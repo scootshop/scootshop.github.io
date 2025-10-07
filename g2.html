@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SCOOT SHOP — G2</title>
+  <meta name="description" content="G2 de SCOOT SHOP: motor 500 W, batería 48V 10.4Ah, hasta 40 km/h y autonomía real 45 km. Subidas 18–25°. Envío 6–8 días y garantía 70 km por producto.">
+
+  <!-- Tipografías -->
+  <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Tangerine:wght@700&display=swap" rel="stylesheet">
+  <!-- Iconos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <!-- Metadatos Product JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "G2",
+    "brand": {"@type":"Brand","name":"SCOOT SHOP"},
+    "description": "Scooter eléctrico G2 con motor 500 W, batería 48V 10.4Ah, hasta 40 km/h y autonomía 45 km.",
+    "image": [
+      "Img-G2/1.jpg","Img-G2/2.jpg","Img-G2/3.jpg","Img-G2/4.jpg"
+    ],
+    "offers": {
+      "@type": "Offer",
+      "priceCurrency": "EUR",
+      "price": "380",
+      "url": "https://tudominio.example/g2.html",
+      "availability": "https://schema.org/InStock",
+      "itemCondition": "https://schema.org/NewCondition"
+    }
+  }
+  </script>
+
+  <style>
+    :root{
+      --sport-font:'Russo One',sans-serif;
+      --logo-font:'Tangerine',cursive;
+      --ui: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Noto Sans";
+      --bg:#ffffff; --ink:#111315; --muted:#676b73; --line:#E6E9EF; --primary:#b91e1e;
+      --radius:14px; --shadow-1:0 4px 14px rgba(0,0,0,.06); --shadow-2:0 12px 28px rgba(0,0,0,.12);
+      --header-h:72px;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:var(--sport-font);background:var(--bg);color:var(--ink);line-height:1.5}
+    img{max-width:100%;display:block}
+    a{text-decoration:none;color:inherit}
+    .container{width:min(1140px,94vw);margin:auto}
+    :target{scroll-margin-top: calc(var(--header-h) + 16px)}
+
+    /* Header sticky */
+    header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+    .nav{display:flex;justify-content:space-between;align-items:center;height:var(--header-h);gap:12px}
+    .brand{display:flex;align-items:center;gap:8px}
+    .brand img{height:72px}
+    .brand span{font-family:var(--logo-font);font-size:2rem;color:var(--primary)}
+    .menu{display:flex;gap:16px;align-items:center;font-weight:900;text-transform:uppercase;font-size:.9rem}
+    .menu a{display:flex;align-items:center;gap:6px;position:relative;padding:4px 0}
+    .menu a::after{content:"";position:absolute;bottom:-3px;left:0;width:100%;height:2px;background:var(--primary);transform:scaleX(0);transform-origin:left;transition:transform .25s ease}
+    .menu a:hover::after{transform:scaleX(1)}
+    .menu i{font-size:20px}
+    .menu-toggle{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;width:28px;height:22px;justify-content:center}
+    .menu-toggle span{display:block;width:100%;height:3px;background:var(--ink);border-radius:2px;transition:.3s}
+    .menu-toggle.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+    .menu-toggle.active span:nth-child(2){opacity:0}
+    .menu-toggle.active span:nth-child(3){transform:rotate(-45deg) translate(6px,-6px)}
+    @media(max-width:768px){
+      .menu{position:fixed;top:var(--header-h);right:0;left:0;background:var(--bg);flex-direction:column;align-items:center;gap:18px;padding:20px 0;border-bottom:1px solid var(--line);transform:translateY(-120%);transition:transform .25s ease;z-index:60}
+      .menu.show{transform:translateY(0)}
+      .menu-toggle{display:flex}
+    }
+
+    /* Breadcrumb */
+    .crumbs{font-family:var(--ui);font-size:.92rem;color:#6b7280;padding:10px 0}
+    .crumbs a{color:#6b7280}
+    .crumbs i{font-size:.8rem;margin:0 6px;color:#9aa0a6}
+
+    /* Hero: galería + info */
+    .hero{max-width:1140px;margin:18px auto 26px;display:grid;grid-template-columns:1.1fr .9fr;gap:28px;padding:0 8px}
+    @media(max-width:980px){.hero{grid-template-columns:1fr}}
+    .panel{border:1px solid var(--line);border-radius:var(--radius);background:#fff;box-shadow:var(--shadow-1)}
+
+    /* Carrusel */
+    .carousel{position:relative;overflow:hidden}
+    .carousel-track{display:flex;transition:transform .35s ease;touch-action:pan-y;cursor:grab}
+    .carousel-track.dragging{cursor:grabbing}
+    .carousel img{width:100%;flex:0 0 100%;object-fit:contain;max-height:520px;background:#fff;-webkit-user-drag:none;user-select:none;pointer-events:none}
+    .carousel-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.5);color:#fff;border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;z-index:10}
+    .carousel-btn.prev{left:8px}.carousel-btn.next{right:8px}
+    .carousel-counter{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.55);color:#fff;padding:2px 8px;border-radius:6px;font-size:.85rem}
+
+    /* Info */
+    .info{padding:18px}
+    .h1{font-size:clamp(26px,4vw,40px);color:var(--primary);margin-bottom:8px}
+    .sub{font-family:var(--ui);color:var(--muted);margin-bottom:12px}
+    .price{display:flex;align-items:baseline;gap:10px;margin-bottom:12px}
+    .now{font-size:1.8rem;color:var(--ink);font-weight:900}
+    .was{color:#9aa0a6;text-decoration:line-through}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+    .chip{font-family:var(--ui);font-size:.9rem;border:1px solid var(--line);padding:6px 10px;border-radius:999px;color:#50545b;background:#f8fafc}
+    .trust{font-family:var(--ui);font-size:.95rem;color:#4b5563;margin:12px 0}
+    .trust i{color:#16a34a;margin-right:6px}
+    .cta{display:flex;gap:10px;align-items:center;margin-top:8px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#25D366;color:#fff;padding:12px 16px;border-radius:12px;font-weight:800;border:1px solid #1ebe5d}
+    .btn:hover{background:#1ebe5d}
+    .link{font-family:var(--ui);font-weight:700;color:#111315;border-bottom:1px solid #111315}
+    .notes{font-family:var(--ui);font-size:.9rem;color:#6b7280;margin-top:10px}
+
+    /* Features */
+    .features{background:#f9f9f9;padding:48px 12px;margin-top:10px}
+    .features h2{text-align:center;margin-bottom:24px;font-size:clamp(22px,3.2vw,32px);color:var(--primary)}
+    .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;max-width:1140px;margin:auto}
+    .feature{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.06);font-family:var(--ui);font-weight:700}
+    .feature i{font-size:26px;color:var(--primary);margin-bottom:8px}
+
+    /* Specs */
+    .specs{max-width:1000px;margin:48px auto;padding:0 12px}
+    .specs h2{text-align:center;margin-bottom:16px;font-size:clamp(22px,3vw,30px);color:var(--primary)}
+    table{width:100%;border-collapse:collapse;font-family:var(--ui)}
+    th,td{border:1px solid var(--line);padding:12px;text-align:left}
+    th{background:#f6f7f9;font-weight:800}
+
+    /* Galería inferior */
+    .gallery{max-width:1140px;margin:40px auto;padding:0 12px}
+    .gallery h2{text-align:center;margin-bottom:16px;font-size:clamp(22px,3vw,30px);color:var(--primary)}
+    .gallery-track{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px}
+    .gallery img{width:260px;flex:0 0 auto;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.08);scroll-snap-align:center}
+
+    /* Barra de compra fija */
+    .buybar{position:sticky;bottom:0;z-index:45;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-top:1px solid var(--line)}
+    .buybar .inner{display:flex;gap:10px;align-items:center;justify-content:space-between;max-width:1140px;margin:auto;padding:10px 12px}
+    .buybar .title{font-family:var(--ui);font-weight:800}
+    .buybar .priceb{font-weight:900}
+    .buybar .btn{padding:10px 14px}
+
+    footer{text-align:center;padding:20px;color:#80848b;margin-top:30px;font-size:.9rem;font-family:var(--ui)}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <div class="brand"><img src="Img/0-removebg-preview.png" alt="Scoot Shop logo"><span>Versatil</span></div>
+      <button class="menu-toggle" aria-label="Menú"><span></span><span></span><span></span></button>
+      <nav class="menu">
+        <a href="index.html"><i class="fas fa-home"></i>Inicio</a>
+        <a href="index.html#p-g5"><i class="fas fa-bolt"></i>G2</a>
+        <a href="index.html#p-g7"><i class="fas fa-box"></i>T10</a>
+        <a href="#specs"><i class="fas fa-list"></i>Specs</a>
+        <a href="#legal"><i class="fa-regular fa-file-lines"></i>Legal</a>
+        <a href="https://www.instagram.com/scootshopping" target="_blank"><i class="fab fa-instagram"></i></a>
+        <a href="https://www.facebook.com/61579248524907" target="_blank"><i class="fab fa-facebook"></i></a>
+        <a href="https://wa.me/34666318747" target="_blank"><i class="fab fa-whatsapp"></i></a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Breadcrumb -->
+    <div class="crumbs">
+      <a href="index.html">Inicio</a> <i class="fa-solid fa-angle-right"></i>
+      <a href="index.html#series-g">Series GT</a> <i class="fa-solid fa-angle-right"></i>
+      <span>G2</span>
+    </div>
+  </div>
+
+  <!-- Hero con carrusel + info -->
+  <section class="hero">
+    <div class="panel">
+      <div class="carousel" id="heroCarousel">
+        <div class="carousel-track">
+          <img src="Img-G2/1.jpg" alt="G2 imagen 1">
+          <img src="Img-G2/2.jpg" alt="G2 imagen 2" loading="lazy">
+          <img src="Img-G2/3.jpg" alt="G2 imagen 3" loading="lazy">
+          <img src="Img-G2/4.jpg" alt="G2 imagen 4" loading="lazy">
+        </div>
+        <button class="carousel-btn prev" aria-label="Anterior">‹</button>
+        <button class="carousel-btn next" aria-label="Siguiente">›</button>
+        <div class="carousel-counter">1/4</div>
+      </div>
+    </div>
+
+    <div class="panel info">
+      <h1 class="h1">G2</h1>
+      <p class="sub">Equilibrio perfecto entre potencia y autonomía para ciudad y tramos mixtos. Motor de 500 W con respuesta progresiva y batería 48V 10.4Ah para llegar más lejos con confianza.</p>
+
+      <div class="price"><div class="now">380 €</div><div class="was">780 €</div></div>
+
+      <div class="chips">
+        <span class="chip">500 W</span>
+        <span class="chip">48V 10.4Ah</span>
+        <span class="chip">Autonomía 45 km</span>
+        <span class="chip">Hasta 40 km/h*</span>
+        <span class="chip">Peso 25 kg</span>
+        <span class="chip">Pendientes 18–25°</span>
+      </div>
+
+      <div class="trust"><i class="fa-regular fa-circle-check"></i> Envío 6–8 días · Garantía 70 km por producto · Pago seguro</div>
+
+      <div class="cta">
+        <a class="btn" href="https://wa.me/34666318747" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> Comprar por WhatsApp</a>
+        <a class="link" href="index.html#p-g5">Volver a catálogo</a>
+      </div>
+
+      <p class="notes">Incluye: cargador, soporte móvil y manual rápido. SAT propio y repuestos disponibles.</p>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features">
+    <h2>Características principales</h2>
+    <div class="features-grid">
+      <div class="feature"><i class="fas fa-bolt"></i><p>Motor 500 W</p></div>
+      <div class="feature"><i class="fas fa-battery-half"></i><p>Batería 48V 10.4Ah</p></div>
+      <div class="feature"><i class="fas fa-gauge-high"></i><p>Hasta 40 km/h*</p></div>
+      <div class="feature"><i class="fas fa-route"></i><p>Autonomía real 45 km**</p></div>
+      <div class="feature"><i class="fas fa-mountain"></i><p>Pendientes 18–25°</p></div>
+      <div class="feature"><i class="fas fa-weight-hanging"></i><p>Peso 25 kg</p></div>
+    </div>
+    <p style="text-align:center;margin-top:8px;font-family:var(--ui);color:#6b7280;font-size:.92rem">*Sujeto a normativa local de circulación. **La autonomía puede variar según peso, terreno y estilo de conducción.</p>
+  </section>
+
+  <!-- Specs -->
+  <section class="specs" id="specs">
+    <h2>Especificaciones técnicas</h2>
+    <table>
+      <tr><th>Motor</th><td>500 W</td></tr>
+      <tr><th>Batería</th><td>48V 10.4Ah (litio)</td></tr>
+      <tr><th>Autonomía</th><td>Hasta 45 km</td></tr>
+      <tr><th>Velocidad máxima</th><td>Hasta 40 km/h*</td></tr>
+      <tr><th>Peso</th><td>25 kg</td></tr>
+      <tr><th>Pendiente</th><td>18–25°</td></tr>
+      <tr><th>Garantía</th><td><strong>70 km por producto</strong></td></tr>
+      <tr><th>Envío</th><td>Plazo estimado <strong>6–8 días</strong> en península</td></tr>
+    </table>
+    <p style="margin-top:8px;color:#6b7280;font-family:var(--ui);font-size:.9rem">*En vía pública, respeta la velocidad permitida.</p>
+  </section>
+
+  <!-- Galería inferior -->
+  <section class="gallery">
+    <h2>Galería G2</h2>
+    <div class="gallery-track">
+      <img src="Img-G2/1.jpg" alt="G2 lateral" loading="lazy">
+      <img src="Img-G2/2.jpg" alt="G2 detalle frontal" loading="lazy">
+      <img src="Img-G2/3.jpg" alt="G2 detalle rueda" loading="lazy">
+      <img src="Img-G2/4.jpg" alt="G2 plegado" loading="lazy">
+    </div>
+  </section>
+
+  <!-- Legal (breve) -->
+  <section id="legal" class="container" style="margin-bottom:20px">
+    <details class="panel" style="padding:14px">
+      <summary><strong>Información legal y política de garantías</strong></summary>
+      <p style="font-family:var(--ui);margin-top:8px;color:#4b5563">
+        Garantía <strong>70 km por producto</strong> frente a defectos de fabricación. Envíos estimados <strong>6–8 días</strong> (puede variar por logística).
+        Devoluciones 30 días (producto en buen estado y con accesorios). Para soporte o repuestos, contáctanos por WhatsApp o email.
+      </p>
+    </details>
+  </section>
+
+  <!-- Buybar fija -->
+  <div class="buybar">
+    <div class="inner">
+      <div class="title">G2</div>
+      <div class="priceb">380 € <span style="color:#9aa0a6;text-decoration:line-through;font-weight:600;margin-left:8px">780 €</span></div>
+      <a class="btn" href="https://wa.me/34666318747" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> Comprar ahora</a>
+    </div>
+  </div>
+
+  <footer>© <span id="year"></span> SCOOT SHOP — Envío 6–8 días · Garantía 70 km por producto</footer>
+
+  <script>
+    // Año footer
+    document.getElementById("year").textContent=new Date().getFullYear();
+
+    // Menú hamburguesa
+    const toggle=document.querySelector('.menu-toggle');
+    toggle?.addEventListener('click',()=>{document.querySelector('.menu').classList.toggle('show');toggle.classList.toggle('active');});
+
+    // Carrusel con swipe (Pointer/Touch + mouse)
+    function makeCarousel(el){
+      const track=el.querySelector('.carousel-track');
+      const slides=[...track.children];
+      const prev=el.querySelector('.prev');
+      const next=el.querySelector('.next');
+      const counter=el.querySelector('.carousel-counter');
+      let i=0;
+
+      const snap=()=>{ track.style.transition='transform .35s ease'; track.style.transform=`translateX(${-i*100}%)`; counter.textContent=`${i+1}/${slides.length}`; }
+      const go  =(n)=>{ i=(n+slides.length)%slides.length; snap(); }
+      prev?.addEventListener('click',()=>go(i-1));
+      next?.addEventListener('click',()=>go(i+1));
+      snap();
+
+      // Swipe / Drag
+      let dragging=false, startX=0, lastX=0, startT=0;
+      const onDown=(e)=>{ dragging=true; startX=e.clientX; lastX=e.clientX; startT=Date.now(); track.classList.add('dragging'); track.style.willChange='transform'; track.style.transition='none'; track.setPointerCapture?.(e.pointerId); };
+      const onMove=(e)=>{ if(!dragging) return; lastX=e.clientX; const dx=lastX-startX; track.style.transform=`translateX(calc(${-i*100}% + ${dx}px))`; e.preventDefault(); };
+      const onUp=()=>{ if(!dragging) return; dragging=false; const dx=lastX-startX; const dt=Date.now()-startT; track.classList.remove('dragging'); track.style.willChange='auto';
+        if(Math.abs(dx) > el.clientWidth*0.15 || (Math.abs(dx)>30 && dt<200)){ i += dx<0?1:-1; } i=(i+slides.length)%slides.length; snap(); };
+      track.addEventListener('pointerdown',onDown,{passive:false});
+      window.addEventListener('pointermove',onMove,{passive:false});
+      window.addEventListener('pointerup',onUp,{passive:false});
+      window.addEventListener('pointercancel',onUp,{passive:false});
+      slides.forEach(img=>img.draggable=false);
+      window.addEventListener('resize',snap,{passive:true});
+    }
+    makeCarousel(document.getElementById('heroCarousel'));
+  </script>
+</body>
+</html>
