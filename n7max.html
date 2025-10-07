@@ -44,7 +44,6 @@
       --ok:#1ebe5d;
       --radius:14px;
       --shadow-1:0 4px 14px rgba(0,0,0,.06);
-      --shadow-2:0 12px 28px rgba(0,0,0,.12);
       --header-h:72px;
       --t:.3s;
     }
@@ -122,7 +121,6 @@
     .chip{font-size:.9rem;border:1px solid var(--line);padding:6px 10px;border-radius:999px;color:#50545b;background:#f8fafc}
     .trust{font-size:.95rem;color:#4b5563;margin:12px 0}
     .trust i{color:var(--ok);margin-right:6px}
-
     .notes{font-size:.9rem;color:#6b7280;margin-top:10px}
 
     /* Features */
@@ -146,12 +144,6 @@
     table{width:100%;border-collapse:collapse}
     th,td{border:1px solid var(--line);padding:12px;text-align:left}
     th{background:#f6f7f9;font-weight:800}
-
-    /* Galería inferior */
-    .gallery{max-width:1140px;margin:40px auto;padding:0 12px}
-    .gallery h2{text-align:center;margin-bottom:16px;font-size:clamp(22px,3vw,30px);color:var(--primary);font-family:var(--sport-font)}
-    .gallery-track{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px}
-    .gallery img{width:260px;flex:0 0 auto;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.08);scroll-snap-align:center}
 
     /* Barra compra fija — ÚNICO botón de compra */
     .buybar{
@@ -188,7 +180,7 @@
   <!-- Header -->
   <header id="hdr">
     <div class="container nav">
-      <div class="brand"><img src="Img/0-removebg-preview.png" alt="Scoot Shop logo"><span>Versatil</span></div>
+      <div class="brand"><img src="Img/0-removebg-preview.png" alt="Scoot Shop logo" decoding="async"><span>Versatil</span></div>
       <button class="menu-toggle" aria-label="Menú"><span></span><span></span><span></span></button>
       <nav class="menu" aria-label="Principal">
         <a href="index.html"><i class="fas fa-home"></i>Inicio</a>
@@ -217,20 +209,18 @@
     <div class="panel">
       <div class="carousel" id="heroCarousel">
         <div class="carousel-track">
-          <img src="Img-N7MAX/1.jpg" alt="N7MAX vista 1" loading="lazy">
-          <img src="Img-N7MAX/2.jpg" alt="N7MAX vista 2" loading="lazy">
-          <img src="Img-N7MAX/3.jpg" alt="N7MAX vista 3" loading="lazy">
-          <img src="Img-N7MAX/4.jpg" alt="N7MAX vista 4" loading="lazy">
-          <img src="Img-N7MAX/5.jpg" alt="N7MAX vista 5" loading="lazy">
-          <img src="Img-N7MAX/6.jpg" alt="N7MAX vista 6" loading="lazy">
-          <img src="Img-N7MAX/7.jpg" alt="N7MAX vista 7" loading="lazy">
-          <img src="Img-N7MAX/8.jpg" alt="N7MAX vista 8" loading="lazy">
-          <img src="Img-N7MAX/9.jpg" alt="N7MAX vista 9" loading="lazy">
-          <img src="Img-N7MAX/10.jpg" alt="N7MAX vista 10" loading="lazy">
+          <img src="Img-N7MAX/1.jpg" alt="N7MAX vista 1" loading="lazy" decoding="async">
+          <img src="Img-N7MAX/2.jpg" alt="N7MAX vista 2" loading="lazy" decoding="async">
+          <img src="Img-N7MAX/3.jpg" alt="N7MAX vista 3" loading="lazy" decoding="async">
+          <img src="Img-N7MAX/4.jpg" alt="N7MAX vista 4" loading="lazy" decoding="async">
+          <img src="Img-N7MAX/5.jpg" alt="N7MAX vista 5" loading="lazy" decoding="async">
+          <img src="Img-N7MAX/6.jpg" alt="N7MAX vista 6" loading="lazy" decoding="async">
+          <img src="Img-N7MAX/7.jpg" alt="N7MAX vista 7" loading="lazy" decoding="async">
+          <img src="Img-N7MAX/8.jpg" alt="N7MAX vista 8" loading="lazy" decoding="async">
+          <img src="Img-N7MAX/9.jpg" alt="N7MAX vista 9" loading="lazy" decoding="async">
+          <img src="Img-N7MAX/10.jpg" alt="N7MAX vista 10" loading="lazy" decoding="async">
         </div>
-        <div class="carousel-dots" aria-label="Indicadores">
-          <!-- Se llenan por JS (exactamente 3) -->
-        </div>
+        <div class="carousel-dots" aria-label="Indicadores"><!-- 3 puntos por JS --></div>
         <div class="carousel-counter" aria-live="polite">1/10</div>
       </div>
     </div>
@@ -249,7 +239,7 @@
 
       <div class="trust"><i class="fa-regular fa-circle-check"></i> Envío 6–8 días · Garantía 70 km por producto · Pago seguro</div>
 
-      <!-- OJO: SIN botón de compra aquí (solo habrá el de la barra fija) -->
+      <!-- Sin botón de compra aquí -->
       <p class="notes">Incluye: cargador, soporte móvil y manual rápido. SAT propio y repuestos disponibles.</p>
     </div>
   </section>
@@ -308,12 +298,6 @@
     <p style="margin-top:8px;color:#6b7280;font-size:.9rem">*Sujeto a normativa local.</p>
   </section>
 
-  <!-- Galería inferior -->
-  <section class="gallery">
-    
-  
-  </section>
-
   <!-- Legal breve -->
   <section id="legal" class="container" style="margin-bottom:20px">
     <details class="panel" style="padding:14px">
@@ -337,6 +321,7 @@
   </div>
 
   <footer>© <span id="year"></span> SCOOT SHOP — Envío 6–8 días · Garantía 70 km por producto</footer>
+
   <script>
     // Año en footer
     document.getElementById('year').textContent = new Date().getFullYear();
@@ -351,7 +336,7 @@
     const menu = document.querySelector('.menu');
     toggle?.addEventListener('click', () => { menu.classList.toggle('show'); toggle.classList.toggle('active'); });
 
-    // Prellenar WhatsApp ÚNICO botón
+    // WhatsApp (único botón)
     (function(){
       const btn = document.getElementById('buyBtn');
       const name = 'N7MAX';
@@ -361,9 +346,7 @@
       btn.href = `https://wa.me/34666318747?text=${msg}`;
     })();
 
-    // ======================
-    // Carrusel + 3 puntos
-    // ======================
+    // ===== Carrusel con 3 puntos + swipe + auto 4s =====
     function makeCarousel(el){
       const track = el.querySelector('.carousel-track');
       const slides = [...track.children];
@@ -371,7 +354,7 @@
       const dotsWrap = el.querySelector('.carousel-dots');
       let i = 0, dragging=false, startX=0, lastX=0;
 
-      // 3 puntos fijos (anclas 0 / ~33% / ~66%)
+      // 3 puntos (anclas 0 / ~33% / ~66%)
       const anchors = [
         0,
         Math.min(slides.length - 1, Math.max(1, Math.round(slides.length / 3))),
@@ -420,9 +403,7 @@
 
     const heroCarousel = makeCarousel(document.getElementById('heroCarousel'));
 
-    // ======================
-    // Testimonios (sin animación CSS)
-    // ======================
+    // ===== Testimonios (JS, 4s) =====
     const tSlides = [...document.querySelectorAll('#tList .t-slide')];
     let tIdx = 0;
     function tickTestimonials(){
@@ -431,12 +412,9 @@
       tSlides[tIdx].classList.add('active');
       tIdx = (tIdx + 1) % tSlides.length;
     }
-    // init visible
     tSlides.forEach((s,idx)=>s.classList.toggle('active', idx===0));
 
-    // ======================
-    // Ticker global 4 s (sincroniza carrusel + testimonios)
-    // ======================
+    // ===== Ticker global 4 s (sincroniza carrusel + testimonios) =====
     setInterval(()=>{ if(document.hidden) return; heroCarousel.tick(); tickTestimonials(); }, 4000);
   </script>
 </body>
