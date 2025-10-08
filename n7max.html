@@ -39,33 +39,24 @@
       --logo-font:'Tangerine',cursive;
       --ui: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Noto Sans";
       --bg:#ffffff; --ink:#111315; --muted:#676b73; --line:#E6E9EF;
-      --primary:#b91e1e;
-      --cta:#ff6a00; --cta-hover:#e85f00;
-      --ok:#1ebe5d;
-      --radius:14px;
-      --shadow-1:0 4px 14px rgba(0,0,0,.06);
-      --header-h:72px;
-      --t:.3s;
+      --primary:#b91e1e; --ok:#1ebe5d;
+      --radius:14px; --shadow-1:0 4px 14px rgba(0,0,0,.06);
+      --header-h:72px; --t:.3s;
     }
     *{margin:0;padding:0;box-sizing:border-box}
     img{max-width:100%;display:block}
     a{text-decoration:none;color:inherit}
     body{font-family:var(--ui);background:var(--bg);color:var(--ink);line-height:1.5}
-    .container{width:min(1140px,94vw);margin:auto}
+    .container{width:min(1100px,94vw);margin:auto}
     :target{scroll-margin-top: calc(var(--header-h) + 16px)}
 
-    /* ===== Header ===== */
-    header{
-      position:sticky; top:0; z-index:60;
-      background:rgba(255,255,255,.95); backdrop-filter:blur(8px);
-      border-bottom:1px solid var(--line);
-      transition: box-shadow .2s ease, border-color .2s ease;
-    }
-    header.scrolled{ box-shadow:0 6px 20px rgba(0,0,0,.08); }
+    /* Header */
+    header{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);transition: box-shadow .2s ease}
+    header.scrolled{ box-shadow:0 6px 20px rgba(0,0,0,.08) }
     .nav{display:flex;justify-content:space-between;align-items:center;height:var(--header-h);gap:12px}
     .brand{display:flex;align-items:center;gap:8px}
-    .brand img{height:72px}
-    .brand span{font-family:var(--logo-font);font-size:2rem;color:var(--primary)}
+    .brand img{height:68px}
+    .brand span{font-family:var(--logo-font);font-size:1.8rem;color:var(--primary)}
     .menu{display:flex;gap:16px;align-items:center;font-weight:900;text-transform:uppercase;font-size:.9rem}
     .menu a{display:flex;align-items:center;gap:6px;position:relative;padding:4px 0}
     .menu i{font-size:20px}
@@ -75,104 +66,119 @@
     .menu-toggle.active span:nth-child(2){opacity:0}
     .menu-toggle.active span:nth-child(3){transform:rotate(-45deg) translate(6px,-6px)}
     .menu a:focus-visible,.menu-toggle:focus-visible,.btn:focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:10px}
-
+    @media(hover:hover){
+      .menu a::after{content:"";position:absolute;bottom:-3px;left:0;width:100%;height:2px;background:var(--primary);transform:scaleX(0);transform-origin:left;transition:transform .25s ease}
+      .menu a:hover::after{transform:scaleX(1)}
+    }
     @media(max-width:768px){
       .menu{
-        position:absolute; top:var(--header-h); right:0; left:0; background:var(--bg);
-        flex-direction:column; align-items:center; gap:18px; padding:16px 0;
-        border-bottom:1px solid var(--line);
-        transform:translateY(-130%); transition:transform var(--t) ease;
-        border-bottom-left-radius:18px; border-bottom-right-radius:18px;
-        box-shadow:none;
+        position:absolute;top:var(--header-h);right:0;left:0;background:var(--bg);
+        flex-direction:column;align-items:center;gap:18px;padding:16px 0;border-bottom:1px solid var(--line);
+        transform:translateY(-130%);transition:transform var(--t) ease;border-bottom-left-radius:18px;border-bottom-right-radius:18px
       }
-      .menu.show{ transform:translateY(0); box-shadow:0 12px 30px rgba(0,0,0,.12); }
+      .menu.show{transform:translateY(0);box-shadow:0 12px 30px rgba(0,0,0,.12)}
       .menu-toggle{display:flex}
     }
 
-    /* ===== Hero (galería + info) ===== */
-    .hero{max-width:1140px;margin:18px auto 26px;display:grid;grid-template-columns:1.1fr .9fr;gap:28px;padding:0 8px}
+    /* Hero */
+    .hero{max-width:1100px;margin:18px auto 26px;display:grid;grid-template-columns:1.08fr .92fr;gap:24px;padding:0 6px}
     @media(max-width:980px){.hero{grid-template-columns:1fr}}
-    .panel{border:1px solid var(--line);border-radius:var(--radius);background:#fff;box-shadow:var(--shadow-1)}
+    .panel{border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow-1)}
 
-    /* Carrusel */
-    .carousel{position:relative;overflow:hidden;aspect-ratio:4/3;background:#fff;border-radius:inherit}
+    /* Carrusel principal */
+    .carousel{position:relative;overflow:hidden;aspect-ratio:4/3;background:#fff;border-radius:12px 12px 0 0}
     .carousel-track{display:flex;transition:transform .35s ease;touch-action:pan-y;cursor:grab;height:100%}
     .carousel-track.dragging{cursor:grabbing}
     .carousel img{width:100%;height:100%;flex:0 0 100%;object-fit:contain;background:#fff;-webkit-user-drag:none;user-select:none}
 
     /* 3 puntos indicadores */
     .carousel-dots{
-      position:absolute; bottom:8px; left:50%; transform:translateX(-50%);
-      display:flex; gap:6px; z-index:2;
-      background:rgba(255,255,255,.9); border:1px solid var(--line);
-      padding:3px 8px; border-radius:999px;
+      position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
+      display:flex;gap:6px;z-index:2;background:rgba(255,255,255,.9);border:1px solid var(--line);
+      padding:3px 8px;border-radius:999px
     }
-    .carousel-dots .dot{ width:8px; height:8px; border-radius:50%; border:0; background:#cbd5e1; opacity:.9; cursor:pointer; }
-    .carousel-dots .dot.active{ background:#111; opacity:1; }
+    .carousel-dots .dot{width:8px;height:8px;border-radius:50%;border:0;background:#cbd5e1;opacity:.9;cursor:pointer}
+    .carousel-dots .dot.active{background:#111;opacity:1}
 
-    /* Info */
-    .info{padding:18px}
-    .h1{font-family:var(--sport-font);font-size:clamp(26px,4vw,40px);color:var(--primary);margin-bottom:8px}
-    .sub{color:var(--muted);margin-bottom:12px}
-    .price{display:flex;align-items:baseline;gap:10px;margin-bottom:12px}
-    .now{font-size:1.8rem;color:var(--ink);font-weight:900}
+    /* Thumbs con paginación (móvil 4 / desktop 8) + flechas en ambos */
+    .carousel-thumbs{
+      --thumb-gap:8px;
+      --thumbs-per-page:4; /* móvil por defecto */
+      display:flex;align-items:center;gap:8px;padding:10px 6px;border-top:1px solid var(--line);
+      background:#fff;border-bottom-left-radius:12px;border-bottom-right-radius:12px
+    }
+    .thumbs-nav{
+      width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:#fff;
+      display:grid;place-items:center;cursor:pointer;flex:0 0 auto
+    }
+    .thumbs-viewport{flex:1;overflow:hidden}
+    .thumbs-track{display:flex;gap:var(--thumb-gap);transform:translateX(0)}
+    .thumb{
+      flex:0 0 auto;
+      width:calc((100% - (var(--thumbs-per-page) - 1)*var(--thumb-gap))/var(--thumbs-per-page));
+      height:64px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:0;cursor:pointer
+    }
+    .thumb img{width:100%;height:100%;object-fit:cover;border-radius:10px;pointer-events:none}
+    .thumb.active{outline:2px solid var(--primary);border-color:var(--primary)}
+    .thumbs-nav:disabled{opacity:.4;cursor:not-allowed}
+
+    @media(min-width:1024px){
+      .carousel-thumbs{ --thumbs-per-page:8; }
+      .thumb{height:68px}
+    }
+
+    /* Info (compacto) */
+    .info{padding:14px}
+    .h1{font-family:var(--sport-font);font-size:clamp(24px,3.2vw,34px);color:var(--primary);margin-bottom:6px}
+    .sub{color:var(--muted);margin-bottom:10px;font-size:.98rem}
+    .price{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
+    .now{font-size:1.6rem;color:var(--ink);font-weight:900}
     .was{color:#9aa0a6;text-decoration:line-through}
-    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
-    .chip{font-size:.9rem;border:1px solid var(--line);padding:6px 10px;border-radius:999px;color:#50545b;background:#f8fafc}
-    .trust{font-size:.95rem;color:#4b5563;margin:12px 0}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+    .chip{font-size:.85rem;border:1px solid var(--line);padding:6px 10px;border-radius:999px;color:#50545b;background:#f8fafc}
+    .trust{font-size:.92rem;color:#4b5563;margin:10px 0}
     .trust i{color:var(--ok);margin-right:6px}
-    .notes{font-size:.9rem;color:#6b7280;margin-top:10px}
+    .notes{font-size:.88rem;color:#6b7280;margin-top:8px}
 
     /* Features */
-    .features{background:#f9f9f9;padding:48px 12px;margin-top:10px}
-    .features h2{text-align:center;margin-bottom:24px;font-size:clamp(22px,3.2vw,32px);color:var(--primary);font-family:var(--sport-font)}
-    .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;max-width:1140px;margin:auto}
-    .feature{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.06);font-weight:700}
-    .feature i{font-size:26px;color:var(--primary);margin-bottom:8px}
+    .features{background:#f9f9f9;padding:40px 10px;margin-top:8px}
+    .features h2{text-align:center;margin-bottom:18px;font-size:clamp(21px,2.6vw,28px);color:var(--primary);font-family:var(--sport-font)}
+    .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;max-width:1100px;margin:auto}
+    .feature{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center;box-shadow:0 3px 10px rgba(0,0,0,.06);font-weight:700}
+    .feature i{font-size:22px;color:var(--primary);margin-bottom:6px}
 
     /* Testimonios */
-    .testimonios{background:#fff;padding:40px 12px}
-    .testimonios h2{text-align:center;margin-bottom:16px;font-size:clamp(22px,3vw,30px);color:var(--primary);font-family:var(--sport-font)}
-    .t-list{max-width:900px;margin:0 auto}
-    .t-slide{display:none;font-style:italic;font-size:1.05rem;line-height:1.6}
+    .testimonios{background:#fff;padding:34px 10px}
+    .testimonios h2{text-align:center;margin-bottom:12px;font-size:clamp(21px,2.6vw,28px);color:var(--primary);font-family:var(--sport-font)}
+    .t-list{max-width:860px;margin:0 auto}
+    .t-slide{display:none;font-style:italic;font-size:1.02rem;line-height:1.55}
     .t-slide.active{display:block}
-    .t-author{margin-top:8px;font-weight:700;color:#6b7280}
+    .t-author{margin-top:6px;font-weight:700;color:#6b7280}
 
     /* Specs */
-    .specs{max-width:1000px;margin:48px auto;padding:0 12px}
-    .specs h2{text-align:center;margin-bottom:16px;font-size:clamp(22px,3vw,30px);color:var(--primary);font-family:var(--sport-font)}
+    .specs{max-width:960px;margin:40px auto 44px;padding:0 10px}
+    .specs h2{text-align:center;margin-bottom:14px;font-size:clamp(21px,2.6vw,28px);color:var(--primary);font-family:var(--sport-font)}
     table{width:100%;border-collapse:collapse}
-    th,td{border:1px solid var(--line);padding:12px;text-align:left}
+    th,td{border:1px solid var(--line);padding:10px;text-align:left;font-size:.95rem}
     th{background:#f6f7f9;font-weight:800}
 
-    /* Barra compra fija — ÚNICO botón de compra */
-    .buybar{
-      position:sticky; bottom:0; z-index:55;
-      background:rgba(255,255,255,.92); backdrop-filter:blur(8px); border-top:1px solid var(--line);
-    }
-    .buybar .inner{display:flex;gap:10px;align-items:center;justify-content:space-between;max-width:1140px;margin:auto;padding:10px 12px}
+    /* Buybar (único botón) */
+    .buybar{position:sticky;bottom:0;z-index:55;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-top:1px solid var(--line)}
+    .buybar .inner{display:flex;gap:10px;align-items:center;justify-content:space-between;max-width:1100px;margin:auto;padding:10px 12px}
     .buybar .title{font-weight:800}
     .buybar .priceb{font-weight:900}
-    .btn{
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      background:#25D366;color:#fff;padding:12px 16px;border-radius:12px;font-weight:800;border:1px solid #1ebe5d;
-      transition:background .15s ease, transform .1s ease;
-    }
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#25D366;color:#fff;padding:12px 16px;border-radius:12px;font-weight:800;border:1px solid #1ebe5d}
     .btn:hover{background:#1ebe5d}
     .btn:active{transform:translateY(1px)}
 
-    footer{text-align:center;padding:20px;color:#80848b;margin-top:30px;font-size:.9rem}
+    footer{text-align:center;padding:18px;color:#80848b;margin-top:24px;font-size:.88rem}
 
-    /* ===== Móvil: sin hovers ni animaciones CSS ===== */
+    /* Móvil: sin hovers ni animaciones CSS (solo carrusel) */
     @media (max-width:768px){
       .menu a:hover::after{transform:none}
       .carousel-track{transition:none}
       .carousel img{transition:none}
       .t-slide{transition:none}
-    }
-    @media (hover:hover){
-      .menu a::after{content:"";position:absolute;bottom:-3px;left:0;width:100%;height:2px;background:var(--primary);transform:scaleX(0);transform-origin:left;transition:transform .25s ease}
-      .menu a:hover::after{transform:scaleX(1)}
     }
   </style>
 </head>
@@ -196,7 +202,6 @@
   </header>
 
   <div class="container">
-    <!-- Breadcrumb -->
     <nav class="crumbs" aria-label="Breadcrumb" style="color:#6b7280;font-size:.92rem;margin:10px 0">
       <a href="index.html" style="color:#6b7280">Inicio</a> <i class="fa-solid fa-angle-right" aria-hidden="true" style="margin:0 6px"></i>
       <a href="index.html#comprar" style="color:#6b7280">Productos</a> <i class="fa-solid fa-angle-right" aria-hidden="true" style="margin:0 6px"></i>
@@ -221,7 +226,15 @@
           <img src="Img-N7MAX/10.jpg" alt="N7MAX vista 10" loading="lazy" decoding="async">
         </div>
         <div class="carousel-dots" aria-label="Indicadores"><!-- 3 puntos por JS --></div>
-        <div class="carousel-counter" aria-live="polite">1/10</div>
+      </div>
+
+      <!-- THUMBS con paginación y flechas también en desktop -->
+      <div class="carousel-thumbs" id="heroThumbs" aria-label="Miniaturas">
+        <button class="thumbs-nav prev" aria-label="Miniaturas anteriores">‹</button>
+        <div class="thumbs-viewport">
+          <div class="thumbs-track"><!-- thumbs por JS --></div>
+        </div>
+        <button class="thumbs-nav next" aria-label="Miniaturas siguientes">›</button>
       </div>
     </div>
 
@@ -238,9 +251,8 @@
       </div>
 
       <div class="trust"><i class="fa-regular fa-circle-check"></i> Envío 6–8 días · Garantía 70 km por producto · Pago seguro</div>
-
-      <!-- Sin botón de compra aquí -->
       <p class="notes">Incluye: cargador, soporte móvil y manual rápido. SAT propio y repuestos disponibles.</p>
+      <!-- Sin botón aquí: solo el de la buybar -->
     </div>
   </section>
 
@@ -258,7 +270,7 @@
     <p style="text-align:center;margin-top:8px;color:#6b7280;font-size:.92rem">*La autonomía puede variar según peso, terreno y estilo de conducción.</p>
   </section>
 
-  <!-- Testimonios (sin animación CSS, rotación por JS a 4 s) -->
+  <!-- Testimonios -->
   <section class="testimonios" aria-label="Testimonios">
     <div class="container">
       <h2>Lo que dicen</h2>
@@ -298,18 +310,7 @@
     <p style="margin-top:8px;color:#6b7280;font-size:.9rem">*Sujeto a normativa local.</p>
   </section>
 
-  <!-- Legal breve -->
-  <section id="legal" class="container" style="margin-bottom:20px">
-    <details class="panel" style="padding:14px">
-      <summary><strong>Información legal y garantías</strong></summary>
-      <p style="margin-top:8px;color:#4b5563">
-        Garantía <strong>70 km por producto</strong> frente a defectos de fabricación. Envíos estimados <strong>6–8 días</strong>.
-        Devoluciones 30 días (producto en buen estado y con accesorios). Para soporte o repuestos, contáctanos por WhatsApp o email.
-      </p>
-    </details>
-  </section>
-
-  <!-- Buybar fija (ÚNICO botón de compra) -->
+  <!-- Buybar (único botón) -->
   <div class="buybar" role="region" aria-label="Barra de compra">
     <div class="inner">
       <div class="title">N7MAX</div>
@@ -323,15 +324,13 @@
   <footer>© <span id="year"></span> SCOOT SHOP — Envío 6–8 días · Garantía 70 km por producto</footer>
 
   <script>
-    // Año en footer
+    // Año y header
     document.getElementById('year').textContent = new Date().getFullYear();
-
-    // Header sombra al hacer scroll
     const hdr = document.getElementById('hdr');
     const onScrollHdr = () => { if (window.scrollY > 6) hdr.classList.add('scrolled'); else hdr.classList.remove('scrolled'); };
     onScrollHdr(); window.addEventListener('scroll', onScrollHdr, {passive:true});
 
-    // Menú hamburguesa
+    // Menú
     const toggle = document.querySelector('.menu-toggle');
     const menu = document.querySelector('.menu');
     toggle?.addEventListener('click', () => { menu.classList.toggle('show'); toggle.classList.toggle('active'); });
@@ -346,64 +345,117 @@
       btn.href = `https://wa.me/34666318747?text=${msg}`;
     })();
 
-    // ===== Carrusel con 3 puntos + swipe + auto 4s =====
-    function makeCarousel(el){
+    // ===== Carrusel + Dots + Thumbs paginadas (4 móvil / 8 desktop) =====
+    function makeCarousel(el, thumbsRoot){
       const track = el.querySelector('.carousel-track');
       const slides = [...track.children];
-      const counter = el.querySelector('.carousel-counter');
       const dotsWrap = el.querySelector('.carousel-dots');
-      let i = 0, dragging=false, startX=0, lastX=0;
 
-      // 3 puntos (anclas 0 / ~33% / ~66%)
-      const anchors = [
-        0,
-        Math.min(slides.length - 1, Math.max(1, Math.round(slides.length / 3))),
-        Math.min(slides.length - 1, Math.max(2, Math.round(2 * slides.length / 3))),
-      ];
+      const vp = thumbsRoot.querySelector('.thumbs-viewport');
+      const tTrack = thumbsRoot.querySelector('.thumbs-track');
+      const navPrev = thumbsRoot.querySelector('.thumbs-nav.prev');
+      const navNext = thumbsRoot.querySelector('.thumbs-nav.next');
+
+      let i = 0, dragging=false, startX=0, lastX=0;
+      const getPerPage = () => {
+        const val = parseInt(getComputedStyle(thumbsRoot).getPropertyValue('--thumbs-per-page')) || 4;
+        return val;
+      };
+      let perPage = getPerPage();
+      let pages = 1, thumbPage = 0;
+
+      // 3 puntos (i % 3)
       const dots = [];
       for(let k=0;k<3;k++){
         const b=document.createElement('button');
-        b.type='button'; b.className='dot'; b.setAttribute('aria-label',`Ir a grupo ${k+1}`);
-        b.addEventListener('click', (ev)=>{ ev.stopPropagation(); go(anchors[k], true); });
+        b.type='button'; b.className='dot'; b.setAttribute('aria-label',`Punto ${k+1}`);
+        b.addEventListener('click',(ev)=>{
+          ev.stopPropagation();
+          const delta=(k - (i%3) + 3) % 3;
+          go(i + delta, true);
+        });
         dotsWrap.appendChild(b); dots.push(b);
       }
 
-      const updateDots = ()=>{
-        let j = 2;
-        if (i < anchors[1]) j = 0;
-        else if (i < anchors[2]) j = 1;
-        dots.forEach((d,idx)=> d.classList.toggle('active', idx===j));
-      };
+      // Thumbs
+      const thumbs = slides.map((img, idx)=>{
+        const btn=document.createElement('button'); btn.type='button'; btn.className='thumb';
+        const t=img.cloneNode(); t.removeAttribute('loading'); t.removeAttribute('decoding'); t.alt=img.alt||`N7MAX ${idx+1}`;
+        btn.appendChild(t);
+        btn.addEventListener('click', ()=> go(idx, true));
+        tTrack.appendChild(btn);
+        return btn;
+      });
 
-      const snap = (animate=true) => {
-        if(!slides.length) return;
+      function recalc(){
+        perPage = getPerPage();
+        pages = Math.max(1, Math.ceil(slides.length / perPage));
+      }
+      function pageForIndex(idx){ return Math.floor(idx / perPage); }
+
+      function setThumbPage(p, animate){
+        recalc();
+        thumbPage = Math.max(0, Math.min(p, pages-1));
+        const vw = vp.clientWidth;
+        tTrack.style.transition = animate ? 'transform .25s ease' : 'none';
+        tTrack.style.transform = `translateX(${-thumbPage*vw}px)`;
+        navPrev.disabled = (thumbPage===0);
+        navNext.disabled = (thumbPage>=pages-1);
+      }
+
+      function updateDots(){ dots.forEach((d,idx)=> d.classList.toggle('active', idx === (i % 3))); }
+      function updateThumbs(){ thumbs.forEach((b,idx)=> b.classList.toggle('active', idx===i)); }
+
+      function snap(animate=true){
         track.style.transition = animate ? 'transform .35s ease' : 'none';
         track.style.transform = `translateX(${-i*100}%)`;
-        if(counter) counter.textContent = `${i+1}/${slides.length}`;
-        updateDots();
-      };
-      const go = (n, animate=true) => { i = (n + slides.length) % slides.length; snap(animate); };
-      snap(false);
+        updateDots(); updateThumbs();
+        setThumbPage(pageForIndex(i), false);
+      }
+      function go(n, animate=true){
+        i = (n + slides.length) % slides.length;
+        snap(animate);
+      }
 
       // Gestos
       const threshold = () => Math.max(40, el.clientWidth * 0.15);
       const onDown = (e) => { dragging=true; startX=e.clientX; lastX=e.clientX; track.classList.add('dragging'); track.style.willChange='transform'; track.setPointerCapture?.(e.pointerId); };
       const onMove = (e) => { if(!dragging) return; lastX=e.clientX; const dx=lastX-startX; track.style.transition='none'; track.style.transform=`translateX(calc(${-i*100}% + ${dx}px))`; e.preventDefault(); };
-      const onUp   = () => { if(!dragging) return; dragging=false; const dx=lastX-startX; track.classList.remove('dragging'); track.style.willChange='auto'; if(Math.abs(dx)>threshold()){ i += dx<0?1:-1; } i=(i+slides.length)%slides.length; snap(false); };
+      const onUp   = () => { if(!dragging) return; dragging=false; const dx=lastX-startX; track.classList.remove('dragging'); track.style.willChange='auto'; if(Math.abs(dx)>threshold()){ i += dx<0?1:-1; i=(i+slides.length)%slides.length; } snap(false); };
 
       track.addEventListener('pointerdown', onDown, {passive:false});
       window.addEventListener('pointermove', onMove, {passive:false});
       window.addEventListener('pointerup', onUp, {passive:false});
       window.addEventListener('pointercancel', onUp, {passive:false});
       slides.forEach(img => img.draggable = false);
-      window.addEventListener('resize', ()=>snap(false), {passive:true});
+
+      // Nav thumbs
+      navPrev.addEventListener('click', ()=> setThumbPage(thumbPage-1, true));
+      navNext.addEventListener('click', ()=> setThumbPage(thumbPage+1, true));
+
+      window.addEventListener('resize', ()=> {
+        const prevPer = perPage;
+        recalc();
+        if (prevPer !== perPage) {
+          setThumbPage(pageForIndex(i), false);
+        } else {
+          setThumbPage(thumbPage, false);
+        }
+      }, {passive:true});
+
+      // Init
+      setThumbPage(0, false);
+      snap(false);
 
       return { tick(){ if(!dragging && slides.length>1) go(i+1, true); } };
     }
 
-    const heroCarousel = makeCarousel(document.getElementById('heroCarousel'));
+    const heroCarousel = makeCarousel(
+      document.getElementById('heroCarousel'),
+      document.getElementById('heroThumbs')
+    );
 
-    // ===== Testimonios (JS, 4s) =====
+    // Testimonios (4 s)
     const tSlides = [...document.querySelectorAll('#tList .t-slide')];
     let tIdx = 0;
     function tickTestimonials(){
@@ -414,8 +466,19 @@
     }
     tSlides.forEach((s,idx)=>s.classList.toggle('active', idx===0));
 
-    // ===== Ticker global 4 s (sincroniza carrusel + testimonios) =====
+    // Ticker global 4 s (sincroniza carrusel + testimonios)
     setInterval(()=>{ if(document.hidden) return; heroCarousel.tick(); tickTestimonials(); }, 4000);
   </script>
+
+  <!-- Legal (breve para detalle) -->
+  <section id="legal" class="container" style="margin-bottom:20px">
+    <details class="panel" style="padding:12px">
+      <summary><strong>Información legal y política de garantías</strong></summary>
+      <p style="margin-top:8px;color:#4b5563">
+        Garantía <strong>70 km por producto</strong> frente a defectos de fabricación. Envíos estimados <strong>6–8 días</strong> (puede variar por logística).
+        Devoluciones 30 días (producto en buen estado y con accesorios). Para soporte o repuestos, contáctanos por WhatsApp o email.
+      </p>
+    </details>
+  </section>
 </body>
 </html>
