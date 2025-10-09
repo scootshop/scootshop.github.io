@@ -6,13 +6,21 @@
   <title>SCOOT SHOP — Scooters eléctricos</title>
   <meta name="description" content="Scooters eléctricos fiables y potentes. Envío 6–8 días, pago seguro y garantía 70 km por producto." />
   <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f1113" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="favicon.ico" sizes="any" />
   <!-- SEO / Social -->
   <meta property="og:title" content="SCOOT SHOP — Scooters eléctricos" />
   <meta property="og:description" content="Scooters eléctricos fiables y potentes. Envío 6–8 días, pago seguro y garantía 70 km por producto." />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="Img/og-cover.jpg" />
+  <meta property="og:site_name" content="SCOOT SHOP" />
   <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Rendimiento: preconnect -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 
   <!-- Tipografías -->
   <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
@@ -54,6 +62,9 @@
     .container{width:min(1200px,100%);padding-inline:clamp(16px,4vw,28px);margin-inline:auto}
     :target{scroll-margin-top: calc(var(--header-h) + var(--trustbar-h) + 18px)}
     .hide-mobile{display:inline}
+
+    /* Accesibilidad foco */
+    :focus-visible{outline:3px solid rgba(34,197,94,.6); outline-offset:2px; border-radius:10px}
 
     /* ===== HEADER ===== */
     header{
@@ -140,6 +151,8 @@
       transition:transform var(--t) var(--ease), box-shadow var(--t) var(--ease), border-color var(--t) var(--ease), background var(--t) var(--ease);
       opacity:0; transform:translateY(18px);
       contain: paint;
+      content-visibility:auto;
+      contain-intrinsic-size: 400px 600px;
     }
     .card.visible{opacity:1;transform:translateY(0)}
     @media (hover:hover){
@@ -208,13 +221,11 @@
 
     /* ===== MÓVIL ===== */
     @media (max-width: 768px){
-      /* Ocultar sellos SOLO en móvil y quitar hueco */
       :root{ --trustbar-h: 0px; }
       .trustbar{ display:none !important; }
 
       .hide-mobile{ display:none; }
 
-      /* Menú móvil limpio */
       .menu{
         position:fixed; top: calc(var(--header-h) + var(--trustbar-h)); left:0; right:0;
         background:var(--bg);
@@ -231,13 +242,12 @@
       .has-submenu.open>.submenu{display:block}
       .menu-toggle{display:flex}
 
-      /* Grid y tarjetas compactas */
       #comprar.container,
       section[aria-label="Lista de productos Series G"],
       section[aria-label="Lista de productos Series IX"]{ padding-inline: 10px; }
 
       .grid{ grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-      .card{ border:0; border-radius:0; box-shadow:none; transform:none; opacity:1; } /* sin animación en móvil */
+      .card{ border:0; border-radius:0; box-shadow:none; transform:none; opacity:1; }
       .card-media{ margin:0; border:0; border-radius:0; background:#fff; aspect-ratio:1/1; overflow:hidden; }
       .carousel, .carousel-track{ height:100%; }
       .carousel img{ width:100%; height:100%; object-fit:contain; background:#fff; }
@@ -259,7 +269,6 @@
       .btn-primary:hover{ background:#000; }
       .btn-whatsapp{ display:none; }
 
-      /* Testimonios sin animación en móvil */
       .testimonios .slide.active{ animation:none !important; }
     }
 
@@ -319,6 +328,9 @@
       .carousel-track{transition:none}
       .hero video{transition:none}
     }
+    @media (prefers-reduced-data: reduce){
+      .hero video{display:none}
+    }
   </style>
 </head>
 <body>
@@ -326,15 +338,15 @@
   <header id="siteHeader" aria-label="Barra superior">
     <div class="container nav">
       <div class="brand">
-        <img src="Img/0-removebg-preview.png" alt="SCOOT SHOP logo">
+        <img src="Img/0-removebg-preview.png" alt="SCOOT SHOP logo" decoding="async" height="80" width="160">
         <span>Versatil</span>
       </div>
 
-      <nav class="menu" role="menubar" aria-label="Principal">
-        <a href="#"><i class="fas fa-home"></i>Inicio</a>
+      <nav id="mainMenu" class="menu" role="menubar" aria-label="Principal">
+        <a href="#"><i class="fas fa-home" aria-hidden="true"></i>Inicio</a>
         <div class="has-submenu" role="none">
           <button class="submenu-toggle nav-link" id="submenuBtn" role="menuitem" aria-haspopup="true" aria-expanded="false" aria-controls="submenu-products">
-            <i class="fas fa-box"></i>PRODUCTOS <i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i>
+            <i class="fas fa-box" aria-hidden="true"></i>PRODUCTOS <i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i>
           </button>
           <div class="submenu" id="submenu-products" role="menu" aria-label="Productos">
             <div class="submenu-grid">
@@ -356,44 +368,45 @@
           </div>
         </div>
 
-        <a href="#faq"><i class="fas fa-question-circle"></i>Preguntas</a>
-        <a href="#ubicacion"><i class="fas fa-map-marker-alt"></i>Ubicación</a>
-        <a href="#legal"><i class="fa-regular fa-file-lines"></i>Legal</a>
-        <a href="https://www.instagram.com/scootshopping" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-        <a href="https://www.facebook.com/61579248524907" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
-        <a href="https://wa.me/34666318747" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+        <a href="#faq"><i class="fas fa-question-circle" aria-hidden="true"></i>Preguntas</a>
+        <a href="#ubicacion"><i class="fas fa-map-marker-alt" aria-hidden="true"></i>Ubicación</a>
+        <a href="#legal"><i class="fa-regular fa-file-lines" aria-hidden="true"></i>Legal</a>
+        <a href="https://www.instagram.com/scootshopping" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+        <a href="https://www.facebook.com/61579248524907" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook" aria-hidden="true"></i></a>
+        <a href="https://wa.me/34666318747" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
       </nav>
 
       <div class="right-controls">
         <button class="theme" id="themeToggle" aria-label="Cambiar tema" title="Cambiar tema"><i class="fa-regular fa-moon"></i></button>
         <button id="searchLaunch" class="search-launch" aria-label="Buscar en SCOOT SHOP">
-          <i class="fa-solid fa-magnifying-glass"></i><span class="hide-mobile"> Buscar</span> <span class="hide-mobile" style="opacity:.6">⌘K</span>
+          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><span class="hide-mobile"> Buscar</span> <span class="hide-mobile" style="opacity:.6">⌘K</span>
         </button>
-        <button class="menu-toggle" aria-label="Abrir menú"><span></span><span></span><span></span></button>
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-controls="mainMenu" aria-expanded="false"><span></span><span></span><span></span></button>
       </div>
     </div>
 
     <!-- Micro-confianza (oculta en móvil por CSS) -->
     <div class="trustbar" aria-label="Sellos de confianza">
       <div class="container inner">
-        <span><i class="fa-regular fa-circle-check"></i> Garantía 70 km por producto</span>
-        <span><i class="fa-solid fa-rotate-left"></i> Devolución 30 días</span>
-        <span><i class="fa-solid fa-shield-halved"></i> Pago 100% seguro</span>
-        <span><i class="fa-solid fa-truck-fast"></i> Envío 6–8 días</span>
+        <span><i class="fa-regular fa-circle-check" aria-hidden="true"></i> Garantía 70 km por producto</span>
+        <span><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Devolución 30 días</span>
+        <span><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Pago 100% seguro</span>
+        <span><i class="fa-solid fa-truck-fast" aria-hidden="true"></i> Envío 6–8 días</span>
       </div>
     </div>
   </header>
 
-  <!-- HERO (se mantiene igual) -->
+  <!-- HERO -->
   <section class="hero" aria-label="Video hero">
-    <video id="heroVideo" muted playsinline webkit-playsinline autoplay loop preload="auto" poster="Img-N7MAX/1.jpg">
+    <video id="heroVideo" muted playsinline webkit-playsinline autoplay loop preload="metadata" poster="Img-N7MAX/1.jpg">
       <source src="completo.mp4" type="video/mp4">
     </video>
+    <noscript><img src="Img-N7MAX/1.jpg" alt="Scooters G2 y T10 en acción" loading="eager" decoding="async"></noscript>
     <div>
       <h1>G2 Y T10</h1>
       <p>Presentamos nuestros nuevos modelos de Alta y Ultra potencia. G2 y T10 — dos sombras en la ciudad.</p>
     </div>
-    <a href="#comprar" class="scroll-down" aria-label="Ir a productos"><i class="fas fa-chevron-down"></i></a>
+    <a href="#comprar" class="scroll-down" aria-label="Ir a productos"><i class="fas fa-chevron-down" aria-hidden="true"></i></a>
   </section>
 
   <!-- SERIES N -->
@@ -412,22 +425,22 @@
       <article class="card" id="p-n7pro" tabindex="0"
         data-name="N7PRO" data-was="387,50 €" data-now="215 €"
         data-spec="30–35 km · 350 W · 15 kg" data-link="n7pro.html" data-wa="https://wa.me/34666318747"
-        data-tags="n ciudad ligero urbano">
+        data-tags="n ciudad ligero urbano" aria-label="N7PRO — Patinete eléctrico urbano">
         <div class="card-top">
           <div class="verified" aria-label="Tienda verificada"><i class="fa-regular fa-circle-check" aria-hidden="true"></i><span>Tienda verificada</span></div>
           <div class="badges"><span class="badge offer">Oferta</span></div>
         </div>
 
         <div class="card-media">
-          <div class="oos-overlay">Agotado</div>
+          <div class="oos-overlay" aria-hidden="true">Agotado</div>
           <div class="carousel" data-carousel>
             <div class="carousel-track">
-              <img src="Img-N7PRO/1.jpg" alt="N7PRO vista 1" loading="lazy">
-              <img src="Img-N7PRO/2.jpg" alt="N7PRO vista 2" loading="lazy">
-              <img src="Img-N7PRO/3.jpg" alt="N7PRO vista 3" loading="lazy">
-              <img src="Img-N7PRO/4.jpg" alt="N7PRO vista 4" loading="lazy">
-              <img src="Img-N7PRO/5.jpg" alt="N7PRO vista 5" loading="lazy">
-              <img src="Img-N7PRO/6.jpg" alt="N7PRO vista 6" loading="lazy">
+              <img src="Img-N7PRO/1.jpg" alt="N7PRO vista 1" loading="eager" fetchpriority="high" decoding="async">
+              <img src="Img-N7PRO/2.jpg" alt="N7PRO vista 2" loading="lazy" decoding="async">
+              <img src="Img-N7PRO/3.jpg" alt="N7PRO vista 3" loading="lazy" decoding="async">
+              <img src="Img-N7PRO/4.jpg" alt="N7PRO vista 4" loading="lazy" decoding="async">
+              <img src="Img-N7PRO/5.jpg" alt="N7PRO vista 5" loading="lazy" decoding="async">
+              <img src="Img-N7PRO/6.jpg" alt="N7PRO vista 6" loading="lazy" decoding="async">
             </div>
           </div>
         </div>
@@ -436,7 +449,7 @@
           <div class="card-brand">Scoot Shop</div>
           <div class="title">N7PRO — Patinete eléctrico urbano</div>
           <div class="rating" aria-label="Valoración 4,9 de 5">
-            <span>
+            <span aria-hidden="true">
               <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
               <i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i>
             </span>
@@ -446,8 +459,8 @@
 
         <div class="card-bottom">
           <div class="price-row">
-            <div class="price-now">215 €</div>
-            <div class="price-was">387,50 €</div>
+            <div class="price-now" aria-label="Precio actual">215 €</div>
+            <div class="price-was" aria-label="Precio anterior">387,50 €</div>
           </div>
           <a class="more-link" href="n7pro.html">Más información</a>
           <div class="btn-row">
@@ -461,7 +474,7 @@
       <article class="card" id="p-n7max" tabindex="0"
         data-name="N7MAX" data-was="937,50 €" data-now="375 €"
         data-spec="40–45 km · 800 W · 24 kg" data-link="n7max.html" data-wa="https://wa.me/34666318747"
-        data-tags="n potencia premium">
+        data-tags="n potencia premium" aria-label="N7MAX — Patinete eléctrico de alta potencia">
         <div class="card-top">
           <div class="verified" aria-label="Tienda verificada"><i class="fa-regular fa-circle-check" aria-hidden="true"></i><span>Tienda verificada</span></div>
           <div class="badges"><span class="badge offer">Oferta</span></div>
@@ -470,16 +483,16 @@
         <div class="card-media">
           <div class="carousel" data-carousel>
             <div class="carousel-track">
-              <img src="Img-N7MAX/1.jpg" alt="N7MAX vista 1" loading="lazy">
-              <img src="Img-N7MAX/2.jpg" alt="N7MAX vista 2" loading="lazy">
-              <img src="Img-N7MAX/3.jpg" alt="N7MAX vista 3" loading="lazy">
-              <img src="Img-N7MAX/4.jpg" alt="N7MAX vista 4" loading="lazy">
-              <img src="Img-N7MAX/5.jpg" alt="N7MAX vista 5" loading="lazy">
-              <img src="Img-N7MAX/6.jpg" alt="N7MAX vista 6" loading="lazy">
-              <img src="Img-N7MAX/7.jpg" alt="N7MAX vista 7" loading="lazy">
-              <img src="Img-N7MAX/8.jpg" alt="N7MAX vista 8" loading="lazy">
-              <img src="Img-N7MAX/9.jpg" alt="N7MAX vista 9" loading="lazy">
-              <img src="Img-N7MAX/10.jpg" alt="N7MAX vista 10" loading="lazy">
+              <img src="Img-N7MAX/1.jpg" alt="N7MAX vista 1" loading="eager" fetchpriority="high" decoding="async">
+              <img src="Img-N7MAX/2.jpg" alt="N7MAX vista 2" loading="lazy" decoding="async">
+              <img src="Img-N7MAX/3.jpg" alt="N7MAX vista 3" loading="lazy" decoding="async">
+              <img src="Img-N7MAX/4.jpg" alt="N7MAX vista 4" loading="lazy" decoding="async">
+              <img src="Img-N7MAX/5.jpg" alt="N7MAX vista 5" loading="lazy" decoding="async">
+              <img src="Img-N7MAX/6.jpg" alt="N7MAX vista 6" loading="lazy" decoding="async">
+              <img src="Img-N7MAX/7.jpg" alt="N7MAX vista 7" loading="lazy" decoding="async">
+              <img src="Img-N7MAX/8.jpg" alt="N7MAX vista 8" loading="lazy" decoding="async">
+              <img src="Img-N7MAX/9.jpg" alt="N7MAX vista 9" loading="lazy" decoding="async">
+              <img src="Img-N7MAX/10.jpg" alt="N7MAX vista 10" loading="lazy" decoding="async">
             </div>
           </div>
         </div>
@@ -488,7 +501,7 @@
           <div class="card-brand">Scoot Shop</div>
           <div class="title">N7MAX — Patinete eléctrico de alta potencia</div>
           <div class="rating" aria-label="Valoración 4,8 de 5">
-            <span>
+            <span aria-hidden="true">
               <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
               <i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i>
             </span>
@@ -526,7 +539,7 @@
       <article class="card" id="p-g5" tabindex="0"
         data-name="G2" data-was="780 €" data-now="380 €"
         data-spec="40 km · 600 W · 18 kg" data-link="g2.html" data-wa="https://wa.me/34666318747"
-        data-tags="g ligero urbano">
+        data-tags="g ligero urbano" aria-label="G2 — Patinete eléctrico de alta potencia">
         <div class="card-top">
           <div class="verified" aria-label="Tienda verificada"><i class="fa-regular fa-circle-check" aria-hidden="true"></i><span>Tienda verificada</span></div>
           <div class="badges"><span class="badge offer">Oferta</span></div>
@@ -535,10 +548,10 @@
         <div class="card-media">
           <div class="carousel" data-carousel>
             <div class="carousel-track">
-              <img src="Img-G2/1.jpg" alt="G2 vista 1" loading="lazy">
-              <img src="Img-G2/2.jpg" alt="G2 vista 2" loading="lazy">
-              <img src="Img-G2/3.jpg" alt="G2 vista 3" loading="lazy">
-              <img src="Img-G2/4.jpg" alt="G2 vista 4" loading="lazy">
+              <img src="Img-G2/1.jpg" alt="G2 vista 1" loading="eager" fetchpriority="high" decoding="async">
+              <img src="Img-G2/2.jpg" alt="G2 vista 2" loading="lazy" decoding="async">
+              <img src="Img-G2/3.jpg" alt="G2 vista 3" loading="lazy" decoding="async">
+              <img src="Img-G2/4.jpg" alt="G2 vista 4" loading="lazy" decoding="async">
             </div>
           </div>
         </div>
@@ -547,7 +560,7 @@
           <div class="card-brand">Scoot Shop</div>
           <div class="title">G2 — Patinete eléctrico de alta potencia</div>
           <div class="rating" aria-label="Valoración 4,7 de 5">
-            <span>
+            <span aria-hidden="true">
               <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
               <i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i>
             </span>
@@ -572,7 +585,7 @@
       <article class="card" id="p-g7" tabindex="0"
         data-name="T10" data-was="850 €" data-now="450 €"
         data-spec="45 km · 700 W · 20 kg" data-link="t10.html" data-wa="https://wa.me/34666318747"
-        data-tags="g urbano">
+        data-tags="g urbano" aria-label="T10 — Patinete eléctrico Ultra">
         <div class="card-top">
           <div class="verified" aria-label="Tienda verificada"><i class="fa-regular fa-circle-check" aria-hidden="true"></i><span>Tienda verificada</span></div>
           <div class="badges"><span class="badge offer">Oferta</span></div>
@@ -581,10 +594,10 @@
         <div class="card-media">
           <div class="carousel" data-carousel>
             <div class="carousel-track">
-              <img src="Img-T10/1.jpg" alt="T10 vista 1" loading="lazy">
-              <img src="Img-T10/2.jpg" alt="T10 vista 2" loading="lazy">
-              <img src="Img-T10/3.jpg" alt="T10 vista 3" loading="lazy">
-              <img src="Img-T10/4.jpg" alt="T10 vista 4" loading="lazy">
+              <img src="Img-T10/1.jpg" alt="T10 vista 1" loading="eager" fetchpriority="high" decoding="async">
+              <img src="Img-T10/2.jpg" alt="T10 vista 2" loading="lazy" decoding="async">
+              <img src="Img-T10/3.jpg" alt="T10 vista 3" loading="lazy" decoding="async">
+              <img src="Img-T10/4.jpg" alt="T10 vista 4" loading="lazy" decoding="async">
             </div>
           </div>
         </div>
@@ -593,7 +606,7 @@
           <div class="card-brand">Scoot Shop</div>
           <div class="title">T10 — Patinete eléctrico Ultra</div>
           <div class="rating" aria-label="Valoración 4,8 de 5">
-            <span>
+            <span aria-hidden="true">
               <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
               <i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i>
             </span>
@@ -620,17 +633,17 @@
   <section class="series" id="series-ix">
     <div class="container">
       <h2>Serie IX</h2>
-      <p>La nueva Serie IX apuesta por chasis sólido, electrónica fiable y conducción estable. Un único modelo: IX3.</p>
+      <p>La nueva Serie IX apuesta por chasis sólido, electrónica fiable y inteligente y conducción estable. Un modelo único y actual: IX3.</p>
     </div>
   </section>
 
   <section class="container" aria-label="Lista de productos Series IX">
     <div class="grid">
-      <!-- IX3 (Único en Serie IX) -->
+      <!-- IX3 -->
       <article class="card" id="p-ix3" tabindex="0"
-        data-name="IX3" data-was="850 €" data-now="450 €"
+        data-name="IX3" data-was="850 €" data-now="380 €"
         data-spec="40–45 km · 800 W · 24 kg" data-link="ix3.html" data-wa="https://wa.me/34666318747"
-        data-tags="ix potencia urbano compacto">
+        data-tags="ix potencia urbano compacto" aria-label="IX3 — Patinete eléctrico Serie IX">
         <div class="card-top">
           <div class="verified" aria-label="Tienda verificada"><i class="fa-regular fa-circle-check" aria-hidden="true"></i><span>Tienda verificada</span></div>
           <div class="badges"><span class="badge offer">Oferta</span></div>
@@ -639,12 +652,12 @@
         <div class="card-media">
           <div class="carousel" data-carousel>
             <div class="carousel-track">
-              <img src="Img-IX3/1.jpg" alt="IX3 vista 1" loading="lazy">
-              <img src="Img-IX3/2.jpg" alt="IX3 vista 2" loading="lazy">
-              <img src="Img-IX3/3.jpg" alt="IX3 vista 3" loading="lazy">
-              <img src="Img-IX3/4.jpg" alt="IX3 vista 4" loading="lazy">
-              <img src="Img-IX3/5.jpg" alt="IX3 vista 5" loading="lazy">
-              <img src="Img-IX3/6.jpg" alt="IX3 vista 6" loading="lazy">
+              <img src="Img-IX3/1.jpg" alt="IX3 vista 1" loading="eager" fetchpriority="high" decoding="async">
+              <img src="Img-IX3/2.jpg" alt="IX3 vista 2" loading="lazy" decoding="async">
+              <img src="Img-IX3/3.jpg" alt="IX3 vista 3" loading="lazy" decoding="async">
+              <img src="Img-IX3/4.jpg" alt="IX3 vista 4" loading="lazy" decoding="async">
+              <img src="Img-IX3/5.jpg" alt="IX3 vista 5" loading="lazy" decoding="async">
+              <img src="Img-IX3/6.jpg" alt="IX3 vista 6" loading="lazy" decoding="async">
             </div>
           </div>
         </div>
@@ -653,7 +666,7 @@
           <div class="card-brand">Scoot Shop</div>
           <div class="title">IX3 — Patinete eléctrico Serie IX</div>
           <div class="rating" aria-label="Valoración 4,8 de 5">
-            <span>
+            <span aria-hidden="true">
               <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
               <i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i>
             </span>
@@ -663,7 +676,7 @@
 
         <div class="card-bottom">
           <div class="price-row">
-            <div class="price-now">450 €</div>
+            <div class="price-now">380 €</div>
             <div class="price-was">850 €</div>
           </div>
           <a class="more-link" href="ix3.html">Más información</a>
@@ -745,16 +758,16 @@
   </section>
 
   <!-- MÉTODOS DE PAGO + FOOTER -->
-  <a href="https://wa.me/34666318747" class="wa-fab" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+  <a href="https://wa.me/34666318747" class="wa-fab" aria-label="WhatsApp"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
   <section class="pagos">
     <div class="container">
       <h2>Métodos de pago aceptados</h2>
-      <div class="pagos-logos">
-        <i class="fab fa-paypal" title="PayPal"></i>
-        <i class="fas fa-piggy-bank" title="Transferencia bancaria"></i>
-        <i class="fas fa-mobile-alt" title="Bizum"></i>
-        <i class="fas fa-store" title="Wallapop"></i>
-        <i class="fas fa-shirt" title="Vinted"></i>
+      <div class="pagos-logos" aria-label="Métodos de pago">
+        <i class="fab fa-paypal" title="PayPal" aria-hidden="true"></i>
+        <i class="fas fa-piggy-bank" title="Transferencia bancaria" aria-hidden="true"></i>
+        <i class="fas fa-mobile-alt" title="Bizum" aria-hidden="true"></i>
+        <i class="fas fa-store" title="Wallapop" aria-hidden="true"></i>
+        <i class="fas fa-shirt" title="Vinted" aria-hidden="true"></i>
       </div>
     </div>
     <footer>© <span id="y"></span> SCOOT SHOP · <a href="#legal">Legal</a> · <a href="mailto:info@scootshop.example">Contactar</a></footer>
@@ -762,7 +775,7 @@
 
   <!-- SPOTLIGHT SEARCH -->
   <div class="cmdk" id="cmdk" aria-hidden="true">
-    <div class="panel" role="dialog" aria-modal="true">
+    <div class="panel" role="dialog" aria-modal="true" aria-labelledby="cmdkLabel">
       <div class="head">
         <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
         <input id="cmdkInput" type="search" placeholder="Buscar modelos, secciones, preguntas o legal..." aria-label="Buscar en SCOOT SHOP" />
@@ -775,15 +788,21 @@
 
   <!-- JSON-LD -->
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"Organization","name":"SCOOT SHOP","url":"https://tudominio.example","logo":"https://tudominio.example/Img/0-removebg-preview.png","sameAs":["https://www.instagram.com/scootshopping","https://www.facebook.com/61579248524907"]}</script>
+  {"@context":"https://schema.org","@type":"Organization","name":"SCOOT SHOP","url":"https://tudominio.example","logo":"https://tudominio.example/Img/0-removebg-preview.png","sameAs":["https://www.instagram.com/scootshopping","https://www.facebook.com/61579248524907"]}
+  </script>
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"ItemList","itemListElement":[
-    {"@type":"Product","name":"N7PRO — Patinete eléctrico urbano","image":["https://tudominio.example/Img-N7PRO/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"215","availability":"https://schema.org/InStock","url":"https://tudominio.example/n7pro.html"}},
-    {"@type":"Product","name":"N7MAX — Patinete eléctrico de alta potencia","image":["https://tudominio.example/Img-N7MAX/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"375","availability":"https://schema.org/InStock","url":"https://tudominio.example/n7max.html"}},
-    {"@type":"Product","name":"G2 — Patinete eléctrico de alta potencia","image":["https://tudominio.example/Img-G2/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"380","availability":"https://schema.org/InStock","url":"https://tudominio.example/g2.html"}},
-    {"@type":"Product","name":"T10 — Patinete eléctrico Ultra","image":["https://tudominio.example/Img-T10/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"450","availability":"https://schema.org/InStock","url":"https://tudominio.example/t10.html"}},
-    {"@type":"Product","name":"IX3 — Patinete eléctrico Serie IX","image":["https://tudominio.example/Img-IX3/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"450","availability":"https://schema.org/InStock","url":"https://tudominio.example/ix3.html"}}
-  ]}</script>
+  {
+    "@context":"https://schema.org",
+    "@type":"ItemList",
+    "itemListElement":[
+      {"@type":"ListItem","position":1,"item":{"@type":"Product","name":"N7PRO — Patinete eléctrico urbano","image":["https://tudominio.example/Img-N7PRO/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"215","availability":"https://schema.org/InStock","url":"https://tudominio.example/n7pro.html"}}},
+      {"@type":"ListItem","position":2,"item":{"@type":"Product","name":"N7MAX — Patinete eléctrico de alta potencia","image":["https://tudominio.example/Img-N7MAX/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"375","availability":"https://schema.org/InStock","url":"https://tudominio.example/n7max.html"}}},
+      {"@type":"ListItem","position":3,"item":{"@type":"Product","name":"G2 — Patinete eléctrico de alta potencia","image":["https://tudominio.example/Img-G2/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"380","availability":"https://schema.org/InStock","url":"https://tudominio.example/g2.html"}}},
+      {"@type":"ListItem","position":4,"item":{"@type":"Product","name":"T10 — Patinete eléctrico Ultra","image":["https://tudominio.example/Img-T10/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"450","availability":"https://schema.org/InStock","url":"https://tudominio.example/t10.html"}}},
+      {"@type":"ListItem","position":5,"item":{"@type":"Product","name":"IX3 — Patinete eléctrico Serie IX","image":["https://tudominio.example/Img-IX3/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"380","availability":"https://schema.org/InStock","url":"https://tudominio.example/ix3.html"}}}
+    ]
+  }
+  </script>
 
   <script>
     // Año
@@ -812,19 +831,24 @@
     function setVh(){ document.documentElement.style.setProperty('--vh',(window.innerHeight*0.01)+'px'); }
     setVh(); window.addEventListener('resize', setVh, {passive:true}); window.addEventListener('orientationchange', setVh, {passive:true});
 
-    // Menú hamburguesa
-    const toggle = document.querySelector('.menu-toggle');
-    const menu = document.querySelector('.menu');
-    toggle.addEventListener('click', () => { menu.classList.toggle('show'); toggle.classList.toggle('active'); });
+    // Menú hamburguesa + accesibilidad
+    const toggle = document.getElementById('menuToggle');
+    const menu = document.getElementById('mainMenu');
+    function closeMenu(){ menu.classList.remove('show'); toggle.classList.remove('active'); toggle.setAttribute('aria-expanded','false'); }
+    function openMenu(){ menu.classList.add('show'); toggle.classList.add('active'); toggle.setAttribute('aria-expanded','true'); }
+    toggle.addEventListener('click', () => { menu.classList.contains('show') ? closeMenu() : openMenu(); });
+    // Cierra al navegar por cualquier enlace del menú
+    menu.querySelectorAll('a').forEach(a=> a.addEventListener('click', closeMenu));
+    // Cierra con Escape
+    window.addEventListener('keydown', e=>{ if(e.key==='Escape') closeMenu(); }, {passive:true});
 
     // Submenú
     const submenuWrap = document.querySelector('.has-submenu');
     const submenuBtn  = document.getElementById('submenuBtn');
     function closeSubmenu(){ submenuWrap.classList.remove('open'); submenuBtn.setAttribute('aria-expanded','false'); }
     submenuBtn.addEventListener('click', (e) => { e.preventDefault(); const isOpen = submenuWrap.classList.toggle('open'); submenuBtn.setAttribute('aria-expanded', String(isOpen)); });
-    document.addEventListener('click', (e) => { if(!submenuWrap.contains(e.target) && !submenuBtn.contains(e.target)) closeSubmenu(); });
+    document.addEventListener('click', (e) => { if(!submenuWrap.contains(e.target) && e.target!==submenuBtn) closeSubmenu(); });
     submenuBtn.addEventListener('keydown', (e) => { if(e.key==='Escape') { closeSubmenu(); submenuBtn.focus(); }});
-    document.querySelectorAll('.submenu a').forEach(a => { a.addEventListener('click', () => { menu.classList.remove('show'); toggle.classList.remove('active'); closeSubmenu(); }); });
 
     // Aparición tarjetas (desktop)
     const cards = document.querySelectorAll('.card');
@@ -842,7 +866,7 @@
       const cardEl = c.closest('.card');
       let i=0, dragging=false, startX=0, currentX=0, startTime=0;
 
-      // Crear 3 DOTS fijos (anclas ~0%, ~33%, ~66%)
+      // 3 puntos anclados (~0%, ~33%, ~66%)
       const dotsWrap = document.createElement('div');
       dotsWrap.className='carousel-dots';
       const dots=[];
@@ -981,8 +1005,7 @@
       }); activeIndex=0;
     }
     let activeIndex=0;
-    launch.addEventListener('click', openCmdk);
-    window.addEventListener('keydown',(e)=>{
+    document.addEventListener('keydown',(e)=>{
       if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); openCmdk(); }
       if(e.key==='/' && !cmdk.classList.contains('show')){ openCmdk(); }
       if(e.key==='Escape' && cmdk.classList.contains('show')){ closeCmdk(); }
@@ -992,12 +1015,13 @@
         if(e.key==='ArrowUp'){ e.preventDefault(); activeIndex=Math.max(activeIndex-1,0); items.forEach(x=>x.classList.remove('active')); items[activeIndex]?.classList.add('active'); items[activeIndex]?.scrollIntoView({block:'nearest'}); }
         if(e.key==='Enter'){ e.preventDefault(); items[activeIndex]?.click(); }
       }
-    });
-    input.addEventListener('input', e=>renderResults(e.target.value));
-    cmdk.addEventListener('click',e=>{ if(e.target===cmdk) closeCmdk(); });
+    }, {passive:false});
+    document.getElementById('searchLaunch').addEventListener('click', openCmdk);
+    document.getElementById('cmdk').addEventListener('click',e=>{ if(e.target===cmdk) closeCmdk(); });
+    document.getElementById('cmdkInput').addEventListener('input', e=>renderResults(e.target.value));
     renderResults('');
 
-    // Limpieza badges antiguos
+    // Limpieza badges antiguos (por si vienen de versiones anteriores)
     document.querySelectorAll('.mob-badge').forEach(el => el.remove());
   </script>
 </body>
