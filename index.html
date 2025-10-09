@@ -232,7 +232,10 @@
       .menu-toggle{display:flex}
 
       /* Grid y tarjetas compactas */
-      #comprar.container, section[aria-label="Lista de productos Series G"]{ padding-inline: 10px; }
+      #comprar.container,
+      section[aria-label="Lista de productos Series G"],
+      section[aria-label="Lista de productos Series IX"]{ padding-inline: 10px; }
+
       .grid{ grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
       .card{ border:0; border-radius:0; box-shadow:none; transform:none; opacity:1; } /* sin animación en móvil */
       .card-media{ margin:0; border:0; border-radius:0; background:#fff; aspect-ratio:1/1; overflow:hidden; }
@@ -310,7 +313,6 @@
     .cmdk .item{display:flex;gap:12px;align-items:center;padding:10px 12px;border-bottom:1px solid rgba(0,0,0,.04);cursor:pointer}
     .cmdk .item:hover,.cmdk .item.active{background:rgba(0,0,0,.03)}
     .cmdk .item .type{font-size:12px;color:var(--ink-weak);border:1px solid var(--line);padding:2px 6px;border-radius:999px}
-    .cmdk .item .title{font-weight:600}
     .cmdk .empty{padding:18px;text-align:center;color:var(--ink-weak)}
 
     @media (prefers-reduced-motion: reduce){
@@ -346,6 +348,10 @@
                 <a href="#p-g5" role="menuitem">G2 Urban — Potencia</a>
                 <a href="#p-g7" role="menuitem">T10 URBANs — Ultra</a>
               </div>
+              <div class="submenu-col">
+                <div class="submenu-head">Serie IX</div>
+                <a href="#p-ix3" role="menuitem">IX3 — Compacto</a>
+              </div>
             </div>
           </div>
         </div>
@@ -367,7 +373,7 @@
       </div>
     </div>
 
-    <!-- Micro-confianza (oculta en móvil por CSS de la Parte 1) -->
+    <!-- Micro-confianza (oculta en móvil por CSS) -->
     <div class="trustbar" aria-label="Sellos de confianza">
       <div class="container inner">
         <span><i class="fa-regular fa-circle-check"></i> Garantía 70 km por producto</span>
@@ -378,7 +384,7 @@
     </div>
   </header>
 
-  <!-- HERO -->
+  <!-- HERO (se mantiene igual) -->
   <section class="hero" aria-label="Video hero">
     <video id="heroVideo" muted playsinline webkit-playsinline autoplay loop preload="auto" poster="Img-N7MAX/1.jpg">
       <source src="completo.mp4" type="video/mp4">
@@ -404,8 +410,8 @@
     <div class="grid">
       <!-- N7PRO -->
       <article class="card" id="p-n7pro" tabindex="0"
-        data-name="N7PRO" data-was="387,50 €" data-now="215 €
-"        data-spec="30–35 km · 350 W · 15 kg" data-link="n7pro.html" data-wa="https://wa.me/34666318747"
+        data-name="N7PRO" data-was="387,50 €" data-now="215 €"
+        data-spec="30–35 km · 350 W · 15 kg" data-link="n7pro.html" data-wa="https://wa.me/34666318747"
         data-tags="n ciudad ligero urbano">
         <div class="card-top">
           <div class="verified" aria-label="Tienda verificada"><i class="fa-regular fa-circle-check" aria-hidden="true"></i><span>Tienda verificada</span></div>
@@ -610,6 +616,66 @@
     </div>
   </section>
 
+  <!-- SERIE IX -->
+  <section class="series" id="series-ix">
+    <div class="container">
+      <h2>Serie IX</h2>
+      <p>La nueva Serie IX apuesta por chasis sólido, electrónica fiable y conducción estable. Un único modelo: IX3.</p>
+    </div>
+  </section>
+
+  <section class="container" aria-label="Lista de productos Series IX">
+    <div class="grid">
+      <!-- IX3 (Único en Serie IX) -->
+      <article class="card" id="p-ix3" tabindex="0"
+        data-name="IX3" data-was="850 €" data-now="450 €"
+        data-spec="40–45 km · 800 W · 24 kg" data-link="ix3.html" data-wa="https://wa.me/34666318747"
+        data-tags="ix potencia urbano compacto">
+        <div class="card-top">
+          <div class="verified" aria-label="Tienda verificada"><i class="fa-regular fa-circle-check" aria-hidden="true"></i><span>Tienda verificada</span></div>
+          <div class="badges"><span class="badge offer">Oferta</span></div>
+        </div>
+
+        <div class="card-media">
+          <div class="carousel" data-carousel>
+            <div class="carousel-track">
+              <img src="Img-IX3/1.jpg" alt="IX3 vista 1" loading="lazy">
+              <img src="Img-IX3/2.jpg" alt="IX3 vista 2" loading="lazy">
+              <img src="Img-IX3/3.jpg" alt="IX3 vista 3" loading="lazy">
+              <img src="Img-IX3/4.jpg" alt="IX3 vista 4" loading="lazy">
+              <img src="Img-IX3/5.jpg" alt="IX3 vista 5" loading="lazy">
+              <img src="Img-IX3/6.jpg" alt="IX3 vista 6" loading="lazy">
+            </div>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="card-brand">Scoot Shop</div>
+          <div class="title">IX3 — Patinete eléctrico Serie IX</div>
+          <div class="rating" aria-label="Valoración 4,8 de 5">
+            <span>
+              <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i>
+            </span>
+            <span class="count">(203)</span>
+          </div>
+        </div>
+
+        <div class="card-bottom">
+          <div class="price-row">
+            <div class="price-now">450 €</div>
+            <div class="price-was">850 €</div>
+          </div>
+          <a class="more-link" href="ix3.html">Más información</a>
+          <div class="btn-row">
+            <a class="btn-primary" href="ix3.html" data-buy-button>Vista</a>
+            <a class="btn-whatsapp" href="https://wa.me/34666318747" target="_blank" rel="noopener" data-buy-button><i class="fab fa-whatsapp"></i>Comprar</a>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
   <!-- FAQ -->
   <section id="faq" class="container">
     <h2>Preguntas frecuentes</h2>
@@ -626,7 +692,7 @@
       <div class="testimonios-carousel" id="testimoniosCarousel">
         <div class="slide active"><p>"Increíble potencia en el N7MAX, me siento seguro y rápido en la ciudad."</p><div class="author">— Carlos G. ⭐⭐⭐⭐⭐</div></div>
         <div class="slide"><p>"El N7PRO es perfecto para mis trayectos diarios. Ligero y fiable."</p><div class="author">— Marta L. ⭐⭐⭐⭐⭐</div></div>
-        <div class="slide"><p>"Entrega rápida y la garantía de 70 km me dio total tranquilidad."</p><div class="author">— Javier P. ⭐⭐⭐⭐⭐</div></div>
+        <div class="slide"><p>"El IX3 es compacto pero con pegada. Muy equilibrado."</p><div class="author">— Javier P. ⭐⭐⭐⭐⭐</div></div>
       </div>
     </div>
   </section>
@@ -713,8 +779,12 @@
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"ItemList","itemListElement":[
     {"@type":"Product","name":"N7PRO — Patinete eléctrico urbano","image":["https://tudominio.example/Img-N7PRO/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"215","availability":"https://schema.org/InStock","url":"https://tudominio.example/n7pro.html"}},
-    {"@type":"Product","name":"N7MAX — Patinete eléctrico de alta potencia","image":["https://tudominio.example/Img-N7MAX/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"375","availability":"https://schema.org/InStock","url":"https://tudominio.example/n7max.html"}}
+    {"@type":"Product","name":"N7MAX — Patinete eléctrico de alta potencia","image":["https://tudominio.example/Img-N7MAX/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"375","availability":"https://schema.org/InStock","url":"https://tudominio.example/n7max.html"}},
+    {"@type":"Product","name":"G2 — Patinete eléctrico de alta potencia","image":["https://tudominio.example/Img-G2/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"380","availability":"https://schema.org/InStock","url":"https://tudominio.example/g2.html"}},
+    {"@type":"Product","name":"T10 — Patinete eléctrico Ultra","image":["https://tudominio.example/Img-T10/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"450","availability":"https://schema.org/InStock","url":"https://tudominio.example/t10.html"}},
+    {"@type":"Product","name":"IX3 — Patinete eléctrico Serie IX","image":["https://tudominio.example/Img-IX3/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"450","availability":"https://schema.org/InStock","url":"https://tudominio.example/ix3.html"}}
   ]}</script>
+
   <script>
     // Año
     document.getElementById('y').textContent = new Date().getFullYear();
@@ -756,7 +826,7 @@
     submenuBtn.addEventListener('keydown', (e) => { if(e.key==='Escape') { closeSubmenu(); submenuBtn.focus(); }});
     document.querySelectorAll('.submenu a').forEach(a => { a.addEventListener('click', () => { menu.classList.remove('show'); toggle.classList.remove('active'); closeSubmenu(); }); });
 
-    // Aparición tarjetas (desktop; en móvil ya no hay animación)
+    // Aparición tarjetas (desktop)
     const cards = document.querySelectorAll('.card');
     const io = new IntersectionObserver(es => {
       es.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); io.unobserve(e.target); } });
@@ -889,8 +959,10 @@
       {type:'Producto',title:'N7MAX',hint:'40–45 km · 800 W · 24 kg (Serie N)',action:()=>document.getElementById('p-n7max').scrollIntoView({behavior:'smooth'})},
       {type:'Producto',title:'G2',hint:'40 km · 600 W · 18 kg (Serie GT)',action:()=>document.getElementById('p-g5').scrollIntoView({behavior:'smooth'})},
       {type:'Producto',title:'T10',hint:'45 km · 700 W · 20 kg (Serie GT)',action:()=>document.getElementById('p-g7').scrollIntoView({behavior:'smooth'})},
+      {type:'Producto',title:'IX3',hint:'40–45 km · 800 W · 24 kg (Serie IX)',action:()=>document.getElementById('p-ix3').scrollIntoView({behavior:'smooth'})},
       {type:'Sección',title:'Series N',hint:'#comprar',action:()=>document.getElementById('comprar').scrollIntoView({behavior:'smooth'})},
       {type:'Sección',title:'Series G',hint:'#series-g',action:()=>document.getElementById('series-g').scrollIntoView({behavior:'smooth'})},
+      {type:'Sección',title:'Serie IX',hint:'#series-ix',action:()=>document.getElementById('series-ix').scrollIntoView({behavior:'smooth'})},
       {type:'FAQ',title:'¿Plazo de envío?',hint:'6–8 días hábiles',action:()=>document.getElementById('faq').scrollIntoView({behavior:'smooth'})},
       {type:'FAQ',title:'¿Garantía?',hint:'70 km por producto (SAT propio)',action:()=>document.getElementById('faq').scrollIntoView({behavior:'smooth'})}
     ];
