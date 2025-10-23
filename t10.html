@@ -6,10 +6,14 @@
   <title>SCOOT SHOP — T10</title>
   <meta name="description" content="T10 de SCOOT SHOP: 700 W, autonomía 45 km, chasis reforzado y frenada segura. Envío 6–8 días y garantía 70 km por producto." />
   <meta name="color-scheme" content="light" />
+  <meta name="theme-color" content="#ffffff">
 
-  <!-- Tipografías -->
+  <!-- Tipografías (mismas del index) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Tangerine:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
   <!-- Iconos -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
@@ -18,10 +22,10 @@
   {
     "@context":"https://schema.org",
     "@type":"Product",
-    "name":"T10",
+    "name":"T10 — Patinete eléctrico Ultra",
     "brand":{"@type":"Brand","name":"SCOOT SHOP"},
-    "description":"Scooter eléctrico T10 con motor 700 W y autonomía real de hasta 45 km.",
-    "image":["Img-T10/1.jpg","Img-T10/2.jpg","Img-T10/3.jpg","Img-T10/4.jpg"],
+    "description":"Scooter eléctrico T10 con motor 700 W, autonomía real hasta 45 km y chasis reforzado.",
+    "image":["https://tudominio.example/Img-T10/1.jpg","https://tudominio.example/Img-T10/2.jpg","https://tudominio.example/Img-T10/3.jpg","https://tudominio.example/Img-T10/4.jpg"],
     "offers":{
       "@type":"Offer",
       "priceCurrency":"EUR",
@@ -35,96 +39,118 @@
 
   <style>
     :root{
+      /* mismas variables base que en index */
       --sport-font:'Russo One',sans-serif;
-      --logo-font:'Tangerine',cursive;
-      --ui: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Noto Sans";
-      --bg:#ffffff; --ink:#111315; --muted:#676b73; --line:#E6E9EF;
+      --ui:'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Noto Sans";
+      --bg:#ffffff; --ink:#111315; --muted:#676b73; --line:#E6E9EF; --ink-weak:#6b7280;
       --primary:#b91e1e; --ok:#1ebe5d;
-      --radius:14px; --shadow-1:0 4px 14px rgba(0,0,0,.06);
-      --header-h:72px; --t:.3s;
+      --c1:#ff6a00; --c2:#61e7ff; --c3:#9b66ff; --c4:#ffd067;
+
+      --header-h: 92px; --trustbar-h: 40px;
+      --t: 300ms; --ease: cubic-bezier(.22,.61,.36,1);
     }
-    *{margin:0;padding:0;box-sizing:border-box}
+    @media (max-width: 768px){ :root{ --header-h: 84px; --trustbar-h: 0px; } }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{font-family:var(--ui);background:var(--bg);color:var(--ink);line-height:1.55;overflow-x:hidden;padding-top:calc(var(--header-h) + var(--trustbar-h))}
     img{max-width:100%;display:block}
     a{text-decoration:none;color:inherit}
-    body{font-family:var(--ui);background:var(--bg);color:var(--ink);line-height:1.5}
-    .container{width:min(1100px,94vw);margin:auto}
-    :target{scroll-margin-top: calc(var(--header-h) + 16px)}
+    .container{width:min(1100px,100%);padding-inline:clamp(16px,4vw,28px);margin-inline:auto}
+    :target{scroll-margin-top: calc(var(--header-h) + var(--trustbar-h) + 16px)}
+    :focus-visible{outline:3px solid rgba(34,197,94,.6); outline-offset:2px; border-radius:10px}
 
-    /* Header */
-    header{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);transition: box-shadow .2s ease}
-    header.scrolled{ box-shadow:0 6px 20px rgba(0,0,0,.08) }
-    .nav{display:flex;justify-content:space-between;align-items:center;height:var(--header-h);gap:12px}
-    .brand{display:flex;align-items:center;gap:8px}
-    .brand img{height:68px}
-    .brand span{font-family:var(--logo-font);font-size:1.8rem;color:var(--primary)}
-    .menu{display:flex;gap:16px;align-items:center;font-weight:900;text-transform:uppercase;font-size:.9rem}
-    .menu a{display:flex;align-items:center;gap:6px;position:relative;padding:4px 0}
-    .menu i{font-size:20px}
+    /* Aurora sutil de fondo (como en index) */
+    .aurora{
+      position:fixed; inset:-15vmax -15vmax auto -15vmax; height:70vmax; z-index:-2;
+      filter: blur(70px) saturate(130%); opacity:.42; pointer-events:none;
+      background:
+        radial-gradient(closest-side at 20% 30%, var(--c1), transparent 55%),
+        radial-gradient(closest-side at 85% 20%, var(--c2), transparent 50%),
+        radial-gradient(closest-side at 70% 80%, var(--c3), transparent 50%),
+        radial-gradient(closest-side at 10% 85%, var(--c4), transparent 50%);
+      animation: auroraFlow 26s ease-in-out infinite alternate;
+    }
+    @keyframes auroraFlow{ 0%{transform:translate3d(0,0,0)} 100%{transform:translate3d(4vmax,-2vmax,0)} }
+
+    /* Header consistente */
+    header{
+      position:fixed; inset:0 0 auto 0; z-index:70;
+      background:rgba(255,255,255,.82); backdrop-filter:blur(12px) saturate(120%); border-bottom:1px solid rgba(255,255,255,.35);
+      box-shadow:0 1px 2px rgba(0,0,0,.05), 0 6px 20px rgba(0,0,0,.06);
+    }
+    header.scrolled{ box-shadow:0 10px 24px rgba(0,0,0,.10) }
+    .accent-line{position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--c1),var(--c4),var(--c2),var(--c3),var(--c1)); background-size:300% 100%; animation:sweep 18s linear infinite;}
+    @keyframes sweep{from{background-position:0 0}to{background-position:300% 0}}
+    .nav{display:grid;grid-template-columns:auto 1fr auto;align-items:center;height:var(--header-h);gap:18px}
+    .brand{display:flex;align-items:center;gap:10px}
+    .brand img{height:64px;filter: drop-shadow(0 10px 18px rgba(0,0,0,.2));}
+    .brand span{font-family:'Tangerine',cursive;font-size:1.7rem;color:var(--primary);text-shadow:0 1px 0 rgba(0,0,0,.15)}
+    nav.menu{display:flex;gap:14px;align-items:center;font-weight:800;text-transform:uppercase;font-size:.9rem}
+    nav.menu a,.menu button{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:10px}
+    nav.menu a:hover{background:rgba(0,0,0,.035)}
     .menu-toggle{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;width:28px;height:22px;justify-content:center}
-    .menu-toggle span{display:block;width:100%;height:3px;background:var(--ink);border-radius:2px;transition:.3s}
+    .menu-toggle span{display:block;width:100%;height:3px;background:var(--ink);border-radius:2px;transition:transform var(--t) var(--ease), opacity var(--t) var(--ease)}
     .menu-toggle.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
     .menu-toggle.active span:nth-child(2){opacity:0}
     .menu-toggle.active span:nth-child(3){transform:rotate(-45deg) translate(6px,-6px)}
-    .menu a:focus-visible,.menu-toggle:focus-visible,.btn:focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:10px}
-    @media(hover:hover){
-      .menu a::after{content:"";position:absolute;bottom:-3px;left:0;width:100%;height:2px;background:var(--primary);transform:scaleX(0);transform-origin:left;transition:transform .25s ease}
-      .menu a:hover::after{transform:scaleX(1)}
-    }
-    @media(max-width:768px){
-      .menu{
-        position:absolute;top:var(--header-h);right:0;left:0;background:var(--bg);
-        flex-direction:column;align-items:center;gap:18px;padding:16px 0;border-bottom:1px solid var(--line);
-        transform:translateY(-130%);transition:transform var(--t) ease;border-bottom-left-radius:18px;border-bottom-right-radius:18px
+    /* Redes compactas */
+    nav.menu a[aria-label] i{ font-size:18px; }
+
+    /* Trustbar */
+    .trustbar{border-top:1px solid var(--line); background:rgba(255,255,255,.75); color:var(--muted); font-weight:700; font-size:.95rem}
+    .trustbar .inner{display:flex;gap:28px;align-items:center;justify-content:center;padding:8px 0}
+    @media (max-width:768px){ .trustbar{ display:none } }
+
+    /* Menú móvil off-canvas (estable) */
+    @media (max-width: 768px){
+      nav.menu{
+        position: fixed; top: var(--header-h); right: 0; bottom: 0; left: auto;
+        width: min(92vw, 420px);
+        transform: translateX(110%); transition: transform var(--t) var(--ease);
+        border-left: 1px solid var(--line); padding: 18px 14px; box-shadow:0 18px 60px rgba(0,0,0,.18);
+        background: var(--bg); flex-direction:column; gap: 14px; z-index: 999; overflow-y:auto;
       }
-      .menu.show{transform:translateY(0);box-shadow:0 12px 30px rgba(0,0,0,.12)}
+      nav.menu.show{ transform: translateX(0) }
+      nav.menu.show::before{ content:""; position: fixed; left: 0; top: var(--header-h); width: 100vw; height: calc(100vh - var(--header-h)); background: rgba(0,0,0,.35); z-index: -1; }
       .menu-toggle{display:flex}
     }
 
-    /* Hero */
+    /* Migas */
+    .crumbs{color:#6b7280;font-size:.92rem;margin:10px 0}
+    .crumbs a{color:#6b7280}
+
+    /* Hero de producto: carrusel + info */
     .hero{max-width:1100px;margin:18px auto 26px;display:grid;grid-template-columns:1.08fr .92fr;gap:24px;padding:0 6px}
     @media(max-width:980px){.hero{grid-template-columns:1fr}}
-    .panel{border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow-1)}
+    .panel{border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.06)}
 
-    /* Carrusel principal */
+    /* Carrusel */
     .carousel{position:relative;overflow:hidden;aspect-ratio:4/3;background:#fff;border-radius:12px 12px 0 0}
-    .carousel-track{display:flex;transition:transform .35s ease;touch-action:pan-y;cursor:grab;height:100%}
+    .carousel-track{display:flex;transition:transform var(--t) var(--ease);touch-action:pan-y;cursor:grab;height:100%}
     .carousel-track.dragging{cursor:grabbing}
     .carousel img{width:100%;height:100%;flex:0 0 100%;object-fit:contain;background:#fff;-webkit-user-drag:none;user-select:none}
-
-    /* 3 puntos indicadores */
     .carousel-dots{
       position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
-      display:flex;gap:6px;z-index:2;background:rgba(255,255,255,.9);border:1px solid var(--line);
-      padding:3px 8px;border-radius:999px
+      display:flex;gap:6px;z-index:2;background:rgba(255,255,255,.85);border:1px solid var(--line);
+      padding:2px 6px;border-radius:999px
     }
-    .carousel-dots .dot{width:8px;height:8px;border-radius:50%;border:0;background:#cbd5e1;opacity:.9;cursor:pointer}
-    .carousel-dots .dot.active{background:#111;opacity:1}
+    .carousel-dots .dot{ width:8px; height:8px; border-radius:50%; border:0; background:#cbd5e1; opacity:.85; cursor:pointer; }
+    .carousel-dots .dot.active{ background:#111; opacity:1; }
 
-    /* Thumbs (4 móvil / 8 desktop) con flechas */
-    .carousel-thumbs{
-      --thumb-gap:8px;
-      --thumbs-per-page:4;
-      display:flex;align-items:center;gap:8px;padding:10px 6px;border-top:1px solid var(--line);
-      background:#fff;border-bottom-left-radius:12px;border-bottom-right-radius:12px
-    }
+    /* Miniaturas con navegación */
+    .carousel-thumbs{display:flex;align-items:center;gap:8px;padding:10px 6px;border-top:1px solid var(--line);background:#fff;border-radius:0 0 12px 12px}
     .thumbs-nav{
       width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:#fff;
       display:grid;place-items:center;cursor:pointer;flex:0 0 auto
     }
     .thumbs-viewport{flex:1;overflow:hidden}
-    .thumbs-track{display:flex;gap:var(--thumb-gap);transform:translateX(0)}
-    .thumb{
-      flex:0 0 auto;
-      width:calc((100% - (var(--thumbs-per-page) - 1)*var(--thumb-gap))/var(--thumbs-per-page));
-      height:64px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:0;cursor:pointer
-    }
+    .thumbs-track{display:flex;gap:8px;transform:translateX(0)}
+    .thumb{flex:0 0 auto;width:calc((100% - (var(--thumbs-per-page,4) - 1)*8px)/var(--thumbs-per-page,4));height:64px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:0;cursor:pointer}
     .thumb img{width:100%;height:100%;object-fit:cover;border-radius:10px;pointer-events:none}
     .thumb.active{outline:2px solid var(--primary);border-color:var(--primary)}
     .thumbs-nav:disabled{opacity:.4;cursor:not-allowed}
-    @media(min-width:1024px){
-      .carousel-thumbs{ --thumbs-per-page:8; }
-      .thumb{height:68px}
-    }
+    @media(min-width:1024px){ .thumb{height:68px} }
 
     /* Info */
     .info{padding:14px}
@@ -164,72 +190,83 @@
     /* Buybar */
     .buybar{position:sticky;bottom:0;z-index:55;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-top:1px solid var(--line)}
     .buybar .inner{display:flex;gap:10px;align-items:center;justify-content:space-between;max-width:1100px;margin:auto;padding:10px 12px}
-    .buybar .title{font-weight:800}
+    .buybar .title{font-weight:900}
     .buybar .priceb{font-weight:900}
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#25D366;color:#fff;padding:12px 16px;border-radius:12px;font-weight:800;border:1px solid #1ebe5d}
-    .btn:hover{background:#1ebe5d}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#25D366;color:#fff;padding:12px 16px;border-radius:12px;font-weight:900;border:1px solid #1ebe5d}
+    .btn:hover{filter:brightness(.97)}
     .btn:active{transform:translateY(1px)}
 
     footer{text-align:center;padding:18px;color:#80848b;margin-top:24px;font-size:.88rem}
 
-    /* Móvil: sin hovers ni animaciones CSS */
-    @media (max-width:768px){
-      .menu a:hover::after{transform:none}
-      .carousel-track{transition:none}
-      .carousel img{transition:none}
-      .t-slide{transition:none}
-    }
+    @media (max-width:768px){ .carousel-track{transition:none} }
   </style>
 </head>
 <body>
+  <div class="aurora" aria-hidden="true"></div>
+
   <!-- Header -->
-  <header id="hdr">
+  <header id="hdr" aria-label="Barra superior">
+    <div class="accent-line" aria-hidden="true"></div>
     <div class="container nav">
-      <div class="brand"><img src="Img/0-removebg-preview.png" alt="Scoot Shop logo" decoding="async"><span>Versatil</span></div>
-      <button class="menu-toggle" aria-label="Menú"><span></span><span></span><span></span></button>
-      <nav class="menu" aria-label="Principal">
+      <div class="brand"><img src="Img/0-removebg-preview.png" alt="SCOOT SHOP logo" decoding="async"><span>Versatil</span></div>
+
+      <nav class="menu" id="mainMenu" aria-label="Principal">
         <a href="index.html"><i class="fas fa-home"></i>Inicio</a>
-        <a href="index.html#p-g5"><i class="fas fa-box"></i>G2</a>
-        <a href="index.html#p-g7"><i class="fas fa-bolt"></i>T10</a>
+        <a href="index.html#series-g"><i class="fas fa-box"></i>Series GT</a>
+        <a href="index.html#p-g5"><i class="fas fa-bolt"></i>G2</a>
+        <a href="index.html#p-g7"><i class="fas fa-fire"></i>T10</a>
         <a href="#specs"><i class="fas fa-list"></i>Specs</a>
         <a href="#legal"><i class="fa-regular fa-file-lines"></i>Legal</a>
-        <a href="https://www.instagram.com/scootshopping" target="_blank" rel="noopener"><i class="fab fa-instagram"></i></a>
-        <a href="https://www.facebook.com/61579248524907" target="_blank" rel="noopener"><i class="fab fa-facebook"></i></a>
-        <a href="https://wa.me/34666318747" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i></a>
+        <a href="https://www.instagram.com/scootshopping" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="https://www.facebook.com/61579248524907" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+        <a href="https://wa.me/34666318747" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
       </nav>
+
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-controls="mainMenu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+    <div class="trustbar" aria-label="Sellos de confianza">
+      <div class="container inner">
+        <span><i class="fa-regular fa-circle-check" aria-hidden="true"></i> Garantía 70 km por producto</span>
+        <span><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Devolución 30 días</span>
+        <span><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Pago 100% seguro</span>
+        <span><i class="fa-solid fa-truck-fast" aria-hidden="true"></i> Envío 6–8 días</span>
+      </div>
     </div>
   </header>
 
   <div class="container">
-    <nav class="crumbs" aria-label="Breadcrumb" style="color:#6b7280;font-size:.92rem;margin:10px 0">
-      <a href="index.html" style="color:#6b7280">Inicio</a> <i class="fa-solid fa-angle-right" aria-hidden="true" style="margin:0 6px"></i>
-      <a href="index.html#series-g" style="color:#6b7280">Series GT</a> <i class="fa-solid fa-angle-right" aria-hidden="true" style="margin:0 6px"></i>
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="index.html">Inicio</a> <i class="fa-solid fa-angle-right" aria-hidden="true" style="margin:0 6px"></i>
+      <a href="index.html#series-g">Series GT</a> <i class="fa-solid fa-angle-right" aria-hidden="true" style="margin:0 6px"></i>
       <span aria-current="page">T10</span>
     </nav>
   </div>
 
   <!-- Hero: Carrusel + Info -->
-  <section class="hero">
+  <section class="hero" aria-label="T10 — galería e información">
     <div class="panel">
       <div class="carousel" id="heroCarousel">
         <div class="carousel-track">
-          <img src="Img-T10/1.jpg" alt="T10 vista 1" loading="lazy" decoding="async">
+          <img src="Img-T10/1.jpg" alt="T10 vista 1" loading="eager" fetchpriority="high" decoding="async">
           <img src="Img-T10/2.jpg" alt="T10 vista 2" loading="lazy" decoding="async">
           <img src="Img-T10/3.jpg" alt="T10 vista 3" loading="lazy" decoding="async">
           <img src="Img-T10/4.jpg" alt="T10 vista 4" loading="lazy" decoding="async">
-          <img src="Img-T10/5.jpg" alt="T10 vista 2" loading="lazy" decoding="async">
-          <img src="Img-T10/6.jpg" alt="T10 vista 3" loading="lazy" decoding="async">
-          <img src="Img-T10/7.jpg" alt="T10 vista 4" loading="lazy" decoding="async">
-          <img src="Img-T10/8.jpg" alt="T10 vista 4" loading="lazy" decoding="async">
+          <img src="Img-T10/5.jpg" alt="T10 vista 5" loading="lazy" decoding="async">
+          <img src="Img-T10/6.jpg" alt="T10 vista 6" loading="lazy" decoding="async">
+          <img src="Img-T10/7.jpg" alt="T10 vista 7" loading="lazy" decoding="async">
+          <img src="Img-T10/8.jpg" alt="T10 vista 8" loading="lazy" decoding="async">
         </div>
-        <div class="carousel-dots" aria-label="Indicadores"><!-- 3 puntos por JS --></div>
+        <div class="carousel-dots" aria-label="Indicadores"></div>
       </div>
 
-      <!-- THUMBS paginadas -->
+      <!-- Miniaturas -->
       <div class="carousel-thumbs" id="heroThumbs" aria-label="Miniaturas">
         <button class="thumbs-nav prev" aria-label="Miniaturas anteriores">‹</button>
         <div class="thumbs-viewport">
-          <div class="thumbs-track"><!-- thumbs por JS --></div>
+          <div class="thumbs-track"></div>
         </div>
         <button class="thumbs-nav next" aria-label="Miniaturas siguientes">›</button>
       </div>
@@ -241,15 +278,14 @@
       <div class="price"><div class="now">450 €</div><div class="was">850 €</div></div>
 
       <div class="chips">
-        <span class="chip">900 W</span>
-        <span class="chip">Autonomía hasta 60 km</span>
-        <span class="chip">Peso 25 kg</span>
-        <span class="chip">Ruedas 11*</span>
+        <span class="chip">700 W</span>
+        <span class="chip">Autonomía hasta 45 km</span>
+        <span class="chip">Peso 20 kg</span>
+        <span class="chip">Ruedas 10”</span>
       </div>
 
       <div class="trust"><i class="fa-regular fa-circle-check"></i> Envío 6–8 días · Garantía 70 km por producto · Pago seguro</div>
       <p class="notes">Incluye: cargador, soporte móvil y manual rápido. SAT propio y repuestos disponibles.</p>
-      <!-- Sin botón aquí: solo el de la buybar -->
     </div>
   </section>
 
@@ -257,10 +293,10 @@
   <section class="features">
     <h2>Características principales</h2>
     <div class="features-grid">
-      <div class="feature"><i class="fas fa-bolt"></i><p>Motor 900 W de alto poder</p></div>
-      <div class="feature"><i class="fas fa-route"></i><p>Autonomía real hasta 60 km*</p></div>
+      <div class="feature"><i class="fas fa-bolt"></i><p>Motor 700 W con gran par</p></div>
+      <div class="feature"><i class="fas fa-route"></i><p>Autonomía real hasta 45 km*</p></div>
       <div class="feature"><i class="fas fa-battery-full"></i><p>Batería litio 48V 13Ah</p></div>
-      <div class="feature"><i class="fas fa-mountain"></i><p>Sube pendientes MUY exigentes</p></div>
+      <div class="feature"><i class="fas fa-mountain"></i><p>Sube pendientes exigentes</p></div>
       <div class="feature"><i class="fas fa-shield-halved"></i><p>Freno doble + e-ABS</p></div>
       <div class="feature"><i class="fas fa-gears"></i><p>Chasis y horquilla reforzados</p></div>
     </div>
@@ -292,16 +328,16 @@
   <section class="specs" id="specs">
     <h2>Especificaciones técnicas</h2>
     <table>
-      <tr><th>Motor</th><td>900 W</td></tr>
+      <tr><th>Motor</th><td>700 W</td></tr>
       <tr><th>Batería</th><td>Litio 48V 13Ah</td></tr>
-      <tr><th>Autonomía</th><td>Hasta 60 km</td></tr>
+      <tr><th>Autonomía</th><td>Hasta 45 km</td></tr>
       <tr><th>Velocidad máxima</th><td>Hasta 63 km/h*</td></tr>
       <tr><th>Carga máxima</th><td>140 kg</td></tr>
       <tr><th>Frenos</th><td>Disco delantero y trasero + e-ABS</td></tr>
-      <tr><th>Peso</th><td>29 kg</td></tr>
+      <tr><th>Peso</th><td>20 kg</td></tr>
       <tr><th>Pendiente</th><td>Hasta 25°</td></tr>
       <tr><th>Neumáticos</th><td>10”</td></tr>
-      <tr><th>Garantía</th><td><strong>200 km por producto</strong></td></tr>
+      <tr><th>Garantía</th><td><strong>70 km por producto</strong></td></tr>
       <tr><th>Envío</th><td><strong>6–8 días</strong> en península</td></tr>
     </table>
     <p style="margin-top:8px;color:#6b7280;font-size:.9rem">*Sujeto a normativa local.</p>
@@ -321,18 +357,22 @@
   <footer>© <span id="year"></span> SCOOT SHOP — Envío 6–8 días · Garantía 70 km por producto</footer>
 
   <script>
-    // Año y header
+    // Año + header sombra
     document.getElementById('year').textContent = new Date().getFullYear();
     const hdr = document.getElementById('hdr');
     const onScrollHdr = () => { if (window.scrollY > 6) hdr.classList.add('scrolled'); else hdr.classList.remove('scrolled'); };
     onScrollHdr(); window.addEventListener('scroll', onScrollHdr, {passive:true});
 
-    // Menú
-    const toggle = document.querySelector('.menu-toggle');
-    const menu = document.querySelector('.menu');
-    toggle?.addEventListener('click', () => { menu.classList.toggle('show'); toggle.classList.toggle('active'); });
+    // Menú móvil
+    const toggle = document.getElementById('menuToggle');
+    const menu = document.getElementById('mainMenu');
+    const closeMenu=()=>{ menu.classList.remove('show'); toggle.classList.remove('active'); toggle.setAttribute('aria-expanded','false'); };
+    const openMenu =()=>{ menu.classList.add('show'); toggle.classList.add('active'); toggle.setAttribute('aria-expanded','true'); };
+    toggle.addEventListener('click', () => { menu.classList.contains('show') ? closeMenu() : openMenu(); });
+    menu.querySelectorAll('a').forEach(a=> a.addEventListener('click', closeMenu));
+    window.addEventListener('keydown', e=>{ if(e.key==='Escape') closeMenu(); }, {passive:true});
 
-    // WhatsApp (único botón)
+    // WhatsApp (mensaje con specs alineados al index)
     (function(){
       const btn = document.getElementById('buyBtn');
       const name = 'T10';
@@ -342,35 +382,29 @@
       btn.href = `https://wa.me/34666318747?text=${msg}`;
     })();
 
-    // ===== Carrusel + Dots + Thumbs paginadas =====
-    function makeCarousel(el, thumbsRoot){
-      const track = el.querySelector('.carousel-track');
+    // ===== Carrusel con dots (3 anclas) + thumbs y gestos =====
+    function makeCarousel(root, thumbsRoot){
+      const track = root.querySelector('.carousel-track');
       const slides = [...track.children];
-      const dotsWrap = el.querySelector('.carousel-dots');
+      const dotsWrap = root.querySelector('.carousel-dots');
 
       const vp = thumbsRoot.querySelector('.thumbs-viewport');
       const tTrack = thumbsRoot.querySelector('.thumbs-track');
       const navPrev = thumbsRoot.querySelector('.thumbs-nav.prev');
       const navNext = thumbsRoot.querySelector('.thumbs-nav.next');
 
-      let i = 0, dragging=false, startX=0, lastX=0;
-      const getPerPage = () => {
-        const val = parseInt(getComputedStyle(thumbsRoot).getPropertyValue('--thumbs-per-page')) || 4;
-        return val;
-      };
-      let perPage = getPerPage();
-      let pages = 1, thumbPage = 0;
-
-      // 3 puntos (i % 3)
-      const dots = [];
-      for(let k=0;k<3;k++){
+      let i=0, dragging=false, startX=0, currentX=0, startTime=0;
+      // Dots a 3 grupos (0, ~1/3, ~2/3) como en index
+      const anchors = [
+        0,
+        Math.min(slides.length - 1, Math.max(1, Math.round(slides.length / 3))),
+        Math.min(slides.length - 1, Math.max(2, Math.round(2 * slides.length / 3))),
+      ];
+      const dots=[];
+      for (let k=0;k<3;k++){
         const b=document.createElement('button');
-        b.type='button'; b.className='dot'; b.setAttribute('aria-label',`Punto ${k+1}`);
-        b.addEventListener('click',(ev)=>{
-          ev.stopPropagation();
-          const delta=(k - (i%3) + 3) % 3;
-          go(i + delta, true);
-        });
+        b.type='button'; b.className='dot'; b.setAttribute('aria-label',`Ir a grupo ${k+1}`);
+        b.addEventListener('click',(ev)=>{ ev.stopPropagation(); go(anchors[k], true); });
         dotsWrap.appendChild(b); dots.push(b);
       }
 
@@ -384,67 +418,60 @@
         return btn;
       });
 
-      function recalc(){
-        perPage = getPerPage();
-        pages = Math.max(1, Math.ceil(slides.length / perPage));
-      }
+      // Navegación por páginas en thumbs (desplaza por viewport)
+      const getPerPage = ()=> getComputedStyle(document.documentElement).getPropertyValue('--thumbs-per-page') || (matchMedia('(min-width:1024px)').matches ? '8' : '4');
+      let perPage = parseInt(getPerPage(),10) || 4;
+      function updatePerPage(){ const p = parseInt(getPerPage(),10) || 4; if(p!==perPage){ perPage=p; setThumbPage(pageForIndex(i), false); } }
       function pageForIndex(idx){ return Math.floor(idx / perPage); }
-
       function setThumbPage(p, animate){
-        recalc();
-        thumbPage = Math.max(0, Math.min(p, pages-1));
+        const totalPages = Math.max(1, Math.ceil(thumbs.length / perPage));
+        p = Math.max(0, Math.min(p, totalPages-1));
         const vw = vp.clientWidth;
-        tTrack.style.transition = animate ? 'transform .25s ease' : 'none';
-        tTrack.style.transform = `translateX(${-thumbPage*vw}px)`;
-        navPrev.disabled = (thumbPage===0);
-        navNext.disabled = (thumbPage>=pages-1);
+        tTrack.style.transition = animate ? 'transform 250ms var(--ease)' : 'none';
+        tTrack.style.transform = `translateX(${-p*vw}px)`;
+        navPrev.disabled = (p===0);
+        navNext.disabled = (p>=totalPages-1);
       }
+      navPrev.addEventListener('click', ()=> setThumbPage(pageForIndex(i)-1, true));
+      navNext.addEventListener('click', ()=> setThumbPage(pageForIndex(i)+1, true));
+      window.addEventListener('resize', ()=>{ updatePerPage(); setThumbPage(pageForIndex(i), false); }, {passive:true});
 
-      function updateDots(){ dots.forEach((d,idx)=> d.classList.toggle('active', idx === (i % 3))); }
+      function updateDots(){
+        let j = 2;
+        if (i < anchors[1]) j = 0;
+        else if (i < anchors[2]) j = 1;
+        dots.forEach((d,idx)=> d.classList.toggle('active', idx===j));
+      }
       function updateThumbs(){ thumbs.forEach((b,idx)=> b.classList.toggle('active', idx===i)); }
-
-      function snap(animate=true){
-        track.style.transition = animate ? 'transform .35s ease' : 'none';
+      function go(idx, animate=true){
+        i=(idx+slides.length)%slides.length;
+        track.style.transition = animate ? 'transform var(--t) var(--ease)' : 'none';
         track.style.transform = `translateX(${-i*100}%)`;
-        updateDots(); updateThumbs();
-        setThumbPage(pageForIndex(i), false);
+        updateDots(); updateThumbs(); setThumbPage(pageForIndex(i), false);
       }
-      function go(n, animate=true){
-        i = (n + slides.length) % slides.length;
-        snap(animate);
-      }
+      go(0,false);
 
       // Gestos
-      const threshold = () => Math.max(40, el.clientWidth * 0.15);
-      const onDown = (e) => { dragging=true; startX=e.clientX; lastX=e.clientX; track.classList.add('dragging'); track.style.willChange='transform'; track.setPointerCapture?.(e.pointerId); };
-      const onMove = (e) => { if(!dragging) return; lastX=e.clientX; const dx=lastX-startX; track.style.transition='none'; track.style.transform=`translateX(calc(${-i*100}% + ${dx}px))`; e.preventDefault(); };
-      const onUp   = () => { if(!dragging) return; dragging=false; const dx=lastX-startX; track.classList.remove('dragging'); track.style.willChange='auto'; if(Math.abs(dx)>threshold()){ i += dx<0?1:-1; i=(i+slides.length)%slides.length; } snap(false); };
+      const threshold = () => Math.max(40, root.clientWidth*0.12);
+      const onStart = x => { dragging=true; startX=x; currentX=x; startTime=Date.now(); track.style.transition='none'; track.classList.add('dragging'); };
+      const onMove  = x => { if(!dragging) return; currentX=x; const dx=currentX-startX; track.style.transform=`translateX(calc(${-i*100}% + ${dx}px))`; };
+      const onEnd   = () => {
+        if(!dragging) return; dragging=false;
+        const dx=currentX-startX, dt=Date.now()-startTime; track.classList.remove('dragging');
+        const swipe = (Math.abs(dx)>threshold()) || (Math.abs(dx)>30 && dt<200);
+        if(swipe){ i += dx<0 ? 1 : -1; }
+        go(i,false);
+      };
+      root.addEventListener('touchstart',e=>onStart(e.changedTouches[0].clientX),{passive:true});
+      root.addEventListener('touchmove', e=>onMove(e.changedTouches[0].clientX),{passive:true});
+      root.addEventListener('touchend',  onEnd,{passive:true});
+      root.addEventListener('mousedown', e=>{ e.preventDefault(); onStart(e.clientX); });
+      window.addEventListener('mousemove',e=>onMove(e.clientX));
+      window.addEventListener('mouseup',onEnd);
 
-      track.addEventListener('pointerdown', onDown, {passive:false});
-      window.addEventListener('pointermove', onMove, {passive:false});
-      window.addEventListener('pointerup', onUp, {passive:false});
-      window.addEventListener('pointercancel', onUp, {passive:false});
-      slides.forEach(img => img.draggable = false);
+      setThumbPage(0,false);
 
-      // Nav thumbs
-      navPrev.addEventListener('click', ()=> setThumbPage(thumbPage-1, true));
-      navNext.addEventListener('click', ()=> setThumbPage(thumbPage+1, true));
-
-      window.addEventListener('resize', ()=> {
-        const prevPer = perPage;
-        recalc();
-        if (prevPer !== perPage) {
-          setThumbPage(pageForIndex(i), false);
-        } else {
-          setThumbPage(thumbPage, false);
-        }
-      }, {passive:true});
-
-      // Init
-      setThumbPage(0, false);
-      snap(false);
-
-      return { tick(){ if(!dragging && slides.length>1) go(i+1, true); } };
+      return { tick(){ if(!dragging && slides.length>1) go(i+1,true); } };
     }
 
     const heroCarousel = makeCarousel(
@@ -452,19 +479,19 @@
       document.getElementById('heroThumbs')
     );
 
-    // Testimonios (4 s)
+    // Testimonios
     const tSlides = [...document.querySelectorAll('#tList .t-slide')];
-    let tIdx = 0;
+    let tIdx=0;
     function tickTestimonials(){
       if(!tSlides.length) return;
       tSlides.forEach(s=>s.classList.remove('active'));
       tSlides[tIdx].classList.add('active');
-      tIdx = (tIdx + 1) % tSlides.length;
+      tIdx=(tIdx+1)%tSlides.length;
     }
     tSlides.forEach((s,idx)=>s.classList.toggle('active', idx===0));
 
-    // Ticker global 4 s (sincroniza carrusel + testimonios)
-    setInterval(()=>{ if(document.hidden) return; heroCarousel.tick(); tickTestimonials(); }, 4000);
+    // Ticker global sincronizado: 6 s (carrusel + testimonios)
+    setInterval(()=>{ if(document.hidden) return; heroCarousel.tick(); tickTestimonials(); }, 6000);
   </script>
 
   <!-- Legal -->
