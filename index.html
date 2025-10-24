@@ -50,7 +50,7 @@
       --cta:#ff6a00; --cta-hover:#e85f00;
 
       /* Paleta ÚNICA en ROJO */
-      --red:#e11d48;   /* puedes ajustar este tono si quieres */
+      --red:#e11d48;
       --c1: var(--red);
       --c2: var(--red);
       --c3: var(--red);
@@ -59,7 +59,6 @@
       --shadow-soft: 0 1px 2px rgba(0,0,0,.05), 0 6px 20px rgba(0,0,0,.06);
       --shadow-med: 0 10px 24px rgba(0,0,0,.10);
       --shadow-deep: 0 18px 60px rgba(0,0,0,.18);
-      /* Glow en rojo */
       --glow: 0 0 0 1px rgba(255,255,255,.16), 0 10px 30px rgba(225,29,72,.25), 0 0 40px rgba(225,29,72,.18);
 
       --vh:1vh;
@@ -75,8 +74,8 @@
       --rcw: 200px;
 
       /* iOS safe-areas */
-      --sat: env(safe-area-inset-top, 0px);    /* TOP  */
-      --sab: env(safe-area-inset-bottom, 0px); /* BOTTOM */
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
     }
     @media (max-width: 768px){
       :root{ --header-h: 84px; --logo-h: 64px; --trustbar-h: 0px; --rcw: 140px; }
@@ -127,7 +126,7 @@
       width:100%; box-shadow: var(--shadow-soft);
       /* Rellena zona segura superior para que no quede hueco blanco */
       padding-top: var(--sat);
-      transform: translateZ(0); /* evita seams de composición en iOS */
+      transform: translateZ(0);
       background-clip: padding-box;
     }
     header.scrolled{box-shadow: var(--shadow-med)}
@@ -163,8 +162,7 @@
     @media (max-width:420px){ .brand span{ max-width:46vw; } }
 
     .accent-line{
-      position:absolute; 
-      /* sitúa la línea justo debajo del safe-area */
+      position:absolute;
       top: var(--sat);
       left:0; right:0; height:2px; z-index:80;
       background: linear-gradient(90deg, var(--c1), var(--c4), var(--c2), var(--c3), var(--c1));
@@ -243,7 +241,7 @@
     .hero::before{
       content:""; position:absolute; inset:-10% -10% -30% -10%;
       background: radial-gradient(140% 60% at 50% 0%, rgba(0,0,0,.35), rgba(0,0,0,.5));
-      z-index:1; pointer-events:none; 
+      z-index:1; pointer-events:none;
       mask: linear-gradient(180deg,#000 70%, transparent);
     }
     .hero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:0;transition:opacity var(--t) var(--ease);background:#000}
@@ -261,8 +259,7 @@
     .hero .cta-inline{display:flex;justify-content:center;margin-top:10px}
 
     /* CTA */
-    .cta-btn{
-      position:relative; display:inline-flex;align-items:center;gap:10px;
+    .cta-btn{ position:relative; display:inline-flex;align-items:center;gap:10px;
       min-height:58px;padding:14px 28px;border-radius:999px;
       font-weight:900;text-transform:uppercase;letter-spacing:.06em;font-size:1rem;cursor:pointer;
       color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.25);
@@ -274,7 +271,6 @@
       transition:transform .18s var(--ease), box-shadow .18s var(--ease), filter .18s var(--ease);
       border: none; isolation:isolate; overflow:hidden;
     }
-    /* Borde/halo del CTA en ROJO */
     .cta-btn::before{
       content:""; position:absolute; inset:0; border-radius:inherit; padding:1.6px;
       background: conic-gradient(from 0deg, rgba(225,29,72,.95) 0deg, rgba(225,29,72,.95) 360deg);
@@ -292,7 +288,7 @@
       background: radial-gradient(circle, rgba(255,255,255,.55), rgba(255,255,255,0) 60%); animation: ripple .7s var(--ease); width: 12px; height: 12px; opacity:.85;}
     @keyframes ripple{ to { transform:translate(-50%,-50%) scale(22); opacity:0; } }
 
-    /* Títulos de sección (gradientes ahora en rojo) */
+    /* Títulos de sección */
     .pagos h2, .testimonios h2, .legal h2{
       font-family:var(--sport-font);
       font-size:clamp(28px,5vw,42px);
@@ -349,25 +345,26 @@
 
     /* ================
        MENÚ MÓVIL SLIDE
+       (se anula más abajo)
        ================ */
     .only-mobile{ display:none; }
     @media (max-width: 768px){
       .trustbar{ display:none !important; }
       .hide-mobile{ display:none; }
 
-      /* Panel ocupa pantalla completa bajo el header (+ safe-area top) */
+      /* Panel ocuparía pantalla... pero lo desactivamos con overrides */
       header .menu{
         position: fixed !important;
-        inset: calc(var(--header-h) + var(--sat)) 0 0 0 !important; /* bajo el header + safe-area */
+        inset: calc(var(--header-h) + var(--sat)) 0 0 0 !important;
         width: auto !important;
-        transform: translateY(100%) !important;     /* oculto por debajo */
+        transform: translateY(100%) !important;
         transition: transform .28s var(--ease) !important;
         background:#fff !important;
         display:flex !important;
         flex-direction:column;
         align-items:stretch;
         gap: 6px;
-        padding: 12px 16px calc(16px + var(--sab)) !important; /* respeta home-bar iOS */
+        padding: 12px 16px calc(16px + var(--sab)) !important;
         border:0 !important;
         border-top:1px solid var(--line) !important;
         box-shadow: 0 20px 40px rgba(0,0,0,.12) !important;
@@ -377,12 +374,11 @@
       }
       header .menu.show{ transform: translateY(0) !important; }
 
-      /* Overlay clicable (creado por JS) */
       .menu-backdrop{
         position: fixed;
-        left: 0; 
+        left: 0;
         top: calc(var(--header-h) + var(--sat));
-        width: 100vw; 
+        width: 100vw;
         height: calc(100vh - var(--header-h) - var(--sat));
         background: rgba(0,0,0,.35);
         opacity: 0; pointer-events: none;
@@ -391,7 +387,6 @@
       }
       .menu-backdrop.show{ opacity: 1; pointer-events: auto; }
 
-      /* Ítems grandes y tocables */
       .menu > a:first-of-type{ margin-left:0 !important; }
       .menu a,
       .menu button{
@@ -404,7 +399,6 @@
       .menu a:hover,
       .menu button:hover{ background: rgba(0,0,0,.05) !important; }
 
-      /* Submenú colapsable dentro del panel */
       .has-submenu{ margin-top: 4px; }
       .submenu{
         position: static !important;
@@ -424,18 +418,8 @@
       .submenu-grid{ display:block !important; }
       .submenu a{ padding: 10px 12px !important; font-size: 1rem !important; }
 
-      /* Mostrar toggle en móvil */
+      /* Mostrar toggle en móvil (pero lo ocultaremos abajo) */
       .menu-toggle{display:flex}
-    }
-
-    @media (prefers-reduced-motion: reduce){
-      .hero video{transition:none}
-      .cta-btn .shine{transition:none}
-      .aurora{animation:none}
-      [data-reveal]{ transition:none }
-    }
-    @media (prefers-reduced-data: reduce){
-      .hero video{display:none}
     }
 
     /* === Tarjetas / Listados === */
@@ -454,7 +438,6 @@
       .card:hover{box-shadow: var(--shadow-med);}
       .card:hover .carousel img{ transform:scale(1.02); }
     }
-    /* Borde-resplandor en ROJO */
     .card::after{
       content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
       background:linear-gradient(120deg,
@@ -511,7 +494,7 @@
       .card-body{ padding:8px 10px 0; }
       .card-bottom{ padding:8px 10px 10px; }
       .title{ font-size:1rem; line-height:1.25; }
-      .price-now{ font-size:1.04rem; } /* FIX del typo */
+      .price-now{ font size:1.04rem; }
       .price-was{ font-size:.92rem; }
       .btn-primary, .btn-whatsapp{ padding:9px 12px; font-size:.92rem; border-radius:12px; }
     }
@@ -578,7 +561,7 @@
     .cmdk .item .type{font-size:12px;color:var(--ink-weak);border:1px solid var(--line);padding:2px 6px;border-radius:999px}
     .cmdk .empty{padding:18px;text-align:center;color:var(--ink-weak)}
 
-    /* Barra de progreso de scroll en header (en rojo por --c1..--c3) */
+    /* Barra de progreso de scroll en header */
     .scroll-progress{
       position:absolute; left:0; bottom:0; height:3px; width:0;
       background: linear-gradient(90deg, var(--c1), var(--c2), var(--c3));
@@ -605,7 +588,6 @@
     html{ color-scheme: light; background:#fff; }
     body{ background:#fff; color:#111315; }
 
-    /* Aunque el usuario tenga dark-mode, forzamos BLANCO */
     @media (prefers-color-scheme: dark){
       :root{ --bg:#ffffff; --ink:#111315; --muted:#676b73; --line:#E6E9EF; }
 
@@ -613,12 +595,25 @@
       .card, .card-media, .feature-card, .testimonios, .legal, .pagos{
         background-color:#ffffff !important; color:#111315 !important;
       }
-
-      /* Fuerza controles y UI del navegador en “light” */
       * { color-scheme: light !important; }
-
       img, video, canvas{ filter:none !important; }
       .accent-line, .scroll-progress{ filter:none !important; }
+    }
+
+    /* =========================================================
+       🔥 ELIMINAR COMPLETAMENTE EL MENÚ EN MÓVIL (≤ 768 px)
+       ========================================================= */
+    @media (max-width: 768px){
+      /* Oculta nav, toggle y overlay */
+      #mainMenu,
+      #menuToggle,
+      .menu-backdrop,
+      .has-submenu,
+      .submenu,
+      .only-mobile { display:none !important; }
+
+      /* Ajusta la rejilla del header a 2 columnas (logo + controles) */
+      .nav{ grid-template-columns: auto 1fr !important; }
     }
   </style>
 </head>
@@ -674,9 +669,11 @@
       </nav>
 
       <div class="right-controls">
+        <!-- Sigue visible en móvil: buscador (no es parte del menú) -->
         <button id="searchLaunch" class="search-launch" aria-label="Buscar en SCOOT SHOP">
           <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><span class="hide-mobile"> Buscar</span> <span class="hide-mobile" style="opacity:.6">⌘K</span>
         </button>
+        <!-- Botón hamburguesa (oculto en móvil por CSS arriba) -->
         <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-controls="mainMenu" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>
@@ -1094,7 +1091,7 @@
     function setVh(){ document.documentElement.style.setProperty('--vh',(window.innerHeight*0.01)+'px'); }
     setVh(); window.addEventListener('resize', setVh, {passive:true}); window.addEventListener('orientationchange', setVh, {passive:true});
 
-    // ===== Menú hamburguesa + accesibilidad (vertical bajo header)
+    // ===== Menú hamburguesa + accesibilidad
     const toggle = document.getElementById('menuToggle');
     const menu   = document.getElementById('mainMenu');
 
@@ -1106,7 +1103,6 @@
       document.body.appendChild(backdrop);
     }
 
-    // Focus-trap dentro del panel
     const focusableSelectors = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
     let lastFocusedEl = null;
 
@@ -1144,22 +1140,22 @@
       if(lastFocusedEl) lastFocusedEl.focus();
     }
 
-    toggle.addEventListener('click', () => {
-      menu.classList.contains('show') ? closeMenu() : openMenu();
-    });
+    if (toggle) {
+      toggle.addEventListener('click', () => {
+        menu.classList.contains('show') ? closeMenu() : openMenu();
+      });
+    }
 
-    // Cerrar al navegar por un enlace del panel
     menu.querySelectorAll('a').forEach(a=> a.addEventListener('click', closeMenu));
-    // Cerrar con Escape
     window.addEventListener('keydown', e=>{ if(e.key==='Escape') closeMenu(); }, {passive:true});
 
-    // Submenú
+    // Submenú (sigue activo en escritorio)
     const submenuWrap = document.querySelector('.has-submenu');
     const submenuBtn  = document.getElementById('submenuBtn');
-    const closeSubmenu=()=>{ submenuWrap.classList.remove('open'); submenuBtn.setAttribute('aria-expanded','false'); }
-    submenuBtn.addEventListener('click', (e) => { e.preventDefault(); const isOpen = submenuWrap.classList.toggle('open'); submenuBtn.setAttribute('aria-expanded', String(isOpen)); });
-    document.addEventListener('click', (e) => { if(!submenuWrap.contains(e.target) && e.target!==submenuBtn) closeSubmenu(); });
-    submenuBtn.addEventListener('keydown', (e) => { if(e.key==='Escape') { closeSubmenu(); submenuBtn.focus(); }});
+    const closeSubmenu=()=>{ submenuWrap && submenuWrap.classList.remove('open'); submenuBtn && submenuBtn.setAttribute('aria-expanded','false'); }
+    submenuBtn && submenuBtn.addEventListener('click', (e) => { e.preventDefault(); const isOpen = submenuWrap.classList.toggle('open'); submenuBtn.setAttribute('aria-expanded', String(isOpen)); });
+    document.addEventListener('click', (e) => { if(submenuWrap && !submenuWrap.contains(e.target) && e.target!==submenuBtn) closeSubmenu(); });
+    submenuBtn && submenuBtn.addEventListener('keydown', (e) => { if(e.key==='Escape') { closeSubmenu(); submenuBtn.focus(); }});
 
     // Reservar espacio para controles de la derecha
     const rightControls = document.querySelector('.right-controls');
@@ -1196,7 +1192,6 @@
       const cardEl = c.closest('.card');
       let i=0, dragging=false, startX=0, currentX=0, startTime=0;
 
-      // Dots (3 anclas)
       const dotsWrap = document.createElement('div');
       dotsWrap.className='carousel-dots';
       const dots=[];
@@ -1355,7 +1350,6 @@
     }, {passive:false});
     launch.addEventListener('click', openCmdk);
 
-    // Abrir buscador desde el ítem del panel móvil
     const menuSearchMobile = document.getElementById('menuSearchMobile');
     if(menuSearchMobile){
       menuSearchMobile.addEventListener('click', ()=>{ closeMenu(); openCmdk(); });
@@ -1364,68 +1358,6 @@
     cmdk.addEventListener('click',e=>{ if(e.target===cmdk) closeCmdk(); });
     input.addEventListener('input', e=>renderResults(e.target.value));
     renderResults('');
-
-    // CTA Series GT: ripple + scroll suave (ajustado a safe-area-top)
-    (function(){
-      const cta = document.getElementById('ctaSeriesGT');
-      if(!cta) return;
-      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-      cta.addEventListener('mousedown', (ev)=>{
-        cta.classList.add('press');
-        const r = document.createElement('span');
-        r.className = 'ripple';
-        const rect = cta.getBoundingClientRect();
-        r.style.left = (ev.clientX - rect.left) + 'px';
-        r.style.top  = (ev.clientY - rect.top)  + 'px';
-        cta.appendChild(r);
-        setTimeout(()=> r.remove(), 700);
-        const shine = cta.querySelector('.shine');
-        if(shine){
-          shine.style.transition='none';
-          shine.style.transform='rotate(25deg) translateX(-120%)';
-          requestAnimationFrame(()=>{ shine.style.transition='transform .9s cubic-bezier(.22,.61,.36,1)'; shine.style.transform='rotate(25deg) translateX(260%)'; });
-        }
-      });
-      ['mouseup','mouseleave','blur'].forEach(ev => cta.addEventListener(ev, ()=> cta.classList.remove('press')));
-
-      function getOffsets(){
-        const cs = getComputedStyle(document.documentElement);
-        const h  = parseFloat(cs.getPropertyValue('--header-h')) || 0;
-        const tb = parseFloat(cs.getPropertyValue('--trustbar-h')) || 0;
-        const sat = parseFloat(cs.getPropertyValue('--sat')) || 0; // SAFE-AREA TOP
-        return h + tb + sat + 12;
-      }
-      function easeInOutCubic(t){ return t<0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2; }
-      function scrollToEl(el, duration=1100){
-        const startY = window.pageYOffset;
-        const theRect = el.getBoundingClientRect();
-        const targetY= theRect.top + startY - getOffsets();
-        const delta  = targetY - startY;
-        const startT = performance.now();
-        function step(now){
-          const t = Math.min(1, (now - startT) / duration);
-          const eased = easeInOutCubic(t);
-          window.scrollTo(0, startY + delta * eased);
-          if(t < 1) requestAnimationFrame(step);
-          else {
-            history.pushState(null,'','#series-g');
-            const sec = document.getElementById('series-g');
-            if(sec) sec.setAttribute('tabindex','-1'), sec.focus({preventScroll:true});
-          }
-        }
-        requestAnimationFrame(step);
-      }
-      function handleActivate(e){
-        e.preventDefault();
-        const target = document.getElementById('series-g');
-        if(!target){ window.location.hash = '#series-g'; return; }
-        if(prefersReduced){ target.scrollIntoView({behavior:'smooth', block:'start'}); return; }
-        scrollToEl(target, 1100);
-      }
-      cta.addEventListener('click', handleActivate);
-      cta.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ handleActivate(e); } });
-    })();
 
     // ===== Scroll progress + botón toTop =====
     (function(){
@@ -1444,7 +1376,7 @@
       if(toTop){ toTop.addEventListener('click', ()=> window.scrollTo({top:0, behavior:'smooth'})); }
     })();
 
-    // ===== HERO VIDEO ready (para iOS/Android) =====
+    // ===== HERO VIDEO ready =====
     (function(){
       const hv = document.getElementById('heroVideo');
       if(!hv) return;
