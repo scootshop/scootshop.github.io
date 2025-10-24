@@ -2,7 +2,11 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Ocupa la zona segura en iOS para evitar la línea blanca -->
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  />
   <title>SCOOT SHOP — Scooters eléctricos</title>
   <meta name="description" content="Scooters eléctricos fiables y potentes. Envío 6–8 días, pago seguro y garantía 70 km por producto." />
 
@@ -44,11 +48,20 @@
       --bg:#ffffff; --ink:#111315; --muted:#676b73; --line:#E6E9EF; --ink-weak:#6b7280;
       --primary:#b91e1e; --ok:#1ebe5d;
       --cta:#ff6a00; --cta-hover:#e85f00;
-      --c1:#ff6a00; --c2:#61e7ff; --c3:#9b66ff; --c4:#ffd067;
+
+      /* Paleta ÚNICA en ROJO */
+      --red:#e11d48;   /* puedes ajustar este tono si quieres */
+      --c1: var(--red);
+      --c2: var(--red);
+      --c3: var(--red);
+      --c4: var(--red);
+
       --shadow-soft: 0 1px 2px rgba(0,0,0,.05), 0 6px 20px rgba(0,0,0,.06);
       --shadow-med: 0 10px 24px rgba(0,0,0,.10);
       --shadow-deep: 0 18px 60px rgba(0,0,0,.18);
-      --glow: 0 0 0 1px rgba(255,255,255,.16), 0 10px 30px rgba(97,231,255,.25), 0 0 40px rgba(155,102,255,.18);
+      /* Glow en rojo */
+      --glow: 0 0 0 1px rgba(255,255,255,.16), 0 10px 30px rgba(225,29,72,.25), 0 0 40px rgba(225,29,72,.18);
+
       --vh:1vh;
       --ease: cubic-bezier(.22,.61,.36,1);
       --t: 300ms;
@@ -61,8 +74,9 @@
       /* ancho dinámico reservado para controles derechos (JS lo ajusta) */
       --rcw: 200px;
 
-      /* iOS safe-area bottom */
-      --sab: env(safe-area-inset-bottom, 0px);
+      /* iOS safe-areas */
+      --sat: env(safe-area-inset-top, 0px);    /* TOP  */
+      --sab: env(safe-area-inset-bottom, 0px); /* BOTTOM */
     }
     @media (max-width: 768px){
       :root{ --header-h: 84px; --logo-h: 64px; --trustbar-h: 0px; --rcw: 140px; }
@@ -70,20 +84,27 @@
 
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%}
+
+    /* Fuerza color-scheme light en TODO (navegador, inputs, etc.) */
+    html, body, button, input, select, textarea, dialog, [role="dialog"]{
+      color-scheme: light !important;
+    }
+
     body{
       font-family:var(--ui);
       background:var(--bg);color:var(--ink);line-height:1.55;overflow-x:hidden;scroll-behavior:smooth;
-      padding-top: calc(var(--header-h) + var(--trustbar-h));
+      /* +safe-area TOP para eliminar línea blanca en iOS */
+      padding-top: calc(var(--header-h) + var(--trustbar-h) + var(--sat));
       -webkit-tap-highlight-color: transparent;
     }
     img{max-width:100%;display:block}
     a{text-decoration:none;color:inherit}
     .container{width:min(1200px,100%);padding-inline:clamp(16px,4vw,28px);margin-inline:auto}
-    :target{scroll-margin-top: calc(var(--header-h) + var(--trustbar-h) + 18px)}
+    :target{scroll-margin-top: calc(var(--header-h) + var(--trustbar-h) + var(--sat) + 18px)}
     .hide-mobile{display:inline}
     :focus-visible{outline:3px solid rgba(34,197,94,.6); outline-offset:2px; border-radius:10px}
 
-    /* Aurora */
+    /* Aurora (ahora en tonos rojos por --c1..--c4) */
     .aurora{
       position:fixed; inset:-15vmax -15vmax auto -15vmax; height:70vmax; z-index:-2;
       filter: blur(70px) saturate(130%); opacity:.42; pointer-events:none;
@@ -101,9 +122,13 @@
     header{
       position:fixed; inset:0 auto auto 0; z-index:70;
       background:rgba(255,255,255,.82); backdrop-filter:blur(12px) saturate(120%); -webkit-backdrop-filter:blur(12px) saturate(120%);
-      border-bottom:1px solid rgba(255,255,255,.35);
+      border-bottom:1px solid rgba(0,0,0,.06);
       transition:border-color var(--t) var(--ease), background var(--t) var(--ease), box-shadow var(--t) var(--ease);
       width:100%; box-shadow: var(--shadow-soft);
+      /* Rellena zona segura superior para que no quede hueco blanco */
+      padding-top: var(--sat);
+      transform: translateZ(0); /* evita seams de composición en iOS */
+      background-clip: padding-box;
     }
     header.scrolled{box-shadow: var(--shadow-med)}
 
@@ -138,7 +163,10 @@
     @media (max-width:420px){ .brand span{ max-width:46vw; } }
 
     .accent-line{
-      position:absolute; top:0; left:0; right:0; height:2px; z-index:80;
+      position:absolute; 
+      /* sitúa la línea justo debajo del safe-area */
+      top: var(--sat);
+      left:0; right:0; height:2px; z-index:80;
       background: linear-gradient(90deg, var(--c1), var(--c4), var(--c2), var(--c3), var(--c1));
       background-size: 300% 100%;
       animation: sweep 18s linear infinite; opacity:.95;
@@ -151,6 +179,7 @@
     .menu{
       justify-self:center; display:flex;gap:16px;align-items:center;font-weight:800;text-transform:uppercase;font-size:.9rem;position:relative;
       white-space:nowrap; min-width:0;
+      /* reserva ancho para controles derechas */
       padding-right: calc(var(--rcw) + 12px);
     }
     .menu > a:first-of-type{ margin-left: clamp(16px, 4.8vw, 72px); }
@@ -245,8 +274,10 @@
       transition:transform .18s var(--ease), box-shadow .18s var(--ease), filter .18s var(--ease);
       border: none; isolation:isolate; overflow:hidden;
     }
-    .cta-btn::before{content:""; position:absolute; inset:0; border-radius:inherit; padding:1.6px;
-      background: conic-gradient(from 220deg, rgba(255,255,255,.85) 0deg, rgba(97,231,255,.9) 80deg, rgba(155,102,255,.9) 160deg, rgba(255,106,0,.95) 240deg, rgba(255,255,255,.85) 360deg);
+    /* Borde/halo del CTA en ROJO */
+    .cta-btn::before{
+      content:""; position:absolute; inset:0; border-radius:inherit; padding:1.6px;
+      background: conic-gradient(from 0deg, rgba(225,29,72,.95) 0deg, rgba(225,29,72,.95) 360deg);
       -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
       -webkit-mask-composite: xor; mask-composite: exclude; opacity:.85; z-index:-1; filter: blur(.2px);
     }
@@ -261,7 +292,7 @@
       background: radial-gradient(circle, rgba(255,255,255,.55), rgba(255,255,255,0) 60%); animation: ripple .7s var(--ease); width: 12px; height: 12px; opacity:.85;}
     @keyframes ripple{ to { transform:translate(-50%,-50%) scale(22); opacity:0; } }
 
-    /* Títulos de sección */
+    /* Títulos de sección (gradientes ahora en rojo) */
     .pagos h2, .testimonios h2, .legal h2{
       font-family:var(--sport-font);
       font-size:clamp(28px,5vw,42px);
@@ -324,10 +355,10 @@
       .trustbar{ display:none !important; }
       .hide-mobile{ display:none; }
 
-      /* Panel ocupa pantalla completa bajo el header */
+      /* Panel ocupa pantalla completa bajo el header (+ safe-area top) */
       header .menu{
         position: fixed !important;
-        inset: var(--header-h) 0 0 0 !important;    /* bajo el header */
+        inset: calc(var(--header-h) + var(--sat)) 0 0 0 !important; /* bajo el header + safe-area */
         width: auto !important;
         transform: translateY(100%) !important;     /* oculto por debajo */
         transition: transform .28s var(--ease) !important;
@@ -336,7 +367,7 @@
         flex-direction:column;
         align-items:stretch;
         gap: 6px;
-        padding: 12px 16px calc(16px + var(--sab)) !important;
+        padding: 12px 16px calc(16px + var(--sab)) !important; /* respeta home-bar iOS */
         border:0 !important;
         border-top:1px solid var(--line) !important;
         box-shadow: 0 20px 40px rgba(0,0,0,.12) !important;
@@ -349,8 +380,10 @@
       /* Overlay clicable (creado por JS) */
       .menu-backdrop{
         position: fixed;
-        left: 0; top: var(--header-h);
-        width: 100vw; height: calc(100vh - var(--header-h));
+        left: 0; 
+        top: calc(var(--header-h) + var(--sat));
+        width: 100vw; 
+        height: calc(100vh - var(--header-h) - var(--sat));
         background: rgba(0,0,0,.35);
         opacity: 0; pointer-events: none;
         transition: opacity var(--t) var(--ease);
@@ -421,10 +454,16 @@
       .card:hover{box-shadow: var(--shadow-med);}
       .card:hover .carousel img{ transform:scale(1.02); }
     }
-    .card::after{content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
-      background:linear-gradient(120deg, rgba(97,231,255,.18), rgba(155,102,255,.12) 60%, rgba(255,106,0,.14));
+    /* Borde-resplandor en ROJO */
+    .card::after{
+      content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+      background:linear-gradient(120deg,
+                 rgba(225,29,72,.18),
+                 rgba(225,29,72,.12) 60%,
+                 rgba(225,29,72,.14));
       -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-      -webkit-mask-composite: xor; mask-composite: exclude; padding:1px; opacity:.7;}
+      -webkit-mask-composite: xor; mask-composite: exclude; padding:1px; opacity:.7;
+    }
     .card-top{display:flex; align-items:center; justify-content:space-between; padding:8px 10px 0 10px; gap:8px;}
     .verified{display:flex;align-items:center;gap:6px;font-size:.84rem;font-weight:800;color:var(--ink-weak)}
     .verified i{color:var(--ok)}
@@ -472,7 +511,7 @@
       .card-body{ padding:8px 10px 0; }
       .card-bottom{ padding:8px 10px 10px; }
       .title{ font-size:1rem; line-height:1.25; }
-      .price-now{ font-size:1.04rem; }
+      .price-now{ font-size:1.04rem; } /* FIX del typo */
       .price-was{ font-size:.92rem; }
       .btn-primary, .btn-whatsapp{ padding:9px 12px; font-size:.92rem; border-radius:12px; }
     }
@@ -481,7 +520,7 @@
     @media (max-width: 640px){
       .grid{ grid-template-columns: 1fr; gap: 14px; }
       .card{ border-radius:16px; transform:none !important; }
-      .card-top{ display:none !important; } /* franja verificado/oferta oculta en móvil */
+      .card-top{ display:none !important; }
       .card-top *{ display:none !important; }
       .card-media{ margin:8px 8px 0 8px; aspect-ratio: 16/10; }
       .card-body{ padding:10px 12px 0; }
@@ -523,7 +562,7 @@
     .pagos-logos i{color:var(--ink); filter: drop-shadow(0 8px 18px rgba(0,0,0,.08));}
     footer{text-align:center;padding:18px;color:var(--muted)}
 
-    .wa-fab{display:flex; position:fixed;bottom:16px;right:16px;background:#25d366;color:#fff;border-radius:50%;
+    .wa-fab{display:flex; position:fixed;bottom:calc(16px + var(--sab));right:16px;background:#25d366;color:#fff;border-radius:50%;
       width:56px;height:56px;align-items:center;justify-content:center;font-size:28px; box-shadow:0 16px 40px rgba(0,0,0,.35);z-index:300}
 
     /* Spotlight (⌘K) */
@@ -539,7 +578,7 @@
     .cmdk .item .type{font-size:12px;color:var(--ink-weak);border:1px solid var(--line);padding:2px 6px;border-radius:999px}
     .cmdk .empty{padding:18px;text-align:center;color:var(--ink-weak)}
 
-    /* Barra de progreso de scroll en header */
+    /* Barra de progreso de scroll en header (en rojo por --c1..--c3) */
     .scroll-progress{
       position:absolute; left:0; bottom:0; height:3px; width:0;
       background: linear-gradient(90deg, var(--c1), var(--c2), var(--c3));
@@ -550,7 +589,7 @@
 
     /* Botón toTop */
     .to-top{
-      position:fixed; right:16px; bottom:16px;
+      position:fixed; right:16px; bottom:calc(16px + var(--sab));
       width:48px; height:48px; border-radius:50%;
       display:grid; place-items:center;
       background:#111; color:#fff; border:0;
@@ -565,15 +604,19 @@
        ======================= */
     html{ color-scheme: light; background:#fff; }
     body{ background:#fff; color:#111315; }
+
+    /* Aunque el usuario tenga dark-mode, forzamos BLANCO */
     @media (prefers-color-scheme: dark){
       :root{ --bg:#ffffff; --ink:#111315; --muted:#676b73; --line:#E6E9EF; }
-      body, header, .trustbar, .menu, .submenu, .cmdk .panel,
+
+      html, body, header, .trustbar, .menu, .submenu, .cmdk .panel,
       .card, .card-media, .feature-card, .testimonios, .legal, .pagos{
         background-color:#ffffff !important; color:#111315 !important;
       }
-      input, select, textarea, button{
-        background:#ffffff !important; color:#111315 !important; border-color: var(--line) !important;
-      }
+
+      /* Fuerza controles y UI del navegador en “light” */
+      * { color-scheme: light !important; }
+
       img, video, canvas{ filter:none !important; }
       .accent-line, .scroll-progress{ filter:none !important; }
     }
@@ -1322,7 +1365,7 @@
     input.addEventListener('input', e=>renderResults(e.target.value));
     renderResults('');
 
-    // CTA Series GT: ripple + scroll suave
+    // CTA Series GT: ripple + scroll suave (ajustado a safe-area-top)
     (function(){
       const cta = document.getElementById('ctaSeriesGT');
       if(!cta) return;
@@ -1350,7 +1393,8 @@
         const cs = getComputedStyle(document.documentElement);
         const h  = parseFloat(cs.getPropertyValue('--header-h')) || 0;
         const tb = parseFloat(cs.getPropertyValue('--trustbar-h')) || 0;
-        return h + tb + 12;
+        const sat = parseFloat(cs.getPropertyValue('--sat')) || 0; // SAFE-AREA TOP
+        return h + tb + sat + 12;
       }
       function easeInOutCubic(t){ return t<0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2; }
       function scrollToEl(el, duration=1100){
