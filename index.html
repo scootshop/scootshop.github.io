@@ -3,10 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <!-- Ocupa la zona segura en iOS para evitar la línea blanca -->
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover"
-  />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>SCOOT SHOP — Scooters eléctricos</title>
   <meta name="description" content="Scooters eléctricos fiables y potentes. Envío 6–8 días, pago seguro y garantía 70 km por producto." />
 
@@ -29,7 +26,7 @@
   <meta name="twitter:card" content="summary_large_image" />
 
   <!-- Rendimiento -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 
@@ -293,7 +290,7 @@
       font-family:var(--sport-font);
       font-size:clamp(28px,5vw,42px);
       margin-bottom:12px;
-      background: linear-gradient(90deg, var(--c1), var(--c4), var(--c2), var(--c3));
+      background: linear-gradient(90deg, #131212, #cf0d0d, #111);
       -webkit-background-clip: text; background-clip:text; color:transparent;
       letter-spacing:.05em;
     }
@@ -303,7 +300,7 @@
       margin-bottom:12px; color: var(--primary); letter-spacing:.05em;
     }
     #series-g h2{
-      background: linear-gradient(90deg, var(--c1), var(--c4), var(--c2), var(--c3)) !important;
+      background: linear-gradient(90deg, #b90000, #b90000, var(--c3)) !important;
       -webkit-background-clip: text !important; background-clip: text !important; color: transparent !important;
     }
     .series{padding:46px 0;text-align:center}
@@ -352,7 +349,6 @@
       .trustbar{ display:none !important; }
       .hide-mobile{ display:none; }
 
-      /* Panel ocuparía pantalla... pero lo desactivamos con overrides */
       header .menu{
         position: fixed !important;
         inset: calc(var(--header-h) + var(--sat)) 0 0 0 !important;
@@ -494,7 +490,7 @@
       .card-body{ padding:8px 10px 0; }
       .card-bottom{ padding:8px 10px 10px; }
       .title{ font-size:1rem; line-height:1.25; }
-      .price-now{ font size:1.04rem; }
+      .price-now{ font-size:1.04rem; } /* <-- bug corregido */
       .price-was{ font-size:.92rem; }
       .btn-primary, .btn-whatsapp{ padding:9px 12px; font-size:.92rem; border-radius:12px; }
     }
@@ -564,7 +560,7 @@
     /* Barra de progreso de scroll en header */
     .scroll-progress{
       position:absolute; left:0; bottom:0; height:3px; width:0;
-      background: linear-gradient(90deg, var(--c1), var(--c2), var(--c3));
+      background: linear-gradient(90deg, #b90000, #b90000, var(--c3));
       box-shadow: 0 1px 0 rgba(0,0,0,.06);
       border-bottom-left-radius:2px; border-bottom-right-radius:2px;
       z-index: 120;
@@ -633,7 +629,7 @@
 
       <nav id="mainMenu" class="menu" aria-label="Navegación principal">
         <!-- (Opcional) Buscador dentro del panel en móvil -->
-        <button class="only-mobile nav-link" id="menuSearchMobile"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>Buscar</button>
+        
 
         <a href="#"><i class="fas fa-home" aria-hidden="true"></i>Inicio</a>
         <div class="has-submenu">
@@ -650,7 +646,7 @@
               <div class="submenu-col">
                 <div class="submenu-head">Series GT</div>
                 <a href="#p-g5" role="menuitem">G2 Urban — Potencia</a>
-                <a href="#p-g7" role="menuitem">T10 URBANs — Ultra</a>
+                <a href="#p-g7" role="menuitem">T10 URBAN — Ultra</a>
               </div>
               <div class="submenu-col">
                 <div class="submenu-head">Serie IX</div>
@@ -777,9 +773,9 @@
           </div>
         </div>
         <div class="card-bottom">
-          <div class="price-row">
-            <div class="price-now" aria-label="Precio actual">215 €</div>
-            <div class="price-was" aria-label="Precio anterior">387,50 €</div>
+          <div class="price-row" aria-label="Precio N7PRO">
+            <div class="price-now" aria-label="Precio actual N7PRO">215 €</div>
+            <div class="price-was" aria-label="Precio anterior N7PRO">387,50 €</div>
           </div>
           <a class="more-link" href="n7pro.html">Más información</a>
           <div class="btn-row">
@@ -819,7 +815,7 @@
           </div>
         </div>
         <div class="card-bottom">
-          <div class="price-row">
+          <div class="price-row" aria-label="Precio N7MAX">
             <div class="price-now">375 €</div>
             <div class="price-was">937,50 €</div>
           </div>
@@ -867,7 +863,7 @@
           </div>
         </div>
         <div class="card-bottom">
-          <div class="price-row">
+          <div class="price-row" aria-label="Precio G2">
             <div class="price-now">380 €</div>
             <div class="price-was">780 €</div>
           </div>
@@ -903,7 +899,7 @@
           </div>
         </div>
         <div class="card-bottom">
-          <div class="price-row">
+          <div class="price-row" aria-label="Precio T10">
             <div class="price-now">450 €</div>
             <div class="price-was">850 €</div>
           </div>
@@ -953,7 +949,7 @@
           </div>
         </div>
         <div class="card-bottom">
-          <div class="price-row">
+          <div class="price-row" aria-label="Precio IX3">
             <div class="price-now">380 €</div>
             <div class="price-was">850 €</div>
           </div>
@@ -1043,7 +1039,7 @@
       <div class="pagos-logos" aria-label="Métodos de pago">
         <i class="fab fa-paypal" title="PayPal" aria-hidden="true"></i>
         <i class="fas fa-piggy-bank" title="Transferencia bancaria" aria-hidden="true"></i>
-        <i class="fas fa-mobile-alt" title="Bizum" aria-hidden="true"></i>
+        <i class="fas fa-mobile-screen" title="Bizum" aria-hidden="true"></i>
         <i class="fas fa-store" title="Wallapop" aria-hidden="true"></i>
         <i class="fas fa-shirt" title="Vinted" aria-hidden="true"></i>
       </div>
@@ -1146,7 +1142,9 @@
       });
     }
 
-    menu.querySelectorAll('a').forEach(a=> a.addEventListener('click', closeMenu));
+    if (menu) {
+      menu.querySelectorAll('a').forEach(a=> a.addEventListener('click', closeMenu));
+    }
     window.addEventListener('keydown', e=>{ if(e.key==='Escape') closeMenu(); }, {passive:true});
 
     // Submenú (sigue activo en escritorio)
