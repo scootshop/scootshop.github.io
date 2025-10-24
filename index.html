@@ -178,13 +178,15 @@
     }
     .search-launch{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:rgba(255,255,255,.5);border-radius:12px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow:var(--shadow-soft)}
     .search-launch i.fa-magnifying-glass{ font-size:18px; color:currentColor; opacity:1; visibility:visible; }
+
+    /* Botón hamburguesa */
     .menu-toggle{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;width:28px;height:22px;justify-content:center}
     .menu-toggle span{display:block;width:100%;height:3px;background:var(--ink);border-radius:2px;transition:transform var(--t) var(--ease), opacity var(--t) var(--ease)}
     .menu-toggle.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
     .menu-toggle.active span:nth-child(2){opacity:0}
     .menu-toggle.active span:nth-child(3){transform:rotate(-45deg) translate(6px,-6px)}
 
-    /* Submenú */
+    /* Submenú (desktop) */
     .has-submenu{position:relative}
     .submenu-toggle.nav-link{display:flex;align-items:center;gap:8px}
     .submenu-toggle .chevron{font-size:14px;transition:transform var(--t) var(--ease)}
@@ -314,9 +316,10 @@
     }
     .f-icon i{ font-size:18px; }
 
-    /* ============================
-       MENÚ MÓVIL VERTICAL (SLIDE)
-       ============================ */
+    /* ================
+       MENÚ MÓVIL SLIDE
+       ================ */
+    .only-mobile{ display:none; }
     @media (max-width: 768px){
       .trustbar{ display:none !important; }
       .hide-mobile{ display:none; }
@@ -343,7 +346,7 @@
       }
       header .menu.show{ transform: translateY(0) !important; }
 
-      /* Overlay clicable (creado como nodo .menu-backdrop) */
+      /* Overlay clicable (creado por JS) */
       .menu-backdrop{
         position: fixed;
         left: 0; top: var(--header-h);
@@ -356,7 +359,6 @@
       .menu-backdrop.show{ opacity: 1; pointer-events: auto; }
 
       /* Ítems grandes y tocables */
-      .menu{ padding-right: 0 !important; }
       .menu > a:first-of-type{ margin-left:0 !important; }
       .menu a,
       .menu button{
@@ -369,7 +371,7 @@
       .menu a:hover,
       .menu button:hover{ background: rgba(0,0,0,.05) !important; }
 
-      /* Submenú colapsable */
+      /* Submenú colapsable dentro del panel */
       .has-submenu{ margin-top: 4px; }
       .submenu{
         position: static !important;
@@ -388,9 +390,6 @@
       .submenu::before{ display:none !important; }
       .submenu-grid{ display:block !important; }
       .submenu a{ padding: 10px 12px !important; font-size: 1rem !important; }
-
-      /* Redes */
-      .menu a[aria-label]{ padding-inline: 10px !important; }
 
       /* Mostrar toggle en móvil */
       .menu-toggle{display:flex}
@@ -478,17 +477,31 @@
       .btn-primary, .btn-whatsapp{ padding:9px 12px; font-size:.92rem; border-radius:12px; }
     }
 
-    /* Tarjetas — diseño propio en móvil */
+    /* Tarjetas — móvil: 1 botón negro + sin franja superior */
     @media (max-width: 640px){
       .grid{ grid-template-columns: 1fr; gap: 14px; }
       .card{ border-radius:16px; transform:none !important; }
-      .card-top{ padding:10px 12px 0; }
+      .card-top{ display:none !important; } /* franja verificado/oferta oculta en móvil */
+      .card-top *{ display:none !important; }
       .card-media{ margin:8px 8px 0 8px; aspect-ratio: 16/10; }
       .card-body{ padding:10px 12px 0; }
       .title{ font-size:1.06rem; line-height:1.25; }
       .card-bottom{ padding:10px 12px 12px; }
       .btn-row{ flex-direction:column; gap:8px; }
-      .btn-primary, .btn-whatsapp{ width:100%; }
+      .more-link{ display:none !important; }
+      .btn-whatsapp{ display:none !important; }
+      .btn-primary{
+        width:100%;
+        background:#111 !important;
+        color:#fff !important;
+        border:1px solid #111 !important;
+        box-shadow:none !important;
+        padding:12px 14px !important;
+        border-radius:14px !important;
+        letter-spacing:.04em;
+      }
+      .btn-primary:hover{ filter:brightness(1.05) !important; transform:none !important; }
+      .btn-primary:active{ transform:translateY(1px) !important; }
     }
 
     /* FAQ / Testimonios / Legal / Pagos */
@@ -535,6 +548,18 @@
       z-index: 120;
     }
 
+    /* Botón toTop */
+    .to-top{
+      position:fixed; right:16px; bottom:16px;
+      width:48px; height:48px; border-radius:50%;
+      display:grid; place-items:center;
+      background:#111; color:#fff; border:0;
+      box-shadow:0 16px 40px rgba(0,0,0,.22);
+      opacity:0; pointer-events:none; transition:opacity .2s var(--ease), transform .2s var(--ease); z-index:250;
+    }
+    .to-top.show{ opacity:1; pointer-events:auto; }
+    .to-top:active{ transform:translateY(1px); }
+
     /* =======================
        OVERRIDES FINALES CLARO
        ======================= */
@@ -569,6 +594,9 @@
       </div>
 
       <nav id="mainMenu" class="menu" aria-label="Navegación principal">
+        <!-- (Opcional) Buscador dentro del panel en móvil -->
+        <button class="only-mobile nav-link" id="menuSearchMobile"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>Buscar</button>
+
         <a href="#"><i class="fas fa-home" aria-hidden="true"></i>Inicio</a>
         <div class="has-submenu">
           <button class="submenu-toggle nav-link" id="submenuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="submenu-products">
@@ -606,7 +634,9 @@
         <button id="searchLaunch" class="search-launch" aria-label="Buscar en SCOOT SHOP">
           <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><span class="hide-mobile"> Buscar</span> <span class="hide-mobile" style="opacity:.6">⌘K</span>
         </button>
-        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-controls="mainMenu" aria-expanded="false"><span></span><span></span><span></span></button>
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-controls="mainMenu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
       </div>
     </div>
 
@@ -685,10 +715,6 @@
         data-name="N7PRO" data-was="387,50 €" data-now="215 €"
         data-spec="30–35 km · 350 W · 15 kg" data-link="n7pro.html" data-wa="https://wa.me/34666318747"
         data-tags="n ciudad ligero urbano" aria-label="N7PRO — Patinete eléctrico urbano">
-        <div class="card-top">
-          <div class="verified" aria-label="Tienda verificada"><i class="fa-regular fa-circle-check" aria-hidden="true"></i><span>Tienda verificada</span></div>
-          <div class="badges"><span class="badge offer">Oferta</span></div>
-        </div>
         <div class="card-media">
           <div class="oos-overlay" aria-hidden="true">Agotado</div>
           <div class="carousel" data-carousel>
@@ -728,10 +754,6 @@
         data-name="N7MAX" data-was="937,50 €" data-now="375 €"
         data-spec="40–45 km · 800 W · 24 kg" data-link="n7max.html" data-wa="https://wa.me/34666318747"
         data-tags="n potencia premium" aria-label="N7MAX — Patinete eléctrico de alta potencia">
-        <div class="card-top">
-          <div class="verified" aria-label="Tienda verificada"><i class="fa-regular fa-circle-check" aria-hidden="true"></i><span>Tienda verificada</span></div>
-          <div class="badges"><span class="badge offer">Oferta</span></div>
-        </div>
         <div class="card-media">
           <div class="carousel" data-carousel>
             <div class="carousel-track">
@@ -786,10 +808,6 @@
         data-name="G2" data-was="780 €" data-now="380 €"
         data-spec="40 km · 600 W · 18 kg" data-link="g2.html" data-wa="https://wa.me/34666318747"
         data-tags="g ligero urbano" aria-label="G2 — Patinete eléctrico de alta potencia">
-        <div class="card-top">
-          <div class="verified" aria-label="Tienda verificada"><i class="fa-regular fa-circle-check" aria-hidden="true"></i><span>Tienda verificada</span></div>
-          <div class="badges"><span class="badge offer">Oferta</span></div>
-        </div>
         <div class="card-media">
           <div class="carousel" data-carousel>
             <div class="carousel-track">
@@ -826,10 +844,6 @@
         data-name="T10" data-was="850 €" data-now="450 €"
         data-spec="45 km · 700 W · 20 kg" data-link="t10.html" data-wa="https://wa.me/34666318747"
         data-tags="g urbano" aria-label="T10 — Patinete eléctrico Ultra">
-        <div class="card-top">
-          <div class="verified" aria-label="Tienda verificada"><i class="fa-regular fa-circle-check" aria-hidden="true"></i><span>Tienda verificada</span></div>
-          <div class="badges"><span class="badge offer">Oferta</span></div>
-        </div>
         <div class="card-media">
           <div class="carousel" data-carousel>
             <div class="carousel-track">
@@ -878,10 +892,6 @@
         data-name="IX3" data-was="850 €" data-now="380 €"
         data-spec="40–45 km · 800 W · 24 kg" data-link="ix3.html" data-wa="https://wa.me/34666318747"
         data-tags="ix potencia urbano compacto" aria-label="IX3 — Patinete eléctrico Serie IX">
-        <div class="card-top">
-          <div class="verified" aria-label="Tienda verificada"><i class="fa-regular fa-circle-check" aria-hidden="true"></i><span>Tienda verificada</span></div>
-          <div class="badges"><span class="badge offer">Oferta</span></div>
-        </div>
         <div class="card-media">
           <div class="carousel" data-carousel>
             <div class="carousel-track">
@@ -1301,6 +1311,13 @@
       }
     }, {passive:false});
     launch.addEventListener('click', openCmdk);
+
+    // Abrir buscador desde el ítem del panel móvil
+    const menuSearchMobile = document.getElementById('menuSearchMobile');
+    if(menuSearchMobile){
+      menuSearchMobile.addEventListener('click', ()=>{ closeMenu(); openCmdk(); });
+    }
+
     cmdk.addEventListener('click',e=>{ if(e.target===cmdk) closeCmdk(); });
     input.addEventListener('input', e=>renderResults(e.target.value));
     renderResults('');
@@ -1338,7 +1355,7 @@
       function easeInOutCubic(t){ return t<0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2; }
       function scrollToEl(el, duration=1100){
         const startY = window.pageYOffset;
-        theRect = el.getBoundingClientRect();
+        const theRect = el.getBoundingClientRect();
         const targetY= theRect.top + startY - getOffsets();
         const delta  = targetY - startY;
         const startT = performance.now();
@@ -1382,12 +1399,22 @@
       window.addEventListener('resize', setProgress, {passive:true});
       if(toTop){ toTop.addEventListener('click', ()=> window.scrollTo({top:0, behavior:'smooth'})); }
     })();
+
+    // ===== HERO VIDEO ready (para iOS/Android) =====
+    (function(){
+      const hv = document.getElementById('heroVideo');
+      if(!hv) return;
+      const markReady = () => hv.classList.add('ready');
+      hv.muted = true; hv.playsInline = true; hv.setAttribute('playsinline',''); hv.setAttribute('muted','');
+      ['loadeddata','canplay','playing'].forEach(ev => hv.addEventListener(ev, markReady, {once:true}));
+      hv.play && hv.play().catch(()=>{ /* autoplay bloqueado */ });
+    })();
   </script>
 
   <!-- Botón volver arriba -->
   <button id="toTop" class="to-top" aria-label="Volver arriba">
     <i class="fa-solid fa-arrow-up"></i>
   </button>
-  
+
 </body>
 </html>
