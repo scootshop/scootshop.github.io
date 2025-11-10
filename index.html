@@ -48,9 +48,9 @@
     a{color:inherit;text-decoration:none}
     .container{width:min(1200px,100%);padding-inline:clamp(16px,4vw,28px);margin-inline:auto}
 
-    /* Header */
+    /* Header fijo */
     header{
-      position:fixed; inset:0 0 auto 0; z-index:60; background:rgba(255,255,255,.9);
+      position:fixed; inset:0 0 auto 0; z-index:80; background:rgba(255,255,255,.9);
       backdrop-filter: blur(10px); border-bottom:1px solid rgba(0,0,0,.06);
     }
     .nav{
@@ -66,48 +66,80 @@
     nav.menu a, nav.menu button{padding:6px 10px;border-radius:10px;background:transparent;border:0;cursor:pointer}
     nav.menu a:hover{background:rgba(0,0,0,.05)}
 
-    /* Botón hamburguesa (solo móvil) */
+    /* Botón hamburguesa (solo móvil, derecha) */
     .burger{
-      display:none; place-items:center; width:40px; height:40px; border-radius:10px; border:1px solid var(--line);
-      background:#fff; font-size:18px; color:#111;
+      display:none; 
+      place-items:center; 
+      width:44px; 
+      height:44px; 
+      border-radius:12px; 
+      border:1px solid var(--line);
+      background:#fff; 
+      font-size:20px; 
+      color:#111;
+      position: absolute; /* Posicionamiento absoluto */
+      right: 16px; /* Alineación a la derecha */
     }
-    .burger:active{ transform:scale(0.98) }
-
-    /* Panel menú móvil (lateral derecho) */
-    .mm-backdrop{
-      position:fixed; inset:0; background:rgba(0,0,0,.28); backdrop-filter:saturate(120%) blur(2px);
-      z-index:55; opacity:0; transition:opacity .18s ease; pointer-events:none;
-    }
-    .mm-backdrop.show{ opacity:1; pointer-events:auto }
-
-    .mm-panel{
-      position:fixed; top:calc(var(--header-h) + var(--sat)); bottom:0; right:0;
-      width:min(420px,86vw); background:#fff; border-left:1px solid var(--line); z-index:56;
-      transform:translateX(100%); transition:transform .22s ease;
-      box-shadow:-24px 0 40px rgba(0,0,0,.12);
-      padding:10px 14px 14px;
-    }
-    .mm-panel.open{ transform:translateX(0) }
-    .mm-list{ display:grid; gap:8px }
-    .mm-link{
-      display:flex; align-items:center; gap:10px; padding:12px; border:1px solid var(--line);
-      border-radius:12px; font-weight:800; text-transform:uppercase; font-size:.92rem;
-    }
-    .mm-icons{ display:flex; gap:10px; padding-top:6px }
-    .mm-icons a{
-      width:44px; height:44px; display:grid; place-items:center; border:1px solid var(--line); border-radius:12px; font-size:18px;
+    .burger:active{ 
+      transform:scale(0.98) 
     }
 
     /* Ocultar menú de escritorio en móvil y mostrar burger */
     @media (max-width:768px){
-      nav.menu{ display:none }
-      .burger{ display:grid }
+      nav.menu{ 
+        display:none;
+      }
+      .burger{ 
+        display:grid; 
+      }
     }
 
     .trustbar{border-top:1px solid var(--line); background:#fff; color:var(--muted); font-weight:700; font-size:.95rem}
     .trustbar .inner{display:flex;gap:28px;align-items:center;justify-content:center;padding:8px 0}
     .trustbar i{opacity:.9}
     @media (max-width:768px){ .trustbar{display:none} }
+
+    /* Backdrop + panel móvil (fuera del header para que no “corte” el panel) */
+    .mm-backdrop{
+      position:fixed; inset:0; background:rgba(0,0,0,.35);
+      z-index:100; opacity:0; transition:opacity .2s ease; pointer-events:none;
+    }
+    .mm-backdrop.show{ opacity:1; pointer-events:auto }
+
+    .mm-panel{
+      position:fixed; inset:0 0 0 auto; width:min(440px,92vw);
+      background:#fff; border-left:1px solid var(--line); z-index:101;
+      transform:translateX(100%); transition:transform .24s ease; display:flex; flex-direction:column;
+      box-shadow:-28px 0 60px rgba(0,0,0,.18); overscroll-behavior:contain;
+    }
+    .mm-panel.open{ transform:translateX(0) }
+
+    .mm-head{
+      padding: calc(env(safe-area-inset-top,0px) + 10px) 16px 10px;
+      display:flex; align-items:center; justify-content:space-between; gap:12px; border-bottom:1px solid var(--line);
+    }
+    .mm-brand{ display:flex; align-items:center; gap:10px; font-weight:900 }
+    .mm-brand img{ height:34px }
+    .mm-close{
+      width:44px; height:44px; border:1px solid var(--line); border-radius:12px; background:#fff; font-size:18px; color:#111;
+    }
+    .mm-content{ padding:12px 16px 16px; display:grid; gap:10px; overflow:auto; flex:1 }
+    .mm-link{
+      display:flex; align-items:center; gap:12px; padding:14px; border:1px solid var(--line);
+      border-radius:12px; font-weight:800; text-transform:uppercase; font-size:.98rem;
+    }
+    .mm-icons{ display:flex; gap:10px; margin-top:6px }
+    .mm-icons a{
+      width:48px; height:48px; display:grid; place-items:center; border:1px solid var(--line); border-radius:12px; font-size:20px;
+    }
+    .mm-foot{
+      padding:12px 16px calc(env(safe-area-inset-bottom,0px) + 14px);
+      border-top:1px solid var(--line); background:#fff;
+    }
+    .mm-cta{
+      display:block; width:100%; text-align:center; padding:12px 16px; border-radius:12px; font-weight:900;
+      background:#25d366; color:#fff; border:1px solid #22c15e; font-size:1rem;
+    }
 
     /* Hero */
     .hero{position:relative;height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden}
@@ -149,16 +181,17 @@
     .f-icon{ width:40px;height:40px;border-radius:10px;display:grid;place-items:center;border:1px solid var(--line);background:#fff }
     .f-icon i{ font-size:18px }
 
-    /* Grid de productos (base escritorio) */
+    /* Grid de productos */
     .grid{display:grid;grid-template-columns: repeat(2, minmax(0, 1fr));gap:18px;margin-top:18px;}
+    @media (max-width:640px){ .grid{grid-template-columns:repeat(2,1fr); gap:10px;} }
 
     .card{
       background:#fff; border:1px solid #e9edf2; border-radius:var(--radius); display:flex; flex-direction:column; cursor:pointer;
       overflow:hidden;
     }
-    .card-media{
-      position:relative; margin:8px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#fff; aspect-ratio: 3 / 2;
-    }
+    .card-media{position:relative; margin:8px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#fff; aspect-ratio: 3 / 2;}
+    @media (max-width:640px){ .card-media{ margin:6px; border-radius:10px; aspect-ratio:1/1; } }
+
     .carousel{position:relative; overflow:hidden; height:100%}
     .carousel-track{display:flex;transition:transform .3s; height:100%; touch-action: pan-y; cursor:grab}
     .carousel-track.dragging{cursor:grabbing}
@@ -185,29 +218,14 @@
     .btn-whatsapp{background:#25d366; color:#fff}
     .btn-whatsapp i{margin-right:6px}
 
-    /* ====== MÓVIL: tarjetas 2×2, solo foto + nombre debajo (sin tapar imagen) ====== */
-    .chip-name{ display:none } /* oculta por defecto (desktop) */
-
+    /* Móvil: tarjetas 2×2 con nombre debajo (no tapar imagen) */
+    .chip-name{ display:none }
     @media (max-width:640px){
-      .grid{ grid-template-columns: repeat(2, 1fr); gap:10px; }
-
-      .card{ border:1px solid #eceff4; border-radius:12px; }
-      .card-media{ margin:6px; border-radius:10px; aspect-ratio: 1 / 1; }
-
-      /* Nombre en pastilla por debajo de la imagen (no la tapa) */
       .chip-name{
-        display:block;
-        margin:6px 6px 10px;
-        padding:8px 10px;
-        border-radius:10px;
-        background:#111; color:#fff; font-weight:900; font-size:.88rem; text-align:center;
-        letter-spacing:.02em;
+        display:block; margin:6px 6px 10px; padding:8px 10px; border-radius:10px;
+        background:#111; color:#fff; font-weight:900; font-size:.88rem; text-align:center; letter-spacing:.02em;
       }
-
-      /* Ocultar elementos no esenciales en móvil */
-      .card-body{ display:none !important; }
-      .card-bottom{ display:none !important; }
-      .carousel-dots{ display:none !important; }
+      .card-body, .card-bottom, .carousel-dots{ display:none !important; }
     }
 
     /* FAQ / Legal / Pagos */
@@ -228,7 +246,7 @@
     /* WhatsApp FAB */
     .wa-fab{
       position:fixed; bottom:16px; right:16px; width:56px; height:56px; border-radius:50%;
-      display:grid; place-items:center; background:#25d366; color:#fff; font-size:26px; box-shadow:0 16px 40px rgba(0,0,0,.25); z-index:40
+      display:grid; place-items:center; background:#25d366; color:#fff; font-size:26px; box-shadow:0 16px 40px rgba(0,0,0,.25); z-index:70
     }
   </style>
 </head>
@@ -260,23 +278,6 @@
       </button>
     </div>
 
-    <!-- Panel móvil (derecha) -->
-    <div class="mm-backdrop" id="mmBackdrop" hidden></div>
-    <nav class="mm-panel" id="mobileMenu" hidden aria-label="Menú móvil">
-      <div class="mm-list">
-        <a class="mm-link" href="#"><i class="fa-solid fa-house"></i> Inicio</a>
-        <a class="mm-link" href="#comprar"><i class="fa-solid fa-cart-shopping"></i> Productos</a>
-        <a class="mm-link" href="#faq"><i class="fa-solid fa-circle-question"></i> Preguntas</a>
-        <a class="mm-link" href="#ubicacion"><i class="fa-solid fa-location-dot"></i> Ubicación</a>
-        <a class="mm-link" href="#legal"><i class="fa-solid fa-scale-balanced"></i> Legal</a>
-        <div class="mm-icons" aria-label="Redes">
-          <a href="https://www.instagram.com/scootshopping" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-          <a href="https://www.facebook.com/61579248524907" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
-          <a href="https://wa.me/34666318747" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-        </div>
-      </div>
-    </nav>
-
     <div class="trustbar" aria-label="Sellos de confianza">
       <div class="container inner">
         <span><i class="fa-regular fa-circle-check" aria-hidden="true"></i> Garantía 70 km por producto</span>
@@ -286,6 +287,33 @@
       </div>
     </div>
   </header>
+
+  <!-- Backdrop + Panel móvil (fuera del header para que no “corte” el panel) -->
+  <div class="mm-backdrop" id="mmBackdrop" hidden></div>
+  <nav class="mm-panel" id="mobileMenu" hidden aria-label="Menú móvil">
+    <div class="mm-head">
+      <div class="mm-brand">
+        <img src="Img/0-removebg-preview.png" alt="" />
+        <span>SCOOT SHOP</span>
+      </div>
+      <button class="mm-close" id="mmClose" aria-label="Cerrar menú"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="mm-content">
+      <a class="mm-link" href="#"><i class="fa-solid fa-house"></i> Inicio</a>
+      <a class="mm-link" href="#comprar"><i class="fa-solid fa-cart-shopping"></i> Productos</a>
+      <a class="mm-link" href="#faq"><i class="fa-solid fa-circle-question"></i> Preguntas</a>
+      <a class="mm-link" href="#ubicacion"><i class="fa-solid fa-location-dot"></i> Ubicación</a>
+      <a class="mm-link" href="#legal"><i class="fa-solid fa-scale-balanced"></i> Legal</a>
+      <div class="mm-icons" aria-label="Redes">
+        <a href="https://www.instagram.com/scootshopping" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="https://www.facebook.com/61579248524907" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+        <a href="https://wa.me/34666318747" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+      </div>
+    </div>
+    <div class="mm-foot">
+      <a class="mm-cta" href="https://wa.me/34666318747" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> Escríbenos por WhatsApp</a>
+    </div>
+  </nav>
 
   <!-- HERO -->
   <section class="hero" aria-label="Video hero">
@@ -646,7 +674,7 @@
     {"@type":"ListItem","position":3,"item":{"@type":"Product","name":"G2 — Patinete eléctrico de alta potencia","image":["https://tudominio.example/Img-G2/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"380","availability":"https://schema.org/InStock","url":"https://tudominio.example/g2.html"}}},
     {"@type":"ListItem","position":4,"item":{"@type":"Product","name":"T10 — Patinete eléctrico Ultra","image":["https://tudominio.example/Img-T10/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"450","availability":"https://schema.org/InStock","url":"https://tudominio.example/t10.html"}}},
     {"@type":"ListItem","position":5,"item":{"@type":"Product","name":"IX3 — Patinete eléctrico Serie IX","image":["https://tudominio.example/Img-IX3/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"380","availability":"https://schema.org/InStock","url":"https://tudominio.example/ix3.html"}}}
-  ]}
+  ]} 
   </script>
 
   <script>
@@ -664,20 +692,23 @@
       const markReady = () => hv.classList.add('ready');
       hv.muted = true; hv.playsInline = true;
       ['loadeddata','canplay','playing'].forEach(ev => hv.addEventListener(ev, markReady, {once:true}));
-      hv.play && hv.play().catch(()=>{});
+      hv.play && hv.play().catch(()=>{}); 
     })();
 
-    // Carruseles: dots por slide + swipe (sin auto-rotación)
+    // Carruseles: dots por slide + swipe
     document.querySelectorAll('[data-carousel]').forEach(c => {
       const track=c.querySelector('.carousel-track'), slides=[...track.children];
       const dotsWrap = c.parentElement.querySelector('.carousel-dots');
-      const dots=[];
+      const dots=[]; 
       let i=0, dragging=false, startX=0, currentX=0, startTime=0;
 
-      slides.forEach((_,idx)=>{
-        const b=document.createElement('button'); b.type='button'; b.className='dot';
+      slides.forEach((_,idx)=>{ 
+        const b=document.createElement('button'); 
+        b.type='button'; 
+        b.className='dot';
         b.addEventListener('click',(ev)=>{ ev.stopPropagation(); go(idx,true); });
-        dotsWrap.appendChild(b); dots.push(b);
+        dotsWrap.appendChild(b); 
+        dots.push(b);
       });
 
       function update(){ dots.forEach((d,idx)=> d.classList.toggle('active', idx===i)); }
@@ -729,25 +760,31 @@
       }
     });
 
-    // Menú móvil: toggle burger (panel derecho)
+    // Menú móvil (drawer derecha, full-top, fuera del header)
     (function(){
       const burger = document.getElementById('burger');
       const panel = document.getElementById('mobileMenu');
       const backdrop = document.getElementById('mmBackdrop');
+      const closeBtn = document.getElementById('mmClose');
+
+      function lockScroll(lock){
+        document.body.style.overflow = lock ? 'hidden' : '';
+        document.documentElement.style.overscrollBehavior = lock ? 'contain' : '';
+      }
 
       function openMenu(){
         panel.hidden = false; backdrop.hidden = false;
         requestAnimationFrame(()=>{
           panel.classList.add('open'); backdrop.classList.add('show');
         });
-        document.body.style.overflow='hidden';
         burger.setAttribute('aria-expanded','true');
+        lockScroll(true);
       }
       function closeMenu(){
         panel.classList.remove('open'); backdrop.classList.remove('show');
-        setTimeout(()=>{ panel.hidden = true; backdrop.hidden = true; }, 220);
-        document.body.style.overflow='';
+        setTimeout(()=>{ panel.hidden = true; backdrop.hidden = true; }, 240);
         burger.setAttribute('aria-expanded','false');
+        lockScroll(false);
       }
       function toggle(){
         if(panel.hidden) openMenu(); else closeMenu();
@@ -755,10 +792,10 @@
 
       burger.addEventListener('click', toggle);
       backdrop.addEventListener('click', closeMenu);
+      closeBtn.addEventListener('click', closeMenu);
       panel.querySelectorAll('a').forEach(a=> a.addEventListener('click', closeMenu));
       addEventListener('keydown', (e)=>{ if(e.key==='Escape' && !panel.hidden) closeMenu(); });
     })();
   </script>
-
 </body>
 </html>
