@@ -150,23 +150,6 @@
       transform:translateY(-50%);
     }
 
-    .trustbar{
-      border-top:1px solid var(--line);
-      background:#fff;
-      color:var(--muted);
-      font-weight:700;
-      font-size:.9rem;
-    }
-
-    .trustbar .inner{
-      display:flex;
-      gap:24px;
-      align-items:center;
-      justify-content:center;
-      padding:6px 0;
-      white-space:nowrap;
-    }
-
     /* Menú móvil */
     .mm-backdrop{
       position:fixed;
@@ -541,7 +524,6 @@
     @media (max-width:768px){
       nav.menu{ display:none; }
       .burger{ display:grid; }
-      .trustbar{ display:none; }
     }
 
     @media (max-width:640px){
@@ -580,18 +562,9 @@
         </a>
       </nav>
 
-      <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileMenu">
+      <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileMenu" type="button">
         <i class="fa-solid fa-bars"></i>
       </button>
-    </div>
-
-    <div class="trustbar" aria-label="Sellos de confianza">
-      <div class="container inner">
-        <span><i class="fa-regular fa-circle-check"></i> Garantía 70 km</span>
-        <span><i class="fa-solid fa-rotate-left"></i> Devolución 30 días</span>
-        <span><i class="fa-solid fa-shield-halved"></i> Pago seguro</span>
-        <span><i class="fa-solid fa-truck-fast"></i> Envío 6–8 días</span>
-      </div>
     </div>
   </header>
 

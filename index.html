@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>SCOOT SHOP — Scooters eléctricos</title>
-  <meta name="description" content="Scooters eléctricos fiables y potentes. Envío 6–8 días, pago seguro y garantía 70 km por producto." />
+  <meta name="description" content="Scooters eléctricos fiables y potentes. Envío 6–8 días, pago seguro y garantía 200 km por producto." />
   <meta name="robots" content="index,follow" />
   <link rel="canonical" href="https://tudominio.example/" />
 
@@ -16,7 +16,7 @@
 
   <!-- SEO Social -->
   <meta property="og:title" content="SCOOT SHOP — Scooters eléctricos" />
-  <meta property="og:description" content="Scooters eléctricos fiables y potentes. Envío 6–8 días, pago seguro y garantía 70 km por producto." />
+  <meta property="og:description" content="Scooters eléctricos fiables y potentes. Envío 6–8 días, pago seguro y garantía 200 km por producto." />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="Img/og-cover.jpg" />
   <meta property="og:site_name" content="SCOOT SHOP" />
@@ -127,7 +127,7 @@
       inset:0 0 auto 0;
       z-index:80;
       background:rgba(255,255,255,.9);
-      backdrop-filter: blur(10px);
+      backdrop-filter:blur(10px);
       border-bottom:1px solid rgba(0,0,0,.06);
     }
 
@@ -137,7 +137,6 @@
       align-items:center;
       height:var(--header-h);
       gap:12px;
-      position:relative;
     }
 
     .brand{
@@ -194,10 +193,12 @@
       color:#111;
       position:absolute;
       right:16px;
+      top:50%;
+      transform:translateY(-50%);
     }
 
     .burger:active{
-      transform:scale(0.98);
+      transform:translateY(-50%) scale(0.98);
     }
 
     /* Trust bar */
@@ -881,14 +882,14 @@
       </nav>
 
       <!-- Botón hamburguesa (derecha) -->
-      <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileMenu">
+      <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileMenu" type="button">
         <i class="fa-solid fa-bars"></i>
       </button>
     </div>
 
     <div class="trustbar" aria-label="Sellos de confianza">
       <div class="container inner">
-        <span><i class="fa-regular fa-circle-check" aria-hidden="true"></i> Garantía 70 km por producto</span>
+        <span><i class="fa-regular fa-circle-check" aria-hidden="true"></i> Garantía 200 km por producto</span>
         <span><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Devolución 30 días</span>
         <span><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Pago 100% seguro</span>
         <span><i class="fa-solid fa-truck-fast" aria-hidden="true"></i> Envío 6–8 días</span>
@@ -904,7 +905,7 @@
         <img src="Img/0-removebg-preview.png" alt="Logo SCOOT SHOP" />
         <span>SCOOT SHOP</span>
       </div>
-      <button class="mm-close" id="mmClose" aria-label="Cerrar menú">
+      <button class="mm-close" id="mmClose" aria-label="Cerrar menú" type="button">
         <i class="fa-solid fa-xmark"></i>
       </button>
     </div>
@@ -960,7 +961,7 @@
           <li class="feature-card">
             <div class="f-icon"><i class="fa-solid fa-shield-halved"></i></div>
             <h3>Garantía real</h3>
-            <p>Garantía <strong>70 km por producto</strong> y servicio técnico propio.</p>
+            <p>Garantía <strong>200 km por producto</strong> y servicio técnico propio.</p>
           </li>
           <li class="feature-card">
             <div class="f-icon"><i class="fa-solid fa-rotate-left"></i></div>
@@ -1251,7 +1252,7 @@
       </details>
       <details>
         <summary>¿Cuál es la garantía?</summary>
-        <p><strong>70 km por producto</strong>. Cubre defectos de fabricación; excluye desgaste por uso y daños por mal uso.</p>
+        <p><strong>200 km por producto</strong>. Cubre defectos de fabricación; excluye desgaste por uso y daños por mal uso.</p>
       </details>
       <details>
         <summary>¿Incluye accesorios?</summary>
@@ -1290,7 +1291,7 @@
             <summary><strong>Términos y condiciones</strong></summary>
             <p><strong>Pedidos y pagos:</strong> PayPal, transferencia y Bizum. El pedido se considera confirmado tras validar el pago.</p>
             <p><strong>Envíos:</strong> 6–8 días hábiles en península (salvo incidencias logísticas). Se facilita número de seguimiento.</p>
-            <p><strong>Garantía:</strong> <strong>70 km por producto</strong> desde la entrega. Cubre defectos de fabricación. No cubre desgaste por uso ni daños por mal uso o modificaciones no autorizadas.</p>
+            <p><strong>Garantía:</strong> <strong>200 km por producto</strong> desde la entrega. Cubre defectos de fabricación. No cubre desgaste por uso ni daños por mal uso o modificaciones no autorizadas.</p>
             <p><strong>Devoluciones:</strong> 30 días naturales. Producto en buen estado y con accesorios originales.</p>
             <p><strong>SAT:</strong> Servicio técnico propio y repuestos disponibles.</p>
           </details>
