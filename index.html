@@ -214,6 +214,18 @@
     @media (prefers-reduced-motion: reduce){
       .hero video{ animation:none; transition:none; }
     }
+    /* Subrayado degradado en títulos de sección .series */
+.series h2::after{
+  content:"";
+  display:block;
+  width:64px;
+  height:4px;
+  margin:8px auto 0;
+  border-radius:999px;
+  background:linear-gradient(90deg, var(--primary), #ff6b6b);
+  opacity:.9;
+}
+
   </style>
 </head>
 <body>
