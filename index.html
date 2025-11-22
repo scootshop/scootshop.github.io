@@ -7,20 +7,31 @@
   <meta name="description" content="Scooters eléctricos fiables y potentes. Envío 6–8 días, pago seguro y garantía 200 km por producto." />
   <meta name="robots" content="index,follow" />
   <link rel="canonical" href="https://tudominio.example/" />
-
-  <!-- Forzar SIEMPRE modo claro -->
-  <meta name="color-scheme" content="light">
-  <meta name="theme-color" content="#ffffff">
-
-  <link rel="icon" href="favicon.ico" sizes="any" />
-
-  <!-- SEO Social -->
+  <meta property="og:url" content="https://tudominio.example/" />
   <meta property="og:title" content="SCOOT SHOP — Scooters eléctricos" />
   <meta property="og:description" content="Scooters eléctricos fiables y potentes. Envío 6–8 días, pago seguro y garantía 200 km por producto." />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="Img/og-cover.jpg" />
   <meta property="og:site_name" content="SCOOT SHOP" />
+  <meta property="og:locale" content="es_ES" />
   <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Forzar SIEMPRE modo claro -->
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="format-detection" content="telephone=no">
+
+  <link rel="icon" href="favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+
+  <!-- Preconexiones + rendimiento tipografías -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+
+  <!-- Precarga de recursos críticos (LCP/hero y primera imagen de producto) -->
+  <link rel="preload" as="image" href="Img-N7PRO/1.jpg" fetchpriority="high">
+  <link rel="preload" as="image" href="Img-G2/1.jpg">
 
   <!-- Tipografías + Iconos -->
   <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
@@ -44,35 +55,14 @@
     }
 
     @media (max-width:768px){
-      :root{
-        --header-h: 72px;
-      }
+      :root{ --header-h: 72px; }
     }
 
     /* Reset básico */
-    *{
-      box-sizing:border-box;
-      margin:0;
-      padding:0;
-    }
-
-    html,body{
-      height:100%;
-    }
-
-    html,
-    body,
-    button,
-    input,
-    select,
-    textarea{
-      color-scheme: light !important;
-    }
-
-    html{
-      scroll-behavior:smooth;
-    }
-
+    *{ box-sizing:border-box; margin:0; padding:0; }
+    html,body{ height:100%; }
+    html, body, button, input, select, textarea{ color-scheme: light !important; }
+    html{ scroll-behavior:smooth; }
     body{
       font-family:var(--ui);
       background:var(--bg);
@@ -81,778 +71,152 @@
       overflow-x:hidden;
       padding-top: calc(var(--header-h) + var(--sat));
     }
-
-    img{
-      max-width:100%;
-      display:block;
-    }
-
-    a{
-      color:inherit;
-      text-decoration:none;
-    }
-
-    button{
-      font-family:inherit;
-    }
-
-    .container{
-      width:min(1200px,100%);
-      padding-inline:clamp(16px,4vw,28px);
-      margin-inline:auto;
-    }
+    img{ max-width:100%; display:block; }
+    a{ color:inherit; text-decoration:none; }
+    button{ font-family:inherit; }
+    .container{ width:min(1200px,100%); padding-inline:clamp(16px,4vw,28px); margin-inline:auto; }
 
     /* Enlace de salto accesible */
     .skip-link{
-      position:absolute;
-      top:-40px;
-      left:16px;
-      padding:8px 12px;
-      border-radius:8px;
-      background:#111;
-      color:#fff;
-      z-index:200;
-      transition:top .2s ease;
+      position:absolute; top:-40px; left:16px; padding:8px 12px; border-radius:8px; background:#111; color:#fff; z-index:200; transition:top .2s ease;
     }
-    .skip-link:focus{
-      top:8px;
-    }
+    .skip-link:focus{ top:8px; }
 
-    /* ===========================
-       HEADER + NAVEGACIÓN
-       =========================== */
-
-    header{
-      position:fixed;
-      inset:0 0 auto 0;
-      z-index:80;
-      background:rgba(255,255,255,.9);
-      backdrop-filter:blur(10px);
-      border-bottom:1px solid rgba(0,0,0,.06);
-    }
-
-    .nav{
-      display:grid;
-      grid-template-columns:auto 1fr auto;
-      align-items:center;
-      height:var(--header-h);
-      gap:12px;
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-
-    .brand img{
-      height:52px;
-      width:auto;
-      object-fit:contain;
-    }
-
-    .brand span{
-      font-family:'Tangerine',cursive;
-      font-size:1.6rem;
-      color:var(--primary);
-    }
+    /* =========================== HEADER + NAVEGACIÓN =========================== */
+    header{ position:fixed; inset:0 0 auto 0; z-index:80; background:rgba(255,255,255,.9); backdrop-filter:blur(10px); border-bottom:1px solid rgba(0,0,0,.06); }
+    .nav{ display:grid; grid-template-columns:auto 1fr auto; align-items:center; height:var(--header-h); gap:12px; }
+    .brand{ display:flex; align-items:center; gap:10px; }
+    .brand img{ height:52px; width:auto; object-fit:contain; }
+    .brand span{ font-family:'Tangerine',cursive; font-size:1.6rem; color:var(--primary); }
 
     /* Menú escritorio */
-    nav.menu{
-      justify-self:end;
-      display:flex;
-      gap:16px;
-      font-weight:800;
-      text-transform:uppercase;
-      font-size:.9rem;
-    }
-
-    nav.menu a,
-    nav.menu button{
-      padding:6px 10px;
-      border-radius:10px;
-      background:transparent;
-      border:0;
-      cursor:pointer;
-    }
-
-    nav.menu a:hover{
-      background:rgba(0,0,0,.05);
-    }
+    nav.menu{ justify-self:end; display:flex; gap:16px; font-weight:800; text-transform:uppercase; font-size:.9rem; }
+    nav.menu a, nav.menu button{ padding:6px 10px; border-radius:10px; background:transparent; border:0; cursor:pointer; }
+    nav.menu a:hover{ background:rgba(0,0,0,.05); }
 
     /* Botón hamburguesa (solo móvil, derecha) */
-    .burger{
-      display:none;
-      place-items:center;
-      width:44px;
-      height:44px;
-      border-radius:12px;
-      border:1px solid var(--line);
-      background:#fff;
-      font-size:20px;
-      color:#111;
-      position:absolute;
-      right:16px;
-      top:50%;
-      transform:translateY(-50%);
-    }
-
-    .burger:active{
-      transform:translateY(-50%) scale(0.98);
-    }
+    .burger{ display:none; place-items:center; width:44px; height:44px; border-radius:12px; border:1px solid var(--line); background:#fff; font-size:20px; color:#111; position:absolute; right:16px; top:50%; transform:translateY(-50%); }
+    .burger:active{ transform:translateY(-50%) scale(0.98); }
 
     /* Trust bar */
-    .trustbar{
-      border-top:1px solid var(--line);
-      background:#fff;
-      color:var(--muted);
-      font-weight:700;
-      font-size:.95rem;
-    }
-
-    .trustbar .inner{
-      display:flex;
-      gap:28px;
-      align-items:center;
-      justify-content:center;
-      padding:8px 0;
-    }
-
-    .trustbar i{
-      opacity:.9;
-    }
-
-    /* ===========================
-       MENÚ MÓVIL (DRAWER)
-       =========================== */
-
-    .mm-backdrop{
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,.35);
-      z-index:100;
-      opacity:0;
-      transition:opacity .2s ease;
-      pointer-events:none;
-    }
-
-    .mm-backdrop.show{
-      opacity:1;
-      pointer-events:auto;
-    }
-
-    .mm-panel{
-      position:fixed;
-      inset:0 0 0 auto;
-      width:min(440px,92vw);
-      background:#fff;
-      border-left:1px solid var(--line);
-      z-index:101;
-      transform:translateX(100%);
-      transition:transform .24s ease;
-      display:flex;
-      flex-direction:column;
-      box-shadow:-28px 0 60px rgba(0,0,0,.18);
-      overscroll-behavior:contain;
-    }
-
-    .mm-panel.open{
-      transform:translateX(0);
-    }
-
-    .mm-head{
-      padding: calc(env(safe-area-inset-top,0px) + 10px) 16px 10px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      border-bottom:1px solid var(--line);
-    }
-
-    .mm-brand{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      font-weight:900;
-    }
-
-    .mm-brand img{
-      height:34px;
-    }
-
-    .mm-close{
-      width:44px;
-      height:44px;
-      border:1px solid var(--line);
-      border-radius:12px;
-      background:#fff;
-      font-size:18px;
-      color:#111;
-      cursor:pointer;
-    }
-
-    .mm-content{
-      padding:12px 16px 16px;
-      display:grid;
-      gap:10px;
-      overflow:auto;
-      flex:1;
-    }
-
-    .mm-link{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      padding:14px;
-      border:1px solid var(--line);
-      border-radius:12px;
-      font-weight:800;
-      text-transform:uppercase;
-      font-size:.98rem;
-    }
-
-    .mm-icons{
-      display:flex;
-      gap:10px;
-      margin-top:6px;
-    }
-
-    .mm-icons a{
-      width:48px;
-      height:48px;
-      display:grid;
-      place-items:center;
-      border:1px solid var(--line);
-      border-radius:12px;
-      font-size:20px;
-    }
-
-    .mm-foot{
-      padding:12px 16px calc(env(safe-area-inset-bottom,0px) + 14px);
-      border-top:1px solid var(--line);
-      background:#fff;
-    }
-
-    .mm-cta{
-      display:block;
-      width:100%;
-      text-align:center;
-      padding:12px 16px;
-      border-radius:12px;
-      font-weight:900;
-      background:#25d366;
-      color:#fff;
-      border:1px solid #22c15e;
-      font-size:1rem;
-    }
-
-    /* ===========================
-       HERO
-       =========================== */
-
-    .hero{
-      position:relative;
-      min-height:calc(var(--vh) * 100);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      overflow:hidden;
-    }
-
-    .hero::before{
-      content:"";
-      position:absolute;
-      inset:-10% -10% -30% -10%;
-      background: radial-gradient(140% 60% at 50% 0%, rgba(0,0,0,.35), rgba(0,0,0,.5));
-      z-index:1;
-      pointer-events:none;
-      mask: linear-gradient(180deg,#000 70%, transparent);
-    }
-
-    .hero video{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      z-index:0;
-      opacity:0;
-      transition:opacity .3s;
-    }
-
-    .hero video.ready{
-      opacity:1;
-    }
-
-    .hero > *{
-      position:relative;
-      z-index:2;
-    }
-
-    .hero h1{
-      font-family:var(--sport);
-      font-size:clamp(38px,6.4vw,74px);
-      margin-bottom:10px;
-      text-transform:uppercase;
-      color:#fff;
-      letter-spacing:.06em;
-      text-shadow:0 12px 34px rgba(0,0,0,.42);
-    }
-
-    .hero p{
-      color:#fff;
-      margin-top:12px;
-      font-size:clamp(15px,1.4vw,18px);
-      opacity:.95;
-    }
-
-    .cta-btn{
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      min-height:52px;
-      padding:12px 24px;
-      border-radius:999px;
-      font-weight:900;
-      text-transform:uppercase;
-      letter-spacing:.06em;
-      font-size:1rem;
-      cursor:pointer;
-      background:var(--cta);
-      color:var(--cta-ink);
-      border:1px solid #111;
-      transition:transform .15s, filter .15s;
-    }
-
-    .cta-btn:hover{
-      filter:brightness(1.08);
-      transform:translateY(-1px);
-    }
-
-    /* ===========================
-       SECCIONES / COPY
-       =========================== */
-
-    .series{
-      padding:40px 0;
-      text-align:center;
-    }
-
-    .series h2{
-      font-family:var(--sport);
-      font-size:clamp(28px,5vw,42px);
-      margin-bottom:10px;
-      color:var(--primary);
-    }
-
-    .series p{
-      color:var(--muted);
-      max-width:820px;
-      margin:0 auto;
-      font-size:1.04rem;
-    }
-
-    .features{
-      padding:24px 0 6px;
-    }
-
-    .feature-grid{
-      list-style:none;
-      display:grid;
-      gap:14px;
-      grid-template-columns: repeat(4, minmax(0,1fr));
-    }
-
-    .feature-card{
-      background:#fff;
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-      padding:14px;
-      display:grid;
-      grid-template-columns:auto 1fr;
-      column-gap:12px;
-      row-gap:6px;
-      align-items:center;
-    }
-
-    .feature-card h3{
-      font-size:1.02rem;
-    }
-
-    .feature-card p{
-      grid-column:1/-1;
-      color:var(--muted);
-    }
-
-    .f-icon{
-      width:40px;
-      height:40px;
-      border-radius:10px;
-      display:grid;
-      place-items:center;
-      border:1px solid var(--line);
-      background:#fff;
-    }
-
-    .f-icon i{
-      font-size:18px;
-    }
-
-    /* ===========================
-       GRID PRODUCTOS + CARDS
-       =========================== */
-
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap:18px;
-      margin-top:18px;
-    }
-
-    .card{
-      background:#fff;
-      border:1px solid #e9edf2;
-      border-radius:var(--radius);
-      display:flex;
-      flex-direction:column;
-      cursor:pointer;
-      overflow:hidden;
-    }
-
-    .card-media{
-      position:relative;
-      margin:8px;
-      border:1px solid var(--line);
-      border-radius:12px;
-      overflow:hidden;
-      background:#fff;
-      aspect-ratio: 3 / 2;
-    }
-
-    .carousel{
-      position:relative;
-      overflow:hidden;
-      height:100%;
-    }
-
-    .carousel-track{
-      display:flex;
-      transition:transform .3s;
-      height:100%;
-      touch-action: pan-y;
-      cursor:grab;
-    }
-
-    .carousel-track.dragging{
-      cursor:grabbing;
-    }
-
-    .carousel img{
-      width:100%;
-      height:100%;
-      flex:0 0 100%;
-      object-fit:contain;
-      background:#fff;
-      -webkit-user-drag:none;
-      user-select:none;
-      pointer-events:none;
-    }
-
-    .carousel-dots{
-      position:absolute;
-      bottom:8px;
-      left:50%;
-      transform:translateX(-50%);
-      display:flex;
-      gap:6px;
-      background:rgba(255,255,255,.9);
-      border:1px solid var(--line);
-      padding:2px 6px;
-      border-radius:999px;
-    }
-
-    .carousel-dots .dot{
-      width:8px;
-      height:8px;
-      border-radius:50%;
-      border:0;
-      background:#cbd5e1;
-      opacity:.9;
-      cursor:pointer;
-    }
-
-    .carousel-dots .dot.active{
-      background:#111;
-    }
-
-    .card-body{
-      padding:8px 10px 0;
-    }
-
-    .card-brand{
-      font-size:.72rem;
-      letter-spacing:.08em;
-      color:#6b7280;
-      text-transform:uppercase;
-      font-weight:900;
-    }
-
-    .title{
-      margin-top:4px;
-      font-size:1rem;
-      line-height:1.3;
-      font-weight:900;
-    }
-
-    .rating{
-      display:flex;
-      align-items:center;
-      gap:6px;
-      margin-top:6px;
-      color:#f97316;
-    }
-
-    .rating .count{
-      color:var(--muted);
-      font-weight:700;
-    }
-
-    .card-bottom{
-      margin-top:8px;
-      padding:10px;
-      border-top:1px solid var(--line);
-    }
-
-    .price-row{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      margin-bottom:6px;
-    }
-
-    .price-now{
-      font-size:1.06rem;
-      font-weight:900;
-    }
-
-    .price-was{
-      color:#9aa0a6;
-      text-decoration:line-through;
-      font-weight:700;
-    }
-
-    .btn-row{
-      display:flex;
-      gap:10px;
-    }
-
-    .btn-primary,
-    .btn-whatsapp{
-      display:block;
-      text-align:center;
-      font-weight:900;
-      border-radius:12px;
-      padding:10px 12px;
-      border:1px solid transparent;
-      font-size:.95rem;
-    }
-
-    .btn-primary{
-      background:#111;
-      color:#fff;
-      border-color:#111;
-    }
-
-    .btn-primary:hover{
-      filter:brightness(1.05);
-    }
-
-    .btn-whatsapp{
-      background:#25d366;
-      color:#fff;
-    }
-
-    .btn-whatsapp i{
-      margin-right:6px;
-    }
+    .trustbar{ border-top:1px solid var(--line); background:#fff; color:var(--muted); font-weight:700; font-size:.95rem; }
+    .trustbar .inner{ display:flex; gap:28px; align-items:center; justify-content:center; padding:8px 0; }
+    .trustbar i{ opacity:.9; }
+
+    /* =========================== MENÚ MÓVIL (DRAWER) =========================== */
+    .mm-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:100; opacity:0; transition:opacity .2s ease; pointer-events:none; }
+    .mm-backdrop.show{ opacity:1; pointer-events:auto; }
+    .mm-panel{ position:fixed; inset:0 0 0 auto; width:min(440px,92vw); background:#fff; border-left:1px solid var(--line); z-index:101; transform:translateX(100%); transition:transform .24s ease; display:flex; flex-direction:column; box-shadow:-28px 0 60px rgba(0,0,0,.18); overscroll-behavior:contain; }
+    .mm-panel.open{ transform:translateX(0); }
+    .mm-head{ padding: calc(env(safe-area-inset-top,0px) + 10px) 16px 10px; display:flex; align-items:center; justify-content:space-between; gap:12px; border-bottom:1px solid var(--line); }
+    .mm-brand{ display:flex; align-items:center; gap:10px; font-weight:900; }
+    .mm-brand img{ height:34px; }
+    .mm-close{ width:44px; height:44px; border:1px solid var(--line); border-radius:12px; background:#fff; font-size:18px; color:#111; cursor:pointer; }
+    .mm-content{ padding:12px 16px 16px; display:grid; gap:10px; overflow:auto; flex:1; }
+    .mm-link{ display:flex; align-items:center; gap:12px; padding:14px; border:1px solid var(--line); border-radius:12px; font-weight:800; text-transform:uppercase; font-size:.98rem; }
+    .mm-icons{ display:flex; gap:10px; margin-top:6px; }
+    .mm-icons a{ width:48px; height:48px; display:grid; place-items:center; border:1px solid var(--line); border-radius:12px; font-size:20px; }
+    .mm-foot{ padding:12px 16px calc(env(safe-area-inset-bottom,0px) + 14px); border-top:1px solid var(--line); background:#fff; }
+    .mm-cta{ display:block; width:100%; text-align:center; padding:12px 16px; border-radius:12px; font-weight:900; background:#25d366; color:#fff; border:1px solid #22c15e; font-size:1rem; }
+
+    /* =========================== HERO =========================== */
+    .hero{ position:relative; min-height:calc(var(--vh) * 100); display:flex; align-items:center; justify-content:center; text-align:center; overflow:hidden; }
+    .hero::before{ content:""; position:absolute; inset:-10% -10% -30% -10%; background: radial-gradient(140% 60% at 50% 0%, rgba(0,0,0,.35), rgba(0,0,0,.5)); z-index:1; pointer-events:none; mask: linear-gradient(180deg,#000 70%, transparent); }
+    .hero video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; opacity:0; transition:opacity .3s; }
+    .hero video.ready{ opacity:1; }
+    .hero > *{ position:relative; z-index:2; }
+    .hero h1{ font-family:var(--sport); font-size:clamp(38px,6.4vw,74px); margin-bottom:10px; text-transform:uppercase; color:#fff; letter-spacing:.06em; text-shadow:0 12px 34px rgba(0,0,0,.42); }
+    .hero p{ color:#fff; margin-top:12px; font-size:clamp(15px,1.4vw,18px); opacity:.95; }
+    .cta-btn{ display:inline-flex; align-items:center; gap:10px; min-height:52px; padding:12px 24px; border-radius:999px; font-weight:900; text-transform:uppercase; letter-spacing:.06em; font-size:1rem; cursor:pointer; background:var(--cta); color:var(--cta-ink); border:1px solid #111; transition:transform .15s, filter .15s; }
+    .cta-btn:hover{ filter:brightness(1.08); transform:translateY(-1px); }
+
+    /* =========================== SECCIONES / COPY =========================== */
+    .series{ padding:40px 0; text-align:center; }
+    .series h2{ font-family:var(--sport); font-size:clamp(28px,5vw,42px); margin-bottom:10px; color:var(--primary); }
+    .series p{ color:var(--muted); max-width:820px; margin:0 auto; font-size:1.04rem; }
+
+    .features{ padding:24px 0 6px; }
+    .feature-grid{ list-style:none; display:grid; gap:14px; grid-template-columns: repeat(4, minmax(0,1fr)); }
+    .feature-card{ background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:14px; display:grid; grid-template-columns:auto 1fr; column-gap:12px; row-gap:6px; align-items:center; }
+    .feature-card h3{ font-size:1.02rem; }
+    .feature-card p{ grid-column:1/-1; color:var(--muted); }
+    .f-icon{ width:40px; height:40px; border-radius:10px; display:grid; place-items:center; border:1px solid var(--line); background:#fff; }
+    .f-icon i{ font-size:18px; }
+
+    /* =========================== GRID PRODUCTOS + CARDS =========================== */
+    .grid{ display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:18px; margin-top:18px; }
+    .card{ background:#fff; border:1px solid #e9edf2; border-radius:var(--radius); display:flex; flex-direction:column; cursor:pointer; overflow:hidden; }
+    .card-media{ position:relative; margin:8px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#fff; aspect-ratio: 3 / 2; }
+
+    .carousel{ position:relative; overflow:hidden; height:100%; }
+    .carousel-track{ display:flex; transition:transform .3s; height:100%; touch-action: pan-y; cursor:grab; }
+    .carousel-track.dragging{ cursor:grabbing; }
+    .carousel img{ width:100%; height:100%; flex:0 0 100%; object-fit:contain; background:#fff; -webkit-user-drag:none; user-select:none; pointer-events:none; }
+    .carousel-dots{ position:absolute; bottom:8px; left:50%; transform:translateX(-50%); display:flex; gap:6px; background:rgba(255,255,255,.9); border:1px solid var(--line); padding:2px 6px; border-radius:999px; }
+    .carousel-dots .dot{ width:8px; height:8px; border-radius:50%; border:0; background:#cbd5e1; opacity:.9; cursor:pointer; }
+    .carousel-dots .dot.active{ background:#111; }
+
+    .card-body{ padding:8px 10px 0; }
+    .card-brand{ font-size:.72rem; letter-spacing:.08em; color:#6b7280; text-transform:uppercase; font-weight:900; }
+    .title{ margin-top:4px; font-size:1rem; line-height:1.3; font-weight:900; }
+    .rating{ display:flex; align-items:center; gap:6px; margin-top:6px; color:#f97316; }
+    .rating .count{ color:var(--muted); font-weight:700; }
+
+    .card-bottom{ margin-top:8px; padding:10px; border-top:1px solid var(--line); }
+    .price-row{ display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+    .price-now{ font-size:1.06rem; font-weight:900; }
+    .price-was{ color:#9aa0a6; text-decoration:line-through; font-weight:700; }
+    .btn-row{ display:flex; gap:10px; }
+    .btn-primary, .btn-whatsapp{ display:block; text-align:center; font-weight:900; border-radius:12px; padding:10px 12px; border:1px solid transparent; font-size:.95rem; }
+    .btn-primary{ background:#111; color:#fff; border-color:#111; }
+    .btn-primary:hover{ filter:brightness(1.05); }
+    .btn-whatsapp{ background:#25d366; color:#fff; }
+    .btn-whatsapp i{ margin-right:6px; }
 
     /* Nombre chip en móvil */
-    .chip-name{
-      display:none;
-    }
+    .chip-name{ display:none; }
 
-    /* ===========================
-       FAQ / UBICACIÓN / LEGAL
-       =========================== */
+    /* =========================== FAQ / UBICACIÓN / LEGAL =========================== */
+    #faq h2{ margin:20px 0; font-family:var(--sport); }
+    details{ border:1px solid var(--line); border-radius:12px; padding:10px 14px; margin-bottom:10px; background:#fff; }
+    summary{ cursor:pointer; font-weight:900; }
 
-    #faq h2{
-      margin:20px 0;
-      font-family:var(--sport);
-    }
+    #ubicacion h2{ margin:20px 0 10px; font-family:var(--sport); text-align:left; }
+    .map-embed{ width:100%; height:300px; border-radius:12px; border:0; }
 
-    details{
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:10px 14px;
-      margin-bottom:10px;
-      background:#fff;
-    }
+    .legal{ padding:36px 0; }
+    .legal h2{ text-align:center; font-family:var(--sport); }
+    .legal .columns{ display:grid; grid-template-columns:repeat(2,1fr); gap:16px; max-width:1000px; margin:0 auto; }
+    .legal-update{ text-align:center; margin-top:10px; color:var(--muted); }
 
-    summary{
-      cursor:pointer;
-      font-weight:900;
-    }
+    .pagos{ padding:36px 0; text-align:center; }
+    .pagos h2{ font-family:var(--sport); margin-bottom:18px; }
+    .pagos-logos{ display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); justify-items:center; align-items:center; gap:18px 28px; margin-top:8px; }
+    .pagos-logos img{ max-width:100%; height:34px; display:block; }
 
-    #ubicacion h2{
-      margin:20px 0 10px;
-      font-family:var(--sport);
-      text-align:left;
-    }
+    footer{ text-align:center; padding:18px; color:var(--muted); }
 
-    .map-embed{
-      width:100%;
-      height:300px;
-      border-radius:12px;
-      border:0;
-    }
+    /* =========================== WHATSAPP FAB =========================== */
+    .wa-fab{ position:fixed; bottom:16px; right:16px; width:56px; height:56px; border-radius:50%; display:grid; place-items:center; background:#25d366; color:#fff; font-size:26px; box-shadow:0 16px 40px rgba(0,0,0,.25); z-index:70; }
 
-    .legal{
-      padding:36px 0;
-    }
-
-    .legal h2{
-      text-align:center;
-      font-family:var(--sport);
-    }
-
-    .legal .columns{
-      display:grid;
-      grid-template-columns:repeat(2,1fr);
-      gap:16px;
-      max-width:1000px;
-      margin:0 auto;
-    }
-
-    .legal-update{
-      text-align:center;
-      margin-top:10px;
-      color:var(--muted);
-    }
-
-    .pagos{
-      padding:36px 0;
-      text-align:center;
-    }
-
-    .pagos h2{
-      font-family:var(--sport);
-    }
-
-    .pagos-logos{
-      display:flex;
-      flex-wrap:wrap;
-      gap:28px;
-      justify-content:center;
-      align-items:center;
-      font-size:34px;
-    }
-
-    .pagos-logos i{
-      color:var(--ink);
-    }
-
-    footer{
-      text-align:center;
-      padding:18px;
-      color:var(--muted);
-    }
-
-    /* ===========================
-       WHATSAPP FAB
-       =========================== */
-
-    .wa-fab{
-      position:fixed;
-      bottom:16px;
-      right:16px;
-      width:56px;
-      height:56px;
-      border-radius:50%;
-      display:grid;
-      place-items:center;
-      background:#25d366;
-      color:#fff;
-      font-size:26px;
-      box-shadow:0 16px 40px rgba(0,0,0,.25);
-      z-index:70;
-    }
-
-    /* ===========================
-       MEDIA QUERIES
-       =========================== */
-
-    @media (max-width:1024px){
-      .feature-grid{
-        grid-template-columns: repeat(2, minmax(0,1fr));
-      }
-    }
-
-    @media (max-width:900px){
-      .legal .columns{
-        grid-template-columns:1fr;
-      }
-    }
-
-    @media (max-width:768px){
-      nav.menu{
-        display:none;
-      }
-
-      .burger{
-        display:grid;
-      }
-
-      .trustbar{
-        display:none;
-      }
-    }
-
+    /* =========================== MEDIA QUERIES =========================== */
+    @media (max-width:1024px){ .feature-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+    @media (max-width:900px){ .legal .columns{ grid-template-columns:1fr; } }
+    @media (max-width:768px){ nav.menu{ display:none; } .burger{ display:grid; } .trustbar{ display:none; } }
     @media (max-width:640px){
-      .grid{
-        grid-template-columns:repeat(2,1fr);
-        gap:10px;
-      }
+      .grid{ grid-template-columns:repeat(2,1fr); gap:10px; }
+      .card-media{ margin:6px; border-radius:10px; aspect-ratio:1/1; }
+      .chip-name{ display:block; margin:6px 6px 10px; padding:8px 10px; border-radius:10px; background:#111; color:#fff; font-weight:900; font-size:.88rem; text-align:center; letter-spacing:.02em; }
+      .card-body, .card-bottom, .carousel-dots{ display:none !important; }
+    }
 
-      .card-media{
-        margin:6px;
-        border-radius:10px;
-        aspect-ratio:1/1;
-      }
-
-      .chip-name{
-        display:block;
-        margin:6px 6px 10px;
-        padding:8px 10px;
-        border-radius:10px;
-        background:#111;
-        color:#fff;
-        font-weight:900;
-        font-size:.88rem;
-        text-align:center;
-        letter-spacing:.02em;
-      }
-
-      .card-body,
-      .card-bottom,
-      .carousel-dots{
-        display:none !important;
-      }
+    /* Respeta accesibilidad/usuarios con menos movimiento */
+    @media (prefers-reduced-motion: reduce){
+      .hero video{ animation:none; transition:none; }
     }
   </style>
 </head>
 <body>
-
   <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
 
   <!-- HEADER -->
@@ -860,12 +224,12 @@
     <div class="container nav">
       <div class="brand">
         <img src="Img/0-removebg-preview.png" alt="SCOOT SHOP logo" decoding="async" fetchpriority="high">
-        <span>Versatil</span>
+        <span>Versátil</span>
       </div>
 
       <!-- Menú escritorio -->
       <nav class="menu" aria-label="Navegación principal">
-        <a href="#">Inicio</a>
+        <a href="#" aria-current="page">Inicio</a>
         <a href="#comprar">Productos</a>
         <a href="#faq">Preguntas</a>
         <a href="#ubicacion">Ubicación</a>
@@ -940,6 +304,12 @@
       <video id="heroVideo" muted playsinline autoplay loop preload="metadata" poster="Img-N7MAX/1.jpg">
         <source src="completo.mp4" type="video/mp4">
       </video>
+      <noscript>
+        <div style="padding:40px 16px; max-width:760px; margin:auto;">
+          <h1>Scooters eléctricos urbanos</h1>
+          <p>Si no ves el video, habilita JavaScript o carga la página completa.</p>
+        </div>
+      </noscript>
       <div>
         <h1>G2 Y T10</h1>
         <a class="cta-btn" href="#series-g" aria-label="Ver Series GT">
@@ -1096,7 +466,7 @@
     <section class="container" aria-label="Lista de productos Series G">
       <div class="grid">
         <!-- G2 -->
-        <article class="card" id="p-g5" tabindex="0"
+        <article class="card" id="p-g2" tabindex="0"
           data-name="G2" data-was="780 €" data-now="380 €"
           data-spec="40 km · 600 W · 18 kg" data-link="g2.html" data-wa="https://wa.me/34666318747"
           aria-label="G2 — Patinete eléctrico de alta potencia">
@@ -1140,7 +510,7 @@
         </article>
 
         <!-- T10 -->
-        <article class="card" id="p-g7" tabindex="0"
+        <article class="card" id="p-t10" tabindex="0"
           data-name="T10" data-was="850 €" data-now="450 €"
           data-spec="45 km · 700 W · 20 kg" data-link="t10.html" data-wa="https://wa.me/34666318747"
           aria-label="T10 — Patinete eléctrico Ultra">
@@ -1267,12 +637,7 @@
     <!-- UBICACIÓN -->
     <section id="ubicacion" class="container">
       <h2>Ubicación</h2>
-      <iframe
-        class="map-embed"
-        src="https://www.google.com/maps?q=Silla%20Valencia&output=embed"
-        loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade">
-      </iframe>
+      <iframe class="map-embed" src="https://www.google.com/maps?q=Silla%20Valencia&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
     </section>
 
     <!-- LEGAL -->
@@ -1325,13 +690,7 @@
     <section class="pagos">
       <div class="container">
         <h2>Métodos de pago aceptados</h2>
-        <div class="pagos-logos" aria-label="Métodos de pago">
-          <i class="fab fa-paypal" title="PayPal" aria-hidden="true"></i>
-          <i class="fas fa-piggy-bank" title="Transferencia bancaria" aria-hidden="true"></i>
-          <i class="fas fa-mobile-screen" title="Bizum" aria-hidden="true"></i>
-          <i class="fas fa-store" title="Wallapop" aria-hidden="true"></i>
-          <i class="fas fa-shirt" title="Vinted" aria-hidden="true"></i>
-        </div>
+        <div class="pagos-logos" aria-label="Métodos de pago"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/PayPal%202024.svg" alt="PayPal" loading="lazy" decoding="async"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Bizum.svg" alt="Bizum" loading="lazy" decoding="async"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/BBVA%20logo%202025.svg" alt="BBVA" loading="lazy" decoding="async"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Banco%20Santander%20Logotipo.svg" alt="Banco Santander" loading="lazy" decoding="async"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Logo%20CaixaBank.svg" alt="CaixaBank" loading="lazy" decoding="async"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/ING%20Group%20N.V.%20Logo.svg" alt="ING" loading="lazy" decoding="async"></div>
       </div>
       <footer>
         © <span id="y"></span> SCOOT SHOP ·
@@ -1341,7 +700,7 @@
     </section>
   </main>
 
-  <!-- JSON-LD básico (SEO) -->
+  <!-- JSON-LD (SEO) -->
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
@@ -1352,7 +711,14 @@
     "sameAs":[
       "https://www.instagram.com/scootshopping",
       "https://www.facebook.com/61579248524907"
-    ]
+    ],
+    "contactPoint": [{
+      "@type":"ContactPoint",
+      "telephone":"+34-666-318-747",
+      "contactType":"customer support",
+      "areaServed":"ES",
+      "availableLanguage":["es"]
+    }]
   }
   </script>
 
@@ -1369,6 +735,7 @@
           "name":"N7PRO — Patinete eléctrico urbano",
           "image":["https://tudominio.example/Img-N7PRO/1.jpg"],
           "brand":{"@type":"Brand","name":"Scoot Shop"},
+          "aggregateRating":{"@type":"AggregateRating","ratingValue":"4.9","reviewCount":"128"},
           "offers":{
             "@type":"Offer",
             "priceCurrency":"EUR",
@@ -1386,6 +753,7 @@
           "name":"N7MAX — Patinete eléctrico de alta potencia",
           "image":["https://tudominio.example/Img-N7MAX/1.jpg"],
           "brand":{"@type":"Brand","name":"Scoot Shop"},
+          "aggregateRating":{"@type":"AggregateRating","ratingValue":"4.8","reviewCount":"203"},
           "offers":{
             "@type":"Offer",
             "priceCurrency":"EUR",
@@ -1403,6 +771,7 @@
           "name":"G2 — Patinete eléctrico de alta potencia",
           "image":["https://tudominio.example/Img-G2/1.jpg"],
           "brand":{"@type":"Brand","name":"Scoot Shop"},
+          "aggregateRating":{"@type":"AggregateRating","ratingValue":"4.7","reviewCount":"239"},
           "offers":{
             "@type":"Offer",
             "priceCurrency":"EUR",
@@ -1420,6 +789,7 @@
           "name":"T10 — Patinete eléctrico Ultra",
           "image":["https://tudominio.example/Img-T10/1.jpg"],
           "brand":{"@type":"Brand","name":"Scoot Shop"},
+          "aggregateRating":{"@type":"AggregateRating","ratingValue":"4.8","reviewCount":"42"},
           "offers":{
             "@type":"Offer",
             "priceCurrency":"EUR",
@@ -1437,6 +807,7 @@
           "name":"IX3 — Patinete eléctrico Serie IX",
           "image":["https://tudominio.example/Img-IX3/1.jpg"],
           "brand":{"@type":"Brand","name":"Scoot Shop"},
+          "aggregateRating":{"@type":"AggregateRating","ratingValue":"4.8","reviewCount":"203"},
           "offers":{
             "@type":"Offer",
             "priceCurrency":"EUR",
@@ -1450,23 +821,17 @@
   }
   </script>
 
-  <script>
+  <script defer>
     (function(){
       'use strict';
 
       document.addEventListener('DOMContentLoaded', function(){
-
         /* Año dinámico */
         var yearEl = document.getElementById('y');
-        if(yearEl){
-          yearEl.textContent = new Date().getFullYear();
-        }
+        if(yearEl){ yearEl.textContent = new Date().getFullYear(); }
 
         /* 100vh móvil con --vh */
-        function setVh(){
-          var vh = window.innerHeight * 0.01;
-          document.documentElement.style.setProperty('--vh', vh + 'px');
-        }
+        function setVh(){ var vh = window.innerHeight * 0.01; document.documentElement.style.setProperty('--vh', vh + 'px'); }
         setVh();
         window.addEventListener('resize', setVh, {passive:true});
         window.addEventListener('orientationchange', setVh, {passive:true});
@@ -1475,17 +840,10 @@
         (function(){
           var hv = document.getElementById('heroVideo');
           if(!hv) return;
-          function markReady(){
-            hv.classList.add('ready');
-          }
-          hv.muted = true;
-          hv.playsInline = true;
-          ['loadeddata','canplay','playing'].forEach(function(ev){
-            hv.addEventListener(ev, markReady, {once:true});
-          });
-          if(hv.play){
-            hv.play().catch(function(){});
-          }
+          function markReady(){ hv.classList.add('ready'); }
+          hv.muted = true; hv.playsInline = true;
+          ['loadeddata','canplay','playing'].forEach(function(ev){ hv.addEventListener(ev, markReady, {once:true}); });
+          if(hv.play){ hv.play().catch(function(){}); }
         })();
 
         /* Carruseles: dots + swipe */
@@ -1496,133 +854,46 @@
           if(!slides.length) return;
 
           var dotsWrap = c.parentElement.querySelector('.carousel-dots');
-          var dots = [];
-          var i = 0;
-          var dragging = false;
-          var startX = 0;
-          var currentX = 0;
-          var startTime = 0;
+          var dots = []; var i = 0; var dragging = false; var startX = 0; var currentX = 0; var startTime = 0;
 
           slides.forEach(function(_, idx){
             if(!dotsWrap) return;
             var b = document.createElement('button');
-            b.type = 'button';
-            b.className = 'dot';
-            b.addEventListener('click', function(ev){
-              ev.stopPropagation();
-              go(idx,true);
-            });
-            dotsWrap.appendChild(b);
-            dots.push(b);
+            b.type = 'button'; b.className = 'dot';
+            b.addEventListener('click', function(ev){ ev.stopPropagation(); go(idx,true); });
+            dotsWrap.appendChild(b); dots.push(b);
           });
 
-          function updateDots(){
-            dots.forEach(function(d, idx){
-              d.classList.toggle('active', idx === i);
-            });
-          }
-
-          function go(idx, animate){
-            if(animate === void 0) animate = true;
-            i = (idx + slides.length) % slides.length;
-            if(!animate){
-              track.style.transition = 'none';
-            }
-            track.style.transform = 'translateX(' + (-i*100) + '%)';
-            if(!animate){
-              requestAnimationFrame(function(){
-                track.style.transition = 'transform .3s';
-              });
-            }
-            updateDots();
-          }
+          function updateDots(){ dots.forEach(function(d, idx){ d.classList.toggle('active', idx === i); }); }
+          function go(idx, animate){ if(animate===void 0) animate = true; i = (idx + slides.length) % slides.length; if(!animate){ track.style.transition = 'none'; }
+            track.style.transform = 'translateX(' + (-i*100) + '%)'; if(!animate){ requestAnimationFrame(function(){ track.style.transition = 'transform .3s'; }); } updateDots(); }
 
           go(0,false);
 
-          function threshold(){
-            return Math.max(40, c.clientWidth * 0.12);
-          }
+          function threshold(){ return Math.max(40, c.clientWidth * 0.12); }
+          function onStart(x){ dragging = true; startX = x; currentX = x; startTime = Date.now(); track.style.transition = 'none'; track.classList.add('dragging'); }
+          function onMove(x){ if(!dragging) return; currentX = x; var dx = currentX - startX; track.style.transform = 'translateX(calc(' + (-i*100) + '% + ' + dx + 'px))'; }
+          function onEnd(){ if(!dragging) return; dragging = false; var dx = currentX - startX; var dt = Date.now() - startTime; track.classList.remove('dragging'); var swipe = (Math.abs(dx) > threshold()) || (Math.abs(dx) > 30 && dt < 200); if(swipe){ i += (dx < 0 ? 1 : -1); } go(i,false); }
 
-          function onStart(x){
-            dragging = true;
-            startX = x;
-            currentX = x;
-            startTime = Date.now();
-            track.style.transition = 'none';
-            track.classList.add('dragging');
-          }
+          c.addEventListener('touchstart', function(e){ if(!e.changedTouches || !e.changedTouches[0]) return; onStart(e.changedTouches[0].clientX); }, {passive:true});
+          c.addEventListener('touchmove', function(e){ if(!e.changedTouches || !e.changedTouches[0]) return; onMove(e.changedTouches[0].clientX); }, {passive:true});
+          c.addEventListener('touchend', function(){ onEnd(); }, {passive:true});
 
-          function onMove(x){
-            if(!dragging) return;
-            currentX = x;
-            var dx = currentX - startX;
-            track.style.transform = 'translateX(calc(' + (-i*100) + '% + ' + dx + 'px))';
-          }
-
-          function onEnd(){
-            if(!dragging) return;
-            dragging = false;
-            var dx = currentX - startX;
-            var dt = Date.now() - startTime;
-            track.classList.remove('dragging');
-            var swipe = (Math.abs(dx) > threshold()) || (Math.abs(dx) > 30 && dt < 200);
-            if(swipe){
-              i += (dx < 0 ? 1 : -1);
-            }
-            go(i,false);
-          }
-
-          c.addEventListener('touchstart', function(e){
-            if(!e.changedTouches || !e.changedTouches[0]) return;
-            onStart(e.changedTouches[0].clientX);
-          }, {passive:true});
-
-          c.addEventListener('touchmove', function(e){
-            if(!e.changedTouches || !e.changedTouches[0]) return;
-            onMove(e.changedTouches[0].clientX);
-          }, {passive:true});
-
-          c.addEventListener('touchend', function(){
-            onEnd();
-          }, {passive:true});
-
-          c.addEventListener('mousedown', function(e){
-            e.preventDefault();
-            onStart(e.clientX);
-          });
-
-          window.addEventListener('mousemove', function(e){
-            onMove(e.clientX);
-          });
-
-          window.addEventListener('mouseup', function(){
-            onEnd();
-          });
-
-          window.addEventListener('resize', function(){
-            go(i,false);
-          }, {passive:true});
+          c.addEventListener('mousedown', function(e){ e.preventDefault(); onStart(e.clientX); });
+          window.addEventListener('mousemove', function(e){ onMove(e.clientX); });
+          window.addEventListener('mouseup', function(){ onEnd(); });
+          window.addEventListener('resize', function(){ go(i,false); }, {passive:true});
         });
 
         /* Click en tarjeta + WhatsApp dinámico */
         document.querySelectorAll('.card').forEach(function(card){
           var link = card.dataset.link;
           if(link){
-            card.addEventListener('click', function(){
-              window.location.href = link;
-            });
-            card.addEventListener('keydown', function(e){
-              if(e.key === 'Enter'){
-                window.location.href = link;
-              }
-            });
+            card.addEventListener('click', function(){ window.location.href = link; });
+            card.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ window.location.href = link; } });
           }
 
-          card.querySelectorAll('[data-buy-button]').forEach(function(el){
-            el.addEventListener('click', function(e){
-              e.stopPropagation();
-            });
-          });
+          card.querySelectorAll('[data-buy-button]').forEach(function(el){ el.addEventListener('click', function(e){ e.stopPropagation(); }); });
 
           var waBtn = card.querySelector('.btn-whatsapp');
           if(waBtn){
@@ -1630,9 +901,7 @@
             var name = card.dataset.name || 'producto';
             var spec = card.dataset.spec || '';
             var thePrice = card.dataset.now || '';
-            var msg = 'Hola! Me interesa el ' + name + '. ' +
-                      (spec ? '(' + spec + ') ' : '') +
-                      'Precio: ' + thePrice + '. ¿Está disponible?';
+            var msg = 'Hola! Me interesa el ' + name + '. ' + (spec ? '(' + spec + ') ' : '') + 'Precio: ' + thePrice + '. ¿Está disponible?';
             var url = wa + '?text=' + encodeURIComponent(msg);
             waBtn.href = url;
             waBtn.setAttribute('aria-label', 'Comprar ' + name + ' por WhatsApp');
@@ -1645,59 +914,19 @@
           var panel = document.getElementById('mobileMenu');
           var backdrop = document.getElementById('mmBackdrop');
           var closeBtn = document.getElementById('mmClose');
-
           if(!burger || !panel || !backdrop || !closeBtn) return;
 
-          function lockScroll(lock){
-            document.body.style.overflow = lock ? 'hidden' : '';
-            document.documentElement.style.overscrollBehavior = lock ? 'contain' : '';
-          }
-
-          function openMenu(){
-            panel.hidden = false;
-            backdrop.hidden = false;
-            requestAnimationFrame(function(){
-              panel.classList.add('open');
-              backdrop.classList.add('show');
-            });
-            burger.setAttribute('aria-expanded','true');
-            lockScroll(true);
-          }
-
-          function closeMenu(){
-            panel.classList.remove('open');
-            backdrop.classList.remove('show');
-            setTimeout(function(){
-              panel.hidden = true;
-              backdrop.hidden = true;
-            }, 240);
-            burger.setAttribute('aria-expanded','false');
-            lockScroll(false);
-          }
-
-          function toggle(){
-            if(panel.hidden){
-              openMenu();
-            } else{
-              closeMenu();
-            }
-          }
+          function lockScroll(lock){ document.body.style.overflow = lock ? 'hidden' : ''; document.documentElement.style.overscrollBehavior = lock ? 'contain' : ''; }
+          function openMenu(){ panel.hidden = false; backdrop.hidden = false; requestAnimationFrame(function(){ panel.classList.add('open'); backdrop.classList.add('show'); }); burger.setAttribute('aria-expanded','true'); lockScroll(true); }
+          function closeMenu(){ panel.classList.remove('open'); backdrop.classList.remove('show'); setTimeout(function(){ panel.hidden = true; backdrop.hidden = true; }, 240); burger.setAttribute('aria-expanded','false'); lockScroll(false); }
+          function toggle(){ if(panel.hidden){ openMenu(); } else { closeMenu(); } }
 
           burger.addEventListener('click', toggle);
           backdrop.addEventListener('click', closeMenu);
           closeBtn.addEventListener('click', closeMenu);
-
-          panel.querySelectorAll('a').forEach(function(a){
-            a.addEventListener('click', closeMenu);
-          });
-
-          window.addEventListener('keydown', function(e){
-            if(e.key === 'Escape' && !panel.hidden){
-              closeMenu();
-            }
-          });
+          panel.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', closeMenu); });
+          window.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !panel.hidden){ closeMenu(); } });
         })();
-
       });
     })();
   </script>
