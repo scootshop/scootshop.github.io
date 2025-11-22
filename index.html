@@ -29,9 +29,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
 
-  <!-- Precarga de recursos críticos (LCP/hero y primera imagen de producto) -->
+  <!-- Precarga de recursos críticos (LCP/hero y primeras imágenes) -->
   <link rel="preload" as="image" href="Img-N7PRO/1.jpg" fetchpriority="high">
   <link rel="preload" as="image" href="Img-G2/1.jpg">
+  <link rel="preload" as="image" href="Img-S4/1.jpg">
 
   <!-- Tipografías + Iconos -->
   <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
@@ -214,18 +215,18 @@
     @media (prefers-reduced-motion: reduce){
       .hero video{ animation:none; transition:none; }
     }
-    /* Subrayado degradado en títulos de sección .series */
-.series h2::after{
-  content:"";
-  display:block;
-  width:64px;
-  height:4px;
-  margin:8px auto 0;
-  border-radius:999px;
-  background:linear-gradient(90deg, var(--primary), #ff6b6b);
-  opacity:.9;
-}
 
+    /* Subrayado degradado en títulos de sección .series */
+    .series h2::after{
+      content:"";
+      display:block;
+      width:64px;
+      height:4px;
+      margin:8px auto 0;
+      border-radius:999px;
+      background:linear-gradient(90deg, var(--primary), #ff6b6b);
+      opacity:.9;
+    }
   </style>
 </head>
 <body>
@@ -313,7 +314,7 @@
   <main id="main-content">
     <!-- HERO -->
     <section class="hero" aria-label="Video hero">
-      <video id="heroVideo" muted playsinline autoplay loop preload="metadata" poster="Img-N7MAX/1.jpg">
+      <video id="heroVideo" muted playsinline autoplay loop preload="metadata" poster="Img-S4/1.jpg">
         <source src="completo.mp4" type="video/mp4">
       </video>
       <noscript>
@@ -415,33 +416,28 @@
           </div>
         </article>
 
-        <!-- N7MAX -->
-        <article class="card" id="p-n7max" tabindex="0"
-          data-name="N7MAX" data-was="937,50 €" data-now="375 €"
-          data-spec="40–45 km · 800 W · 24 kg" data-link="n7max.html" data-wa="https://wa.me/34666318747"
-          aria-label="N7MAX — Patinete eléctrico de alta potencia">
+        <!-- S4 (antes N7MAX) -->
+        <article class="card" id="p-s4" tabindex="0"
+          data-name="S4" data-was="—" data-now="380 €"
+          data-spec="40–45 km · 500 W · 24 kg" data-link="s4.html" data-wa="https://wa.me/34666318747"
+          aria-label="ZWheel MASCOTER S4 — Homologado DGT">
           <div class="card-media">
             <div class="carousel" data-carousel>
               <div class="carousel-track">
-                <img src="Img-N7MAX/1.jpg" alt="N7MAX vista 1" loading="eager" fetchpriority="high" decoding="async">
-                <img src="Img-N7MAX/2.jpg" alt="N7MAX vista 2" loading="lazy" decoding="async">
-                <img src="Img-N7MAX/3.jpg" alt="N7MAX vista 3" loading="lazy" decoding="async">
-                <img src="Img-N7MAX/4.jpg" alt="N7MAX vista 4" loading="lazy" decoding="async">
-                <img src="Img-N7MAX/5.jpg" alt="N7MAX vista 5" loading="lazy" decoding="async">
-                <img src="Img-N7MAX/6.jpg" alt="N7MAX vista 6" loading="lazy" decoding="async">
-                <img src="Img-N7MAX/7.jpg" alt="N7MAX vista 7" loading="lazy" decoding="async">
-                <img src="Img-N7MAX/8.jpg" alt="N7MAX vista 8" loading="lazy" decoding="async">
-                <img src="Img-N7MAX/9.jpg" alt="N7MAX vista 9" loading="lazy" decoding="async">
-                <img src="Img-N7MAX/10.jpg" alt="N7MAX vista 10" loading="lazy" decoding="async">
+                <img src="Img-S4/1.jpg" alt="S4 vista 1" loading="eager" fetchpriority="high" decoding="async">
+                <img src="Img-S4/5.jpg" alt="S4 plegado" loading="lazy" decoding="async">
+                <img src="Img-S4/2.jpg" alt="S4 freno trasero y amortiguación" loading="lazy" decoding="async">
+                <img src="Img-S4/3.jpg" alt="S4 rueda delantera y suspensión" loading="lazy" decoding="async">
+                <img src="Img-S4/4.jpg" alt="S4 manillar y display" loading="lazy" decoding="async">
               </div>
             </div>
             <div class="carousel-dots" aria-hidden="true"></div>
           </div>
-          <span class="chip-name">N7MAX</span>
+          <span class="chip-name">S4</span>
 
           <div class="card-body">
-            <div class="card-brand">Scoot Shop</div>
-            <div class="title">N7MAX — Patinete eléctrico de alta potencia</div>
+            <div class="card-brand">ZWheel</div>
+            <div class="title">ZWheel MASCOTER S4 — Homologado por la DGT</div>
             <div class="rating" aria-label="Valoración 4,8 de 5">
               <span aria-hidden="true">
                 <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
@@ -452,12 +448,12 @@
             </div>
           </div>
           <div class="card-bottom">
-            <div class="price-row" aria-label="Precio N7MAX">
-              <div class="price-now">375 €</div>
-              <div class="price-was">937,50 €</div>
+            <div class="price-row" aria-label="Precio S4">
+              <div class="price-now">380 €</div>
+              <div class="price-was">—</div>
             </div>
             <div class="btn-row">
-              <a class="btn-primary" href="n7max.html" data-buy-button>Vista</a>
+              <a class="btn-primary" href="s4.html" data-buy-button>Vista</a>
               <a class="btn-whatsapp" href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer" data-buy-button>
                 <i class="fab fa-whatsapp"></i>Comprar
               </a>
@@ -762,16 +758,16 @@
         "position":2,
         "item":{
           "@type":"Product",
-          "name":"N7MAX — Patinete eléctrico de alta potencia",
-          "image":["https://tudominio.example/Img-N7MAX/1.jpg"],
-          "brand":{"@type":"Brand","name":"Scoot Shop"},
+          "name":"ZWheel MASCOTER S4 — Homologado por la DGT",
+          "image":["https://tudominio.example/Img-S4/1.jpg"],
+          "brand":{"@type":"Brand","name":"ZWheel"},
           "aggregateRating":{"@type":"AggregateRating","ratingValue":"4.8","reviewCount":"203"},
           "offers":{
             "@type":"Offer",
             "priceCurrency":"EUR",
-            "price":"375",
+            "price":"380",
             "availability":"https://schema.org/InStock",
-            "url":"https://tudominio.example/n7max.html"
+            "url":"https://tudominio.example/s4.html"
           }
         }
       },
