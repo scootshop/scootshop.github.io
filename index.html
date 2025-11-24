@@ -29,11 +29,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
 
-  <!-- Precargas -->
-  <link rel="preload" as="image" href="Img-S4/1.jpg">
-  <link rel="preload" as="video" href="media/hero.mp4" type="video/mp4">
-  <link rel="preload" as="video" href="media/hero.webm" type="video/webm">
-
   <!-- Tipografías + Iconos -->
   <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
@@ -105,29 +100,252 @@
     .trustbar .inner{ display:flex; gap:28px; align-items:center; justify-content:center; padding:8px 0; }
     .trustbar i{ opacity:.9; }
 
-    /* =============== MOBILE MENU (como la primera versión) =============== */
+    /* ========= MENÚ MÓVIL: DISEÑO MEJORADO ========= */
     .mm-backdrop{
-      position:fixed; inset:0; background:rgba(0,0,0,.4);
-      opacity:0; pointer-events:none; transition:opacity .24s ease; z-index:75;
+      position:fixed;
+      inset:0;
+      background:rgba(15,23,42,.45);
+      z-index:100;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .22s ease-out;
     }
-    .mm-backdrop.show{ opacity:1; pointer-events:auto; }
+    .mm-backdrop.show{
+      opacity:1;
+      pointer-events:auto;
+    }
+
     .mm-panel{
-      position:fixed; top:0; right:0; bottom:0; width:min(320px,85vw);
-      background:#fff; border-left:1px solid var(--line);
-      transform:translateX(100%); transition:transform .24s ease; z-index:90;
-      display:grid; grid-template-rows:auto 1fr auto;
-    }
+  position:fixed;
+  inset:0 0 0 auto;
+  width:min(420px,92vw);
+  background:radial-gradient(circle at top left,#fdf2f2 0,#ffffff 42%,#f9fafb 100%);
+  border-left:1px solid var(--line);
+  z-index:101;
+  transform:translateX(100%);
+  transition:transform .24s ease-out;
+  display:flex;
+  flex-direction:column;
+  box-shadow:none; /* ← limpio, sin brillos */
+}
+
     .mm-panel.open{ transform:translateX(0); }
-    .mm-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 16px; border-bottom:1px solid var(--line); }
-    .mm-brand{ display:flex; align-items:center; gap:10px; font-weight:900; }
-    .mm-brand img{ width:36px; height:36px; object-fit:contain; }
-    .mm-close{ width:40px; height:40px; border-radius:10px; border:1px solid var(--line); background:#fff; font-size:18px; }
-    .mm-content{ padding:14px 16px; display:grid; gap:12px; }
-    .mm-link{ display:block; padding:12px 12px; border:1px solid var(--line); border-radius:12px; font-weight:900; }
-    .mm-link i{ width:20px; margin-right:8px; }
-    .mm-icons{ display:flex; gap:14px; margin-top:8px; font-size:20px; }
-    .mm-foot{ padding:14px 16px; border-top:1px solid var(--line); }
-    .mm-cta{ display:flex; align-items:center; justify-content:center; gap:10px; padding:12px; border-radius:12px; background:#25d366; color:#fff; font-weight:900; }
+
+    .mm-head{
+      padding:calc(env(safe-area-inset-top,0px)+8px) 16px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      border-bottom:1px solid var(--line);
+      backdrop-filter:blur(10px);
+      background:linear-gradient(to bottom,rgba(255,255,255,.95),rgba(255,255,255,.9));
+    }
+
+    .mm-brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .mm-brand img{
+      height:36px;
+      width:auto;
+      border-radius:12px;
+      border:1px solid rgba(0,0,0,.04);
+      background:#fff;
+      padding:3px;
+    }
+
+    .mm-brand-text{
+      display:flex;
+      flex-direction:column;
+      line-height:1.15;
+    }
+
+    .mm-brand-name{
+      font-weight:900;
+      font-size:.95rem;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .mm-brand-tag{
+      font-size:.78rem;
+      color:var(--muted);
+    }
+
+    .mm-close{
+      width:44px;
+      height:44px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#fff;
+      cursor:pointer;
+      font-size:18px;
+      display:grid;
+      place-items:center;
+      box-shadow:0 6px 20px rgba(15,23,42,.06);
+    }
+
+    .mm-content{
+      padding:12px 16px 16px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      overflow:auto;
+      flex:1;
+    }
+
+    .mm-section-label{
+      text-transform:uppercase;
+      font-size:.7rem;
+      letter-spacing:.18em;
+      color:var(--muted);
+      font-weight:800;
+      margin-bottom:4px;
+      opacity:.9;
+    }
+
+    .mm-links-group{
+      display:grid;
+      gap:8px;
+      margin-bottom:10px;
+    }
+
+    .mm-link{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid #e5e7eb;
+      background:rgba(255,255,255,.9);
+      font-weight:800;
+      text-transform:uppercase;
+      font-size:.9rem;
+      position:relative;
+      box-shadow:0 8px 24px rgba(15,23,42,.03);
+      transition:transform .12s ease-out, box-shadow .12s ease-out, border-color .12s;
+    }
+
+    .mm-link-main{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .mm-link i{
+      width:36px;
+      height:36px;
+      border-radius:999px;
+      display:grid;
+      place-items:center;
+      border:1px solid #e5e7eb;
+      background:#f9fafb;
+      font-size:16px;
+    }
+
+    .mm-link-text{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+
+    .mm-link-label{
+      font-size:.9rem;
+    }
+
+    .mm-link-sub{
+      font-size:.7rem;
+      font-weight:600;
+      text-transform:none;
+      color:var(--muted);
+    }
+
+    .mm-link-chevron{
+      font-size:.9rem;
+      color:#9ca3af;
+    }
+
+    .mm-link:hover{
+      transform:translateY(-1px);
+      box-shadow:0 14px 30px rgba(15,23,42,.08);
+      border-color:#d1d5db;
+    }
+
+    .mm-link--primary{
+      border-color:rgba(185,30,30,.18);
+      background:linear-gradient(135deg,rgba(185,30,30,.06),#ffffff);
+    }
+
+    .mm-link--primary i{
+      background:#111;
+      color:#fff;
+      border-color:#111;
+    }
+
+    .mm-icons-label{
+      font-size:.7rem;
+      text-transform:uppercase;
+      letter-spacing:.16em;
+      color:var(--muted);
+      font-weight:800;
+      margin:6px 0 4px;
+    }
+
+    .mm-icons{
+      display:flex;
+      gap:10px;
+      margin-top:2px;
+    }
+
+    .mm-icons a{
+      flex:0 0 auto;
+      width:44px;
+      height:44px;
+      display:grid;
+      place-items:center;
+      border-radius:999px;
+      border:1px solid #e5e7eb;
+      background:#ffffff;
+      font-size:18px;
+      box-shadow:0 10px 24px rgba(15,23,42,.06);
+      transition:transform .1s ease-out, box-shadow .1s ease-out;
+    }
+
+    .mm-icons a:hover{
+      transform:translateY(-1px);
+      box-shadow:0 14px 32px rgba(15,23,42,.12);
+    }
+
+    .mm-foot{
+      padding:12px 16px calc(env(safe-area-inset-bottom,0px)+14px);
+      border-top:1px solid #e5e7eb;
+      background:linear-gradient(to top,#ffffff,rgba(255,255,255,.92));
+    }
+
+    .mm-cta{
+      display:flex;
+      width:100%;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding:11px 16px;
+      border-radius:999px;
+      font-weight:900;
+      background:#25d366;
+      color:#fff;
+      border:1px solid #22c15e;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      box-shadow:0 14px 36px rgba(22,163,74,.5);
+    }
+
+    .mm-cta i{
+      font-size:18px;
+    }
 
     /* ================= HERO ================= */
     .hero{ position:relative; min-height:calc(var(--vh) * 100); display:flex; align-items:center; justify-content:center; text-align:center; overflow:hidden; }
@@ -174,6 +392,7 @@
     .price-row{ display:flex; align-items:center; gap:8px; margin-bottom:6px; }
     .price-now{ font-size:1.06rem; font-weight:900; }
     .price-was{ color:#9aa0a6; text-decoration:line-through; font-weight:700; }
+
     .btn-row{ display:flex; gap:10px; }
     .btn-primary, .btn-whatsapp{ display:block; text-align:center; font-weight:900; border-radius:12px; padding:10px 12px; border:1px solid transparent; font-size:.95rem; }
     .btn-primary{ background:#111; color:#fff; border-color:#111; }
@@ -279,30 +498,98 @@
     </div>
   </header>
 
-  <!-- Backdrop + Panel móvil -->
+  <!-- MENÚ MÓVIL -->
   <div class="mm-backdrop" id="mmBackdrop" hidden></div>
   <nav class="mm-panel" id="mobileMenu" hidden aria-label="Menú móvil">
     <div class="mm-head">
       <div class="mm-brand">
         <img src="Img/0-removebg-preview.png" alt="Logo SCOOT SHOP" />
-        <span>SCOOT SHOP</span>
+        <div class="mm-brand-text">
+          <span class="mm-brand-name">SCOOT SHOP</span>
+          <span class="mm-brand-tag">Scooters eléctricos</span>
+        </div>
       </div>
       <button class="mm-close" id="mmClose" aria-label="Cerrar menú" type="button">
         <i class="fa-solid fa-xmark"></i>
       </button>
     </div>
+
     <div class="mm-content">
-      <a class="mm-link" href="#"><i class="fa-solid fa-house" aria-hidden="true"></i> Inicio</a>
-      <a class="mm-link" href="#comprar"><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i> Productos</a>
-      <a class="mm-link" href="#faq"><i class="fa-solid fa-circle-question" aria-hidden="true"></i> Preguntas</a>
-      <a class="mm-link" href="#ubicacion"><i class="fa-solid fa-location-dot" aria-hidden="true"></i> Ubicación</a>
-      <a class="mm-link" href="#legal"><i class="fa-solid fa-scale-balanced" aria-hidden="true"></i> Legal</a>
-      <div class="mm-icons" aria-label="Redes">
-        <a href="https://www.instagram.com/scootshopping" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
-        <a href="https://www.facebook.com/61579248524907" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook" aria-hidden="true"></i></a>
-        <a href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
+      <div class="mm-links-group">
+        <p class="mm-section-label">Navegación</p>
+
+        <a class="mm-link mm-link--primary" href="#">
+          <div class="mm-link-main">
+            <i class="fa-solid fa-house" aria-hidden="true"></i>
+            <div class="mm-link-text">
+              <span class="mm-link-label">Inicio</span>
+              <span class="mm-link-sub">Modelos destacados y novedades</span>
+            </div>
+          </div>
+          <span class="mm-link-chevron"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></span>
+        </a>
+
+        <a class="mm-link" href="#comprar">
+          <div class="mm-link-main">
+            <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
+            <div class="mm-link-text">
+              <span class="mm-link-label">Productos</span>
+              <span class="mm-link-sub">Series N, GT e IX</span>
+            </div>
+          </div>
+          <span class="mm-link-chevron"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></span>
+        </a>
+
+        <a class="mm-link" href="#faq">
+          <div class="mm-link-main">
+            <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
+            <div class="mm-link-text">
+              <span class="mm-link-label">Preguntas</span>
+              <span class="mm-link-sub">Envíos, garantía y devoluciones</span>
+            </div>
+          </div>
+          <span class="mm-link-chevron"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></span>
+        </a>
+
+        <a class="mm-link" href="#ubicacion">
+          <div class="mm-link-main">
+            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+            <div class="mm-link-text">
+              <span class="mm-link-label">Ubicación</span>
+              <span class="mm-link-sub">Silla y Catarroja (Valencia)</span>
+            </div>
+          </div>
+          <span class="mm-link-chevron"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></span>
+        </a>
+
+        <a class="mm-link" href="#legal">
+          <div class="mm-link-main">
+            <i class="fa-solid fa-scale-balanced" aria-hidden="true"></i>
+            <div class="mm-link-text">
+              <span class="mm-link-label">Legal</span>
+              <span class="mm-link-sub">Aviso legal y políticas</span>
+            </div>
+          </div>
+          <span class="mm-link-chevron"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></span>
+        </a>
+      </div>
+
+      <div>
+        <p class="mm-icons-label">Redes y contacto</p>
+        <div class="mm-icons" aria-label="Redes">
+          <a href="https://www.instagram.com/scootshopping" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+            <i class="fab fa-instagram" aria-hidden="true"></i>
+          </a>
+          <a href="https://www.facebook.com/61579248524907" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+            <i class="fab fa-facebook" aria-hidden="true"></i>
+          </a>
+          <a href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+            <i class="fab fa-whatsapp" aria-hidden="true"></i>
+          </a>
+        </div>
       </div>
     </div>
+
     <div class="mm-foot">
       <a class="mm-cta" href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer">
         <i class="fab fa-whatsapp" aria-hidden="true"></i> Escríbenos por WhatsApp
@@ -312,22 +599,21 @@
 
   <main id="main-content">
     <!-- HERO (video de fondo) -->
-   <section class="hero" aria-label="Video hero">
-  <video class="hero-bg"
-         autoplay
-         muted
-         loop
-         playsinline
-         poster="Img/NEGRO.png">
-    <source src="completo.webm" type="video/webm">
-    <source src="completo.mp4"  type="video/mp4">
-  </video>
-  <div>
-    <h1>T10</h1>
-    <p>Presentamos nuestros nuevos modelos de Alta y Ultra potencia. G2 y T10 — dos sombras en la ciudad.</p>
-  </div>
-</section>
-
+    <section class="hero" aria-label="Video hero">
+      <video class="hero-bg"
+             autoplay
+             muted
+             loop
+             playsinline
+             poster="Img/NEGRO.png">
+        <source src="completo.webm" type="video/webm">
+        <source src="completo.mp4"  type="video/mp4">
+      </video>
+      <div>
+        <h1>T10</h1>
+        <p>Presentamos nuestros nuevos modelos de Alta y Ultra potencia. G2 y T10 — dos sombras en la ciudad.</p>
+      </div>
+    </section>
 
     <!-- ¿POR QUÉ ELEGIRNOS? -->
     <section class="features" aria-label="¿Por qué elegirnos?">
@@ -758,7 +1044,10 @@
         if(yearEl){ yearEl.textContent = new Date().getFullYear(); }
 
         /* 100vh móvil con --vh */
-        function setVh(){ var vh = window.innerHeight * 0.01; document.documentElement.style.setProperty('--vh', vh + 'px'); }
+        function setVh(){
+          var vh = window.innerHeight * 0.01;
+          document.documentElement.style.setProperty('--vh', vh + 'px');
+        }
         setVh();
         window.addEventListener('resize', setVh, {passive:true});
         window.addEventListener('orientationchange', setVh, {passive:true});
@@ -782,18 +1071,55 @@
           });
 
           function updateDots(){ dots.forEach(function(d, idx){ d.classList.toggle('active', idx === i); }); }
-          function go(idx, animate){ if(animate===void 0) animate = true; i = (idx + slides.length) % slides.length; if(!animate){ track.style.transition = 'none'; }
-            track.style.transform = 'translateX(' + (-i*100) + '%)'; if(!animate){ requestAnimationFrame(function(){ track.style.transition = 'transform .3s'; }); } updateDots(); }
+          function go(idx, animate){
+            if(animate===void 0) animate = true;
+            i = (idx + slides.length) % slides.length;
+            if(!animate){ track.style.transition = 'none'; }
+            track.style.transform = 'translateX(' + (-i*100) + '%)';
+            if(!animate){
+              requestAnimationFrame(function(){ track.style.transition = 'transform .3s'; });
+            }
+            updateDots();
+          }
 
           go(0,false);
 
           function threshold(){ return Math.max(40, c.clientWidth * 0.12); }
-          function onStart(x){ dragging = true; startX = x; currentX = x; startTime = Date.now(); track.style.transition = 'none'; track.classList.add('dragging'); }
-          function onMove(x){ if(!dragging) return; currentX = x; var dx = currentX - startX; track.style.transform = 'translateX(calc(' + (-i*100) + '% + ' + dx + 'px))'; }
-          function onEnd(){ if(!dragging) return; dragging = false; var dx = currentX - startX; var dt = Date.now() - startTime; track.classList.remove('dragging'); var swipe = (Math.abs(dx) > threshold()) || (Math.abs(dx) > 30 && dt < 200); if(swipe){ i += (dx < 0 ? 1 : -1); } go(i,false); }
+          function onStart(x){
+            dragging = true;
+            startX = x;
+            currentX = x;
+            startTime = Date.now();
+            track.style.transition = 'none';
+            track.classList.add('dragging');
+          }
+          function onMove(x){
+            if(!dragging) return;
+            currentX = x;
+            var dx = currentX - startX;
+            track.style.transform = 'translateX(calc(' + (-i*100) + '% + ' + dx + 'px))';
+          }
+          function onEnd(){
+            if(!dragging) return;
+            dragging = false;
+            var dx = currentX - startX;
+            var dt = Date.now() - startTime;
+            track.classList.remove('dragging');
+            var swipe = (Math.abs(dx) > threshold()) || (Math.abs(dx) > 30 && dt < 200);
+            if(swipe){
+              i += (dx < 0 ? 1 : -1);
+            }
+            go(i,false);
+          }
 
-          c.addEventListener('touchstart', function(e){ if(!e.changedTouches || !e.changedTouches[0]) return; onStart(e.changedTouches[0].clientX); }, {passive:true});
-          c.addEventListener('touchmove', function(e){ if(!e.changedTouches || !e.changedTouches[0]) return; onMove(e.changedTouches[0].clientX); }, {passive:true});
+          c.addEventListener('touchstart', function(e){
+            if(!e.changedTouches || !e.changedTouches[0]) return;
+            onStart(e.changedTouches[0].clientX);
+          }, {passive:true});
+          c.addEventListener('touchmove', function(e){
+            if(!e.changedTouches || !e.changedTouches[0]) return;
+            onMove(e.changedTouches[0].clientX);
+          }, {passive:true});
           c.addEventListener('touchend', function(){ onEnd(); }, {passive:true});
 
           c.addEventListener('mousedown', function(e){ e.preventDefault(); onStart(e.clientX); });
@@ -810,7 +1136,9 @@
             card.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ window.location.href = link; } });
           }
 
-          card.querySelectorAll('[data-buy-button]').forEach(function(el){ el.addEventListener('click', function(e){ e.stopPropagation(); }); });
+          card.querySelectorAll('[data-buy-button]').forEach(function(el){
+            el.addEventListener('click', function(e){ e.stopPropagation(); });
+          });
 
           var waBtn = card.querySelector('.btn-whatsapp');
           if(waBtn){
@@ -825,7 +1153,7 @@
           }
         });
 
-        /* Menú móvil (drawer restaurado) */
+        /* Menú móvil */
         (function(){
           var burger = document.getElementById('burger');
           var panel = document.getElementById('mobileMenu');
@@ -835,29 +1163,41 @@
 
           function lockScroll(lock){
             document.body.style.overflow = lock ? 'hidden' : '';
-            document.documentElement.style.overscrollBehavior = lock ? 'contain' : '';
           }
+
           function openMenu(){
-            panel.hidden = false; backdrop.hidden = false;
+            panel.hidden = false;
+            backdrop.hidden = false;
             requestAnimationFrame(function(){
-              panel.classList.add('open'); backdrop.classList.add('show');
+              panel.classList.add('open');
+              backdrop.classList.add('show');
             });
             burger.setAttribute('aria-expanded','true');
             lockScroll(true);
           }
+
           function closeMenu(){
-            panel.classList.remove('open'); backdrop.classList.remove('show');
-            setTimeout(function(){ panel.hidden = true; backdrop.hidden = true; }, 240);
+            panel.classList.remove('open');
+            backdrop.classList.remove('show');
+            setTimeout(function(){
+              panel.hidden = true;
+              backdrop.hidden = true;
+            }, 220);
             burger.setAttribute('aria-expanded','false');
             lockScroll(false);
           }
-          function toggle(){ if(panel.hidden){ openMenu(); } else { closeMenu(); } }
 
-          burger.addEventListener('click', toggle);
+          burger.addEventListener('click', function(){
+            if(panel.hidden){ openMenu(); } else{ closeMenu(); }
+          });
           backdrop.addEventListener('click', closeMenu);
           closeBtn.addEventListener('click', closeMenu);
-          panel.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', closeMenu); });
-          window.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !panel.hidden){ closeMenu(); } });
+          panel.querySelectorAll('a').forEach(function(a){
+            a.addEventListener('click', closeMenu);
+          });
+          window.addEventListener('keydown', function(e){
+            if(e.key === 'Escape' && !panel.hidden){ closeMenu(); }
+          });
         })();
       });
     })();
