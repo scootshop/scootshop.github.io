@@ -29,8 +29,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
 
-  <!-- Precarga imagen (no vídeo hero) -->
-  <link rel="preload" as="image" href="Img-S4/1.jpg">
+  <!-- (ELIMINADO) Preload que no necesitas -->
 
   <!-- Tipografías + Iconos -->
   <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
@@ -148,7 +147,7 @@
       color:var(--primary);
     }
 
-    /* Burger (corregido: sin position:absolute) */
+    /* Burger */
     .burger{
       display:none;
       place-items:center;
@@ -174,30 +173,6 @@
       transform:translateY(0);
       box-shadow:0 8px 16px rgba(15,23,42,.06);
     }
-
-    /* Trust bar */
-    .trustbar{
-      border-top:1px solid var(--line);
-      background:#fff;
-      color:var(--muted);
-      font-weight:700;
-      font-size:.9rem;
-    }
-    .trustbar .inner{
-      display:flex;
-      gap:20px;
-      align-items:center;
-      justify-content:center;
-      padding:7px 0;
-      flex-wrap:wrap;
-    }
-    .trustbar span{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      white-space:nowrap;
-    }
-    .trustbar i{ opacity:.9; font-size:.95rem; }
 
     /* ========= MENÚ MÓVIL ========= */
     .mm-backdrop{
@@ -988,17 +963,9 @@
     @media (max-width:768px){
       nav.menu{ display:none; }
       .burger{ display:grid; }
-      .trustbar{ display:none; }
-
-      .hero{
-        text-align:left;
-      }
-      .hero-inner{
-        padding-block:18px 32px;
-      }
-      .hero-meta{
-        gap:8px;
-      }
+      .hero{ text-align:left; }
+      .hero-inner{ padding-block:18px 32px; }
+      .hero-meta{ gap:8px; }
     }
     @media (max-width:640px){
       .grid{
@@ -1066,8 +1033,6 @@
         <i class="fa-solid fa-bars"></i>
       </button>
     </div>
-
-  
   </header>
 
   <!-- MENÚ MÓVIL -->
@@ -1177,10 +1142,13 @@
              muted
              loop
              playsinline
+             webkit-playsinline
+             preload="auto"
              poster="Img/NEGRO.png">
         <source src="completo.webm" type="video/webm">
         <source src="completo.mp4"  type="video/mp4">
       </video>
+
       <div class="hero-inner">
         <span class="hero-tag">
           <i class="fa-solid fa-bolt"></i>
@@ -1639,6 +1607,34 @@
         setVh();
         window.addEventListener('resize', setVh, {passive:true});
         window.addEventListener('orientationchange', setVh, {passive:true});
+
+        /* HERO video: intentar autoplay siempre (móvil) */
+        var heroVideo = document.querySelector('.hero video.hero-bg');
+        if(heroVideo){
+          heroVideo.muted = true;
+          heroVideo.playsInline = true;
+          heroVideo.setAttribute('muted','');
+          heroVideo.setAttribute('playsinline','');
+          heroVideo.setAttribute('webkit-playsinline','');
+          heroVideo.preload = 'auto';
+
+          function tryPlay(){
+            try{
+              var p = heroVideo.play();
+              if(p && typeof p.catch === 'function'){ p.catch(function(){}); }
+            }catch(e){}
+          }
+
+          tryPlay();
+
+          document.addEventListener('visibilitychange', function(){
+            if(!document.hidden) tryPlay();
+          });
+
+          ['touchstart','pointerdown','click','scroll'].forEach(function(evt){
+            window.addEventListener(evt, tryPlay, {passive:true, once:true});
+          });
+        }
 
         /* Carruseles: dots + swipe */
         document.querySelectorAll('[data-carousel]').forEach(function(c){
