@@ -40,7 +40,7 @@
     :root{
       --sport:'Russo One',sans-serif;
       --ui:'Plus Jakarta Sans',ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans";
-    
+
       --ink:#111315;
       --muted:#676b73;
       --line:#E6E9EF;
@@ -65,7 +65,7 @@
     html{ scroll-behavior:smooth; }
     body{
       font-family:var(--ui);
-      background:radial-gradient(circle at top,#ffffff 0,var(--bg) 45%,#e5e7eb 100%);
+      background:#ffffff; /* Fondo totalmente blanco */
       color:var(--ink);
       line-height:1.55;
       overflow-x:hidden;
@@ -148,7 +148,7 @@
       color:var(--primary);
     }
 
-    /* Burger */
+    /* Burger (corregido: sin position:absolute) */
     .burger{
       display:none;
       place-items:center;
@@ -159,20 +159,19 @@
       background:#fff;
       font-size:20px;
       color:#111;
-      position:absolute;
-      right:16px;
-      top:50%;
-      transform:translateY(-50%);
+      position:static;
+      transform:none;
+      justify-self:end;
       box-shadow:0 10px 24px rgba(15,23,42,.06);
       transition:transform .12s ease, box-shadow .16s ease, background .15s ease;
     }
     .burger:hover{
       background:#f9fafb;
-      transform:translateY(-50%) translateY(-1px);
+      transform:translateY(-1px);
       box-shadow:0 14px 30px rgba(15,23,42,.10);
     }
     .burger:active{
-      transform:translateY(-50%);
+      transform:translateY(0);
       box-shadow:0 8px 16px rgba(15,23,42,.06);
     }
 
@@ -200,7 +199,7 @@
     }
     .trustbar i{ opacity:.9; font-size:.95rem; }
 
-    /* ========= MENÚ MÓVIL: DISEÑO MEJORADO ========= */
+    /* ========= MENÚ MÓVIL ========= */
     .mm-backdrop{
       position:fixed;
       inset:0;
@@ -219,7 +218,7 @@
       position:fixed;
       inset:0 0 0 auto;
       width:min(420px,92vw);
-      background:radial-gradient(circle at top left,#fdf2f2 0,#ffffff 42%,#f9fafb 100%);
+      background:#fff;
       border-left:1px solid var(--line);
       z-index:101;
       transform:translateX(100%);
@@ -655,7 +654,7 @@
       display:grid;
       place-items:center;
       border:1px solid var(--line);
-      background:radial-gradient(circle at 0 0,#fee2e2,#ffffff);
+      background:#fff;
     }
     .f-icon i{
       font-size:18px;
@@ -975,29 +974,6 @@
       font-size:.85rem;
     }
 
-    /* FAB WhatsApp */
-    .wa-fab{
-      position:fixed;
-      bottom:16px;
-      right:16px;
-      width:56px;
-      height:56px;
-      border-radius:50%;
-      display:grid;
-      place-items:center;
-      background:#25d366;
-      color:#fff;
-      font-size:26px;
-      box-shadow:0 16px 40px rgba(22,163,74,.55);
-      z-index:70;
-      transition:transform .14s, box-shadow .16s, filter .14s;
-    }
-    .wa-fab:hover{
-      filter:brightness(1.06);
-      transform:translateY(-2px);
-      box-shadow:0 22px 52px rgba(22,163,74,.65);
-    }
-
     /* ======= Media queries ======= */
     @media (max-width:1024px){
       .feature-grid{
@@ -1057,7 +1033,7 @@
     @media (prefers-reduced-motion: reduce){
       .hero video.hero-bg{ display:none !important; }
       .hero{
-        background: url('Img/0.jpg') center/cover no-repeat;
+        background: url('Img/NEGRO.png') center/cover no-repeat;
       }
     }
   </style>
@@ -1091,14 +1067,7 @@
       </button>
     </div>
 
-    <div class="trustbar" aria-label="Sellos de confianza">
-      <div class="container inner">
-        <span><i class="fa-regular fa-circle-check" aria-hidden="true"></i> Garantía 200 km por producto</span>
-        <span><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Devolución 30 días</span>
-        <span><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Pago 100% seguro</span>
-        <span><i class="fa-solid fa-truck-fast" aria-hidden="true"></i> Envío 6–8 días</span>
-      </div>
-    </div>
+  
   </header>
 
   <!-- MENÚ MÓVIL -->
@@ -1349,7 +1318,7 @@
               <span aria-hidden="true">
                 <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
                 <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                <i class="fa-regular fa-star"></i>
+                <i class="fa-solid fa-star"></i>
               </span>
               <span class="count">(203)</span>
             </div>
@@ -1401,7 +1370,7 @@
           <div class="card-body">
             <div class="card-brand">Scoot Shop</div>
             <div class="title">G2 — Patinete eléctrico de alta potencia</div>
-            <div class="rating" aria-label="Valoración 4,7 de 5">
+            <div class="rating" aria-label="Valoración 4,8 de 5">
               <span aria-hidden="true">
                 <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
                 <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
@@ -1596,11 +1565,6 @@
       </div>
     </section>
 
-    <!-- FAB WhatsApp -->
-    <a href="https://wa.me/34666318747" class="wa-fab" aria-label="WhatsApp" target="_blank" rel="noopener noreferrer">
-      <i class="fab fa-whatsapp" aria-hidden="true"></i>
-    </a>
-
     <!-- MÉTODOS DE PAGO + FOOTER -->
     <section class="pagos">
       <div class="container">
@@ -1684,17 +1648,24 @@
           if(!slides.length) return;
 
           var dotsWrap = c.parentElement.querySelector('.carousel-dots');
-          var dots = []; var i = 0; var dragging = false; var startX = 0; var currentX = 0; var startTime = 0;
+          var dots = [];
+          var i = 0;
+          var dragging = false;
+          var startX = 0;
+          var currentX = 0;
+          var startTime = 0;
 
           slides.forEach(function(_, idx){
             if(!dotsWrap) return;
             var b = document.createElement('button');
-            b.type = 'button'; b.className = 'dot';
+            b.type = 'button';
+            b.className = 'dot';
             b.addEventListener('click', function(ev){
               ev.stopPropagation();
               go(idx,true);
             });
-            dotsWrap.appendChild(b); dots.push(b);
+            dotsWrap.appendChild(b);
+            dots.push(b);
           });
 
           function updateDots(){
@@ -1703,12 +1674,14 @@
             });
           }
           function go(idx, animate){
-            if(animate===void 0) animate = true;
+            if(animate === void 0) animate = true;
             i = (idx + slides.length) % slides.length;
             if(!animate){ track.style.transition = 'none'; }
             track.style.transform = 'translateX(' + (-i*100) + '%)';
             if(!animate){
-              requestAnimationFrame(function(){ track.style.transition = 'transform .3s'; });
+              requestAnimationFrame(function(){
+                track.style.transition = 'transform .3s';
+              });
             }
             updateDots();
           }
@@ -1768,7 +1741,8 @@
               window.location.href = link;
             });
             card.addEventListener('keydown', function(e){
-              if(e.key === 'Enter'){
+              if(e.key === 'Enter' || e.key === ' '){
+                e.preventDefault();
                 window.location.href = link;
               }
             });
@@ -1776,6 +1750,9 @@
 
           card.querySelectorAll('[data-buy-button]').forEach(function(el){
             el.addEventListener('click', function(e){
+              e.stopPropagation();
+            });
+            el.addEventListener('keydown', function(e){
               e.stopPropagation();
             });
           });
@@ -1795,50 +1772,102 @@
           }
         });
 
-        /* Menú móvil */
+        /* Menú móvil (accesible: focus trap + restore focus + aria-modal + inert) */
         (function(){
           var burger = document.getElementById('burger');
           var panel = document.getElementById('mobileMenu');
           var backdrop = document.getElementById('mmBackdrop');
           var closeBtn = document.getElementById('mmClose');
+          var main = document.getElementById('main-content');
           if(!burger || !panel || !backdrop || !closeBtn) return;
+
+          var lastFocus = null;
 
           function lockScroll(lock){
             document.body.style.overflow = lock ? 'hidden' : '';
           }
 
+          function setModalState(isOpen){
+            if(main){
+              if(isOpen){
+                main.setAttribute('aria-hidden','true');
+                try { main.inert = true; } catch(e) {}
+              }else{
+                main.removeAttribute('aria-hidden');
+                try { main.inert = false; } catch(e) {}
+              }
+            }
+          }
+
+          function getFocusable(){
+            return panel.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])');
+          }
+
           function openMenu(){
+            lastFocus = document.activeElement;
+
             panel.hidden = false;
             backdrop.hidden = false;
+
             requestAnimationFrame(function(){
               panel.classList.add('open');
               backdrop.classList.add('show');
             });
+
             burger.setAttribute('aria-expanded','true');
+            panel.setAttribute('role','dialog');
+            panel.setAttribute('aria-modal','true');
+
             lockScroll(true);
+            setModalState(true);
+
+            closeBtn.focus();
           }
 
           function closeMenu(){
             panel.classList.remove('open');
             backdrop.classList.remove('show');
+
             setTimeout(function(){
               panel.hidden = true;
               backdrop.hidden = true;
             }, 220);
+
             burger.setAttribute('aria-expanded','false');
             lockScroll(false);
+            setModalState(false);
+
+            if(lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
           }
 
           burger.addEventListener('click', function(){
-            if(panel.hidden){ openMenu(); } else{ closeMenu(); }
+            if(panel.hidden){ openMenu(); } else { closeMenu(); }
           });
+
           backdrop.addEventListener('click', closeMenu);
           closeBtn.addEventListener('click', closeMenu);
+
           panel.querySelectorAll('a').forEach(function(a){
             a.addEventListener('click', closeMenu);
           });
+
           window.addEventListener('keydown', function(e){
-            if(e.key === 'Escape' && !panel.hidden){ closeMenu(); }
+            if(e.key === 'Escape' && !panel.hidden) closeMenu();
+          });
+
+          panel.addEventListener('keydown', function(e){
+            if(e.key !== 'Tab') return;
+            var f = getFocusable();
+            if(!f.length) return;
+
+            var first = f[0];
+            var last = f[f.length - 1];
+
+            if(e.shiftKey && document.activeElement === first){
+              e.preventDefault(); last.focus();
+            } else if(!e.shiftKey && document.activeElement === last){
+              e.preventDefault(); first.focus();
+            }
           });
         })();
       });
