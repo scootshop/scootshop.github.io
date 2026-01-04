@@ -7,29 +7,28 @@
   <meta name="description" content="Scooters eléctricos fiables y potentes. Envío 6–8 días, pago seguro y garantía 200 km por producto." />
   <meta name="robots" content="index,follow" />
   <link rel="canonical" href="https://tudominio.example/" />
+
   <meta property="og:url" content="https://tudominio.example/" />
   <meta property="og:title" content="SCOOT SHOP — Scooters eléctricos" />
   <meta property="og:description" content="Scooters eléctricos fiables y potentes. Envío 6–8 días, pago seguro y garantía 200 km por producto." />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="Img/og-cover.jpg" />
+  <meta property="og:image" content="https://tudominio.example/Img/og-cover.jpg" />
   <meta property="og:site_name" content="SCOOT SHOP" />
   <meta property="og:locale" content="es_ES" />
   <meta name="twitter:card" content="summary_large_image" />
 
   <!-- Forzar SIEMPRE modo claro -->
-  <meta name="color-scheme" content="light">
-  <meta name="theme-color" content="#ffffff">
-  <meta name="format-detection" content="telephone=no">
+  <meta name="color-scheme" content="light" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="format-detection" content="telephone=no" />
 
   <link rel="icon" href="favicon.ico" sizes="any" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
 
   <!-- Preconexiones -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
-
-  <!-- (ELIMINADO) Preload que no necesitas -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
 
   <!-- Tipografías + Iconos -->
   <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
@@ -47,6 +46,7 @@
       --primary-soft:rgba(185,30,30,.08);
       --cta:#111;
       --cta-ink:#fff;
+
       --sat: env(safe-area-inset-top, 0px);
       --header-h: 88px;
       --radius:14px;
@@ -64,7 +64,7 @@
     html{ scroll-behavior:smooth; }
     body{
       font-family:var(--ui);
-      background:#ffffff; /* Fondo totalmente blanco */
+      background:#ffffff;
       color:var(--ink);
       line-height:1.55;
       overflow-x:hidden;
@@ -89,6 +89,7 @@
       background:rgba(255,255,255,.92);
       backdrop-filter:blur(12px);
       border-bottom:1px solid rgba(0,0,0,.05);
+      padding-top: var(--sat); /* ✅ iPhone notch / safe area */
     }
     .nav{
       display:grid;
@@ -98,6 +99,12 @@
       gap:12px;
     }
     .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width: 0;
+    }
+    .brand a{
       display:flex;
       align-items:center;
       gap:10px;
@@ -112,6 +119,9 @@
       font-family:'Tangerine',cursive;
       font-size:1.7rem;
       color:var(--primary);
+      white-space:nowrap;
+      line-height:1;              /* ✅ evita que “baje” */
+      display:block;              /* ✅ evita comportamiento inline raro */
     }
 
     /* Menú escritorio */
@@ -123,6 +133,11 @@
       text-transform:uppercase;
       font-size:.86rem;
       align-items:center;
+
+      /* ✅ evita que se rompa y se monte */
+      flex-wrap:nowrap;
+      white-space:nowrap;
+      min-width:0;
     }
     nav.menu a, nav.menu button{
       padding:7px 11px;
@@ -134,10 +149,9 @@
       align-items:center;
       gap:6px;
       transition:background .15s ease, color .15s ease, transform .12s ease;
+      white-space:nowrap;
     }
-    nav.menu a .nav-icon{
-      font-size:.95em;
-    }
+    nav.menu a .nav-icon{ font-size:.95em; }
     nav.menu a:hover{
       background:var(--primary-soft);
       transform:translateY(-1px);
@@ -219,6 +233,7 @@
       display:flex;
       align-items:center;
       gap:10px;
+      min-width:0;
     }
 
     .mm-brand img{
@@ -234,6 +249,7 @@
       display:flex;
       flex-direction:column;
       line-height:1.15;
+      min-width:0;
     }
 
     .mm-brand-name{
@@ -307,6 +323,7 @@
       display:flex;
       align-items:center;
       gap:10px;
+      min-width:0;
     }
 
     .mm-link i{
@@ -318,18 +335,17 @@
       border:1px solid #e5e7eb;
       background:#f9fafb;
       font-size:16px;
+      flex:0 0 auto;
     }
 
     .mm-link-text{
       display:flex;
       flex-direction:column;
       gap:2px;
+      min-width:0;
     }
 
-    .mm-link-label{
-      font-size:.9rem;
-    }
-
+    .mm-link-label{ font-size:.9rem; }
     .mm-link-sub{
       font-size:.7rem;
       font-weight:600;
@@ -340,6 +356,7 @@
     .mm-link-chevron{
       font-size:.9rem;
       color:#9ca3af;
+      flex:0 0 auto;
     }
 
     .mm-link:hover{
@@ -416,9 +433,7 @@
       box-shadow:0 14px 36px rgba(22,163,74,.5);
     }
 
-    .mm-cta i{
-      font-size:18px;
-    }
+    .mm-cta i{ font-size:18px; }
 
     /* ================= HERO ================= */
     .hero{
@@ -474,10 +489,7 @@
       color:#e5e7eb;
       width:max-content;
     }
-    .hero-tag i{
-      font-size:.85rem;
-      color:#facc15;
-    }
+    .hero-tag i{ font-size:.85rem; color:#facc15; }
     .hero h1{
       font-family:var(--sport);
       font-size:clamp(40px,6.2vw,72px);
@@ -485,9 +497,7 @@
       letter-spacing:.06em;
       text-shadow:0 14px 38px rgba(0,0,0,.65);
     }
-    .hero h1 span{
-      color:#bb0000;
-    }
+    .hero h1 span{ color:#bb0000; }
     .hero p{
       margin-top:4px;
       font-size:clamp(15px,1.4vw,18px);
@@ -557,10 +567,7 @@
       border-radius:999px;
       background:rgba(15,23,42,.7);
     }
-    .hero-meta i{
-      font-size:.9rem;
-      color:#facc15;
-    }
+    .hero-meta i{ font-size:.9rem; color:#facc15; }
 
     /* =============== SECCIONES / CARDS =============== */
     .series{
@@ -592,9 +599,7 @@
       opacity:.9;
     }
 
-    .features{
-      padding:26px 0 10px;
-    }
+    .features{ padding:26px 0 10px; }
     .feature-grid{
       list-style:none;
       display:grid;
@@ -631,10 +636,7 @@
       border:1px solid var(--line);
       background:#fff;
     }
-    .f-icon i{
-      font-size:18px;
-      color:var(--primary);
-    }
+    .f-icon i{ font-size:18px; color:var(--primary); }
 
     .grid{
       display:grid;
@@ -653,6 +655,10 @@
       box-shadow:0 12px 34px rgba(15,23,42,.04);
       transition:transform .16s ease, box-shadow .18s ease, border-color .16s ease;
       position:relative;
+      outline:none;
+    }
+    .card:focus-visible{
+      box-shadow:0 0 0 3px rgba(17,17,17,.22), 0 18px 44px rgba(15,23,42,.10);
     }
     .card::before{
       content:"";
@@ -685,15 +691,19 @@
       position:relative;
       overflow:hidden;
       height:100%;
+      touch-action: pan-y pinch-zoom; /* ✅ mejor en móviles */
     }
     .carousel-track{
       display:flex;
-      transition:transform .3s;
+      transition:transform .3s ease;
       height:100%;
-      touch-action: pan-y;
       cursor:grab;
+      will-change: transform;
     }
-    .carousel-track.dragging{ cursor:grabbing; }
+    .carousel-track.dragging{
+      cursor:grabbing;
+      transition:none !important;
+    }
     .carousel img{
       width:100%;
       height:100%;
@@ -704,6 +714,8 @@
       user-select:none;
       pointer-events:none;
     }
+
+    /* ✅ Dots accesibles (no aria-hidden) */
     .carousel-dots{
       position:absolute;
       bottom:8px;
@@ -727,13 +739,9 @@
     }
     .carousel-dots .dot.active{ background:#111; }
 
-    .chip-name{
-      display:none;
-    }
+    .chip-name{ display:none; }
 
-    .card-body{
-      padding:8px 12px 2px;
-    }
+    .card-body{ padding:8px 12px 2px; }
     .card-brand{
       font-size:.72rem;
       letter-spacing:.08em;
@@ -785,7 +793,6 @@
       font-size:.9rem;
     }
 
-    /* Etiqueta de oferta automática si hay precio anterior */
     .card[data-was]:not([data-was="—"]) .price-now::after{
       content:"Oferta";
       margin-left:8px;
@@ -799,12 +806,20 @@
       color:var(--primary);
     }
 
+    /* ✅ Botonera */
     .btn-row{
       display:flex;
       gap:10px;
+      flex-wrap:wrap;
     }
+    .btn-row a{
+      flex:1;
+      min-width:140px;
+    }
+
     .btn-primary,
-    .btn-whatsapp{
+    .btn-whatsapp,
+    .btn-paypal{
       display:block;
       text-align:center;
       font-weight:900;
@@ -812,9 +827,9 @@
       padding:9px 12px;
       border:1px solid transparent;
       font-size:.9rem;
-      flex:1;
       transition:background .14s, color .14s, transform .12s, box-shadow .16s, border-color .14s;
     }
+
     .btn-primary{
       background:#111;
       color:#fff;
@@ -826,6 +841,56 @@
       transform:translateY(-1px);
       box-shadow:0 16px 32px rgba(15,23,42,.3);
     }
+
+    /* Accesibilidad: texto solo para lectores de pantalla */
+    .sr-only{
+      position:absolute;
+      width:1px;
+      height:1px;
+      padding:0;
+      margin:-1px;
+      overflow:hidden;
+      clip:rect(0,0,0,0);
+      white-space:nowrap;
+      border:0;
+    }
+
+    /* PayPal: fondo amarillo + (pero visible: COMPRAR) */
+    .btn-paypal{
+      background:#ffc439;
+      color:#111;
+      border-color:#f2ba36;
+      box-shadow:0 10px 26px rgba(255,196,57,.45);
+
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+
+    .btn-paypal:hover{
+      filter:brightness(1.03);
+      transform:translateY(-1px);
+      box-shadow:0 16px 36px rgba(255,196,57,.55);
+    }
+
+    .btn-paypal:active{
+      transform:translateY(0);
+    }
+
+    .btn-paypal .paypal-logo{
+      height:18px;
+      width:auto;
+      display:block;
+    }
+    .btn-paypal .buy-text{
+      display:inline-block;
+      font-weight:900;
+    }
+
+    /* (Se deja por si lo usas en otras partes; en las tarjetas ya NO hay botón WhatsApp) */
     .btn-whatsapp{
       background:#25d366;
       color:#fff;
@@ -868,9 +933,7 @@
       font-weight:700;
       color:#9ca3af;
     }
-    details[open] summary::after{
-      content:"–";
-    }
+    details[open] summary::after{ content:"–"; }
 
     #ubicacion h2{
       margin:20px 0 10px;
@@ -887,9 +950,7 @@
       box-shadow:0 16px 40px rgba(15,23,42,.16);
     }
 
-    .legal{
-      padding:36px 0;
-    }
+    .legal{ padding:36px 0; }
     .legal h2{
       text-align:center;
       font-family:var(--sport);
@@ -951,14 +1012,10 @@
 
     /* ======= Media queries ======= */
     @media (max-width:1024px){
-      .feature-grid{
-        grid-template-columns: repeat(2, minmax(0,1fr));
-      }
+      .feature-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); }
     }
     @media (max-width:900px){
-      .legal .columns{
-        grid-template-columns:1fr;
-      }
+      .legal .columns{ grid-template-columns:1fr; }
     }
     @media (max-width:768px){
       nav.menu{ display:none; }
@@ -967,11 +1024,10 @@
       .hero-inner{ padding-block:18px 32px; }
       .hero-meta{ gap:8px; }
     }
+
+    /* ✅ IMPORTANTE: en móvil ahora SÍ se ven los botones para pagar */
     @media (max-width:640px){
-      .grid{
-        grid-template-columns:repeat(2,1fr);
-        gap:10px;
-      }
+      .grid{ grid-template-columns:repeat(2,1fr); gap:10px; }
       .card-media{
         margin:6px;
         border-radius:10px;
@@ -989,22 +1045,143 @@
         text-align:center;
         letter-spacing:.02em;
       }
+
       .card-body,
-      .card-bottom,
       .carousel-dots{
         display:none !important;
+      }
+
+      .card-bottom{
+        display:block !important;
+      }
+
+      .btn-row{
+        flex-direction:column;
+      }
+      .btn-row a{
+        min-width:unset;
+        width:100%;
       }
     }
 
     /* Menos movimiento: usar imagen en lugar de video */
     @media (prefers-reduced-motion: reduce){
       .hero video.hero-bg{ display:none !important; }
-      .hero{
-        background: url('Img/NEGRO.png') center/cover no-repeat;
-      }
+      .hero{ background: url('Img/NEGRO.png') center/cover no-repeat; }
+    }
+
+    /* ===========================================================
+       ✅ CAMBIOS APLICADOS (SIN BORRAR CONTENIDO)
+       - Menú móvil más minimalista (solo estilo)
+       - Oculta WhatsApp (no se muestra)
+       - Reemplaza logo PayPal por texto “COMPRAR” (el img queda oculto)
+       - En móvil NO se muestran los botones “Vista” y “Comprar”
+       - Burger antes (evita que el menú se solape)
+       =========================================================== */
+
+    /* Burger antes para evitar solape del menú (no rompe nada) */
+    @media (max-width:980px){
+      nav.menu{ display:none; }
+      .burger{ display:grid; }
+    }
+
+    /* Ocultar WhatsApp (header + panel + hero) */
+    nav.menu a[aria-label="WhatsApp"],
+    .mm-icons a[aria-label="WhatsApp"],
+    .mm-cta,
+    .hero-actions a[href^="https://wa.me/"]{
+      display:none !important;
+    }
+
+    /* PayPal button: mostrar COMPRAR en vez del logo */
+    .btn-paypal .paypal-logo{ display:none !important; }
+
+    /* En móvil: NO mostrar Vista / Comprar */
+    @media (max-width:768px){
+      .btn-row{ display:none !important; }
+    }
+
+    /* Menú móvil minimalista (solo CSS, mismo HTML) */
+    .mm-panel{
+      width:min(360px,92vw);
+      box-shadow:-18px 0 40px rgba(0,0,0,.12);
+    }
+    .mm-head{
+      background:#fff !important;
+      backdrop-filter:none !important;
+      padding:14px 16px !important;
+    }
+    .mm-close{
+      width:40px; height:40px;
+      border-radius:12px;
+      box-shadow:none;
+      background:transparent;
+    }
+    .mm-content{
+      padding:8px 0 16px !important;
+      gap:0 !important;
+    }
+    .mm-section-label{
+      margin:10px 16px 8px !important;
+      font-size:.68rem !important;
+      letter-spacing:.16em !important;
+      opacity:.85 !important;
+    }
+    .mm-links-group{
+      gap:0 !important;
+      margin:0 !important;
+    }
+    .mm-link{
+      border:0 !important;
+      border-radius:0 !important;
+      background:transparent !important;
+      box-shadow:none !important;
+      padding:12px 16px !important;
+      border-bottom:1px solid #eef0f4 !important;
+      transform:none !important;
+    }
+    .mm-link:hover{
+      box-shadow:none !important;
+      border-color:#eef0f4 !important;
+      background:rgba(0,0,0,.03) !important;
+      transform:none !important;
+    }
+    .mm-link--primary{
+      background:transparent !important;
+      border-color:#eef0f4 !important;
+    }
+    .mm-link i{
+      width:auto !important;
+      height:auto !important;
+      border:0 !important;
+      background:transparent !important;
+      border-radius:0 !important;
+      font-size:18px !important;
+    }
+    .mm-link--primary i{
+      color:#111 !important;
+    }
+    .mm-link-chevron{
+      color:#c0c4cc !important;
+    }
+    .mm-icons{
+      margin:14px 16px 0 !important;
+      padding-top:12px !important;
+      border-top:1px solid #eef0f4 !important;
+    }
+    .mm-icons a{
+      width:40px; height:40px;
+      box-shadow:none !important;
+      background:transparent !important;
+    }
+    .mm-icons a:hover{
+      transform:none !important;
+      box-shadow:none !important;
+      background:#f3f4f6 !important;
     }
   </style>
 </head>
+
 <body>
   <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
 
@@ -1012,13 +1189,15 @@
   <header id="siteHeader" aria-label="Barra superior">
     <div class="container nav">
       <div class="brand">
-        <img src="Img/0-removebg-preview.png" alt="SCOOT SHOP logo" decoding="async" fetchpriority="high">
-        <span>Versátil</span>
+        <a href="#inicio" aria-label="Ir al inicio">
+          <img src="Img/0-removebg-preview.png" alt="SCOOT SHOP logo" decoding="async" fetchpriority="high">
+          <span>Versátil</span>
+        </a>
       </div>
 
       <!-- Menú escritorio con iconos -->
       <nav class="menu" aria-label="Navegación principal">
-        <a href="#" aria-current="page"><i class="fa-solid fa-house nav-icon" aria-hidden="true"></i>Inicio</a>
+        <a href="#inicio" aria-current="page"><i class="fa-solid fa-house nav-icon" aria-hidden="true"></i>Inicio</a>
         <a href="#comprar"><i class="fa-solid fa-cart-shopping nav-icon" aria-hidden="true"></i>Productos</a>
         <a href="#faq"><i class="fa-solid fa-circle-question nav-icon" aria-hidden="true"></i>Preguntas</a>
         <a href="#ubicacion"><i class="fa-solid fa-location-dot nav-icon" aria-hidden="true"></i>Ubicación</a>
@@ -1030,13 +1209,14 @@
 
       <!-- Burger -->
       <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileMenu" type="button">
-        <i class="fa-solid fa-bars"></i>
+        <i class="fa-solid fa-bars" aria-hidden="true"></i>
       </button>
     </div>
   </header>
 
   <!-- MENÚ MÓVIL -->
   <div class="mm-backdrop" id="mmBackdrop" hidden></div>
+
   <nav class="mm-panel" id="mobileMenu" hidden aria-label="Menú móvil">
     <div class="mm-head">
       <div class="mm-brand">
@@ -1047,7 +1227,7 @@
         </div>
       </div>
       <button class="mm-close" id="mmClose" aria-label="Cerrar menú" type="button">
-        <i class="fa-solid fa-xmark"></i>
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
       </button>
     </div>
 
@@ -1055,7 +1235,7 @@
       <div class="mm-links-group">
         <p class="mm-section-label">Navegación</p>
 
-        <a class="mm-link mm-link--primary" href="#">
+        <a class="mm-link mm-link--primary" href="#inicio">
           <div class="mm-link-main">
             <i class="fa-solid fa-house" aria-hidden="true"></i>
             <div class="mm-link-text">
@@ -1136,7 +1316,7 @@
 
   <main id="main-content">
     <!-- HERO (video de fondo) -->
-    <section class="hero" aria-label="Video hero">
+    <section class="hero" id="inicio" aria-label="Video hero">
       <video class="hero-bg"
              autoplay
              muted
@@ -1151,7 +1331,7 @@
 
       <div class="hero-inner">
         <span class="hero-tag">
-          <i class="fa-solid fa-bolt"></i>
+          <i class="fa-solid fa-bolt" aria-hidden="true"></i>
           Scooters eléctricos · Valencia
         </span>
         <h1><span>T10</span> &amp; G2</h1>
@@ -1161,17 +1341,17 @@
         </p>
         <div class="hero-actions">
           <a href="#comprar" class="cta-btn">
-            <i class="fa-solid fa-cart-shopping"></i>
+            <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
             Ver modelos
           </a>
           <a href="https://wa.me/34666318747" class="cta-btn ghost" target="_blank" rel="noopener noreferrer">
-            <i class="fab fa-whatsapp"></i>
+            <i class="fab fa-whatsapp" aria-hidden="true"></i>
             Hablar por WhatsApp
           </a>
         </div>
         <div class="hero-meta">
-          <span><i class="fa-solid fa-truck-fast"></i> Envío 6–8 días en península</span>
-          <span><i class="fa-solid fa-shield-halved"></i> Garantía real 200 km</span>
+          <span><i class="fa-solid fa-truck-fast" aria-hidden="true"></i> Envío 6–8 días en península</span>
+          <span><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Garantía real 200 km</span>
         </div>
       </div>
     </section>
@@ -1181,22 +1361,22 @@
       <div class="container">
         <ul class="feature-grid">
           <li class="feature-card">
-            <div class="f-icon"><i class="fa-solid fa-bolt"></i></div>
+            <div class="f-icon"><i class="fa-solid fa-bolt" aria-hidden="true"></i></div>
             <h3>Potencia urbana</h3>
             <p>Par óptimo para pendientes y firme urbano. Estabilidad y control.</p>
           </li>
           <li class="feature-card">
-            <div class="f-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <div class="f-icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></div>
             <h3>Garantía real</h3>
             <p>Garantía <strong>200 km por producto</strong> y servicio técnico propio.</p>
           </li>
           <li class="feature-card">
-            <div class="f-icon"><i class="fa-solid fa-rotate-left"></i></div>
+            <div class="f-icon"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i></div>
             <h3>Devolución 30 días</h3>
             <p>Si no te convence, lo devuelves fácil, con accesorios originales.</p>
           </li>
           <li class="feature-card">
-            <div class="f-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+            <div class="f-icon"><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i></div>
             <h3>SAT + repuestos</h3>
             <p>Asistencia y repuestos disponibles para mantener tu scooter al día.</p>
           </li>
@@ -1230,7 +1410,7 @@
                 <img src="Img-N7PRO/6.jpg" alt="N7PRO vista 6" loading="lazy" decoding="async">
               </div>
             </div>
-            <div class="carousel-dots" aria-hidden="true"></div>
+            <div class="carousel-dots" aria-label="Selector de imágenes"></div>
           </div>
           <span class="chip-name">N7PRO</span>
 
@@ -1251,10 +1431,20 @@
               <div class="price-now">215 €</div>
               <div class="price-was">387,50 €</div>
             </div>
+
+            <!-- ✅ WhatsApp eliminado de la tarjeta -->
             <div class="btn-row">
               <a class="btn-primary" href="n7pro.html" data-buy-button>Vista</a>
-              <a class="btn-whatsapp" href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer" data-buy-button>
-                <i class="fab fa-whatsapp"></i>Comprar
+
+              <a class="btn-paypal" href="pago.html" data-buy-button data-pay-button aria-label="Comprar">
+                <span class="buy-text">COMPRAR</span>
+                <span class="sr-only">Comprar</span>
+                <img class="paypal-logo"
+                     src="https://commons.wikimedia.org/wiki/Special:FilePath/PayPal%202024.svg"
+                     alt=""
+                     aria-hidden="true"
+                     loading="lazy"
+                     decoding="async">
               </a>
             </div>
           </div>
@@ -1275,13 +1465,13 @@
                 <img src="Img-S4/4.jpg" alt="S4 manillar y display" loading="lazy" decoding="async">
               </div>
             </div>
-            <div class="carousel-dots" aria-hidden="true"></div>
+            <div class="carousel-dots" aria-label="Selector de imágenes"></div>
           </div>
           <span class="chip-name">S4</span>
 
           <div class="card-body">
             <div class="card-brand">ZWheel</div>
-            <div class="title">ZWheel MASCOTER S4 — Homologado por la DGT</div>
+            <div class="title">ZWheel MASCOOTER S4 — Homologado por la DGT</div>
             <div class="rating" aria-label="Valoración 4,8 de 5">
               <span aria-hidden="true">
                 <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
@@ -1296,10 +1486,20 @@
               <div class="price-now">380 €</div>
               <div class="price-was">—</div>
             </div>
+
+            <!-- ✅ WhatsApp eliminado de la tarjeta -->
             <div class="btn-row">
               <a class="btn-primary" href="s4.html" data-buy-button>Vista</a>
-              <a class="btn-whatsapp" href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer" data-buy-button>
-                <i class="fab fa-whatsapp"></i>Comprar
+
+              <a class="btn-paypal" href="pago.html" data-buy-button data-pay-button aria-label="Comprar">
+                <span class="buy-text">COMPRAR</span>
+                <span class="sr-only">Comprar</span>
+                <img class="paypal-logo"
+                     src="https://commons.wikimedia.org/wiki/Special:FilePath/PayPal%202024.svg"
+                     alt=""
+                     aria-hidden="true"
+                     loading="lazy"
+                     decoding="async">
               </a>
             </div>
           </div>
@@ -1315,7 +1515,7 @@
       </div>
     </section>
 
-    <section class="container" aria-label="Lista de productos Series G">
+    <section class="container" aria-label="Lista de productos Series GT">
       <div class="grid">
         <!-- G2 -->
         <article class="card" id="p-g2" tabindex="0"
@@ -1331,7 +1531,7 @@
                 <img src="Img-G2/4.jpg" alt="G2 vista 4" loading="lazy" decoding="async">
               </div>
             </div>
-            <div class="carousel-dots" aria-hidden="true"></div>
+            <div class="carousel-dots" aria-label="Selector de imágenes"></div>
           </div>
           <span class="chip-name">G2</span>
 
@@ -1352,10 +1552,20 @@
               <div class="price-now">380 €</div>
               <div class="price-was">780 €</div>
             </div>
+
+            <!-- ✅ WhatsApp eliminado de la tarjeta -->
             <div class="btn-row">
               <a class="btn-primary" href="g2.html" data-buy-button>Vista</a>
-              <a class="btn-whatsapp" href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer" data-buy-button>
-                <i class="fab fa-whatsapp"></i>Comprar
+
+              <a class="btn-paypal" href="pago.html" data-buy-button data-pay-button aria-label="Comprar">
+                <span class="buy-text">COMPRAR</span>
+                <span class="sr-only">Comprar</span>
+                <img class="paypal-logo"
+                     src="https://commons.wikimedia.org/wiki/Special:FilePath/PayPal%202024.svg"
+                     alt=""
+                     aria-hidden="true"
+                     loading="lazy"
+                     decoding="async">
               </a>
             </div>
           </div>
@@ -1375,7 +1585,7 @@
                 <img src="Img-T10/4.jpg" alt="T10 vista 4" loading="lazy" decoding="async">
               </div>
             </div>
-            <div class="carousel-dots" aria-hidden="true"></div>
+            <div class="carousel-dots" aria-label="Selector de imágenes"></div>
           </div>
           <span class="chip-name">T10</span>
 
@@ -1396,10 +1606,20 @@
               <div class="price-now">450 €</div>
               <div class="price-was">850 €</div>
             </div>
+
+            <!-- ✅ WhatsApp eliminado de la tarjeta -->
             <div class="btn-row">
               <a class="btn-primary" href="t10.html" data-buy-button>Vista</a>
-              <a class="btn-whatsapp" href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer" data-buy-button>
-                <i class="fab fa-whatsapp"></i>Comprar
+
+              <a class="btn-paypal" href="pago.html" data-buy-button data-pay-button aria-label="Comprar">
+                <span class="buy-text">COMPRAR</span>
+                <span class="sr-only">Comprar</span>
+                <img class="paypal-logo"
+                     src="https://commons.wikimedia.org/wiki/Special:FilePath/PayPal%202024.svg"
+                     alt=""
+                     aria-hidden="true"
+                     loading="lazy"
+                     decoding="async">
               </a>
             </div>
           </div>
@@ -1415,7 +1635,7 @@
       </div>
     </section>
 
-    <section class="container" aria-label="Lista de productos Series IX">
+    <section class="container" aria-label="Lista de productos Serie IX">
       <div class="grid">
         <!-- IX3 -->
         <article class="card" id="p-ix3" tabindex="0"
@@ -1433,7 +1653,7 @@
                 <img src="Img-IX3/6.jpg" alt="IX3 vista 6" loading="lazy" decoding="async">
               </div>
             </div>
-            <div class="carousel-dots" aria-hidden="true"></div>
+            <div class="carousel-dots" aria-label="Selector de imágenes"></div>
           </div>
           <span class="chip-name">IX3</span>
 
@@ -1454,10 +1674,20 @@
               <div class="price-now">380 €</div>
               <div class="price-was">850 €</div>
             </div>
+
+            <!-- ✅ WhatsApp eliminado de la tarjeta -->
             <div class="btn-row">
               <a class="btn-primary" href="ix3.html" data-buy-button>Vista</a>
-              <a class="btn-whatsapp" href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer" data-buy-button>
-                <i class="fab fa-whatsapp"></i>Comprar
+
+              <a class="btn-paypal" href="pago.html" data-buy-button data-pay-button aria-label="Comprar">
+                <span class="buy-text">COMPRAR</span>
+                <span class="sr-only">Comprar</span>
+                <img class="paypal-logo"
+                     src="https://commons.wikimedia.org/wiki/Special:FilePath/PayPal%202024.svg"
+                     alt=""
+                     aria-hidden="true"
+                     loading="lazy"
+                     decoding="async">
               </a>
             </div>
           </div>
@@ -1489,7 +1719,12 @@
     <!-- UBICACIÓN -->
     <section id="ubicacion" class="container">
       <h2>Ubicación</h2>
-      <iframe class="map-embed" src="https://www.google.com/maps?q=Silla%20Valencia&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <iframe
+        class="map-embed"
+        title="Mapa de ubicación (Silla, Valencia)"
+        src="https://www.google.com/maps?q=Silla%20Valencia&output=embed"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"></iframe>
     </section>
 
     <!-- LEGAL -->
@@ -1504,6 +1739,7 @@
             <p><strong>Dirección:</strong> Silla y Catarroja (Valencia, España)</p>
             <p>Este sitio ofrece información y venta de scooters eléctricos. El acceso implica la aceptación de este aviso y de las políticas publicadas.</p>
           </details>
+
           <details>
             <summary><strong>Términos y condiciones</strong></summary>
             <p><strong>Pedidos y pagos:</strong> PayPal, transferencia y Bizum. El pedido se considera confirmado tras validar el pago.</p>
@@ -1512,6 +1748,7 @@
             <p><strong>Devoluciones:</strong> 30 días naturales. Producto en buen estado y con accesorios originales.</p>
             <p><strong>SAT:</strong> Servicio técnico propio y repuestos disponibles.</p>
           </details>
+
           <details>
             <summary><strong>Política de privacidad</strong></summary>
             <p><strong>Datos:</strong> Identificativos y de contacto para gestión de pedidos, atención y facturación.</p>
@@ -1520,10 +1757,12 @@
             <p><strong>Derechos:</strong> Acceso, rectificación, supresión, oposición, limitación y portabilidad en <a href="mailto:info@scootshop.example">info@scootshop.example</a>.</p>
             <p><strong>Seguridad:</strong> Medidas organizativas y técnicas razonables.</p>
           </details>
+
           <details>
             <summary><strong>Política de devoluciones</strong></summary>
             <p><strong>Plazo:</strong> 30 días naturales. <strong>Proceso:</strong> Solicita por WhatsApp o email indicando nº de pedido y motivo. Reembolso por el mismo método de pago.</p>
           </details>
+
           <details>
             <summary><strong>Política de cookies</strong></summary>
             <p>Cookies técnicas necesarias y, previa autorización, analíticas/marketing. Puedes configurar o revocar el consentimiento en cualquier momento.</p>
@@ -1546,6 +1785,7 @@
           <img src="https://commons.wikimedia.org/wiki/Special:FilePath/ING%20Group%20N.V.%20Logo.svg" alt="ING" loading="lazy" decoding="async">
         </div>
       </div>
+
       <footer>
         © <span id="y"></span> SCOOT SHOP ·
         <a href="#legal">Legal</a> ·
@@ -1583,7 +1823,7 @@
     "itemListElement":[
       {"@type":"ListItem","position":1,"item":{"@type":"Product","name":"N7PRO — Patinete eléctrico urbano","image":["https://tudominio.example/Img-N7PRO/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.9","reviewCount":"128"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"215","availability":"https://schema.org/InStock","url":"https://tudominio.example/n7pro.html"}}},
       {"@type":"ListItem","position":2,"item":{"@type":"Product","name":"ZWheel MASCOTER S4 — Homologado por la DGT","image":["https://tudominio.example/Img-S4/1.jpg"],"brand":{"@type":"Brand","name":"ZWheel"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.8","reviewCount":"203"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"380","availability":"https://schema.org/InStock","url":"https://tudominio.example/s4.html"}}},
-      {"@type":"ListItem","position":3,"item":{"@type":"Product","name":"G2 — Patinete eléctrico de alta potencia","image":["https://tudominio.example/Img-G2/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.7","reviewCount":"239"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"380","availability":"https://schema.org/InStock","url":"https://tudominio.example/g2.html"}}},
+      {"@type":"ListItem","position":3,"item":{"@type":"Product","name":"G2 — Patinete eléctrico de alta potencia","image":["https://tudominio.example/Img-G2/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.8","reviewCount":"239"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"380","availability":"https://schema.org/InStock","url":"https://tudominio.example/g2.html"}}},
       {"@type":"ListItem","position":4,"item":{"@type":"Product","name":"T10 — Patinete eléctrico Ultra","image":["https://tudominio.example/Img-T10/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.8","reviewCount":"42"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"450","availability":"https://schema.org/InStock","url":"https://tudominio.example/t10.html"}}},
       {"@type":"ListItem","position":5,"item":{"@type":"Product","name":"IX3 — Patinete eléctrico Serie IX","image":["https://tudominio.example/Img-IX3/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.8","reviewCount":"203"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"380","availability":"https://schema.org/InStock","url":"https://tudominio.example/ix3.html"}}}
     ]
@@ -1626,7 +1866,6 @@
           }
 
           tryPlay();
-
           document.addEventListener('visibilitychange', function(){
             if(!document.hidden) tryPlay();
           });
@@ -1640,96 +1879,115 @@
         document.querySelectorAll('[data-carousel]').forEach(function(c){
           var track = c.querySelector('.carousel-track');
           if(!track) return;
+
           var slides = Array.prototype.slice.call(track.children);
           if(!slides.length) return;
 
           var dotsWrap = c.parentElement.querySelector('.carousel-dots');
           var dots = [];
           var i = 0;
-          var dragging = false;
-          var startX = 0;
-          var currentX = 0;
-          var startTime = 0;
 
-          slides.forEach(function(_, idx){
-            if(!dotsWrap) return;
-            var b = document.createElement('button');
-            b.type = 'button';
-            b.className = 'dot';
-            b.addEventListener('click', function(ev){
-              ev.stopPropagation();
-              go(idx,true);
+          if(dotsWrap){
+            dotsWrap.innerHTML = '';
+            slides.forEach(function(_, idx){
+              var b = document.createElement('button');
+              b.type = 'button';
+              b.className = 'dot';
+              b.setAttribute('aria-label', 'Imagen ' + (idx+1) + ' de ' + slides.length);
+              b.addEventListener('click', function(ev){
+                ev.stopPropagation();
+                go(idx, true);
+              });
+              dotsWrap.appendChild(b);
+              dots.push(b);
             });
-            dotsWrap.appendChild(b);
-            dots.push(b);
-          });
+          }
 
           function updateDots(){
             dots.forEach(function(d, idx){
               d.classList.toggle('active', idx === i);
+              d.setAttribute('aria-current', idx === i ? 'true' : 'false');
             });
           }
+
           function go(idx, animate){
-            if(animate === void 0) animate = true;
             i = (idx + slides.length) % slides.length;
             if(!animate){ track.style.transition = 'none'; }
             track.style.transform = 'translateX(' + (-i*100) + '%)';
             if(!animate){
               requestAnimationFrame(function(){
-                track.style.transition = 'transform .3s';
+                track.style.transition = 'transform .3s ease';
               });
             }
             updateDots();
           }
 
-          go(0,false);
+          go(0, false);
 
-          function threshold(){ return Math.max(40, c.clientWidth * 0.12); }
+          function threshold(){
+            return Math.max(40, c.clientWidth * 0.12);
+          }
+
+          var dragging = false;
+          var startX = 0;
+          var currentX = 0;
+          var startTime = 0;
+
           function onStart(x){
             dragging = true;
             startX = x;
             currentX = x;
             startTime = Date.now();
-            track.style.transition = 'none';
             track.classList.add('dragging');
           }
+
           function onMove(x){
             if(!dragging) return;
             currentX = x;
             var dx = currentX - startX;
             track.style.transform = 'translateX(calc(' + (-i*100) + '% + ' + dx + 'px))';
           }
+
           function onEnd(){
             if(!dragging) return;
             dragging = false;
+            track.classList.remove('dragging');
+
             var dx = currentX - startX;
             var dt = Date.now() - startTime;
-            track.classList.remove('dragging');
             var swipe = (Math.abs(dx) > threshold()) || (Math.abs(dx) > 30 && dt < 200);
-            if(swipe){ i += (dx < 0 ? 1 : -1); }
-            go(i,false);
+
+            if(swipe){
+              i += (dx < 0 ? 1 : -1);
+            }
+            go(i, true);
           }
 
-          c.addEventListener('touchstart', function(e){
-            if(!e.changedTouches || !e.changedTouches[0]) return;
-            onStart(e.changedTouches[0].clientX);
-          }, {passive:true});
-          c.addEventListener('touchmove', function(e){
-            if(!e.changedTouches || !e.changedTouches[0]) return;
-            onMove(e.changedTouches[0].clientX);
-          }, {passive:true});
-          c.addEventListener('touchend', function(){ onEnd(); }, {passive:true});
-
-          c.addEventListener('mousedown', function(e){
-            e.preventDefault();
+          c.addEventListener('pointerdown', function(e){
+            if(e.button !== 0) return;
+            c.setPointerCapture(e.pointerId);
             onStart(e.clientX);
           });
-          window.addEventListener('mousemove', function(e){ onMove(e.clientX); });
-          window.addEventListener('mouseup', function(){ onEnd(); });
-          window.addEventListener('resize', function(){ go(i,false); }, {passive:true});
+
+          c.addEventListener('pointermove', function(e){
+            if(!dragging) return;
+            onMove(e.clientX);
+          });
+
+          c.addEventListener('pointerup', function(e){
+            try { c.releasePointerCapture(e.pointerId); } catch(_) {}
+            onEnd();
+          });
+
+          c.addEventListener('pointercancel', function(e){
+            try { c.releasePointerCapture(e.pointerId); } catch(_) {}
+            onEnd();
+          });
+
+          window.addEventListener('resize', function(){ go(i, false); }, {passive:true});
         });
 
-        /* Click en tarjeta + WhatsApp dinámico */
+        /* Click en tarjeta + enlaces dinámicos */
         document.querySelectorAll('.card').forEach(function(card){
           var link = card.dataset.link;
           if(link){
@@ -1744,31 +2002,30 @@
             });
           }
 
+          /* Evitar que los botones disparen click de la card */
           card.querySelectorAll('[data-buy-button]').forEach(function(el){
-            el.addEventListener('click', function(e){
-              e.stopPropagation();
-            });
-            el.addEventListener('keydown', function(e){
-              e.stopPropagation();
-            });
+            el.addEventListener('click', function(e){ e.stopPropagation(); });
+            el.addEventListener('keydown', function(e){ e.stopPropagation(); });
           });
 
-          var waBtn = card.querySelector('.btn-whatsapp');
-          if(waBtn){
-            var wa = card.dataset.wa || 'https://wa.me/34666318747';
-            var name = card.dataset.name || 'producto';
-            var spec = card.dataset.spec || '';
-            var thePrice = card.dataset.now || '';
-            var msg = 'Hola! Me interesa el ' + name + '. ' +
-              (spec ? '(' + spec + ') ' : '') +
-              'Precio: ' + thePrice + '. ¿Está disponible?';
-            var url = wa + '?text=' + encodeURIComponent(msg);
-            waBtn.href = url;
-            waBtn.setAttribute('aria-label', 'Comprar ' + name + ' por WhatsApp');
+          /* ✅ PayPal: crea link a pago.html con name+price */
+          var payBtn = card.querySelector('[data-pay-button]');
+          if(payBtn){
+            var nameP = (card.dataset.name || 'producto').trim();
+            var now = (card.dataset.now || '').trim(); // ej: "215 €"
+            var priceClean = now.replace(/[^\d,\.]/g,'').replace(',', '.');
+            var n = Number(priceClean);
+
+            if(Number.isFinite(n) && n > 0){
+              payBtn.href = 'pago.html?name=' + encodeURIComponent(nameP) + '&price=' + encodeURIComponent(n.toFixed(2));
+            }else{
+              payBtn.href = 'pago.html?name=' + encodeURIComponent(nameP) + '&price=' + encodeURIComponent(now);
+            }
+            payBtn.setAttribute('aria-label', 'Comprar ' + nameP);
           }
         });
 
-        /* Menú móvil (accesible: focus trap + restore focus + aria-modal + inert) */
+        /* Menú móvil (accesible) */
         (function(){
           var burger = document.getElementById('burger');
           var panel = document.getElementById('mobileMenu');
@@ -1784,14 +2041,13 @@
           }
 
           function setModalState(isOpen){
-            if(main){
-              if(isOpen){
-                main.setAttribute('aria-hidden','true');
-                try { main.inert = true; } catch(e) {}
-              }else{
-                main.removeAttribute('aria-hidden');
-                try { main.inert = false; } catch(e) {}
-              }
+            if(!main) return;
+            if(isOpen){
+              main.setAttribute('aria-hidden','true');
+              try { main.inert = true; } catch(e) {}
+            }else{
+              main.removeAttribute('aria-hidden');
+              try { main.inert = false; } catch(e) {}
             }
           }
 
