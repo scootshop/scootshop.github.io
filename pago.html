@@ -1,90 +1,86 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Pagar — SCOOT SHOP</title>
-  <meta name="description" content="Pago seguro con PayPal. Revisa tu pedido y finaliza la compra." />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Pago | SCOOT SHOP</title>
+  <meta name="description" content="Pago seguro: PayPal, Bizum o transferencia bancaria." />
+  <meta name="robots" content="index,follow" />
   <meta name="color-scheme" content="light" />
   <meta name="theme-color" content="#ffffff" />
   <meta name="format-detection" content="telephone=no" />
+  <link rel="icon" href="favicon.ico" sizes="any" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
 
   <style>
     :root{
+      --sport:'Russo One',sans-serif;
       --ui:'Plus Jakarta Sans',ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans";
+      --bg:#fff;
       --ink:#111315;
-      --muted:#676b73;
-      --line:#E6E9EF;
-      --primary:#b91e1e;
-      --bg:#ffffff;
-      --card:#ffffff;
-      --soft:#f6f7fb;
+      --muted:#6b7280;
+      --line:#e6e9ef;
+      --soft:#f8fafc;
+      --primary:#111;
+      --wa:#25d366;
       --radius:16px;
-      --shadow:0 14px 40px rgba(15,23,42,.08);
-      --sat: env(safe-area-inset-top, 0px);
     }
-
     *{ box-sizing:border-box; margin:0; padding:0; }
     html,body{ height:100%; }
     body{
       font-family:var(--ui);
-      background:linear-gradient(180deg,#fff, #f7f7fb 70%);
+      background:var(--bg);
       color:var(--ink);
-      padding-top: var(--sat);
+      line-height:1.55;
     }
     a{ color:inherit; text-decoration:none; }
+    .wrap{
+      min-height:100%;
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      padding:28px 16px;
+    }
     .container{
-      width:min(980px,100%);
-      margin:0 auto;
-      padding: clamp(16px,4vw,28px);
+      width:min(720px, 100%);
+      display:grid;
+      gap:14px;
     }
-
     header{
-      position:sticky;
-      top:0;
-      z-index:10;
-      background:rgba(255,255,255,.85);
-      backdrop-filter: blur(10px);
-      border-bottom:1px solid rgba(0,0,0,.05);
-    }
-    .topbar{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      padding:14px 0;
       gap:12px;
+      padding:14px 14px;
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:#fff;
     }
     .brand{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width:0;
+      display:flex; align-items:center; gap:10px; min-width:0;
     }
-    .brand img{
-      width:44px;height:44px;
-      object-fit:contain;
-      filter:drop-shadow(0 4px 10px rgba(15,23,42,.12));
+    .brand img{ height:38px; width:auto; display:block; }
+    .brand .t{
+      display:flex; flex-direction:column; line-height:1.1; min-width:0;
     }
-    .brand .name{
-      font-weight:900;
+    .brand .t strong{
+      font-family:var(--sport);
       letter-spacing:.08em;
       text-transform:uppercase;
-      font-size:.92rem;
+      font-size:1.02rem;
       white-space:nowrap;
     }
-    .brand .tag{
-      font-size:.78rem;
+    .brand .t span{
       color:var(--muted);
-      margin-top:1px;
+      font-size:.84rem;
       white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:52vw;
     }
-    .brand-text{ display:flex; flex-direction:column; line-height:1.1; min-width:0; }
-
     .back{
       display:inline-flex;
       align-items:center;
@@ -93,467 +89,523 @@
       border-radius:999px;
       border:1px solid var(--line);
       background:#fff;
-      box-shadow:0 10px 24px rgba(15,23,42,.06);
-      font-weight:800;
-      font-size:.88rem;
+      font-weight:900;
+      font-size:.82rem;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      transition:transform .12s ease, background .12s ease;
       white-space:nowrap;
     }
-    .back:hover{ filter:brightness(1.02); }
-
-    main{ padding: 18px 0 34px; }
-
-    .grid{
-      display:grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap:16px;
-      align-items:start;
-    }
-    @media (max-width:900px){
-      .grid{ grid-template-columns:1fr; }
-    }
+    .back:hover{ transform:translateY(-1px); background:var(--soft); }
 
     .card{
-      background:var(--card);
       border:1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
+      border-radius:var(--radius);
+      background:#fff;
       overflow:hidden;
     }
-    .card-head{
-      padding:16px 16px 12px;
-      background:linear-gradient(180deg, rgba(185,30,30,.06), rgba(255,255,255,.0));
-      border-bottom:1px solid rgba(0,0,0,.04);
-    }
-    .card-head h1{
-      font-size:1.12rem;
-      font-weight:900;
-      letter-spacing:.02em;
-    }
-    .card-head p{
-      margin-top:6px;
-      color:var(--muted);
-      font-size:.92rem;
-      line-height:1.4;
-    }
-
-    .card-body{ padding:16px; }
-
-    .summary{
-      display:grid;
-      gap:12px;
-    }
-    .row{
+    .card .head{
+      padding:12px 14px;
+      border-bottom:1px solid var(--line);
+      background:linear-gradient(180deg,#fff,var(--soft));
       display:flex;
-      align-items:flex-start;
+      align-items:center;
       justify-content:space-between;
       gap:12px;
-      padding:12px;
-      border:1px solid var(--line);
-      border-radius:14px;
-      background:rgba(248,250,252,.9);
     }
-    .row .k{
-      color:var(--muted);
-      font-weight:800;
+    .card .head h1,
+    .card .head h2{
+      font-family:var(--sport);
+      letter-spacing:.08em;
       text-transform:uppercase;
-      letter-spacing:.12em;
-      font-size:.72rem;
-    }
-    .row .v{
-      margin-top:4px;
-      font-weight:900;
       font-size:1rem;
-      word-break:break-word;
     }
-    .price{
-      font-size:1.35rem !important;
-      color:#111;
-    }
-    .note{
-      margin-top:10px;
-      color:var(--muted);
-      font-size:.9rem;
-      line-height:1.45;
-    }
-
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:8px 10px;
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:6px 10px;
       border-radius:999px;
       border:1px solid var(--line);
       background:#fff;
       font-weight:900;
-      font-size:.86rem;
-      box-shadow:0 10px 22px rgba(15,23,42,.05);
+      font-size:.78rem;
+      color:#111;
+      white-space:nowrap;
     }
-    .pill i{ color:#0070ba; }
+    .card .body{ padding:14px; display:grid; gap:12px; }
+
+    .summary{
+      display:grid; gap:10px;
+    }
+    .row{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      padding:10px 12px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#fff;
+    }
+    .row .k{ color:var(--muted); font-weight:800; }
+    .row .v{ font-weight:900; text-align:right; }
+
+    .methods{
+      display:grid;
+      gap:10px;
+    }
+    .method{
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#fff;
+      padding:12px;
+      display:grid;
+      gap:10px;
+    }
+    .method .top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .method .top strong{
+      font-size:.95rem;
+      font-weight:900;
+    }
+    .method .top span{
+      color:var(--muted);
+      font-size:.85rem;
+      font-weight:800;
+    }
+    .hint{
+      color:var(--muted);
+      font-size:.88rem;
+    }
+
+    .kv{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:var(--soft);
+    }
+    .kv .label{ font-weight:900; color:#111; font-size:.84rem; }
+    .kv code{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      font-size:.92rem;
+      word-break:break-word;
+      color:#111;
+    }
+    .copy{
+      border:1px solid var(--line);
+      background:#111;
+      color:#fff;
+      border-radius:12px;
+      padding:10px 12px;
+      font-weight:900;
+      cursor:pointer;
+      transition:transform .12s ease, filter .12s ease;
+      white-space:nowrap;
+    }
+    .copy:hover{ transform:translateY(-1px); filter:brightness(1.05); }
+    .copy:active{ transform:translateY(0); }
+
+    .btn{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      min-height:46px;
+      padding:12px 14px;
+      border-radius:999px;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      border:1px solid transparent;
+      cursor:pointer;
+      text-align:center;
+      background:#111;
+      color:#fff;
+    }
+    .btn:hover{ filter:brightness(1.05); transform:translateY(-1px); }
+    .btn:active{ transform:translateY(0); }
+
+    .btn-wa{
+      background:var(--wa);
+      border-color:#22c15e;
+      color:#fff;
+    }
 
     .divider{
       height:1px;
       background:var(--line);
-      margin:14px 0;
+      margin:2px 0;
     }
 
-    .field{
-      display:grid;
-      gap:6px;
-      margin-top:10px;
-    }
-    label{
-      font-weight:900;
-      font-size:.86rem;
-      color:#111;
-    }
-    input{
-      width:100%;
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:12px 12px;
-      font-size:1rem;
-      outline:none;
-      background:#fff;
-    }
-    input:focus{
-      border-color: rgba(17,17,17,.35);
-      box-shadow:0 0 0 3px rgba(17,17,17,.10);
-    }
-    .hint{
-      color:var(--muted);
-      font-size:.86rem;
-    }
-
-    .status{
-      display:none;
-      margin-top:12px;
-      padding:12px;
-      border-radius:14px;
-      border:1px solid var(--line);
-      background:#fff;
-      box-shadow:0 10px 22px rgba(15,23,42,.05);
-      font-size:.92rem;
-      line-height:1.45;
-    }
-    .status.show{ display:block; }
-    .status.ok{
-      border-color:rgba(22,163,74,.25);
-      background:rgba(22,163,74,.06);
-    }
-    .status.err{
-      border-color:rgba(185,28,28,.25);
-      background:rgba(185,28,28,.06);
-    }
-
-    .side{
-      display:grid;
-      gap:16px;
-    }
-    .side .card-body{ padding:16px; }
-    .side h2{
-      font-size:1rem;
-      font-weight:900;
-      letter-spacing:.02em;
-    }
-    .bullets{
-      margin-top:10px;
-      display:grid;
-      gap:8px;
-      color:#111;
-      font-size:.92rem;
-    }
-    .bullets div{
-      display:flex;
-      gap:10px;
-      align-items:flex-start;
+    .mini{
+      font-size:.85rem;
       color:var(--muted);
     }
-    .bullets i{
-      margin-top:2px;
-      color:#111;
-    }
 
-    .small{
-      margin-top:10px;
-      color:var(--muted);
-      font-size:.84rem;
-      line-height:1.45;
-    }
-
-    .paypal-wrap{
-      padding:16px;
+    /* PayPal container: limpio */
+    #paypal-button-container{
+      padding:10px 12px;
       border:1px solid var(--line);
       border-radius:14px;
       background:#fff;
-      box-shadow:0 12px 30px rgba(15,23,42,.05);
     }
-    .paypal-title{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom:10px;
+
+    footer{
+      text-align:center;
+      color:var(--muted);
+      font-size:.85rem;
+      padding:10px 0 0;
     }
-    .paypal-title strong{
-      font-weight:900;
-      font-size:.95rem;
-    }
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(0,112,186,.25);
-      background:rgba(0,112,186,.06);
-      color:#0b3b63;
-      font-weight:900;
-      font-size:.78rem;
-      letter-spacing:.06em;
-      text-transform:uppercase;
-      white-space:nowrap;
-    }
-    .badge i{ color:#0070ba; }
   </style>
 
-  <!-- PayPal SDK -->
-  <script src="https://www.paypal.com/sdk/js?client-id=AZtz3AcSsDxbzHInTtOoUs4WOIxbp8ev5TIMbG5oE30eAM8sLPQkx6BpM2DM0QSApdk1rUffzN4WwWMq&currency=EUR&intent=capture" defer></script>
+  <!-- ✅ PAYPAL SDK (PON TU CLIENT ID AQUÍ) -->
+  <!-- Reemplaza TU_PAYPAL_CLIENT_ID por tu client-id real -->
+  <script
+    src="https://www.paypal.com/sdk/js?client-id=TU_PAYPAL_CLIENT_ID&currency=EUR&intent=capture"
+    data-sdk-integration-source="integrationbuilder">
+  </script>
 </head>
 
 <body>
-  <header>
-    <div class="container topbar">
-      <div class="brand" aria-label="SCOOT SHOP">
-        <img src="Img/0-removebg-preview.png" alt="SCOOT SHOP logo" decoding="async">
-        <div class="brand-text">
-          <span class="name">SCOOT SHOP</span>
-          <span class="tag">Pago seguro</span>
-        </div>
-      </div>
-      <a class="back" href="index.html" aria-label="Volver al inicio">
-        <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
-        Volver
-      </a>
-    </div>
-  </header>
+  <div class="wrap">
+    <div class="container">
 
-  <main class="container">
-    <div class="grid">
-      <!-- RESUMEN -->
+      <header>
+        <a class="back" href="index.html#comprar">Volver</a>
+
+        <div class="brand">
+          <img src="Img/0-removebg-preview.png" alt="SCOOT SHOP logo" decoding="async">
+          <div class="t">
+            <strong>SCOOT SHOP</strong>
+            <span id="subline">Pago seguro</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Resumen -->
       <section class="card" aria-label="Resumen del pedido">
-        <div class="card-head">
-          <h1>Finalizar compra</h1>
-          <p>Revisa tu producto y completa el pago con PayPal.</p>
+        <div class="head">
+          <h1>Resumen</h1>
+          <span class="badge" id="badgePrice">—</span>
         </div>
-
-        <div class="card-body">
-          <div class="summary">
-            <div class="row">
-              <div>
-                <div class="k">Producto</div>
-                <div class="v" id="productName">—</div>
-              </div>
-              <span class="pill" title="Pago con PayPal">
-                <i class="fa-brands fa-paypal" aria-hidden="true"></i>PayPal
-              </span>
-            </div>
-
-            <div class="row">
-              <div>
-                <div class="k">Total</div>
-                <div class="v price" id="productPrice">—</div>
-              </div>
-              <div style="text-align:right">
-                <div class="k">Moneda</div>
-                <div class="v">EUR</div>
-              </div>
-            </div>
+        <div class="body summary">
+          <div class="row">
+            <div class="k">Producto</div>
+            <div class="v" id="sumName">—</div>
           </div>
-
-          <p class="note">
-            <strong>Envío:</strong> 6–8 días hábiles (península).<br>
-            <strong>Garantía:</strong> 200 km por producto.
-          </p>
-
-          <div class="divider"></div>
-
-          <!-- Datos comprador (opcionales, para incluir en la nota interna del pago) -->
-          <div class="field">
-            <label for="buyerName">Nombre (opcional)</label>
-            <input id="buyerName" type="text" autocomplete="name" placeholder="Ej: Juan Pérez">
-            <div class="hint">Se añadirá como nota interna del pedido.</div>
+          <div class="row">
+            <div class="k">Importe</div>
+            <div class="v" id="sumPrice">—</div>
           </div>
-
-          <div class="field">
-            <label for="buyerPhone">Teléfono (opcional)</label>
-            <input id="buyerPhone" type="tel" autocomplete="tel" placeholder="Ej: +34 600 000 000">
+          <div class="row">
+            <div class="k">Referencia</div>
+            <div class="v" id="sumRef">—</div>
           </div>
-
-          <div class="divider"></div>
-
-          <div class="paypal-wrap">
-            <div class="paypal-title">
-              <strong>Pagar ahora</strong>
-              <span class="badge"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i>Seguro</span>
-            </div>
-            <div id="paypal-buttons"></div>
-            <div class="status" id="statusBox"></div>
+          <div class="mini">
+            Esta página recibe: <code>?name=G2&amp;price=380.00</code>
           </div>
-
-          <p class="small">
-            Nota: en páginas estáticas, el precio viene por URL (por ejemplo: <code>?name=N7PRO&price=215.00</code>).
-            Para máxima seguridad anti-manipulación, lo ideal es validar el importe en servidor.
-          </p>
         </div>
       </section>
 
-      <!-- LATERAL -->
-      <aside class="side" aria-label="Información de pago">
-        <section class="card">
-          <div class="card-body">
-            <h2>Qué ocurre después</h2>
-            <div class="bullets">
-              <div><i class="fa-solid fa-receipt" aria-hidden="true"></i><span>Te confirmamos el pago y el pedido por WhatsApp.</span></div>
-              <div><i class="fa-solid fa-truck-fast" aria-hidden="true"></i><span>Te enviamos seguimiento cuando salga.</span></div>
-              <div><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i><span>Soporte y SAT para repuestos y mantenimiento.</span></div>
+      <!-- Métodos -->
+      <section class="card" aria-label="Métodos de pago">
+        <div class="head">
+          <h2>Elige método</h2>
+          <span class="badge">Confirmación por WhatsApp</span>
+        </div>
+        <div class="body methods">
+
+          <!-- PAYPAL -->
+          <div class="method" aria-label="Pago con PayPal">
+            <div class="top">
+              <strong>PayPal</strong>
+              <span>Recomendado</span>
             </div>
-            <p class="small">
-              ¿Dudas? Escríbenos por WhatsApp:
-              <a href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer"><strong>+34 666 318 747</strong></a>
-            </p>
+
+            <div class="hint">
+              Pulsa el botón y finaliza el pago. Al terminar, te saldrá “pago completado”.
+            </div>
+
+            <div id="paypal-button-container" aria-label="Botón PayPal"></div>
+
+            <div class="mini" id="paypalStatus" role="status" aria-live="polite"></div>
           </div>
-        </section>
-      </aside>
+
+          <div class="divider" aria-hidden="true"></div>
+
+          <!-- BIZUM -->
+          <div class="method" aria-label="Pago con Bizum">
+            <div class="top">
+              <strong>Bizum</strong>
+              <span>Rápido</span>
+            </div>
+
+            <div class="kv">
+              <div>
+                <div class="label">Número Bizum</div>
+                <code id="bizumPhone">+34 666 318 747</code>
+              </div>
+              <button class="copy" type="button" data-copy="#bizumPhone">Copiar</button>
+            </div>
+
+            <div class="kv">
+              <div>
+                <div class="label">Concepto</div>
+                <code id="bizumConcept">SCOOT SHOP</code>
+              </div>
+              <button class="copy" type="button" data-copy="#bizumConcept">Copiar</button>
+            </div>
+
+            <a class="btn btn-wa" id="waBizum" href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer">
+              Enviar comprobante por WhatsApp
+            </a>
+
+            <div class="mini">Tras enviar el comprobante, confirmamos el pedido.</div>
+          </div>
+
+          <div class="divider" aria-hidden="true"></div>
+
+          <!-- TRANSFERENCIA -->
+          <div class="method" aria-label="Pago por transferencia bancaria">
+            <div class="top">
+              <strong>Transferencia</strong>
+              <span>1–2 días</span>
+            </div>
+
+            <div class="kv">
+              <div>
+                <div class="label">Titular</div>
+                <code id="bankHolder">SCOOT SHOP</code>
+              </div>
+              <button class="copy" type="button" data-copy="#bankHolder">Copiar</button>
+            </div>
+
+            <div class="kv">
+              <div>
+                <div class="label">IBAN</div>
+                <code id="bankIban">ES00 0000 0000 0000 0000 0000</code>
+              </div>
+              <button class="copy" type="button" data-copy="#bankIban">Copiar</button>
+            </div>
+
+            <div class="kv">
+              <div>
+                <div class="label">Concepto</div>
+                <code id="bankConcept">SCOOT SHOP</code>
+              </div>
+              <button class="copy" type="button" data-copy="#bankConcept">Copiar</button>
+            </div>
+
+            <a class="btn btn-wa" id="waBank" href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer">
+              Enviar comprobante por WhatsApp
+            </a>
+
+            <div class="mini">Envía el justificante y lo confirmamos.</div>
+          </div>
+
+        </div>
+      </section>
+
+      <footer>
+        © <span id="y"></span> SCOOT SHOP · <a href="index.html#legal">Legal</a>
+      </footer>
+
     </div>
-  </main>
+  </div>
 
   <script>
     (function(){
       'use strict';
 
-      function qs(key){
-        return new URLSearchParams(window.location.search).get(key);
+      // ✅ AÑO
+      var y = document.getElementById('y');
+      if(y) y.textContent = new Date().getFullYear();
+
+      // Helpers
+      function getParam(k){
+        try{ return new URLSearchParams(location.search).get(k); }
+        catch(e){ return null; }
       }
+      function safeText(s){ return (s ? String(s).replace(/\s+/g,' ').trim() : ''); }
 
-      function toMoneyEUR(value){
-        try{
-          return new Intl.NumberFormat('es-ES', { style:'currency', currency:'EUR' }).format(value);
-        }catch(_){
-          return value + ' €';
-        }
-      }
+      // Datos desde URL
+      var name = safeText(getParam('name')) || 'Producto SCOOT SHOP';
+      var priceRaw = safeText(getParam('price')) || '';
+      var priceNum = null;
 
-      function showStatus(type, msg){
-        var box = document.getElementById('statusBox');
-        if(!box) return;
-        box.className = 'status show ' + (type === 'ok' ? 'ok' : 'err');
-        box.innerHTML = msg;
-      }
-
-      var productName = (qs('name') || 'Producto').trim();
-      var priceRaw = (qs('price') || '').trim();
-
-      // Normalizar precio
-      var priceNumber = NaN;
       if(priceRaw){
-        var cleaned = priceRaw.replace(/[^\d,\.]/g,'').replace(',', '.');
-        priceNumber = Number(cleaned);
+        var cleaned = priceRaw.replace(/[^\d.,]/g,'').replace(',', '.');
+        var n = Number(cleaned);
+        if(Number.isFinite(n) && n > 0) priceNum = n;
       }
 
-      document.getElementById('productName').textContent = productName;
+      var priceLabel = priceNum ? (priceNum.toFixed(2) + ' €') : (priceRaw ? priceRaw : '—');
+      var ref = 'SS-' + Date.now().toString(36).toUpperCase();
 
-      if(Number.isFinite(priceNumber) && priceNumber > 0){
-        document.getElementById('productPrice').textContent = toMoneyEUR(priceNumber);
-      }else{
-        document.getElementById('productPrice').textContent = (priceRaw || '—');
-      }
+      // Pintar resumen
+      var sumName = document.getElementById('sumName');
+      var sumPrice = document.getElementById('sumPrice');
+      var sumRef = document.getElementById('sumRef');
+      var subline = document.getElementById('subline');
+      var badgePrice = document.getElementById('badgePrice');
 
-      // Esperar a PayPal SDK (defer). Si no carga, mostrar error.
-      window.addEventListener('load', function(){
-        if(!window.paypal){
-          showStatus('err', 'No se pudo cargar PayPal. Revisa tu conexión o bloqueadores (AdBlock).');
-          return;
-        }
+      if(sumName) sumName.textContent = name;
+      if(sumPrice) sumPrice.textContent = priceLabel;
+      if(sumRef) sumRef.textContent = ref;
+      if(subline) subline.textContent = name + ' · ' + priceLabel;
+      if(badgePrice) badgePrice.textContent = priceLabel;
 
-        if(!(Number.isFinite(priceNumber) && priceNumber > 0)){
-          showStatus('err', 'Precio inválido. Vuelve al catálogo y pulsa “Pagar” desde el producto.');
-          return;
-        }
+      // Concepto
+      var concept = 'SCOOT SHOP · ' + name + ' · ' + ref;
 
-        paypal.Buttons({
-          style: {
-            layout: 'vertical',
-            shape: 'pill',
-            label: 'pay'
-          },
+      var bizumConcept = document.getElementById('bizumConcept');
+      var bankConcept = document.getElementById('bankConcept');
+      if(bizumConcept) bizumConcept.textContent = concept;
+      if(bankConcept) bankConcept.textContent = concept;
 
-          createOrder: function(data, actions){
-            var buyerName = (document.getElementById('buyerName').value || '').trim();
-            var buyerPhone = (document.getElementById('buyerPhone').value || '').trim();
+      // WhatsApp prellenado
+      var waText = encodeURIComponent(
+        'Hola, acabo de realizar el pago.\n' +
+        'Producto: ' + name + '\n' +
+        'Importe: ' + priceLabel + '\n' +
+        'Referencia: ' + ref + '\n' +
+        'Adjunto comprobante.'
+      );
+      var waLink = 'https://wa.me/34666318747?text=' + waText;
 
-            var note = [
-              'Producto: ' + productName,
-              'Precio: ' + priceNumber.toFixed(2) + ' EUR',
-              buyerName ? ('Nombre: ' + buyerName) : '',
-              buyerPhone ? ('Teléfono: ' + buyerPhone) : ''
-            ].filter(Boolean).join(' | ');
+      var waBizum = document.getElementById('waBizum');
+      var waBank = document.getElementById('waBank');
+      if(waBizum) waBizum.href = waLink;
+      if(waBank) waBank.href = waLink;
 
-            return actions.order.create({
-              purchase_units: [{
-                description: productName,
-                amount: {
-                  currency_code: 'EUR',
-                  value: priceNumber.toFixed(2)
-                },
-                custom_id: 'SCOOTSHOP-' + Date.now(),
-                soft_descriptor: 'SCOOT SHOP',
-                // Nota para ti (no siempre visible al pagador)
-                // PayPal puede mostrarlo como "nota" dependiendo del flujo
-                // y/o quedará asociado a la transacción.
-                invoice_id: 'SS-' + Date.now(),
-              }],
-              application_context: {
-                shipping_preference: 'NO_SHIPPING'
-              }
-            }).then(function(orderId){
-              // Guardar nota en memoria (para mostrar tras pago)
-              window.__ss_note = note;
-              return orderId;
-            });
-          },
+      // Copiar
+      document.querySelectorAll('[data-copy]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var sel = btn.getAttribute('data-copy');
+          var el = sel ? document.querySelector(sel) : null;
+          if(!el) return;
 
-          onApprove: function(data, actions){
-            return actions.order.capture().then(function(details){
-              var payer = (details && details.payer && details.payer.name)
-                ? (details.payer.name.given_name + ' ' + details.payer.name.surname)
-                : 'Cliente';
+          var text = (el.textContent || '').trim();
+          if(!text) return;
 
-              var orderId = (details && details.id) ? details.id : data.orderID;
-
-              showStatus('ok',
-                '<strong>Pago completado ✅</strong><br>' +
-                'Gracias, <strong>' + payer + '</strong>.<br>' +
-                'ID de pedido PayPal: <strong>' + (orderId || '—') + '</strong><br><br>' +
-                'Ahora escríbenos por WhatsApp para confirmar el envío:<br>' +
-                '<a href="https://wa.me/34666318747?text=' + encodeURIComponent(
-                  'Hola! He pagado por PayPal. Producto: ' + productName +
-                  ' | Total: ' + priceNumber.toFixed(2) + ' EUR' +
-                  (orderId ? (' | PayPal Order ID: ' + orderId) : '')
-                ) + '" target="_blank" rel="noopener noreferrer"><strong>Abrir WhatsApp</strong></a>'
-              );
-            });
-          },
-
-          onCancel: function(){
-            showStatus('err', 'Pago cancelado. Si quieres, vuelve a intentarlo.');
-          },
-
-          onError: function(err){
-            console.error(err);
-            showStatus('err', 'Hubo un error con PayPal. Inténtalo de nuevo o contacta por WhatsApp.');
+          function toast(ok){
+            var old = btn.textContent;
+            btn.textContent = ok ? 'Copiado' : 'Error';
+            setTimeout(function(){ btn.textContent = old; }, 900);
           }
-        }).render('#paypal-buttons');
+
+          if(navigator.clipboard && navigator.clipboard.writeText){
+            navigator.clipboard.writeText(text).then(function(){ toast(true); }).catch(function(){ toast(false); });
+          }else{
+            var ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            document.body.appendChild(ta);
+            ta.select();
+            try{ toast(document.execCommand('copy')); }catch(e){ toast(false); }
+            document.body.removeChild(ta);
+          }
+        });
       });
+
+      // =========================
+      // ✅ PAYPAL: AQUÍ VA TU API
+      // =========================
+      // 1) Pon tu client-id arriba en el script del SDK.
+      // 2) Cambia estas URLs por tus endpoints reales:
+      const CREATE_ORDER_URL  = '/api/paypal/create-order';
+      const CAPTURE_ORDER_URL = '/api/paypal/capture-order';
+
+      const paypalStatus = document.getElementById('paypalStatus');
+
+      function setStatus(msg){
+        if(paypalStatus) paypalStatus.textContent = msg || '';
+      }
+
+      // Si el SDK no cargó, mostramos fallback
+      if(!window.paypal){
+        setStatus('PayPal no se cargó. Revisa el client-id o bloqueadores.');
+        return;
+      }
+
+      // Render del botón PayPal
+      window.paypal.Buttons({
+        style: {
+          layout: 'vertical',
+          shape: 'pill',
+          label: 'paypal'
+        },
+
+        // ✅ Tu backend crea la orden y devuelve { id }
+        createOrder: function() {
+          setStatus('Creando orden…');
+          return fetch(CREATE_ORDER_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: name,
+              price: priceNum ? priceNum.toFixed(2) : priceRaw,
+              currency: 'EUR',
+              reference: ref,
+              concept: concept
+            })
+          })
+          .then(function(res){
+            if(!res.ok) throw new Error('Error creando orden');
+            return res.json();
+          })
+          .then(function(data){
+            if(!data || !data.id) throw new Error('Tu API debe devolver { id: "ORDER_ID" }');
+            setStatus('');
+            return data.id;
+          })
+          .catch(function(err){
+            console.error(err);
+            setStatus('No se pudo crear la orden. Revisa tu API.');
+            throw err;
+          });
+        },
+
+        // ✅ Tu backend captura el pago
+        onApprove: function(data) {
+          setStatus('Confirmando pago…');
+          return fetch(CAPTURE_ORDER_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderID: data.orderID, reference: ref })
+          })
+          .then(function(res){
+            if(!res.ok) throw new Error('Error capturando pago');
+            return res.json();
+          })
+          .then(function(){
+            setStatus('Pago completado. Envíanos el comprobante por WhatsApp si es necesario.');
+          })
+          .catch(function(err){
+            console.error(err);
+            setStatus('Pago aprobado pero no confirmado. Revisa tu API.');
+          });
+        },
+
+        onCancel: function(){
+          setStatus('Pago cancelado.');
+        },
+
+        onError: function(err){
+          console.error(err);
+          setStatus('Error de PayPal. Revisa el client-id y tu API.');
+        }
+
+      }).render('#paypal-button-container');
+
     })();
   </script>
 </body>

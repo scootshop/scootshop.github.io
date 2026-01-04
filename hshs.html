@@ -1,79 +1,116 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Prueba PayPal — 1€</title>
-  <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; background:#fff; color:#111; margin:0; padding:24px;}
-    .wrap{max-width:520px; margin:0 auto; border:1px solid #e5e7eb; border-radius:16px; padding:18px; box-shadow:0 10px 30px rgba(0,0,0,.05);}
-    h1{font-size:18px; margin:0 0 10px;}
-    p{margin:0 0 14px; color:#4b5563;}
-    .price{font-weight:800; font-size:22px; margin:8px 0 16px;}
-    #result{margin-top:14px; padding:12px; border-radius:12px; background:#f9fafb; border:1px solid #e5e7eb; white-space:pre-wrap;}
-    .hint{font-size:12px; color:#6b7280; margin-top:10px;}
-  </style>
+<!-- Menú escritorio con iconos -->
+<nav class="menu" aria-label="Navegación principal">
+  <a href="#inicio" aria-current="page"><i class="fa-solid fa-house nav-icon" aria-hidden="true"></i>Inicio</a>
+  <a href="#comprar"><i class="fa-solid fa-cart-shopping nav-icon" aria-hidden="true"></i>Productos</a>
+  <a href="#faq"><i class="fa-solid fa-circle-question nav-icon" aria-hidden="true"></i>Preguntas</a>
+  <a href="#ubicacion"><i class="fa-solid fa-location-dot nav-icon" aria-hidden="true"></i>Ubicación</a>
+  <a href="#legal"><i class="fa-solid fa-scale-balanced nav-icon" aria-hidden="true"></i>Legal</a>
+  <a href="https://www.instagram.com/scootshopping" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+  <a href="https://www.facebook.com/61579248524907" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook" aria-hidden="true"></i></a>
+  <a href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
+</nav>
 
-  <!-- ✅ PON AQUÍ TU CLIENT ID DE LIVE (PRODUCCIÓN) -->
-  <script src="https://www.paypal.com/sdk/js?client-id=AZtz3AcSsDxbzHInTtOoUs4WOIxbp8ev5TIMbG5oE30eAM8sLPQkx6BpM2DM0QSApdk1rUffzN4WwWMq&currency=EUR&intent=capture"></script>
-</head>
-<body>
-  <div class="wrap">
-    <h1>Prueba de cobro PayPal</h1>
-    <p>Esto crea y captura un pago real de <strong>1,00 EUR</strong>.</p>
-    <div class="price">Total: 1,00 €</div>
+<!-- Burger -->
+<button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileMenu" type="button">
+  <i class="fa-solid fa-bars" aria-hidden="true"></i>
+</button>
 
-    <div id="paypal-button-container"></div>
+<!-- MENÚ MÓVIL -->
+<div class="mm-backdrop" id="mmBackdrop" hidden></div>
 
-    <div id="result">Estado: esperando pago…</div>
-    <div class="hint">
-      Nota: si te sale “Sandbox”, no es real. Debe ser LIVE. <br/>
-      Y tu web debe estar en HTTPS.
+<nav class="mm-panel" id="mobileMenu" hidden aria-label="Menú móvil">
+  <div class="mm-head">
+    <div class="mm-brand">
+      <img src="Img/0-removebg-preview.png" alt="Logo SCOOT SHOP" />
+      <div class="mm-brand-text">
+        <span class="mm-brand-name">SCOOT SHOP</span>
+        <span class="mm-brand-tag">Scooters eléctricos</span>
+      </div>
+    </div>
+    <button class="mm-close" id="mmClose" aria-label="Cerrar menú" type="button">
+      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <div class="mm-content">
+    <div class="mm-links-group">
+      <p class="mm-section-label">Navegación</p>
+
+      <a class="mm-link mm-link--primary" href="#inicio">
+        <div class="mm-link-main">
+          <i class="fa-solid fa-house" aria-hidden="true"></i>
+          <div class="mm-link-text">
+            <span class="mm-link-label">Inicio</span>
+            <span class="mm-link-sub">Modelos destacados y novedades</span>
+          </div>
+        </div>
+        <span class="mm-link-chevron"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></span>
+      </a>
+
+      <a class="mm-link" href="#comprar">
+        <div class="mm-link-main">
+          <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
+          <div class="mm-link-text">
+            <span class="mm-link-label">Productos</span>
+            <span class="mm-link-sub">Series N, GT e IX</span>
+          </div>
+        </div>
+        <span class="mm-link-chevron"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></span>
+      </a>
+
+      <a class="mm-link" href="#faq">
+        <div class="mm-link-main">
+          <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
+          <div class="mm-link-text">
+            <span class="mm-link-label">Preguntas</span>
+            <span class="mm-link-sub">Envíos, garantía y devoluciones</span>
+          </div>
+        </div>
+        <span class="mm-link-chevron"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></span>
+      </a>
+
+      <a class="mm-link" href="#ubicacion">
+        <div class="mm-link-main">
+          <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+          <div class="mm-link-text">
+            <span class="mm-link-label">Ubicación</span>
+            <span class="mm-link-sub">Silla y Catarroja (Valencia)</span>
+          </div>
+        </div>
+        <span class="mm-link-chevron"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></span>
+      </a>
+
+      <a class="mm-link" href="#legal">
+        <div class="mm-link-main">
+          <i class="fa-solid fa-scale-balanced" aria-hidden="true"></i>
+          <div class="mm-link-text">
+            <span class="mm-link-label">Legal</span>
+            <span class="mm-link-sub">Aviso legal y políticas</span>
+          </div>
+        </div>
+        <span class="mm-link-chevron"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></span>
+      </a>
+    </div>
+
+    <div>
+      <p class="mm-icons-label">Redes y contacto</p>
+      <div class="mm-icons" aria-label="Redes">
+        <a href="https://www.instagram.com/scootshopping" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+          <i class="fab fa-instagram" aria-hidden="true"></i>
+        </a>
+        <a href="https://www.facebook.com/61579248524907" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+          <i class="fab fa-facebook" aria-hidden="true"></i>
+        </a>
+        <a href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+          <i class="fab fa-whatsapp" aria-hidden="true"></i>
+        </a>
+      </div>
     </div>
   </div>
 
-  <script>
-    const result = document.getElementById('result');
-
-    paypal.Buttons({
-      style: {
-        layout: 'vertical',
-        shape: 'pill',
-        label: 'paypal'
-      },
-
-      createOrder: function(data, actions) {
-        return actions.order.create({
-          purchase_units: [{
-            description: "Prueba Scoot Shop — 1€",
-            amount: {
-              currency_code: "EUR",
-              value: "1.00"
-            }
-          }]
-        });
-      },
-
-      onApprove: function(data, actions) {
-        result.textContent = "Capturando pago…";
-        return actions.order.capture().then(function(details) {
-          const payer = details?.payer?.name?.given_name || "Cliente";
-          const id = details?.id || data.orderID;
-          const status = details?.status || "COMPLETED";
-          result.textContent =
-            "✅ Pago completado\n" +
-            "ID: " + id + "\n" +
-            "Estado: " + status + "\n" +
-            "Pagador: " + payer + "\n" +
-            "Importe: 1.00 EUR";
-        });
-      },
-
-      onError: function(err) {
-        console.error(err);
-        result.textContent = "❌ Error: " + (err?.message || "revisa consola y configuración (LIVE/HTTPS).");
-      }
-    }).render('#paypal-button-container');
-  </script>
-</body>
-</html>
+  <div class="mm-foot">
+    <a class="mm-cta" href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer">
+      <i class="fab fa-whatsapp" aria-hidden="true"></i> Escríbenos por WhatsApp
+    </a>
+  </div>
+</nav>
