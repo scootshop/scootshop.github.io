@@ -25,17 +25,20 @@
   <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link rel="stylesheet" href="tarjetas.css"/>
+
+  <!-- Extra: estado de burger deshabilitado mientras carga el menú -->
+  <style>
+    .burger[disabled]{ opacity:.55; cursor:not-allowed; }
+  </style>
 </head>
 
 <body>
-  <!-- ✅ SOLO UNA skip-link (quitada la duplicada) -->
   <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
 
-  <!-- HEADER (MENÚ) -->
+  <!-- HEADER -->
   <header aria-label="Barra superior">
     <div class="container nav">
       <div class="brand">
-        <!-- ✅ igual que el index: logo + texto clicable -->
         <a href="index.html" aria-label="Ir al inicio">
           <img src="Img/0-removebg-preview.png" alt="SCOOT SHOP logo" decoding="async" fetchpriority="high">
           <span>Versatil</span>
@@ -56,118 +59,17 @@
         <a href="https://www.facebook.com/61579248524907" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
           <i class="fab fa-facebook" aria-hidden="true"></i>
         </a>
-        <a href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
-          <i class="fab fa-whatsapp" aria-hidden="true"></i>
-        </a>
       </nav>
 
       <!-- BURGER -->
-      <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileMenu" type="button">
+      <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileMenu" type="button" disabled>
         <i class="fa-solid fa-bars" aria-hidden="true"></i>
       </button>
     </div>
   </header>
 
-  <!-- MENÚ MÓVIL -->
-  <div class="mm-backdrop" id="mmBackdrop" hidden></div>
-
-  <nav class="mm-panel" id="mobileMenu" hidden aria-label="Menú móvil">
-    <div class="mm-head">
-      <div class="mm-brand">
-        <img src="Img/0-removebg-preview.png" alt="Logo SCOOT SHOP" />
-        <div class="mm-brand-text">
-          <span class="mm-brand-name">SCOOT SHOP</span>
-          <span class="mm-brand-tag">Scooters eléctricos</span>
-        </div>
-      </div>
-
-      <button class="mm-close" id="mmClose" aria-label="Cerrar menú" type="button">
-        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-      </button>
-    </div>
-
-    <div class="mm-content">
-      <div class="mm-links-group">
-        <p class="mm-section-label">Navegación</p>
-
-        <a class="mm-link mm-link--primary" href="index.html">
-          <div class="mm-link-main">
-            <i class="fa-solid fa-house" aria-hidden="true"></i>
-            <div class="mm-link-text">
-              <span class="mm-link-label">Inicio</span>
-              <span class="mm-link-sub">Volver a la portada</span>
-            </div>
-          </div>
-          <span class="mm-link-chevron"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></span>
-        </a>
-
-        <a class="mm-link" href="index.html#comprar">
-          <div class="mm-link-main">
-            <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
-            <div class="mm-link-text">
-              <span class="mm-link-label">Productos</span>
-              <span class="mm-link-sub">Ver catálogo</span>
-            </div>
-          </div>
-          <span class="mm-link-chevron"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></span>
-        </a>
-
-        <a class="mm-link" href="index.html#faq">
-          <div class="mm-link-main">
-            <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
-            <div class="mm-link-text">
-              <span class="mm-link-label">Preguntas</span>
-              <span class="mm-link-sub">Envíos, garantía y devoluciones</span>
-            </div>
-          </div>
-          <span class="mm-link-chevron"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></span>
-        </a>
-
-        <a class="mm-link" href="index.html#ubicacion">
-          <div class="mm-link-main">
-            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
-            <div class="mm-link-text">
-              <span class="mm-link-label">Ubicación</span>
-              <span class="mm-link-sub">Silla y Catarroja (Valencia)</span>
-            </div>
-          </div>
-          <span class="mm-link-chevron"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></span>
-        </a>
-
-        <a class="mm-link" href="index.html#legal">
-          <div class="mm-link-main">
-            <i class="fa-solid fa-scale-balanced" aria-hidden="true"></i>
-            <div class="mm-link-text">
-              <span class="mm-link-label">Legal</span>
-              <span class="mm-link-sub">Aviso legal y políticas</span>
-            </div>
-          </div>
-          <span class="mm-link-chevron"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></span>
-        </a>
-      </div>
-
-      <div>
-        <p class="mm-icons-label">Redes y contacto</p>
-        <div class="mm-icons" aria-label="Redes">
-          <a href="https://www.instagram.com/scootshopping" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-            <i class="fab fa-instagram" aria-hidden="true"></i>
-          </a>
-          <a href="https://www.facebook.com/61579248524907" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-            <i class="fab fa-facebook" aria-hidden="true"></i>
-          </a>
-          <a href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
-            <i class="fab fa-whatsapp" aria-hidden="true"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <div class="mm-foot">
-      <a class="mm-cta" href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer">
-        <i class="fab fa-whatsapp" aria-hidden="true"></i> Escríbenos por WhatsApp
-      </a>
-    </div>
-  </nav>
+  <!-- Slot para menú móvil común -->
+  <div id="mobile-menu-slot"></div>
 
   <main id="main-content">
     <section class="container">
@@ -195,35 +97,34 @@
           <div class="gallery-main">
             <img src="Img-IX3/1.jpg" alt="IX3 vista principal" id="mainImage" loading="eager" fetchpriority="high" decoding="async">
           </div>
-          <div class="thumbs">
-            <button class="thumb active" data-img="Img-IX3/1.jpg" type="button">
-              <img src="Img-IX3/1.jpg" alt="IX3 vista 1">
+
+          <div class="thumbs" aria-label="Miniaturas IX3">
+            <button class="thumb active" data-img="Img-IX3/1.jpg" type="button" aria-label="Ver imagen 1">
+              <img src="Img-IX3/1.jpg" alt="IX3 vista 1" loading="lazy" decoding="async">
             </button>
-            <button class="thumb" data-img="Img-IX3/2.jpg" type="button">
-              <img src="Img-IX3/2.jpg" alt="IX3 vista 2">
+            <button class="thumb" data-img="Img-IX3/2.jpg" type="button" aria-label="Ver imagen 2">
+              <img src="Img-IX3/2.jpg" alt="IX3 vista 2" loading="lazy" decoding="async">
             </button>
-            <button class="thumb" data-img="Img-IX3/3.jpg" type="button">
-              <img src="Img-IX3/3.jpg" alt="IX3 vista 3">
+            <button class="thumb" data-img="Img-IX3/3.jpg" type="button" aria-label="Ver imagen 3">
+              <img src="Img-IX3/3.jpg" alt="IX3 vista 3" loading="lazy" decoding="async">
             </button>
-            <button class="thumb" data-img="Img-IX3/4.jpg" type="button">
-              <img src="Img-IX3/4.jpg" alt="IX3 vista 4">
+            <button class="thumb" data-img="Img-IX3/4.jpg" type="button" aria-label="Ver imagen 4">
+              <img src="Img-IX3/4.jpg" alt="IX3 vista 4" loading="lazy" decoding="async">
             </button>
-            <button class="thumb" data-img="Img-IX3/5.jpg" type="button">
-              <img src="Img-IX3/5.jpg" alt="IX3 vista 5">
+            <button class="thumb" data-img="Img-IX3/5.jpg" type="button" aria-label="Ver imagen 5">
+              <img src="Img-IX3/5.jpg" alt="IX3 vista 5" loading="lazy" decoding="async">
             </button>
-            <button class="thumb" data-img="Img-IX3/6.jpg" type="button">
-              <img src="Img-IX3/6.jpg" alt="IX3 vista 6">
+            <button class="thumb" data-img="Img-IX3/6.jpg" type="button" aria-label="Ver imagen 6">
+              <img src="Img-IX3/6.jpg" alt="IX3 vista 6" loading="lazy" decoding="async">
             </button>
           </div>
         </section>
 
         <!-- FICHA TÉCNICA -->
         <aside class="panel" aria-label="Ficha técnica IX3">
-          <div>
-            <div class="price-row" aria-label="Precio IX3">
-              <span class="price-now">380 €</span>
-              <span class="price-was">850 €</span>
-            </div>
+          <div class="price-row" aria-label="Precio IX3">
+            <span class="price-now">380 €</span>
+            <span class="price-was">850 €</span>
           </div>
 
           <div class="quick-specs" aria-label="Resumen técnico">
@@ -241,21 +142,18 @@
             </div>
           </div>
 
+          <!-- ✅ CTA ÚNICO -->
           <div class="cta-col">
-            <a href="https://wa.me/34666318747?text=Hola%21%20Me%20interesa%20el%20IX3%20%2840%E2%80%9345%20km%20%E2%80%A2%20800%20W%20%E2%80%A2%2024%20kg%29.%20Precio%3A%20380%20%E2%82%AC.%20%C2%BFEst%C3%A1%20disponible%3F"
-               class="btn-main"
-               target="_blank"
-               rel="noopener noreferrer">
-              <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i> Reservar
-            </a>
+  <a href="https://www.paypal.com/ncp/payment/7ML59E5E7UA66" class="btn-main" aria-label="Comprar IX3">
+    <i class="fa-solid fa-bag-shopping" aria-hidden="true"></i> Comprar
+  </a>
 
-            <a href="https://wa.me/34666318747?text=Hola%21%20Quiero%20m%C3%A1s%20informaci%C3%B3n%20t%C3%A9cnica%20del%20IX3."
-               class="btn-wa"
-               target="_blank"
-               rel="noopener noreferrer">
-              <i class="fab fa-whatsapp" aria-hidden="true"></i> WhatsApp
-            </a>
-          </div>
+  <!-- Reservar (WhatsApp) - el href lo rellena el JS automáticamente -->
+  <a href="#" class="btn-reserve" id="reserveBtn" aria-label="Reservar IX3 por WhatsApp">
+    <i class="fab fa-whatsapp" aria-hidden="true"></i> Reservar
+  </a>
+</div>
+
 
           <div class="spec-table" aria-label="Especificaciones principales">
             <div class="spec-row">
@@ -302,15 +200,6 @@
     <footer>
       © <span id="y"></span> SCOOT SHOP · <a href="index.html#legal">Legal</a>
     </footer>
-
-    <!-- WHATSAPP FAB -->
-    <a href="https://wa.me/34666318747?text=Hola%21%20Me%20interesa%20el%20IX3."
-       class="wa-fab"
-       aria-label="WhatsApp IX3"
-       target="_blank"
-       rel="noopener noreferrer">
-      <i class="fab fa-whatsapp" aria-hidden="true"></i>
-    </a>
   </main>
 
   <!-- JSON-LD PRODUCT -->
@@ -340,6 +229,24 @@
     (function(){
       'use strict';
       document.addEventListener('DOMContentLoaded', function(){
+/* Reservar por WhatsApp (auto: toma nombre + precio de la página) */
+(function(){
+  var btn = document.getElementById('reserveBtn');
+  if(!btn) return;
+
+  var nameEl = document.querySelector('.title-left h1');
+  var priceEl = document.querySelector('.price-now');
+
+  var name = (nameEl ? nameEl.textContent : 'producto').trim();
+  var price = (priceEl ? priceEl.textContent : '').trim();
+
+  var phone = '34666318747';
+  var msg = 'Hola! Quiero reservar el ' + name + (price ? ' (' + price + ')' : '') + '. ¿Está disponible?';
+
+  btn.href = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(msg);
+  btn.target = '_blank';
+  btn.rel = 'noopener noreferrer';
+})();
 
         /* Año dinámico */
         var y = document.getElementById('y');
@@ -361,52 +268,153 @@
           });
         })();
 
-        /* Menú móvil */
-        (function(){
+        /* Menú móvil común (partial) */
+        function initMobileMenu(){
           var burger = document.getElementById('burger');
           var panel = document.getElementById('mobileMenu');
           var backdrop = document.getElementById('mmBackdrop');
           var closeBtn = document.getElementById('mmClose');
+          var main = document.getElementById('main-content');
           if(!burger || !panel || !backdrop || !closeBtn) return;
+
+          var productsToggle = document.getElementById('mmProductsToggle');
+          var productsSub = document.getElementById('mmProductsSub');
+          var lastFocus = null;
 
           function lockScroll(lock){
             document.body.style.overflow = lock ? 'hidden' : '';
           }
 
+          function setModalState(isOpen){
+            if(!main) return;
+            if(isOpen){
+              main.setAttribute('aria-hidden','true');
+              try { main.inert = true; } catch(e) {}
+            }else{
+              main.removeAttribute('aria-hidden');
+              try { main.inert = false; } catch(e) {}
+            }
+          }
+
+          function getFocusable(){
+            return panel.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])');
+          }
+
+          function closeProductsSubmenu(){
+            if(!productsToggle || !productsSub) return;
+            productsSub.hidden = true;
+            productsToggle.setAttribute('aria-expanded','false');
+            productsToggle.classList.remove('is-open');
+          }
+
+          function toggleProductsSubmenu(){
+            if(!productsToggle || !productsSub) return;
+            var isOpen = productsToggle.getAttribute('aria-expanded') === 'true';
+            productsToggle.setAttribute('aria-expanded', String(!isOpen));
+            productsSub.hidden = isOpen;
+            productsToggle.classList.toggle('is-open', !isOpen);
+          }
+
+          if(productsToggle && productsSub){
+            productsToggle.addEventListener('click', function(e){
+              e.preventDefault();
+              toggleProductsSubmenu();
+            });
+          }
+
           function openMenu(){
+            lastFocus = document.activeElement;
+
             panel.hidden = false;
             backdrop.hidden = false;
+
             requestAnimationFrame(function(){
               panel.classList.add('open');
               backdrop.classList.add('show');
             });
+
             burger.setAttribute('aria-expanded','true');
+            panel.setAttribute('role','dialog');
+            panel.setAttribute('aria-modal','true');
+
             lockScroll(true);
+            setModalState(true);
+
+            closeBtn.focus();
           }
 
           function closeMenu(){
             panel.classList.remove('open');
             backdrop.classList.remove('show');
+
             setTimeout(function(){
               panel.hidden = true;
               backdrop.hidden = true;
             }, 220);
+
             burger.setAttribute('aria-expanded','false');
             lockScroll(false);
+            setModalState(false);
+
+            closeProductsSubmenu();
+
+            if(lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
           }
 
           burger.addEventListener('click', function(){
-            if(panel.hidden){ openMenu(); } else{ closeMenu(); }
+            if(panel.hidden){ openMenu(); } else { closeMenu(); }
           });
+
           backdrop.addEventListener('click', closeMenu);
           closeBtn.addEventListener('click', closeMenu);
+
           panel.querySelectorAll('a').forEach(function(a){
             a.addEventListener('click', closeMenu);
           });
+
           window.addEventListener('keydown', function(e){
-            if(e.key === 'Escape' && !panel.hidden){ closeMenu(); }
+            if(e.key === 'Escape' && !panel.hidden) closeMenu();
           });
-        })();
+
+          panel.addEventListener('keydown', function(e){
+            if(e.key !== 'Tab') return;
+            var f = getFocusable();
+            if(!f.length) return;
+
+            var first = f[0];
+            var last = f[f.length - 1];
+
+            if(e.shiftKey && document.activeElement === first){
+              e.preventDefault(); last.focus();
+            } else if(!e.shiftKey && document.activeElement === last){
+              e.preventDefault(); first.focus();
+            }
+          });
+
+          burger.disabled = false;
+        }
+
+        function loadMobileMenuPartial(){
+          var slot = document.getElementById('mobile-menu-slot');
+          var burger = document.getElementById('burger');
+          if(!slot || !burger) return;
+
+          fetch('partials/mobile-menu.html', { cache: 'no-cache' })
+            .then(function(res){
+              if(!res.ok) throw new Error('No se pudo cargar mobile-menu.html');
+              return res.text();
+            })
+            .then(function(html){
+              slot.innerHTML = html;
+              initMobileMenu();
+            })
+            .catch(function(err){
+              console.warn('[MobileMenu] Error:', err);
+              burger.disabled = true;
+            });
+        }
+
+        loadMobileMenuPartial();
       });
     })();
   </script>
