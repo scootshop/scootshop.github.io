@@ -30,7 +30,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
 
-  <!-- Tipografías + Iconos -->
+  <!-- Tipografías + Iconos (NO toco Versátil: mantiene Tangerine) -->
   <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
@@ -44,13 +44,10 @@
       --line:#E6E9EF;
       --primary:#b91e1e;
       --primary-soft:rgba(185,30,30,.08);
-      --cta:#111;
-      --cta-ink:#fff;
 
       --sat: env(safe-area-inset-top, 0px);
       --header-h: 88px;
-      --radius:14px;
-      --vh: 1vh; /* fallback, sobrescrito por JS */
+      --vh: 1vh;
     }
 
     @media (max-width:768px){
@@ -90,7 +87,7 @@
       background:rgba(255,255,255,.92);
       backdrop-filter:blur(12px);
       border-bottom:1px solid rgba(0,0,0,.05);
-      padding-top: var(--sat); /* iPhone notch / safe area */
+      padding-top: var(--sat);
     }
     .nav{
       display:grid;
@@ -116,6 +113,8 @@
       object-fit:contain;
       filter:drop-shadow(0 4px 10px rgba(15,23,42,.15));
     }
+
+    /* ✅ NO TOCAR: “Versátil” */
     .brand span{
       font-family:'Tangerine',cursive;
       font-size:1.7rem;
@@ -171,8 +170,6 @@
       background:#fff;
       font-size:20px;
       color:#111;
-      position:static;
-      transform:none;
       justify-self:end;
       box-shadow:0 10px 24px rgba(15,23,42,.06);
       transition:transform .12s ease, box-shadow .16s ease, background .15s ease;
@@ -202,6 +199,9 @@
       justify-content:center;
       overflow:hidden;
       text-align:center;
+
+      /* ✅ fallback si el navegador bloquea autoplay o tarda */
+      background: url('Img/NEGRO.png') center/cover no-repeat;
     }
 
     .hero .hero-bg{
@@ -217,9 +217,7 @@
       content:"";
       position:absolute;
       inset:0;
-      background:
-        radial-gradient(120% 80% at 50% 10%, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0)),
-        linear-gradient(180deg, rgba(0, 0, 0, 0.066), rgba(0, 0, 0, 0.263));
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.10), rgba(0, 0, 0, 0.45));
       z-index:1;
       pointer-events:none;
     }
@@ -275,13 +273,12 @@
       box-shadow:0 16px 36px rgba(0,0,0,.5);
     }
 
-    /* Menos movimiento: usar imagen en lugar de video */
     @media (prefers-reduced-motion: reduce){
       .hero video.hero-bg{ display:none !important; }
       .hero{ background: url('Img/NEGRO.png') center/cover no-repeat; }
     }
 
-    /* =============== SECCIONES / CARDS =============== */
+    /* =============== SECCIONES / CARDS (igual que tu base) =============== */
     .series{
       padding:40px 0 22px;
       text-align:center;
@@ -372,22 +369,11 @@
     .card:focus-visible{
       box-shadow:0 0 0 3px rgba(17,17,17,.22), 0 18px 44px rgba(15,23,42,.10);
     }
-    .card::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      border-radius:inherit;
-      pointer-events:none;
-      opacity:0;
-      background:radial-gradient(circle at top,#fecaca22,transparent 60%);
-      transition:opacity .2s ease;
-    }
     .card:hover{
       transform:translateY(-3px);
       box-shadow:0 20px 48px rgba(15,23,42,.10);
       border-color:#d0d7e2;
     }
-    .card:hover::before{ opacity:1; }
 
     .card-media{
       position:relative;
@@ -466,19 +452,6 @@
       line-height:1.3;
       font-weight:900;
     }
-    .rating{
-      display:flex;
-      align-items:center;
-      gap:6px;
-      margin-top:6px;
-      color:#f97316;
-      font-size:.9rem;
-    }
-    .rating .count{
-      color:var(--muted);
-      font-weight:700;
-      font-size:.84rem;
-    }
 
     .card-bottom{
       margin-top:8px;
@@ -504,20 +477,6 @@
       font-size:.9rem;
     }
 
-    .card[data-was]:not([data-was="—"]) .price-now::after{
-      content:"Oferta";
-      margin-left:8px;
-      padding:2px 7px;
-      border-radius:999px;
-      font-size:.7rem;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-      font-weight:800;
-      background:rgba(185,28,28,.09);
-      color:var(--primary);
-    }
-
-    /* Botonera */
     .btn-row{
       display:flex;
       gap:10px;
@@ -539,7 +498,6 @@
       font-size:.9rem;
       transition:background .14s, color .14s, transform .12s, box-shadow .16s, border-color .14s;
     }
-
     .btn-primary{
       background:#111;
       color:#fff;
@@ -552,7 +510,6 @@
       box-shadow:0 16px 32px rgba(15,23,42,.3);
     }
 
-    /* Accesibilidad: texto solo para lectores de pantalla */
     .sr-only{
       position:absolute;
       width:1px;
@@ -565,7 +522,6 @@
       border:0;
     }
 
-    /* PayPal: fondo amarillo + (pero visible: COMPRAR) */
     .btn-paypal{
       background:#ffc439;
       color:#111;
@@ -611,11 +567,7 @@
       list-style:none;
     }
     summary::-webkit-details-marker{ display:none; }
-    summary::after{
-      content:"+";
-      font-weight:700;
-      color:#9ca3af;
-    }
+    summary::after{ content:"+"; font-weight:700; color:#9ca3af; }
     details[open] summary::after{ content:"–"; }
 
     #ubicacion h2{
@@ -664,6 +616,8 @@
       letter-spacing:.08em;
       text-transform:uppercase;
     }
+
+    /* ✅ NO TOCAR: volvemos a 6 logos */
     .pagos-logos{
       display:grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -693,7 +647,6 @@
       font-size:.85rem;
     }
 
-    /* ======= Media queries ======= */
     @media (max-width:1024px){
       .feature-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); }
     }
@@ -701,20 +654,14 @@
       .legal .columns{ grid-template-columns:1fr; }
     }
 
-    /* Burger en tablet y móvil */
     @media (max-width:980px){
       nav.menu{ display:none; }
       .burger{ display:grid; }
     }
 
-    /* En móvil */
     @media (max-width:640px){
       .grid{ grid-template-columns:repeat(2,1fr); gap:10px; }
-      .card-media{
-        margin:6px;
-        border-radius:10px;
-        aspect-ratio:1/1;
-      }
+      .card-media{ margin:6px; border-radius:10px; aspect-ratio:1/1; }
       .chip-name{
         display:block;
         margin:6px 6px 10px;
@@ -727,26 +674,12 @@
         text-align:center;
         letter-spacing:.02em;
       }
-
-      .card-body,
-      .carousel-dots{
-        display:none !important;
-      }
-
-      .card-bottom{
-        display:block !important;
-      }
-
-      .btn-row{
-        flex-direction:column;
-      }
-      .btn-row a{
-        min-width:unset;
-        width:100%;
-      }
+      .card-body, .carousel-dots{ display:none !important; }
+      .btn-row{ flex-direction:column; }
+      .btn-row a{ width:100%; min-width:unset; }
     }
 
-    /* PayPal button: mostrar COMPRAR en vez del logo */
+    /* PayPal button: mostrar COMPRAR en vez del logo (como lo tenías) */
     .btn-paypal .paypal-logo{ display:none !important; }
 
     /* En móvil: NO mostrar Vista / Comprar */
@@ -769,7 +702,6 @@
         </a>
       </div>
 
-      <!-- Menú escritorio con iconos -->
       <nav class="menu" aria-label="Navegación principal">
         <a href="#inicio" aria-current="page"><i class="fa-solid fa-house nav-icon" aria-hidden="true"></i>Inicio</a>
         <a href="#comprar"><i class="fa-solid fa-cart-shopping nav-icon" aria-hidden="true"></i>Productos</a>
@@ -792,18 +724,24 @@
   <div id="mobile-menu-slot"></div>
 
   <main id="main-content">
-    <!-- HERO (VIDEO + TITULO + BOTON) -->
+    <!-- HERO -->
     <section class="hero" id="inicio" aria-label="Portada con vídeo">
-      <video class="hero-bg"
-             autoplay
-             muted
-             loop
-             playsinline
-             webkit-playsinline
-             preload="auto"
-             poster="Img/NEGRO.png">
+      <!-- ✅ cambios: id, mp4 primero, + atributos iOS -->
+      <video
+        id="heroVideo"
+        class="hero-bg"
+        autoplay
+        muted
+        loop
+        playsinline
+        webkit-playsinline
+        preload="auto"
+        poster="Img/NEGRO.png"
+        disablepictureinpicture
+        disableremoteplayback
+      >
+        <source src="completo.mp4" type="video/mp4">
         <source src="completo.webm" type="video/webm">
-        <source src="completo.mp4"  type="video/mp4">
       </video>
 
       <div class="hero-inner">
@@ -846,7 +784,7 @@
     <section class="series">
       <div class="container">
         <h2>Series N</h2>
-        <p>La familia N combina chasis sólido, electrónica fiable y una conducción equilibrada. Scooters para el día a día con un punto de deportividad, pensados para durar y con mantenimiento sencillo.</p>
+        <p>La familia N combina chasis sólido, electrónica fiable y una conducción equilibrada.</p>
       </div>
     </section>
 
@@ -855,7 +793,7 @@
         <!-- N7PRO -->
         <article class="card" id="p-n7pro" tabindex="0"
           data-name="N7PRO" data-was="387,50 €" data-now="215 €"
-          data-spec="30–35 km · 350 W · 15 kg" data-link="n7pro.html" data-wa="https://wa.me/34666318747"
+          data-link="n7pro.html"
           aria-label="N7PRO — Patinete eléctrico urbano">
           <div class="card-media">
             <div class="carousel" data-carousel>
@@ -875,15 +813,8 @@
           <div class="card-body">
             <div class="card-brand">Scoot Shop</div>
             <div class="title">N7PRO — Patinete eléctrico urbano</div>
-            <div class="rating" aria-label="Valoración 4,9 de 5">
-              <span aria-hidden="true">
-                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star-half-stroke"></i>
-              </span>
-              <span class="count">(128)</span>
-            </div>
           </div>
+
           <div class="card-bottom">
             <div class="price-row" aria-label="Precio N7PRO">
               <div class="price-now">215 €</div>
@@ -892,16 +823,10 @@
 
             <div class="btn-row">
               <a class="btn-primary" href="n7pro.html" data-buy-button>Vista</a>
-
               <a class="btn-paypal" href="pago.html" data-buy-button data-pay-button aria-label="Comprar">
                 <span class="buy-text">COMPRAR</span>
                 <span class="sr-only">Comprar</span>
-                <img class="paypal-logo"
-                     src="https://commons.wikimedia.org/wiki/Special:FilePath/PayPal%202024.svg"
-                     alt=""
-                     aria-hidden="true"
-                     loading="lazy"
-                     decoding="async">
+                <img class="paypal-logo" src="https://commons.wikimedia.org/wiki/Special:FilePath/PayPal%202024.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
               </a>
             </div>
           </div>
@@ -910,7 +835,7 @@
         <!-- S4 -->
         <article class="card" id="p-s4" tabindex="0"
           data-name="S4" data-was="—" data-now="380 €"
-          data-spec="40–45 km · 500 W · 24 kg" data-link="s4.html" data-wa="https://wa.me/34666318747"
+          data-link="s4.html"
           aria-label="ZWheel MASCOTER S4 — Homologado DGT">
           <div class="card-media">
             <div class="carousel" data-carousel>
@@ -929,15 +854,8 @@
           <div class="card-body">
             <div class="card-brand">ZWheel</div>
             <div class="title">ZWheel MASCOOTER S4 — Homologado por la DGT</div>
-            <div class="rating" aria-label="Valoración 4,8 de 5">
-              <span aria-hidden="true">
-                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i>
-              </span>
-              <span class="count">(203)</span>
-            </div>
           </div>
+
           <div class="card-bottom">
             <div class="price-row" aria-label="Precio S4">
               <div class="price-now">380 €</div>
@@ -946,16 +864,10 @@
 
             <div class="btn-row">
               <a class="btn-primary" href="s4.html" data-buy-button>Vista</a>
-
               <a class="btn-paypal" href="pago.html" data-buy-button data-pay-button aria-label="Comprar">
                 <span class="buy-text">COMPRAR</span>
                 <span class="sr-only">Comprar</span>
-                <img class="paypal-logo"
-                     src="https://commons.wikimedia.org/wiki/Special:FilePath/PayPal%202024.svg"
-                     alt=""
-                     aria-hidden="true"
-                     loading="lazy"
-                     decoding="async">
+                <img class="paypal-logo" src="https://commons.wikimedia.org/wiki/Special:FilePath/PayPal%202024.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
               </a>
             </div>
           </div>
@@ -967,7 +879,7 @@
     <section class="series" id="series-g">
       <div class="container">
         <h2>Series GT</h2>
-        <p>Urbanos, eficientes y con una suspensión a otro nivel. La serie GT prioriza potencia, estabilidad y manejo sobre firme urbano. Ideales para trayectos con pendientes y baches.</p>
+        <p>Urbanos, eficientes y con una suspensión a otro nivel.</p>
       </div>
     </section>
 
@@ -976,7 +888,7 @@
         <!-- G2 -->
         <article class="card" id="p-g2" tabindex="0"
           data-name="G2" data-was="780 €" data-now="380 €"
-          data-spec="40 km · 600 W · 25 kg" data-link="g2.html" data-wa="https://wa.me/34666318747"
+          data-link="g2.html"
           aria-label="G2 — Patinete eléctrico de alta potencia">
           <div class="card-media">
             <div class="carousel" data-carousel>
@@ -994,15 +906,8 @@
           <div class="card-body">
             <div class="card-brand">Scoot Shop</div>
             <div class="title">G2 — Patinete eléctrico de alta potencia</div>
-            <div class="rating" aria-label="Valoración 4,8 de 5">
-              <span aria-hidden="true">
-                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star-half-stroke"></i>
-              </span>
-              <span class="count">(239)</span>
-            </div>
           </div>
+
           <div class="card-bottom">
             <div class="price-row" aria-label="Precio G2">
               <div class="price-now">380 €</div>
@@ -1011,16 +916,10 @@
 
             <div class="btn-row">
               <a class="btn-primary" href="g2.html" data-buy-button>Vista</a>
-
               <a class="btn-paypal" href="pago.html" data-buy-button data-pay-button aria-label="Comprar">
                 <span class="buy-text">COMPRAR</span>
                 <span class="sr-only">Comprar</span>
-                <img class="paypal-logo"
-                     src="https://commons.wikimedia.org/wiki/Special:FilePath/PayPal%202024.svg"
-                     alt=""
-                     aria-hidden="true"
-                     loading="lazy"
-                     decoding="async">
+                <img class="paypal-logo" src="https://commons.wikimedia.org/wiki/Special:FilePath/PayPal%202024.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
               </a>
             </div>
           </div>
@@ -1029,7 +928,7 @@
         <!-- T10 -->
         <article class="card" id="p-t10" tabindex="0"
           data-name="T10" data-was="850 €" data-now="450 €"
-          data-spec="60 km · 900 W · 30 kg" data-link="t10.html" data-wa="https://wa.me/34666318747"
+          data-link="t10.html"
           aria-label="T10 — Patinete eléctrico Ultra">
           <div class="card-media">
             <div class="carousel" data-carousel>
@@ -1047,15 +946,8 @@
           <div class="card-body">
             <div class="card-brand">Scoot Shop</div>
             <div class="title">T10 — Patinete eléctrico Ultra</div>
-            <div class="rating" aria-label="Valoración 4,8 de 5">
-              <span aria-hidden="true">
-                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star-half-stroke"></i>
-              </span>
-              <span class="count">(42)</span>
-            </div>
           </div>
+
           <div class="card-bottom">
             <div class="price-row" aria-label="Precio T10">
               <div class="price-now">450 €</div>
@@ -1064,16 +956,10 @@
 
             <div class="btn-row">
               <a class="btn-primary" href="t10.html" data-buy-button>Vista</a>
-
-              <a class="btn-paypal" href="https://www.paypal.com/ncp/payment/WE5GUHM4PSVYQ" data-buy-button data-pay-button aria-label="Comprar">
+              <a class="btn-paypal" href="pago.html" data-buy-button data-pay-button aria-label="Comprar">
                 <span class="buy-text">COMPRAR</span>
                 <span class="sr-only">Comprar</span>
-                <img class="paypal-logo"
-                     src="https://commons.wikimedia.org/wiki/Special:FilePath/PayPal%202024.svg"
-                     alt=""
-                     aria-hidden="true"
-                     loading="lazy"
-                     decoding="async">
+                <img class="paypal-logo" src="https://commons.wikimedia.org/wiki/Special:FilePath/PayPal%202024.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
               </a>
             </div>
           </div>
@@ -1085,7 +971,7 @@
     <section class="series" id="series-ix">
       <div class="container">
         <h2>Serie IX</h2>
-        <p>La nueva Serie IX apuesta por chasis sólido, electrónica fiable e inteligente y conducción estable. Un modelo único y actual: IX3.</p>
+        <p>Un modelo único y actual: IX3.</p>
       </div>
     </section>
 
@@ -1094,7 +980,7 @@
         <!-- IX3 -->
         <article class="card" id="p-ix3" tabindex="0"
           data-name="IX3" data-was="850 €" data-now="380 €"
-          data-spec="40–45 km · 800 W · 24 kg" data-link="ix3.html" data-wa="https://wa.me/34666318747"
+          data-link="ix3.html"
           aria-label="IX3 — Patinete eléctrico Serie IX">
           <div class="card-media">
             <div class="carousel" data-carousel>
@@ -1114,15 +1000,8 @@
           <div class="card-body">
             <div class="card-brand">Scoot Shop</div>
             <div class="title">IX3 — Patinete eléctrico Serie IX</div>
-            <div class="rating" aria-label="Valoración 4,8 de 5">
-              <span aria-hidden="true">
-                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i>
-              </span>
-              <span class="count">(203)</span>
-            </div>
           </div>
+
           <div class="card-bottom">
             <div class="price-row" aria-label="Precio IX3">
               <div class="price-now">380 €</div>
@@ -1131,16 +1010,10 @@
 
             <div class="btn-row">
               <a class="btn-primary" href="ix3.html" data-buy-button>Vista</a>
-
               <a class="btn-paypal" href="pago.html" data-buy-button data-pay-button aria-label="Comprar">
                 <span class="buy-text">COMPRAR</span>
                 <span class="sr-only">Comprar</span>
-                <img class="paypal-logo"
-                     src="https://commons.wikimedia.org/wiki/Special:FilePath/PayPal%202024.svg"
-                     alt=""
-                     aria-hidden="true"
-                     loading="lazy"
-                     decoding="async">
+                <img class="paypal-logo" src="https://commons.wikimedia.org/wiki/Special:FilePath/PayPal%202024.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
               </a>
             </div>
           </div>
@@ -1151,76 +1024,53 @@
     <!-- FAQ -->
     <section id="faq" class="container">
       <h2>Preguntas frecuentes</h2>
-      <details>
-        <summary>¿Cuánto tarda el envío?</summary>
-        <p>6–8 días hábiles.</p>
-      </details>
-      <details>
-        <summary>¿Cuál es la garantía?</summary>
-        <p><strong>200 km por producto</strong>. Cubre defectos de fabricación; excluye desgaste por uso y daños por mal uso.</p>
-      </details>
-      <details>
-        <summary>¿Incluye accesorios?</summary>
-        <p>Sí, soporte móvil, candado y cargador según modelo.</p>
-      </details>
-      <details>
-        <summary>¿Dónde puedo verlo?</summary>
-        <p>En Silla y Catarroja (Valencia).</p>
-      </details>
+      <details><summary>¿Cuánto tarda el envío?</summary><p>6–8 días hábiles.</p></details>
+      <details><summary>¿Cuál es la garantía?</summary><p><strong>200 km por producto</strong>. Cubre defectos de fabricación; excluye desgaste por uso y daños por mal uso.</p></details>
+      <details><summary>¿Incluye accesorios?</summary><p>Sí, soporte móvil, candado y cargador según modelo.</p></details>
+      <details><summary>¿Dónde puedo verlo?</summary><p>En Silla y Catarroja (Valencia).</p></details>
     </section>
 
     <!-- UBICACIÓN -->
     <section id="ubicacion" class="container">
       <h2>Ubicación</h2>
-      <iframe
-        class="map-embed"
-        title="Mapa de ubicación (Silla, Valencia)"
+      <iframe class="map-embed" title="Mapa de ubicación (Silla, Valencia)"
         src="https://www.google.com/maps?q=Silla%20Valencia&output=embed"
-        loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade"></iframe>
+        loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
     </section>
 
     <!-- LEGAL -->
     <section id="legal" class="legal">
       <div class="container">
         <h2>Información legal</h2>
+
         <div class="columns">
           <details open>
             <summary><strong>Aviso legal</strong></summary>
             <p><strong>Responsable:</strong> SCOOT SHOP</p>
             <p><strong>Contacto:</strong> WhatsApp <a href="https://wa.me/34666318747">+34 666 318 747</a> · Email <a href="mailto:info@scootshop.example">info@scootshop.co</a></p>
             <p><strong>Dirección:</strong> Silla y Catarroja (Valencia, España)</p>
-            <p>Este sitio ofrece información y venta de scooters eléctricos. El acceso implica la aceptación de este aviso y de las políticas publicadas.</p>
           </details>
 
           <details>
             <summary><strong>Términos y condiciones</strong></summary>
-            <p><strong>Pedidos y pagos:</strong> PayPal, transferencia y Bizum. El pedido se considera confirmado tras validar el pago.</p>
-            <p><strong>Envíos:</strong> 6–8 días hábiles en península (salvo incidencias logísticas). Se facilita número de seguimiento.</p>
-            <p><strong>Garantía:</strong> <strong>200 km por producto</strong> desde la entrega. Cubre defectos de fabricación. No cubre desgaste por uso ni daños por mal uso o modificaciones no autorizadas.</p>
-            <p><strong>Devoluciones:</strong> 30 días naturales. Producto en buen estado y con accesorios originales.</p>
-            <p><strong>SAT:</strong> Servicio técnico propio y repuestos disponibles.</p>
+            <p><strong>Pedidos y pagos:</strong> PayPal, transferencia y Bizum.</p>
+            <p><strong>Envíos:</strong> 6–8 días hábiles en península.</p>
+            <p><strong>Garantía:</strong> <strong>200 km por producto</strong> desde la entrega.</p>
+            <p><strong>Devoluciones:</strong> 30 días naturales.</p>
           </details>
 
           <details>
             <summary><strong>Política de privacidad</strong></summary>
-            <p><strong>Datos:</strong> Identificativos y de contacto para gestión de pedidos, atención y facturación.</p>
-            <p><strong>Base legal:</strong> Ejecución de contrato y consentimiento.</p>
-            <p><strong>Conservación:</strong> Durante la relación y plazos legales.</p>
-            <p><strong>Derechos:</strong> Acceso, rectificación, supresión, oposición, limitación y portabilidad en <a href="mailto:info@scootshop.example">info@scootshop.example</a>.</p>
-            <p><strong>Seguridad:</strong> Medidas organizativas y técnicas razonables.</p>
-          </details>
-
-          <details>
-            <summary><strong>Política de devoluciones</strong></summary>
-            <p><strong>Plazo:</strong> 30 días naturales. <strong>Proceso:</strong> Solicita por WhatsApp o email indicando nº de pedido y motivo. Reembolso por el mismo método de pago.</p>
+            <p>Datos para gestión de pedidos, atención y facturación.</p>
+            <p>Derechos en <a href="mailto:info@scootshop.example">info@scootshop.example</a>.</p>
           </details>
 
           <details>
             <summary><strong>Política de cookies</strong></summary>
-            <p>Cookies técnicas necesarias y, previa autorización, analíticas/marketing. Puedes configurar o revocar el consentimiento en cualquier momento.</p>
+            <p>Cookies técnicas necesarias y, previa autorización, analíticas/marketing.</p>
           </details>
         </div>
+
         <p class="legal-update">Última actualización: Octubre 2025</p>
       </div>
     </section>
@@ -1229,6 +1079,7 @@
     <section class="pagos">
       <div class="container">
         <h2>Métodos de pago aceptados</h2>
+
         <div class="pagos-logos" aria-label="Métodos de pago">
           <img src="https://commons.wikimedia.org/wiki/Special:FilePath/PayPal%202024.svg" alt="PayPal" loading="lazy" decoding="async">
           <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Bizum.svg" alt="Bizum" loading="lazy" decoding="async">
@@ -1247,7 +1098,7 @@
     </section>
   </main>
 
-  <!-- JSON-LD (SEO) -->
+  <!-- JSON-LD Organización (ligero) -->
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
@@ -1269,20 +1120,6 @@
   }
   </script>
 
-  <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"ItemList",
-    "itemListElement":[
-      {"@type":"ListItem","position":1,"item":{"@type":"Product","name":"N7PRO — Patinete eléctrico urbano","image":["https://tudominio.example/Img-N7PRO/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.9","reviewCount":"128"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"215","availability":"https://schema.org/InStock","url":"https://tudominio.example/n7pro.html"}}},
-      {"@type":"ListItem","position":2,"item":{"@type":"Product","name":"ZWheel MASCOTER S4 — Homologado por la DGT","image":["https://tudominio.example/Img-S4/1.jpg"],"brand":{"@type":"Brand","name":"ZWheel"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.8","reviewCount":"203"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"380","availability":"https://schema.org/InStock","url":"https://tudominio.example/s4.html"}}},
-      {"@type":"ListItem","position":3,"item":{"@type":"Product","name":"G2 — Patinete eléctrico de alta potencia","image":["https://tudominio.example/Img-G2/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.8","reviewCount":"239"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"380","availability":"https://schema.org/InStock","url":"https://tudominio.example/g2.html"}}},
-      {"@type":"ListItem","position":4,"item":{"@type":"Product","name":"T10 — Patinete eléctrico Ultra","image":["https://tudominio.example/Img-T10/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.8","reviewCount":"42"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"450","availability":"https://schema.org/InStock","url":"https://tudominio.example/t10.html"}}},
-      {"@type":"ListItem","position":5,"item":{"@type":"Product","name":"IX3 — Patinete eléctrico Serie IX","image":["https://tudominio.example/Img-IX3/1.jpg"],"brand":{"@type":"Brand","name":"Scoot Shop"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.8","reviewCount":"203"},"offers":{"@type":"Offer","priceCurrency":"EUR","price":"380","availability":"https://schema.org/InStock","url":"https://tudominio.example/ix3.html"}}}
-    ]
-  }
-  </script>
-
   <script defer>
     (function(){
       'use strict';
@@ -1301,32 +1138,72 @@
         window.addEventListener('resize', setVh, {passive:true});
         window.addEventListener('orientationchange', setVh, {passive:true});
 
-        /* HERO video: intentar autoplay siempre (móvil) */
-        var heroVideo = document.querySelector('.hero video.hero-bg');
-        if(heroVideo){
-          heroVideo.muted = true;
-          heroVideo.playsInline = true;
-          heroVideo.setAttribute('muted','');
-          heroVideo.setAttribute('playsinline','');
-          heroVideo.setAttribute('webkit-playsinline','');
-          heroVideo.preload = 'auto';
+        /* ✅ HERO video: autoplay robusto + fallback (sin depender de tocar pantalla) */
+        (function(){
+          var v = document.getElementById('heroVideo');
+          if(!v) return;
+
+          // Flags antes de play (clave iOS)
+          v.muted = true;
+          v.defaultMuted = true;
+          v.volume = 0;
+          v.playsInline = true;
+
+          v.setAttribute('muted', '');
+          v.setAttribute('playsinline', '');
+          v.setAttribute('webkit-playsinline', '');
+          v.setAttribute('disablepictureinpicture', '');
+          v.setAttribute('disableremoteplayback', '');
+
+          try { v.load(); } catch(e){}
+
+          var tries = 0;
+          var maxTries = 12;
+          var playingOk = false;
 
           function tryPlay(){
-            try{
-              var p = heroVideo.play();
-              if(p && typeof p.catch === 'function'){ p.catch(function(){}); }
-            }catch(e){}
+            // Si ya reproduce, ok
+            if(!v.paused && !v.ended && v.readyState >= 2){
+              playingOk = true;
+              return;
+            }
+            if(tries++ > maxTries) return;
+
+            var p;
+            try { p = v.play(); } catch(e){ p = null; }
+
+            if(p && typeof p.then === 'function'){
+              p.then(function(){ playingOk = true; }).catch(function(){});
+            }
           }
 
           tryPlay();
+          v.addEventListener('loadedmetadata', tryPlay, {passive:true});
+          v.addEventListener('canplay', tryPlay, {passive:true});
+          v.addEventListener('canplaythrough', tryPlay, {passive:true});
+
           document.addEventListener('visibilitychange', function(){
             if(!document.hidden) tryPlay();
           });
 
+          window.addEventListener('pageshow', tryPlay, {passive:true});
+          window.addEventListener('focus', tryPlay, {passive:true});
+
+          setTimeout(tryPlay, 250);
+          setTimeout(tryPlay, 800);
+          setTimeout(tryPlay, 1500);
+          setTimeout(tryPlay, 2500);
+
+          // Si el usuario interactúa, también reintenta (salva casos bloqueados)
           ['touchstart','pointerdown','click','scroll'].forEach(function(evt){
-            window.addEventListener(evt, tryPlay, {passive:true, once:true});
+            window.addEventListener(evt, tryPlay, {passive:true});
           });
-        }
+
+          // Si el vídeo está “parado” mucho rato, reintenta (por si el navegador mató el decode)
+          setInterval(function(){
+            if(!playingOk) tryPlay();
+          }, 3000);
+        })();
 
         /* Carruseles: dots + swipe */
         document.querySelectorAll('[data-carousel]').forEach(function(c){
@@ -1465,7 +1342,7 @@
           var payBtn = card.querySelector('[data-pay-button]');
           if(payBtn){
             var nameP = (card.dataset.name || 'producto').trim();
-            var now = (card.dataset.now || '').trim(); // ej: "215 €"
+            var now = (card.dataset.now || '').trim();
             var priceClean = now.replace(/[^\d,\.]/g,'').replace(',', '.');
             var n = Number(priceClean);
 
@@ -1479,7 +1356,7 @@
         });
 
         /* ===========================
-           Inyectar menú móvil (partial)
+           ✅ RESTAURADO: Menú móvil con "Productos" (submenu)
            =========================== */
         function initMobileMenu(){
           var burger = document.getElementById('burger');
