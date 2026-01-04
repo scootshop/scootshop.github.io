@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Pagar — SCOOT SHOP</title>
+  <meta name="description" content="Pago seguro con PayPal. Revisa tu pedido y finaliza la compra." />
+  <meta name="color-scheme" content="light" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="format-detection" content="telephone=no" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+    :root{
+      --ui:'Plus Jakarta Sans',ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans";
+      --ink:#111315;
+      --muted:#676b73;
+      --line:#E6E9EF;
+      --primary:#b91e1e;
+      --bg:#ffffff;
+      --card:#ffffff;
+      --soft:#f6f7fb;
+      --radius:16px;
+      --shadow:0 14px 40px rgba(15,23,42,.08);
+      --sat: env(safe-area-inset-top, 0px);
+    }
+
+    *{ box-sizing:border-box; margin:0; padding:0; }
+    html,body{ height:100%; }
+    body{
+      font-family:var(--ui);
+      background:linear-gradient(180deg,#fff, #f7f7fb 70%);
+      color:var(--ink);
+      padding-top: var(--sat);
+    }
+    a{ color:inherit; text-decoration:none; }
+    .container{
+      width:min(980px,100%);
+      margin:0 auto;
+      padding: clamp(16px,4vw,28px);
+    }
+
+    header{
+      position:sticky;
+      top:0;
+      z-index:10;
+      background:rgba(255,255,255,.85);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid rgba(0,0,0,.05);
+    }
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:14px 0;
+      gap:12px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+    .brand img{
+      width:44px;height:44px;
+      object-fit:contain;
+      filter:drop-shadow(0 4px 10px rgba(15,23,42,.12));
+    }
+    .brand .name{
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-size:.92rem;
+      white-space:nowrap;
+    }
+    .brand .tag{
+      font-size:.78rem;
+      color:var(--muted);
+      margin-top:1px;
+      white-space:nowrap;
+    }
+    .brand-text{ display:flex; flex-direction:column; line-height:1.1; min-width:0; }
+
+    .back{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#fff;
+      box-shadow:0 10px 24px rgba(15,23,42,.06);
+      font-weight:800;
+      font-size:.88rem;
+      white-space:nowrap;
+    }
+    .back:hover{ filter:brightness(1.02); }
+
+    main{ padding: 18px 0 34px; }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:16px;
+      align-items:start;
+    }
+    @media (max-width:900px){
+      .grid{ grid-template-columns:1fr; }
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card-head{
+      padding:16px 16px 12px;
+      background:linear-gradient(180deg, rgba(185,30,30,.06), rgba(255,255,255,.0));
+      border-bottom:1px solid rgba(0,0,0,.04);
+    }
+    .card-head h1{
+      font-size:1.12rem;
+      font-weight:900;
+      letter-spacing:.02em;
+    }
+    .card-head p{
+      margin-top:6px;
+      color:var(--muted);
+      font-size:.92rem;
+      line-height:1.4;
+    }
+
+    .card-body{ padding:16px; }
+
+    .summary{
+      display:grid;
+      gap:12px;
+    }
+    .row{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      padding:12px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:rgba(248,250,252,.9);
+    }
+    .row .k{
+      color:var(--muted);
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      font-size:.72rem;
+    }
+    .row .v{
+      margin-top:4px;
+      font-weight:900;
+      font-size:1rem;
+      word-break:break-word;
+    }
+    .price{
+      font-size:1.35rem !important;
+      color:#111;
+    }
+    .note{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:.9rem;
+      line-height:1.45;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-weight:900;
+      font-size:.86rem;
+      box-shadow:0 10px 22px rgba(15,23,42,.05);
+    }
+    .pill i{ color:#0070ba; }
+
+    .divider{
+      height:1px;
+      background:var(--line);
+      margin:14px 0;
+    }
+
+    .field{
+      display:grid;
+      gap:6px;
+      margin-top:10px;
+    }
+    label{
+      font-weight:900;
+      font-size:.86rem;
+      color:#111;
+    }
+    input{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:12px 12px;
+      font-size:1rem;
+      outline:none;
+      background:#fff;
+    }
+    input:focus{
+      border-color: rgba(17,17,17,.35);
+      box-shadow:0 0 0 3px rgba(17,17,17,.10);
+    }
+    .hint{
+      color:var(--muted);
+      font-size:.86rem;
+    }
+
+    .status{
+      display:none;
+      margin-top:12px;
+      padding:12px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:#fff;
+      box-shadow:0 10px 22px rgba(15,23,42,.05);
+      font-size:.92rem;
+      line-height:1.45;
+    }
+    .status.show{ display:block; }
+    .status.ok{
+      border-color:rgba(22,163,74,.25);
+      background:rgba(22,163,74,.06);
+    }
+    .status.err{
+      border-color:rgba(185,28,28,.25);
+      background:rgba(185,28,28,.06);
+    }
+
+    .side{
+      display:grid;
+      gap:16px;
+    }
+    .side .card-body{ padding:16px; }
+    .side h2{
+      font-size:1rem;
+      font-weight:900;
+      letter-spacing:.02em;
+    }
+    .bullets{
+      margin-top:10px;
+      display:grid;
+      gap:8px;
+      color:#111;
+      font-size:.92rem;
+    }
+    .bullets div{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      color:var(--muted);
+    }
+    .bullets i{
+      margin-top:2px;
+      color:#111;
+    }
+
+    .small{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:.84rem;
+      line-height:1.45;
+    }
+
+    .paypal-wrap{
+      padding:16px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#fff;
+      box-shadow:0 12px 30px rgba(15,23,42,.05);
+    }
+    .paypal-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .paypal-title strong{
+      font-weight:900;
+      font-size:.95rem;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(0,112,186,.25);
+      background:rgba(0,112,186,.06);
+      color:#0b3b63;
+      font-weight:900;
+      font-size:.78rem;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      white-space:nowrap;
+    }
+    .badge i{ color:#0070ba; }
+  </style>
+
+  <!-- PayPal SDK -->
+  <script src="https://www.paypal.com/sdk/js?client-id=AZtz3AcSsDxbzHInTtOoUs4WOIxbp8ev5TIMbG5oE30eAM8sLPQkx6BpM2DM0QSApdk1rUffzN4WwWMq&currency=EUR&intent=capture" defer></script>
+</head>
+
+<body>
+  <header>
+    <div class="container topbar">
+      <div class="brand" aria-label="SCOOT SHOP">
+        <img src="Img/0-removebg-preview.png" alt="SCOOT SHOP logo" decoding="async">
+        <div class="brand-text">
+          <span class="name">SCOOT SHOP</span>
+          <span class="tag">Pago seguro</span>
+        </div>
+      </div>
+      <a class="back" href="index.html" aria-label="Volver al inicio">
+        <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+        Volver
+      </a>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="grid">
+      <!-- RESUMEN -->
+      <section class="card" aria-label="Resumen del pedido">
+        <div class="card-head">
+          <h1>Finalizar compra</h1>
+          <p>Revisa tu producto y completa el pago con PayPal.</p>
+        </div>
+
+        <div class="card-body">
+          <div class="summary">
+            <div class="row">
+              <div>
+                <div class="k">Producto</div>
+                <div class="v" id="productName">—</div>
+              </div>
+              <span class="pill" title="Pago con PayPal">
+                <i class="fa-brands fa-paypal" aria-hidden="true"></i>PayPal
+              </span>
+            </div>
+
+            <div class="row">
+              <div>
+                <div class="k">Total</div>
+                <div class="v price" id="productPrice">—</div>
+              </div>
+              <div style="text-align:right">
+                <div class="k">Moneda</div>
+                <div class="v">EUR</div>
+              </div>
+            </div>
+          </div>
+
+          <p class="note">
+            <strong>Envío:</strong> 6–8 días hábiles (península).<br>
+            <strong>Garantía:</strong> 200 km por producto.
+          </p>
+
+          <div class="divider"></div>
+
+          <!-- Datos comprador (opcionales, para incluir en la nota interna del pago) -->
+          <div class="field">
+            <label for="buyerName">Nombre (opcional)</label>
+            <input id="buyerName" type="text" autocomplete="name" placeholder="Ej: Juan Pérez">
+            <div class="hint">Se añadirá como nota interna del pedido.</div>
+          </div>
+
+          <div class="field">
+            <label for="buyerPhone">Teléfono (opcional)</label>
+            <input id="buyerPhone" type="tel" autocomplete="tel" placeholder="Ej: +34 600 000 000">
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="paypal-wrap">
+            <div class="paypal-title">
+              <strong>Pagar ahora</strong>
+              <span class="badge"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i>Seguro</span>
+            </div>
+            <div id="paypal-buttons"></div>
+            <div class="status" id="statusBox"></div>
+          </div>
+
+          <p class="small">
+            Nota: en páginas estáticas, el precio viene por URL (por ejemplo: <code>?name=N7PRO&price=215.00</code>).
+            Para máxima seguridad anti-manipulación, lo ideal es validar el importe en servidor.
+          </p>
+        </div>
+      </section>
+
+      <!-- LATERAL -->
+      <aside class="side" aria-label="Información de pago">
+        <section class="card">
+          <div class="card-body">
+            <h2>Qué ocurre después</h2>
+            <div class="bullets">
+              <div><i class="fa-solid fa-receipt" aria-hidden="true"></i><span>Te confirmamos el pago y el pedido por WhatsApp.</span></div>
+              <div><i class="fa-solid fa-truck-fast" aria-hidden="true"></i><span>Te enviamos seguimiento cuando salga.</span></div>
+              <div><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i><span>Soporte y SAT para repuestos y mantenimiento.</span></div>
+            </div>
+            <p class="small">
+              ¿Dudas? Escríbenos por WhatsApp:
+              <a href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer"><strong>+34 666 318 747</strong></a>
+            </p>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    (function(){
+      'use strict';
+
+      function qs(key){
+        return new URLSearchParams(window.location.search).get(key);
+      }
+
+      function toMoneyEUR(value){
+        try{
+          return new Intl.NumberFormat('es-ES', { style:'currency', currency:'EUR' }).format(value);
+        }catch(_){
+          return value + ' €';
+        }
+      }
+
+      function showStatus(type, msg){
+        var box = document.getElementById('statusBox');
+        if(!box) return;
+        box.className = 'status show ' + (type === 'ok' ? 'ok' : 'err');
+        box.innerHTML = msg;
+      }
+
+      var productName = (qs('name') || 'Producto').trim();
+      var priceRaw = (qs('price') || '').trim();
+
+      // Normalizar precio
+      var priceNumber = NaN;
+      if(priceRaw){
+        var cleaned = priceRaw.replace(/[^\d,\.]/g,'').replace(',', '.');
+        priceNumber = Number(cleaned);
+      }
+
+      document.getElementById('productName').textContent = productName;
+
+      if(Number.isFinite(priceNumber) && priceNumber > 0){
+        document.getElementById('productPrice').textContent = toMoneyEUR(priceNumber);
+      }else{
+        document.getElementById('productPrice').textContent = (priceRaw || '—');
+      }
+
+      // Esperar a PayPal SDK (defer). Si no carga, mostrar error.
+      window.addEventListener('load', function(){
+        if(!window.paypal){
+          showStatus('err', 'No se pudo cargar PayPal. Revisa tu conexión o bloqueadores (AdBlock).');
+          return;
+        }
+
+        if(!(Number.isFinite(priceNumber) && priceNumber > 0)){
+          showStatus('err', 'Precio inválido. Vuelve al catálogo y pulsa “Pagar” desde el producto.');
+          return;
+        }
+
+        paypal.Buttons({
+          style: {
+            layout: 'vertical',
+            shape: 'pill',
+            label: 'pay'
+          },
+
+          createOrder: function(data, actions){
+            var buyerName = (document.getElementById('buyerName').value || '').trim();
+            var buyerPhone = (document.getElementById('buyerPhone').value || '').trim();
+
+            var note = [
+              'Producto: ' + productName,
+              'Precio: ' + priceNumber.toFixed(2) + ' EUR',
+              buyerName ? ('Nombre: ' + buyerName) : '',
+              buyerPhone ? ('Teléfono: ' + buyerPhone) : ''
+            ].filter(Boolean).join(' | ');
+
+            return actions.order.create({
+              purchase_units: [{
+                description: productName,
+                amount: {
+                  currency_code: 'EUR',
+                  value: priceNumber.toFixed(2)
+                },
+                custom_id: 'SCOOTSHOP-' + Date.now(),
+                soft_descriptor: 'SCOOT SHOP',
+                // Nota para ti (no siempre visible al pagador)
+                // PayPal puede mostrarlo como "nota" dependiendo del flujo
+                // y/o quedará asociado a la transacción.
+                invoice_id: 'SS-' + Date.now(),
+              }],
+              application_context: {
+                shipping_preference: 'NO_SHIPPING'
+              }
+            }).then(function(orderId){
+              // Guardar nota en memoria (para mostrar tras pago)
+              window.__ss_note = note;
+              return orderId;
+            });
+          },
+
+          onApprove: function(data, actions){
+            return actions.order.capture().then(function(details){
+              var payer = (details && details.payer && details.payer.name)
+                ? (details.payer.name.given_name + ' ' + details.payer.name.surname)
+                : 'Cliente';
+
+              var orderId = (details && details.id) ? details.id : data.orderID;
+
+              showStatus('ok',
+                '<strong>Pago completado ✅</strong><br>' +
+                'Gracias, <strong>' + payer + '</strong>.<br>' +
+                'ID de pedido PayPal: <strong>' + (orderId || '—') + '</strong><br><br>' +
+                'Ahora escríbenos por WhatsApp para confirmar el envío:<br>' +
+                '<a href="https://wa.me/34666318747?text=' + encodeURIComponent(
+                  'Hola! He pagado por PayPal. Producto: ' + productName +
+                  ' | Total: ' + priceNumber.toFixed(2) + ' EUR' +
+                  (orderId ? (' | PayPal Order ID: ' + orderId) : '')
+                ) + '" target="_blank" rel="noopener noreferrer"><strong>Abrir WhatsApp</strong></a>'
+              );
+            });
+          },
+
+          onCancel: function(){
+            showStatus('err', 'Pago cancelado. Si quieres, vuelve a intentarlo.');
+          },
+
+          onError: function(err){
+            console.error(err);
+            showStatus('err', 'Hubo un error con PayPal. Inténtalo de nuevo o contacta por WhatsApp.');
+          }
+        }).render('#paypal-buttons');
+      });
+    })();
+  </script>
+</body>
+</html>
