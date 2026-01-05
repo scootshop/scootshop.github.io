@@ -24,63 +24,65 @@
       --muted:#6b7280;
       --line:#e6e9ef;
       --soft:#f8fafc;
-      --primary:#111;
-      --wa:#25d366;
       --radius:16px;
+      --shadow: 0 10px 26px rgba(15,23,42,.06);
+      --wa:#25d366;
     }
+
     *{ box-sizing:border-box; margin:0; padding:0; }
     html,body{ height:100%; }
     body{
       font-family:var(--ui);
       background:var(--bg);
       color:var(--ink);
-      line-height:1.55;
+      line-height:1.45;
     }
     a{ color:inherit; text-decoration:none; }
+
     .wrap{
       min-height:100%;
       display:flex;
-      align-items:flex-start;
       justify-content:center;
-      padding:28px 16px;
+      padding:18px 14px 24px;
     }
     .container{
       width:min(720px, 100%);
       display:grid;
-      gap:14px;
+      gap:12px;
     }
+
     header{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:12px;
-      padding:14px 14px;
+      gap:10px;
+      padding:12px 12px;
       border:1px solid var(--line);
       border-radius:var(--radius);
       background:#fff;
+      box-shadow: var(--shadow);
     }
     .brand{
       display:flex; align-items:center; gap:10px; min-width:0;
     }
-    .brand img{ height:38px; width:auto; display:block; }
-    .brand .t{
-      display:flex; flex-direction:column; line-height:1.1; min-width:0;
-    }
+    .brand img{ height:34px; width:auto; display:block; }
+    .brand .t{ display:flex; flex-direction:column; line-height:1.1; min-width:0; }
     .brand .t strong{
       font-family:var(--sport);
       letter-spacing:.08em;
       text-transform:uppercase;
-      font-size:1.02rem;
+      font-size:.98rem;
       white-space:nowrap;
     }
     .brand .t span{
       color:var(--muted);
-      font-size:.84rem;
+      font-size:.82rem;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
       max-width:52vw;
     }
+
     .back{
       display:inline-flex;
       align-items:center;
@@ -90,7 +92,7 @@
       border:1px solid var(--line);
       background:#fff;
       font-weight:900;
-      font-size:.82rem;
+      font-size:.78rem;
       text-transform:uppercase;
       letter-spacing:.06em;
       transition:transform .12s ease, background .12s ease;
@@ -103,6 +105,7 @@
       border-radius:var(--radius);
       background:#fff;
       overflow:hidden;
+      box-shadow: var(--shadow);
     }
     .card .head{
       padding:12px 14px;
@@ -111,76 +114,158 @@
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:12px;
+      gap:10px;
     }
-    .card .head h1,
-    .card .head h2{
+    .card .head h1, .card .head h2{
       font-family:var(--sport);
       letter-spacing:.08em;
       text-transform:uppercase;
-      font-size:1rem;
+      font-size:.98rem;
     }
-    .badge{
-      display:inline-flex; align-items:center; gap:8px;
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
       padding:6px 10px;
       border-radius:999px;
       border:1px solid var(--line);
       background:#fff;
       font-weight:900;
-      font-size:.78rem;
-      color:#111;
+      font-size:.76rem;
       white-space:nowrap;
     }
-    .card .body{ padding:14px; display:grid; gap:12px; }
+    .card .body{ padding:12px 14px; display:grid; gap:10px; }
 
+    /* ===== resumen minimal ===== */
     .summary{
-      display:grid; gap:10px;
+      display:grid;
+      gap:8px;
     }
-    .row{
+    .sum-row{
       display:flex;
       justify-content:space-between;
-      gap:12px;
+      gap:10px;
       padding:10px 12px;
       border:1px solid var(--line);
       border-radius:14px;
       background:#fff;
+      align-items:center;
     }
-    .row .k{ color:var(--muted); font-weight:800; }
-    .row .v{ font-weight:900; text-align:right; }
+    .sum-row .k{ color:var(--muted); font-weight:800; font-size:.86rem; }
+    .sum-row .v{ font-weight:900; text-align:right; font-size:.92rem; }
 
-    .methods{
+    /* ===== selector de métodos (NO se montan en móvil) ===== */
+    .pay-tabs{
       display:grid;
       gap:10px;
+      grid-template-columns: repeat(3, minmax(0,1fr));
     }
-    .method{
+    @media (max-width:560px){
+      .pay-tabs{
+        grid-template-columns: 1fr; /* 1 columna en móvil: NO se pisan */
+      }
+    }
+
+    .pay-tab{
+      appearance:none;
+      -webkit-appearance:none;
       border:1px solid var(--line);
-      border-radius:14px;
       background:#fff;
-      padding:12px;
-      display:grid;
-      gap:10px;
-    }
-    .method .top{
+      border-radius:14px;
+      padding:12px 12px;
+      cursor:pointer;
+
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
-      flex-wrap:wrap;
-    }
-    .method .top strong{
-      font-size:.95rem;
+
       font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      font-size:.78rem;
+
+      transition:transform .12s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
     }
-    .method .top span{
-      color:var(--muted);
-      font-size:.85rem;
-      font-weight:800;
+    .pay-tab:hover{
+      transform:translateY(-1px);
+      background:var(--soft);
+      border-color:#d4dae6;
+      box-shadow: 0 10px 22px rgba(15,23,42,.06);
     }
-    .hint{
-      color:var(--muted);
-      font-size:.88rem;
+    .pay-tab[aria-selected="true"]{
+      border-color:#111;
+      background:#111;
+      color:#fff;
+      box-shadow: 0 14px 28px rgba(15,23,42,.14);
     }
 
+    .tab-left{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+    .logo{
+      height:18px;
+      width:auto;
+      display:block;
+      flex:0 0 auto;
+    }
+    .pay-tab[aria-selected="true"] .logo{ filter:brightness(0) invert(1); }
+    .tab-name{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .chev{
+      opacity:.6;
+      font-weight:900;
+      flex:0 0 auto;
+    }
+    .pay-tab[aria-selected="true"] .chev{ opacity:1; }
+
+    /* ===== panel ===== */
+    .panel{ border:1px solid var(--line); border-radius:14px; overflow:hidden; background:#fff; }
+    .panel[hidden]{ display:none; }
+    .panel .phead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:12px;
+      background:linear-gradient(180deg,#fff,var(--soft));
+      border-bottom:1px solid var(--line);
+    }
+    .panel .phead strong{ font-weight:900; text-transform:uppercase; letter-spacing:.06em; font-size:.82rem; }
+    .panel .pbody{ padding:12px; display:grid; gap:10px; }
+
+    /* Texto desplegable (sin ruido) */
+    details.note{
+      border:1px solid var(--line);
+      border-radius:12px;
+      overflow:hidden;
+      background:#fff;
+    }
+    details.note summary{
+      list-style:none;
+      cursor:pointer;
+      padding:10px 12px;
+      font-weight:900;
+      font-size:.82rem;
+      color:#111;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      user-select:none;
+    }
+    details.note summary::-webkit-details-marker{ display:none; }
+    details.note summary .s-muted{ color:var(--muted); font-weight:800; font-size:.78rem; }
+    details.note .content{
+      padding:10px 12px 12px;
+      border-top:1px solid var(--line);
+      color:var(--muted);
+      font-size:.86rem;
+    }
+
+    /* KV + copy */
     .kv{
       display:flex;
       align-items:center;
@@ -188,88 +273,89 @@
       gap:10px;
       padding:10px 12px;
       border:1px solid var(--line);
-      border-radius:14px;
+      border-radius:12px;
       background:var(--soft);
     }
-    .kv .label{ font-weight:900; color:#111; font-size:.84rem; }
+    .kv .label{ font-weight:900; font-size:.78rem; text-transform:uppercase; letter-spacing:.06em; color:#111; }
     .kv code{
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
       font-size:.92rem;
-      word-break:break-word;
       color:#111;
+      word-break:break-word;
     }
+    .kv .left{ display:grid; gap:4px; min-width:0; }
     .copy{
       border:1px solid var(--line);
       background:#111;
       color:#fff;
       border-radius:12px;
-      padding:10px 12px;
+      padding:9px 10px;
       font-weight:900;
       cursor:pointer;
       transition:transform .12s ease, filter .12s ease;
       white-space:nowrap;
+      font-size:.78rem;
+      text-transform:uppercase;
+      letter-spacing:.06em;
     }
     .copy:hover{ transform:translateY(-1px); filter:brightness(1.05); }
     .copy:active{ transform:translateY(0); }
 
-    .btn{
+    /* Botones pequeños/estéticos: WhatsApp + Mail */
+    .actions{
       display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .icon-btn{
+      display:inline-flex;
       align-items:center;
       justify-content:center;
-      gap:10px;
-      min-height:46px;
-      padding:12px 14px;
+      gap:8px;
+      padding:10px 12px;
       border-radius:999px;
+      border:1px solid var(--line);
+      background:#fff;
       font-weight:900;
       text-transform:uppercase;
-      letter-spacing:.08em;
-      border:1px solid transparent;
+      letter-spacing:.06em;
+      font-size:.78rem;
       cursor:pointer;
-      text-align:center;
-      background:#111;
-      color:#fff;
+      transition:transform .12s ease, background .12s ease, box-shadow .12s ease;
+      box-shadow: 0 8px 18px rgba(15,23,42,.05);
     }
-    .btn:hover{ filter:brightness(1.05); transform:translateY(-1px); }
-    .btn:active{ transform:translateY(0); }
+    .icon-btn:hover{ transform:translateY(-1px); background:var(--soft); }
+    .icon-btn:active{ transform:translateY(0); }
 
-    .btn-wa{
-      background:var(--wa);
-      border-color:#22c15e;
-      color:#fff;
+    .icon{
+      width:18px; height:18px; display:block;
     }
+    .wa{ border-color: rgba(34,193,94,.25); }
+    .wa .icon path{ fill: var(--wa); }
 
-    .divider{
-      height:1px;
-      background:var(--line);
-      margin:2px 0;
-    }
+    .mail{ border-color: rgba(17,17,17,.18); }
+    .mail .icon path{ fill: #111; }
 
-    .mini{
-      font-size:.85rem;
-      color:var(--muted);
-    }
-
-    /* PayPal container: limpio */
-    #paypal-button-container{
+    /* Hosted PayPal container */
+    #paypal-hosted-wrap{
       padding:10px 12px;
       border:1px solid var(--line);
-      border-radius:14px;
+      border-radius:12px;
       background:#fff;
+      overflow:hidden;
     }
 
     footer{
       text-align:center;
       color:var(--muted);
       font-size:.85rem;
-      padding:10px 0 0;
+      padding:6px 0 0;
     }
   </style>
 
-  <!-- ✅ PAYPAL SDK (PON TU CLIENT ID AQUÍ) -->
-  <!-- Reemplaza TU_PAYPAL_CLIENT_ID por tu client-id real -->
+  <!-- ✅ PAYPAL HOSTED BUTTONS SDK (TU SCRIPT EXACTO) -->
   <script
-    src="https://www.paypal.com/sdk/js?client-id=TU_PAYPAL_CLIENT_ID&currency=EUR&intent=capture"
-    data-sdk-integration-source="integrationbuilder">
+    src="https://www.paypal.com/sdk/js?client-id=BAAS1K6AQ0o4wiADQPTAozREfr91Fga7A36F85vWpBth0MI4XhlBuaCgDysC4JAv4dDNzh6iyjVVvd29MU&components=hosted-buttons&disable-funding=venmo&currency=EUR">
   </script>
 </head>
 
@@ -284,130 +370,221 @@
           <img src="Img/0-removebg-preview.png" alt="SCOOT SHOP logo" decoding="async">
           <div class="t">
             <strong>SCOOT SHOP</strong>
-            <span id="subline">Pago seguro</span>
+            <span id="subline">Pago</span>
           </div>
         </div>
       </header>
 
-      <!-- Resumen -->
+      <!-- Resumen minimal -->
       <section class="card" aria-label="Resumen del pedido">
         <div class="head">
           <h1>Resumen</h1>
-          <span class="badge" id="badgePrice">—</span>
+          <span class="pill" id="badgePrice">—</span>
         </div>
         <div class="body summary">
-          <div class="row">
+          <div class="sum-row">
             <div class="k">Producto</div>
             <div class="v" id="sumName">—</div>
           </div>
-          <div class="row">
+          <div class="sum-row">
             <div class="k">Importe</div>
             <div class="v" id="sumPrice">—</div>
           </div>
-          <div class="row">
-            <div class="k">Referencia</div>
+          <div class="sum-row">
+            <div class="k">Ref.</div>
             <div class="v" id="sumRef">—</div>
-          </div>
-          <div class="mini">
-            Esta página recibe: <code>?name=G2&amp;price=380.00</code>
           </div>
         </div>
       </section>
 
-      <!-- Métodos -->
+      <!-- Métodos minimal + intuitivo -->
       <section class="card" aria-label="Métodos de pago">
         <div class="head">
-          <h2>Elige método</h2>
-          <span class="badge">Confirmación por WhatsApp</span>
+          <h2>Método</h2>
+          <span class="pill">Elige uno</span>
         </div>
-        <div class="body methods">
 
-          <!-- PAYPAL -->
-          <div class="method" aria-label="Pago con PayPal">
-            <div class="top">
+        <div class="body">
+          <!-- 3 botones (no se pisan en móvil) -->
+          <div class="pay-tabs" role="tablist" aria-label="Seleccionar método de pago">
+            <button class="pay-tab" id="tab-bizum" type="button" role="tab"
+              aria-selected="false" aria-controls="panel-bizum" data-pay-tab="bizum">
+              <span class="tab-left">
+                <img class="logo" src="https://commons.wikimedia.org/wiki/Special:FilePath/Bizum.svg" alt="Bizum" loading="lazy" decoding="async">
+                <span class="tab-name">Bizum</span>
+              </span>
+              <span class="chev">›</span>
+            </button>
+
+            <button class="pay-tab" id="tab-bank" type="button" role="tab"
+              aria-selected="false" aria-controls="panel-bank" data-pay-tab="bank">
+              <span class="tab-left">
+                <!-- icono banco (svg) -->
+                <svg class="logo" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="#111" d="M12 2L2 7v2h20V7L12 2zm-7 9v8H3v2h18v-2h-2v-8h-2v8h-3v-8h-2v8H9v-8H7zm-2 0h18v-2H3v2z"/>
+                </svg>
+                <span class="tab-name">Transferencia</span>
+              </span>
+              <span class="chev">›</span>
+            </button>
+
+            <button class="pay-tab" id="tab-paypal" type="button" role="tab"
+              aria-selected="true" aria-controls="panel-paypal" data-pay-tab="paypal">
+              <span class="tab-left">
+                <img class="logo" src="https://commons.wikimedia.org/wiki/Special:FilePath/PayPal%202024.svg" alt="PayPal" loading="lazy" decoding="async">
+                <span class="tab-name">PayPal</span>
+              </span>
+              <span class="chev">›</span>
+            </button>
+          </div>
+
+          <!-- PANEL PAYPAL -->
+          <div class="panel" id="panel-paypal" role="tabpanel" aria-labelledby="tab-paypal" data-pay-panel>
+            <div class="phead">
               <strong>PayPal</strong>
-              <span>Recomendado</span>
+              <span class="pill" style="font-size:.72rem;">Seguro</span>
             </div>
+            <div class="pbody">
+              <div id="paypal-hosted-wrap">
+                <div id="paypal-container-HVUTLMHPTLT9Y"></div>
+              </div>
 
-            <div class="hint">
-              Pulsa el botón y finaliza el pago. Al terminar, te saldrá “pago completado”.
+              <details class="note">
+                <summary>
+                  <span>¿Cómo funciona?</span>
+                  <span class="s-muted">ver</span>
+                </summary>
+                <div class="content">
+                  Completa el pago en PayPal. Si necesitas confirmación, envía comprobante por WhatsApp o correo.
+                </div>
+              </details>
+
+              <div class="actions">
+                <a class="icon-btn wa" id="waPaypal" href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer" aria-label="Enviar por WhatsApp">
+                  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M20.52 3.48A11.86 11.86 0 0012.06 0C5.5 0 .16 5.3.16 11.84c0 2.1.55 4.15 1.6 5.96L0 24l6.37-1.67a11.86 11.86 0 005.69 1.46h.01c6.56 0 11.9-5.3 11.9-11.84 0-3.16-1.24-6.13-3.45-8.47zM12.06 21.8h-.01a9.9 9.9 0 01-5.06-1.4l-.36-.22-3.78.99 1.01-3.67-.24-.38a9.83 9.83 0 01-1.5-5.28c0-5.44 4.47-9.87 9.98-9.87 2.66 0 5.16 1.03 7.04 2.9a9.78 9.78 0 012.92 6.97c0 5.44-4.47 9.98-10 9.98zm5.73-7.4c-.31-.16-1.84-.9-2.13-1-.29-.1-.5-.16-.7.16-.2.31-.8 1-.98 1.2-.18.2-.36.23-.67.08-.31-.16-1.32-.48-2.51-1.54-.93-.83-1.56-1.86-1.75-2.17-.18-.31-.02-.48.14-.64.14-.14.31-.36.47-.54.16-.18.2-.31.31-.52.1-.2.05-.39-.03-.54-.08-.16-.7-1.67-.95-2.29-.25-.6-.5-.52-.7-.53h-.6c-.2 0-.54.08-.82.39-.28.31-1.08 1.05-1.08 2.56s1.1 2.97 1.25 3.18c.16.2 2.16 3.3 5.23 4.63.73.31 1.29.5 1.73.64.73.23 1.39.2 1.91.12.58-.08 1.84-.74 2.1-1.46.26-.72.26-1.33.18-1.46-.08-.13-.28-.2-.59-.36z"/>
+                  </svg>
+                  WhatsApp
+                </a>
+
+                <a class="icon-btn mail" id="mailPaypal" href="mailto:info@scootshop.co" aria-label="Enviar por correo">
+                  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                  </svg>
+                  Correo
+                </a>
+              </div>
             </div>
-
-            <div id="paypal-button-container" aria-label="Botón PayPal"></div>
-
-            <div class="mini" id="paypalStatus" role="status" aria-live="polite"></div>
           </div>
 
-          <div class="divider" aria-hidden="true"></div>
-
-          <!-- BIZUM -->
-          <div class="method" aria-label="Pago con Bizum">
-            <div class="top">
+          <!-- PANEL BIZUM -->
+          <div class="panel" id="panel-bizum" role="tabpanel" aria-labelledby="tab-bizum" hidden data-pay-panel>
+            <div class="phead">
               <strong>Bizum</strong>
-              <span>Rápido</span>
+              <span class="pill" style="font-size:.72rem;">Rápido</span>
             </div>
-
-            <div class="kv">
-              <div>
-                <div class="label">Número Bizum</div>
-                <code id="bizumPhone">+34 666 318 747</code>
+            <div class="pbody">
+              <div class="kv">
+                <div class="left">
+                  <div class="label">Bizum</div>
+                  <code id="bizumPhone">+34 666 318 747</code>
+                </div>
+                <button class="copy" type="button" data-copy="#bizumPhone">Copiar</button>
               </div>
-              <button class="copy" type="button" data-copy="#bizumPhone">Copiar</button>
-            </div>
 
-            <div class="kv">
-              <div>
-                <div class="label">Concepto</div>
-                <code id="bizumConcept">SCOOT SHOP</code>
+              <div class="kv">
+                <div class="left">
+                  <div class="label">Concepto</div>
+                  <code id="bizumConcept">SCOOT SHOP</code>
+                </div>
+                <button class="copy" type="button" data-copy="#bizumConcept">Copiar</button>
               </div>
-              <button class="copy" type="button" data-copy="#bizumConcept">Copiar</button>
+
+              <div class="actions">
+                <a class="icon-btn wa" id="waBizum" href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer">
+                  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M20.52 3.48A11.86 11.86 0 0012.06 0C5.5 0 .16 5.3.16 11.84c0 2.1.55 4.15 1.6 5.96L0 24l6.37-1.67a11.86 11.86 0 005.69 1.46h.01c6.56 0 11.9-5.3 11.9-11.84 0-3.16-1.24-6.13-3.45-8.47zM12.06 21.8h-.01a9.9 9.9 0 01-5.06-1.4l-.36-.22-3.78.99 1.01-3.67-.24-.38a9.83 9.83 0 01-1.5-5.28c0-5.44 4.47-9.87 9.98-9.87 2.66 0 5.16 1.03 7.04 2.9a9.78 9.78 0 012.92 6.97c0 5.44-4.47 9.98-10 9.98zm5.73-7.4c-.31-.16-1.84-.9-2.13-1-.29-.1-.5-.16-.7.16-.2.31-.8 1-.98 1.2-.18.2-.36.23-.67.08-.31-.16-1.32-.48-2.51-1.54-.93-.83-1.56-1.86-1.75-2.17-.18-.31-.02-.48.14-.64.14-.14.31-.36.47-.54.16-.18.2-.31.31-.52.1-.2.05-.39-.03-.54-.08-.16-.7-1.67-.95-2.29-.25-.6-.5-.52-.7-.53h-.6c-.2 0-.54.08-.82.39-.28.31-1.08 1.05-1.08 2.56s1.1 2.97 1.25 3.18c.16.2 2.16 3.3 5.23 4.63.73.31 1.29.5 1.73.64.73.23 1.39.2 1.91.12.58-.08 1.84-.74 2.1-1.46.26-.72.26-1.33.18-1.46-.08-.13-.28-.2-.59-.36z"/>
+                  </svg>
+                  WhatsApp
+                </a>
+
+                <a class="icon-btn mail" id="mailBizum" href="mailto:info@scootshop.co">
+                  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                  </svg>
+                  Correo
+                </a>
+              </div>
+
+              <details class="note">
+                <summary>
+                  <span>Detalles</span>
+                  <span class="s-muted">ver</span>
+                </summary>
+                <div class="content">
+                  Haz el Bizum y envía el comprobante por WhatsApp o correo. Te confirmamos el pedido.
+                </div>
+              </details>
             </div>
-
-            <a class="btn btn-wa" id="waBizum" href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer">
-              Enviar comprobante por WhatsApp
-            </a>
-
-            <div class="mini">Tras enviar el comprobante, confirmamos el pedido.</div>
           </div>
 
-          <div class="divider" aria-hidden="true"></div>
-
-          <!-- TRANSFERENCIA -->
-          <div class="method" aria-label="Pago por transferencia bancaria">
-            <div class="top">
+          <!-- PANEL TRANSFERENCIA -->
+          <div class="panel" id="panel-bank" role="tabpanel" aria-labelledby="tab-bank" hidden data-pay-panel>
+            <div class="phead">
               <strong>Transferencia</strong>
-              <span>1–2 días</span>
+              <span class="pill" style="font-size:.72rem;">IBAN</span>
             </div>
-
-            <div class="kv">
-              <div>
-                <div class="label">Titular</div>
-                <code id="bankHolder">SCOOT SHOP</code>
+            <div class="pbody">
+              <div class="kv">
+                <div class="left">
+                  <div class="label">Titular</div>
+                  <code id="bankHolder">SCOOT SHOP</code>
+                </div>
+                <button class="copy" type="button" data-copy="#bankHolder">Copiar</button>
               </div>
-              <button class="copy" type="button" data-copy="#bankHolder">Copiar</button>
-            </div>
 
-            <div class="kv">
-              <div>
-                <div class="label">IBAN</div>
-                <code id="bankIban">ES00 0000 0000 0000 0000 0000</code>
+              <div class="kv">
+                <div class="left">
+                  <div class="label">IBAN</div>
+                  <code id="bankIban">ES00 0000 0000 0000 0000 0000</code>
+                </div>
+                <button class="copy" type="button" data-copy="#bankIban">Copiar</button>
               </div>
-              <button class="copy" type="button" data-copy="#bankIban">Copiar</button>
-            </div>
 
-            <div class="kv">
-              <div>
-                <div class="label">Concepto</div>
-                <code id="bankConcept">SCOOT SHOP</code>
+              <div class="kv">
+                <div class="left">
+                  <div class="label">Concepto</div>
+                  <code id="bankConcept">SCOOT SHOP</code>
+                </div>
+                <button class="copy" type="button" data-copy="#bankConcept">Copiar</button>
               </div>
-              <button class="copy" type="button" data-copy="#bankConcept">Copiar</button>
+
+              <div class="actions">
+                <a class="icon-btn wa" id="waBank" href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer">
+                  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M20.52 3.48A11.86 11.86 0 0012.06 0C5.5 0 .16 5.3.16 11.84c0 2.1.55 4.15 1.6 5.96L0 24l6.37-1.67a11.86 11.86 0 005.69 1.46h.01c6.56 0 11.9-5.3 11.9-11.84 0-3.16-1.24-6.13-3.45-8.47zM12.06 21.8h-.01a9.9 9.9 0 01-5.06-1.4l-.36-.22-3.78.99 1.01-3.67-.24-.38a9.83 9.83 0 01-1.5-5.28c0-5.44 4.47-9.87 9.98-9.87 2.66 0 5.16 1.03 7.04 2.9a9.78 9.78 0 012.92 6.97c0 5.44-4.47 9.98-10 9.98zm5.73-7.4c-.31-.16-1.84-.9-2.13-1-.29-.1-.5-.16-.7.16-.2.31-.8 1-.98 1.2-.18.2-.36.23-.67.08-.31-.16-1.32-.48-2.51-1.54-.93-.83-1.56-1.86-1.75-2.17-.18-.31-.02-.48.14-.64.14-.14.31-.36.47-.54.16-.18.2-.31.31-.52.1-.2.05-.39-.03-.54-.08-.16-.7-1.67-.95-2.29-.25-.6-.5-.52-.7-.53h-.6c-.2 0-.54.08-.82.39-.28.31-1.08 1.05-1.08 2.56s1.1 2.97 1.25 3.18c.16.2 2.16 3.3 5.23 4.63.73.31 1.29.5 1.73.64.73.23 1.39.2 1.91.12.58-.08 1.84-.74 2.1-1.46.26-.72.26-1.33.18-1.46-.08-.13-.28-.2-.59-.36z"/>
+                  </svg>
+                  WhatsApp
+                </a>
+
+                <a class="icon-btn mail" id="mailBank" href="mailto:info@scootshop.co">
+                  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                  </svg>
+                  Correo
+                </a>
+              </div>
+
+              <details class="note">
+                <summary>
+                  <span>Detalles</span>
+                  <span class="s-muted">ver</span>
+                </summary>
+                <div class="content">
+                  Realiza la transferencia y envía el justificante por WhatsApp o correo para confirmar.
+                </div>
+              </details>
             </div>
-
-            <a class="btn btn-wa" id="waBank" href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer">
-              Enviar comprobante por WhatsApp
-            </a>
-
-            <div class="mini">Envía el justificante y lo confirmamos.</div>
           </div>
 
         </div>
@@ -424,7 +601,7 @@
     (function(){
       'use strict';
 
-      // ✅ AÑO
+      // Año
       var y = document.getElementById('y');
       if(y) y.textContent = new Date().getFullYear();
 
@@ -462,28 +639,34 @@
       if(subline) subline.textContent = name + ' · ' + priceLabel;
       if(badgePrice) badgePrice.textContent = priceLabel;
 
-      // Concepto
+      // Conceptos
       var concept = 'SCOOT SHOP · ' + name + ' · ' + ref;
-
       var bizumConcept = document.getElementById('bizumConcept');
       var bankConcept = document.getElementById('bankConcept');
       if(bizumConcept) bizumConcept.textContent = concept;
       if(bankConcept) bankConcept.textContent = concept;
 
-      // WhatsApp prellenado
-      var waText = encodeURIComponent(
-        'Hola, acabo de realizar el pago.\n' +
+      // Links WhatsApp y Mail (con asunto y cuerpo)
+      var msg =
+        'Hola, adjunto comprobante.\n' +
         'Producto: ' + name + '\n' +
         'Importe: ' + priceLabel + '\n' +
-        'Referencia: ' + ref + '\n' +
-        'Adjunto comprobante.'
-      );
-      var waLink = 'https://wa.me/34666318747?text=' + waText;
+        'Referencia: ' + ref + '\n';
 
-      var waBizum = document.getElementById('waBizum');
-      var waBank = document.getElementById('waBank');
-      if(waBizum) waBizum.href = waLink;
-      if(waBank) waBank.href = waLink;
+      var waLink = 'https://wa.me/34666318747?text=' + encodeURIComponent(msg);
+      ['waBizum','waBank','waPaypal'].forEach(function(id){
+        var el = document.getElementById(id);
+        if(el) el.href = waLink;
+      });
+
+      var mailSubject = 'Comprobante de pago — ' + ref;
+      var mailBody = msg + '\nGracias.';
+      var mailto = 'mailto:info@scootshop.co?subject=' + encodeURIComponent(mailSubject) + '&body=' + encodeURIComponent(mailBody);
+
+      ['mailBizum','mailBank','mailPaypal'].forEach(function(id){
+        var el = document.getElementById(id);
+        if(el) el.href = mailto;
+      });
 
       // Copiar
       document.querySelectorAll('[data-copy]').forEach(function(btn){
@@ -516,96 +699,68 @@
         });
       });
 
-      // =========================
-      // ✅ PAYPAL: AQUÍ VA TU API
-      // =========================
-      // 1) Pon tu client-id arriba en el script del SDK.
-      // 2) Cambia estas URLs por tus endpoints reales:
-      const CREATE_ORDER_URL  = '/api/paypal/create-order';
-      const CAPTURE_ORDER_URL = '/api/paypal/capture-order';
+      // Tabs (panel único)
+      var tabs = Array.prototype.slice.call(document.querySelectorAll('[data-pay-tab]'));
+      var panels = {
+        paypal: document.getElementById('panel-paypal'),
+        bizum:  document.getElementById('panel-bizum'),
+        bank:   document.getElementById('panel-bank')
+      };
 
-      const paypalStatus = document.getElementById('paypalStatus');
-
-      function setStatus(msg){
-        if(paypalStatus) paypalStatus.textContent = msg || '';
+      function setActiveTab(key){
+        tabs.forEach(function(t){
+          var k = t.getAttribute('data-pay-tab');
+          var on = (k === key);
+          t.setAttribute('aria-selected', on ? 'true' : 'false');
+          t.tabIndex = on ? 0 : -1;
+        });
+        Object.keys(panels).forEach(function(k){
+          if(panels[k]) panels[k].hidden = (k !== key);
+        });
+        if(key === 'paypal'){ ensureHostedButtons(); }
       }
 
-      // Si el SDK no cargó, mostramos fallback
-      if(!window.paypal){
-        setStatus('PayPal no se cargó. Revisa el client-id o bloqueadores.');
-        return;
-      }
+      tabs.forEach(function(t){
+        t.addEventListener('click', function(){
+          setActiveTab(t.getAttribute('data-pay-tab'));
+        });
+        t.addEventListener('keydown', function(e){
+          if(e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+          e.preventDefault();
+          var idx = tabs.indexOf(t);
+          var next = (e.key === 'ArrowRight') ? idx + 1 : idx - 1;
+          if(next < 0) next = tabs.length - 1;
+          if(next >= tabs.length) next = 0;
+          tabs[next].focus();
+          tabs[next].click();
+        });
+      });
 
-      // Render del botón PayPal
-      window.paypal.Buttons({
-        style: {
-          layout: 'vertical',
-          shape: 'pill',
-          label: 'paypal'
-        },
-
-        // ✅ Tu backend crea la orden y devuelve { id }
-        createOrder: function() {
-          setStatus('Creando orden…');
-          return fetch(CREATE_ORDER_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              name: name,
-              price: priceNum ? priceNum.toFixed(2) : priceRaw,
-              currency: 'EUR',
-              reference: ref,
-              concept: concept
-            })
-          })
-          .then(function(res){
-            if(!res.ok) throw new Error('Error creando orden');
-            return res.json();
-          })
-          .then(function(data){
-            if(!data || !data.id) throw new Error('Tu API debe devolver { id: "ORDER_ID" }');
-            setStatus('');
-            return data.id;
-          })
-          .catch(function(err){
-            console.error(err);
-            setStatus('No se pudo crear la orden. Revisa tu API.');
-            throw err;
-          });
-        },
-
-        // ✅ Tu backend captura el pago
-        onApprove: function(data) {
-          setStatus('Confirmando pago…');
-          return fetch(CAPTURE_ORDER_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ orderID: data.orderID, reference: ref })
-          })
-          .then(function(res){
-            if(!res.ok) throw new Error('Error capturando pago');
-            return res.json();
-          })
-          .then(function(){
-            setStatus('Pago completado. Envíanos el comprobante por WhatsApp si es necesario.');
-          })
-          .catch(function(err){
-            console.error(err);
-            setStatus('Pago aprobado pero no confirmado. Revisa tu API.');
-          });
-        },
-
-        onCancel: function(){
-          setStatus('Pago cancelado.');
-        },
-
-        onError: function(err){
-          console.error(err);
-          setStatus('Error de PayPal. Revisa el client-id y tu API.');
+      // PayPal Hosted Buttons (render una vez)
+      var hostedRendered = false;
+      function ensureHostedButtons(){
+        if(hostedRendered) return;
+        var tries = 0;
+        function tryRender(){
+          tries++;
+          if(window.paypal && window.paypal.HostedButtons){
+            try{
+              window.paypal.HostedButtons({
+                hostedButtonId: "HVUTLMHPTLT9Y",
+              }).render("#paypal-container-HVUTLMHPTLT9Y");
+              hostedRendered = true;
+            }catch(e){
+              console.error(e);
+            }
+            return;
+          }
+          if(tries < 60) setTimeout(tryRender, 100);
         }
+        tryRender();
+      }
 
-      }).render('#paypal-button-container');
-
+      // Default: PayPal
+      setActiveTab('paypal');
     })();
   </script>
 </body>
