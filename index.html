@@ -1,29 +1,40 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>SCOOT SHOP — Scooters eléctricos</title>
-  <meta name="description" content="Scooters eléctricos fiables y potentes. Envío 6–8 días, pago seguro y garantía 200 km por producto." />
-  <meta name="robots" content="index,follow" />
-  <link rel="canonical" href="https://tudominio.example/" />
 
-  <meta property="og:url" content="https://tudominio.example/" />
+  <meta name="description" content="Scooters eléctricos fiables y potentes. Envío 6–8 días, pago seguro y garantía 200 km por producto." />
+  <meta name="robots" content="index,follow,max-image-preview:large" />
+
+  <!-- ✅ Dominio real -->
+  <link rel="canonical" href="https://scootshop.co/" />
+
+  <!-- ✅ Open Graph -->
+  <meta property="og:url" content="https://scootshop.co/" />
   <meta property="og:title" content="SCOOT SHOP — Scooters eléctricos" />
   <meta property="og:description" content="Scooters eléctricos fiables y potentes. Envío 6–8 días, pago seguro y garantía 200 km por producto." />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://tudominio.example/Img/og-cover.jpg" />
   <meta property="og:site_name" content="SCOOT SHOP" />
   <meta property="og:locale" content="es_ES" />
+  <!-- ✅ Imagen existente -->
+  <meta property="og:image" content="https://scootshop.co/Img/0-removebg-preview.png" />
+
+  <!-- ✅ Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://scootshop.co/Img/0-removebg-preview.png" />
 
   <!-- Forzar SIEMPRE modo claro -->
   <meta name="color-scheme" content="light" />
   <meta name="theme-color" content="#ffffff" />
   <meta name="format-detection" content="telephone=no" />
 
-  <link rel="icon" href="favicon.ico" sizes="any" />
-  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <!-- ✅ Favicon (para que Google deje de mostrar el globo, lo ideal es tener también /favicon.ico en la raíz) -->
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" href="Img/0.jpg" type="image/png" />
+  <link rel="apple-touch-icon" href="/Img/0-removebg-preview.png" />
 
   <!-- Preconexiones -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -278,7 +289,7 @@
       .hero{ background: url('Img/NEGRO.png') center/cover no-repeat; }
     }
 
-    /* =============== SECCIONES / CARDS (igual que tu base) =============== */
+    /* =============== SECCIONES / CARDS =============== */
     .series{
       padding:40px 0 22px;
       text-align:center;
@@ -726,7 +737,6 @@
   <main id="main-content">
     <!-- HERO -->
     <section class="hero" id="inicio" aria-label="Portada con vídeo">
-      <!-- ✅ cambios: id, mp4 primero, + atributos iOS -->
       <video
         id="heroVideo"
         class="hero-bg"
@@ -1047,7 +1057,7 @@
           <details open>
             <summary><strong>Aviso legal</strong></summary>
             <p><strong>Responsable:</strong> SCOOT SHOP</p>
-            <p><strong>Contacto:</strong> WhatsApp <a href="https://wa.me/34666318747">+34 666 318 747</a> · Email <a href="mailto:info@scootshop.example">info@scootshop.co</a></p>
+            <p><strong>Contacto:</strong> WhatsApp <a href="https://wa.me/34666318747">+34 666 318 747</a> · Email <a href="mailto:info@scootshop.co">info@scootshop.co</a></p>
             <p><strong>Dirección:</strong> Silla y Catarroja (Valencia, España)</p>
           </details>
 
@@ -1062,7 +1072,7 @@
           <details>
             <summary><strong>Política de privacidad</strong></summary>
             <p>Datos para gestión de pedidos, atención y facturación.</p>
-            <p>Derechos en <a href="mailto:info@scootshop.example">info@scootshop.example</a>.</p>
+            <p>Derechos en <a href="mailto:info@scootshop.co">info@scootshop.co</a>.</p>
           </details>
 
           <details>
@@ -1093,30 +1103,206 @@
       <footer>
         © <span id="y"></span> SCOOT SHOP ·
         <a href="#legal">Legal</a> ·
-        <a href="mailto:info@scootshop.example">Contactar</a>
+        <a href="mailto:info@scootshop.co">Contactar</a>
       </footer>
     </section>
   </main>
 
-  <!-- JSON-LD Organización (ligero) -->
+  <!-- ✅ JSON-LD completo: Merchant listings (image + shippingDetails + hasMerchantReturnPolicy) -->
   <script type="application/ld+json">
   {
-    "@context":"https://schema.org",
-    "@type":"Organization",
-    "name":"SCOOT SHOP",
-    "url":"https://tudominio.example",
-    "logo":"https://tudominio.example/Img/0-removebg-preview.png",
-    "sameAs":[
-      "https://www.instagram.com/scootshopping",
-      "https://www.facebook.com/61579248524907"
-    ],
-    "contactPoint": [{
-      "@type":"ContactPoint",
-      "telephone":"+34-666-318-747",
-      "contactType":"customer support",
-      "areaServed":"ES",
-      "availableLanguage":["es"]
-    }]
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://scootshop.co/#org",
+        "name": "SCOOT SHOP",
+        "url": "https://scootshop.co/",
+        "logo": "https://scootshop.co/Img/0-removebg-preview.png",
+        "sameAs": [
+          "https://www.instagram.com/scootshopping",
+          "https://www.facebook.com/61579248524907"
+        ],
+        "contactPoint": [
+          {
+            "@type": "ContactPoint",
+            "telephone": "+34-666-318-747",
+            "contactType": "customer support",
+            "areaServed": "ES",
+            "availableLanguage": ["es"]
+          }
+        ]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://scootshop.co/#website",
+        "url": "https://scootshop.co/",
+        "name": "SCOOT SHOP",
+        "publisher": { "@id": "https://scootshop.co/#org" },
+        "inLanguage": "es-ES"
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://scootshop.co/#webpage",
+        "url": "https://scootshop.co/",
+        "name": "SCOOT SHOP — Scooters eléctricos",
+        "isPartOf": { "@id": "https://scootshop.co/#website" },
+        "about": { "@id": "https://scootshop.co/#org" },
+        "primaryImageOfPage": {
+          "@type": "ImageObject",
+          "url": "https://scootshop.co/Img/0-removebg-preview.png"
+        },
+        "inLanguage": "es-ES"
+      },
+      {
+        "@type": "MerchantReturnPolicy",
+        "@id": "https://scootshop.co/#return-policy",
+        "applicableCountry": "ES",
+        "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+        "merchantReturnDays": 30,
+        "returnMethod": "https://schema.org/ReturnByMail",
+        "returnFees": "https://schema.org/ReturnFeesCustomerResponsibility",
+        "url": "https://scootshop.co/#legal"
+      },
+      {
+        "@type": "OfferShippingDetails",
+        "@id": "https://scootshop.co/#shipping-es",
+        "shippingDestination": {
+          "@type": "DefinedRegion",
+          "addressCountry": "ES"
+        },
+        "deliveryTime": {
+          "@type": "ShippingDeliveryTime",
+          "transitTime": {
+            "@type": "QuantitativeValue",
+            "minValue": 6,
+            "maxValue": 8,
+            "unitCode": "DAY"
+          }
+        },
+        "shippingSettingsLink": "https://scootshop.co/#legal"
+      },
+
+      {
+        "@type": "Product",
+        "@id": "https://scootshop.co/n7pro.html#product",
+        "name": "N7PRO — Patinete eléctrico urbano",
+        "image": [
+          "https://scootshop.co/Img-N7PRO/1.jpg",
+          "https://scootshop.co/Img-N7PRO/2.jpg",
+          "https://scootshop.co/Img-N7PRO/3.jpg"
+        ],
+        "brand": { "@type": "Brand", "name": "Scoot Shop" },
+        "sku": "N7PRO",
+        "offers": {
+          "@type": "Offer",
+          "url": "https://scootshop.co/n7pro.html",
+          "price": 215.00,
+          "priceCurrency": "EUR",
+          "availability": "https://schema.org/InStock",
+          "itemCondition": "https://schema.org/NewCondition",
+          "seller": { "@id": "https://scootshop.co/#org" },
+          "shippingDetails": { "@id": "https://scootshop.co/#shipping-es" },
+          "hasMerchantReturnPolicy": { "@id": "https://scootshop.co/#return-policy" }
+        }
+      },
+
+      {
+        "@type": "Product",
+        "@id": "https://scootshop.co/s4.html#product",
+        "name": "ZWheel MASCOOTER S4 — Homologado por la DGT",
+        "image": [
+          "https://scootshop.co/Img-S4/1.jpg",
+          "https://scootshop.co/Img-S4/2.jpg",
+          "https://scootshop.co/Img-S4/3.jpg"
+        ],
+        "brand": { "@type": "Brand", "name": "ZWheel" },
+        "sku": "S4",
+        "offers": {
+          "@type": "Offer",
+          "url": "https://scootshop.co/s4.html",
+          "price": 380.00,
+          "priceCurrency": "EUR",
+          "availability": "https://schema.org/InStock",
+          "itemCondition": "https://schema.org/NewCondition",
+          "seller": { "@id": "https://scootshop.co/#org" },
+          "shippingDetails": { "@id": "https://scootshop.co/#shipping-es" },
+          "hasMerchantReturnPolicy": { "@id": "https://scootshop.co/#return-policy" }
+        }
+      },
+
+      {
+        "@type": "Product",
+        "@id": "https://scootshop.co/g2.html#product",
+        "name": "G2 — Patinete eléctrico de alta potencia",
+        "image": [
+          "https://scootshop.co/Img-G2/1.jpg",
+          "https://scootshop.co/Img-G2/2.jpg",
+          "https://scootshop.co/Img-G2/3.jpg"
+        ],
+        "brand": { "@type": "Brand", "name": "Scoot Shop" },
+        "sku": "G2",
+        "offers": {
+          "@type": "Offer",
+          "url": "https://scootshop.co/g2.html",
+          "price": 380.00,
+          "priceCurrency": "EUR",
+          "availability": "https://schema.org/InStock",
+          "itemCondition": "https://schema.org/NewCondition",
+          "seller": { "@id": "https://scootshop.co/#org" },
+          "shippingDetails": { "@id": "https://scootshop.co/#shipping-es" },
+          "hasMerchantReturnPolicy": { "@id": "https://scootshop.co/#return-policy" }
+        }
+      },
+
+      {
+        "@type": "Product",
+        "@id": "https://scootshop.co/t10.html#product",
+        "name": "T10 — Patinete eléctrico Ultra",
+        "image": [
+          "https://scootshop.co/Img-T10/1.jpg",
+          "https://scootshop.co/Img-T10/2.jpg",
+          "https://scootshop.co/Img-T10/3.jpg"
+        ],
+        "brand": { "@type": "Brand", "name": "Scoot Shop" },
+        "sku": "T10",
+        "offers": {
+          "@type": "Offer",
+          "url": "https://scootshop.co/t10.html",
+          "price": 450.00,
+          "priceCurrency": "EUR",
+          "availability": "https://schema.org/InStock",
+          "itemCondition": "https://schema.org/NewCondition",
+          "seller": { "@id": "https://scootshop.co/#org" },
+          "shippingDetails": { "@id": "https://scootshop.co/#shipping-es" },
+          "hasMerchantReturnPolicy": { "@id": "https://scootshop.co/#return-policy" }
+        }
+      },
+
+      {
+        "@type": "Product",
+        "@id": "https://scootshop.co/ix3.html#product",
+        "name": "IX3 — Patinete eléctrico Serie IX",
+        "image": [
+          "https://scootshop.co/Img-IX3/1.jpg",
+          "https://scootshop.co/Img-IX3/2.jpg",
+          "https://scootshop.co/Img-IX3/3.jpg"
+        ],
+        "brand": { "@type": "Brand", "name": "Scoot Shop" },
+        "sku": "IX3",
+        "offers": {
+          "@type": "Offer",
+          "url": "https://scootshop.co/ix3.html",
+          "price": 380.00,
+          "priceCurrency": "EUR",
+          "availability": "https://schema.org/InStock",
+          "itemCondition": "https://schema.org/NewCondition",
+          "seller": { "@id": "https://scootshop.co/#org" },
+          "shippingDetails": { "@id": "https://scootshop.co/#shipping-es" },
+          "hasMerchantReturnPolicy": { "@id": "https://scootshop.co/#return-policy" }
+        }
+      }
+    ]
   }
   </script>
 
@@ -1138,12 +1324,11 @@
         window.addEventListener('resize', setVh, {passive:true});
         window.addEventListener('orientationchange', setVh, {passive:true});
 
-        /* ✅ HERO video: autoplay robusto + fallback (sin depender de tocar pantalla) */
+        /* ✅ HERO video: autoplay robusto + fallback */
         (function(){
           var v = document.getElementById('heroVideo');
           if(!v) return;
 
-          // Flags antes de play (clave iOS)
           v.muted = true;
           v.defaultMuted = true;
           v.volume = 0;
@@ -1162,7 +1347,6 @@
           var playingOk = false;
 
           function tryPlay(){
-            // Si ya reproduce, ok
             if(!v.paused && !v.ended && v.readyState >= 2){
               playingOk = true;
               return;
@@ -1194,12 +1378,10 @@
           setTimeout(tryPlay, 1500);
           setTimeout(tryPlay, 2500);
 
-          // Si el usuario interactúa, también reintenta (salva casos bloqueados)
           ['touchstart','pointerdown','click','scroll'].forEach(function(evt){
             window.addEventListener(evt, tryPlay, {passive:true});
           });
 
-          // Si el vídeo está “parado” mucho rato, reintenta (por si el navegador mató el decode)
           setInterval(function(){
             if(!playingOk) tryPlay();
           }, 3000);
@@ -1356,7 +1538,7 @@
         });
 
         /* ===========================
-           ✅ RESTAURADO: Menú móvil con "Productos" (submenu)
+           ✅ Menú móvil
            =========================== */
         function initMobileMenu(){
           var burger = document.getElementById('burger');
@@ -1510,3 +1692,4 @@
   </script>
 </body>
 </html>
+```
