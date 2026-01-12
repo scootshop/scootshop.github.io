@@ -1,28 +1,31 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>SCOOT SHOP — Scooters eléctricos</title>
 
+  <title>SCOOT SHOP — Scooters eléctricos</title>
   <meta name="description" content="Scooters eléctricos fiables y potentes. Envío 6–8 días, pago seguro y garantía 200 km por producto." />
   <meta name="robots" content="index,follow,max-image-preview:large" />
 
-  <!-- ✅ Dominio real -->
+  <!-- Dominio real -->
   <link rel="canonical" href="https://scootshop.co/" />
 
-  <!-- ✅ Open Graph -->
+  <!-- Favicons (evita JPG como favicon) -->
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" href="/Img/0-removebg-preview.png" />
+  <link rel="apple-touch-icon" href="/Img/0-removebg-preview.png" />
+
+  <!-- Open Graph -->
   <meta property="og:url" content="https://scootshop.co/" />
   <meta property="og:title" content="SCOOT SHOP — Scooters eléctricos" />
   <meta property="og:description" content="Scooters eléctricos fiables y potentes. Envío 6–8 días, pago seguro y garantía 200 km por producto." />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="SCOOT SHOP" />
   <meta property="og:locale" content="es_ES" />
-  <!-- ✅ Imagen existente -->
   <meta property="og:image" content="https://scootshop.co/Img/0-removebg-preview.png" />
 
-  <!-- ✅ Twitter -->
+  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:image" content="https://scootshop.co/Img/0-removebg-preview.png" />
 
@@ -31,679 +34,21 @@
   <meta name="theme-color" content="#ffffff" />
   <meta name="format-detection" content="telephone=no" />
 
-  <!-- ✅ Favicon (para que Google deje de mostrar el globo, lo ideal es tener también /favicon.ico en la raíz) -->
-  <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="icon" href="Img/0.jpg" type="image/png" />
-  <link rel="apple-touch-icon" href="/Img/0-removebg-preview.png" />
-
   <!-- Preconexiones -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
 
-  <!-- Tipografías + Iconos (NO toco Versátil: mantiene Tangerine) -->
+  <!-- Tipografías + Iconos -->
   <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
-  <style>
-    :root{
-      --sport:'Russo One',sans-serif;
-      --ui:'Plus Jakarta Sans',ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans";
-
-      --ink:#111315;
-      --muted:#676b73;
-      --line:#E6E9EF;
-      --primary:#b91e1e;
-      --primary-soft:rgba(185,30,30,.08);
-
-      --sat: env(safe-area-inset-top, 0px);
-      --header-h: 88px;
-      --vh: 1vh;
-    }
-
-    @media (max-width:768px){
-      :root{ --header-h: 72px; }
-    }
-
-    /* Reset */
-    *{ box-sizing:border-box; margin:0; padding:0; }
-    html,body{ height:100%; }
-    html, body, button, input, select, textarea{ color-scheme: light !important; }
-    html{ scroll-behavior:smooth; }
-    body{
-      font-family:var(--ui);
-      background:#ffffff;
-      color:var(--ink);
-      line-height:1.55;
-      overflow-x:hidden;
-      padding-top: calc(var(--header-h) + var(--sat));
-    }
-    img, video{ max-width:100%; display:block; }
-    a{ color:inherit; text-decoration:none; }
-    button{ font-family:inherit; }
-    .container{ width:min(1200px,100%); padding-inline:clamp(16px,4vw,28px); margin-inline:auto; }
-
-    /* Enlace de salto */
-    .skip-link{
-      position:absolute; top:-40px; left:16px; padding:8px 12px; border-radius:8px;
-      background:#111; color:#fff; z-index:200; transition:top .2s ease;
-    }
-    .skip-link:focus{ top:8px; }
-
-    /* ================= HEADER + NAV ================= */
-    header{
-      position:fixed;
-      inset:0 0 auto 0;
-      z-index:80;
-      background:rgba(255,255,255,.92);
-      backdrop-filter:blur(12px);
-      border-bottom:1px solid rgba(0,0,0,.05);
-      padding-top: var(--sat);
-    }
-    .nav{
-      display:grid;
-      grid-template-columns:auto 1fr auto;
-      align-items:center;
-      height:var(--header-h);
-      gap:12px;
-    }
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width: 0;
-    }
-    .brand a{
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-    .brand img{
-      height:52px;
-      width:auto;
-      object-fit:contain;
-      filter:drop-shadow(0 4px 10px rgba(15,23,42,.15));
-    }
-
-    /* ✅ NO TOCAR: “Versátil” */
-    .brand span{
-      font-family:'Tangerine',cursive;
-      font-size:1.7rem;
-      color:var(--primary);
-      white-space:nowrap;
-      line-height:1;
-      display:block;
-    }
-
-    /* Menú escritorio */
-    nav.menu{
-      justify-self:end;
-      display:flex;
-      gap:10px;
-      font-weight:800;
-      text-transform:uppercase;
-      font-size:.86rem;
-      align-items:center;
-      flex-wrap:nowrap;
-      white-space:nowrap;
-      min-width:0;
-    }
-    nav.menu a, nav.menu button{
-      padding:7px 11px;
-      border-radius:999px;
-      background:transparent;
-      border:0;
-      cursor:pointer;
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      transition:background .15s ease, color .15s ease, transform .12s ease;
-      white-space:nowrap;
-    }
-    nav.menu a .nav-icon{ font-size:.95em; }
-    nav.menu a:hover{
-      background:var(--primary-soft);
-      transform:translateY(-1px);
-    }
-    nav.menu a[aria-current="page"]{
-      background:var(--primary-soft);
-      color:var(--primary);
-    }
-
-    /* Burger */
-    .burger{
-      display:none;
-      place-items:center;
-      width:44px;
-      height:44px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      background:#fff;
-      font-size:20px;
-      color:#111;
-      justify-self:end;
-      box-shadow:0 10px 24px rgba(15,23,42,.06);
-      transition:transform .12s ease, box-shadow .16s ease, background .15s ease;
-    }
-    .burger:hover{
-      background:#f9fafb;
-      transform:translateY(-1px);
-      box-shadow:0 14px 30px rgba(15,23,42,.10);
-    }
-    .burger:active{
-      transform:translateY(0);
-      box-shadow:0 8px 16px rgba(15,23,42,.06);
-    }
-    .burger[disabled]{
-      opacity:.55;
-      cursor:not-allowed;
-      transform:none !important;
-      box-shadow:0 10px 24px rgba(15,23,42,.06) !important;
-    }
-
-    /* ================= HERO (VIDEO + TITULO + BOTON) ================= */
-    .hero{
-      position:relative;
-      min-height:calc(var(--vh) * 100);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      overflow:hidden;
-      text-align:center;
-
-      /* ✅ fallback si el navegador bloquea autoplay o tarda */
-      background: url('Img/NEGRO.png') center/cover no-repeat;
-    }
-
-    .hero .hero-bg{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      z-index:0;
-    }
-
-    .hero::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      background: linear-gradient(180deg, rgba(0, 0, 0, 0.10), rgba(0, 0, 0, 0.45));
-      z-index:1;
-      pointer-events:none;
-    }
-
-    .hero-inner{
-      position:relative;
-      z-index:2;
-      width:min(1200px,100%);
-      padding-inline:clamp(16px,4vw,28px);
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:14px;
-      color:#f9fafb;
-    }
-
-    .hero-title{
-      font-family:var(--sport);
-      font-size:clamp(40px,7vw,80px);
-      letter-spacing:.10em;
-      text-transform:uppercase;
-      text-shadow:0 18px 48px rgba(0,0,0,.65);
-    }
-
-    .hero-btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      min-height:50px;
-      padding:12px 22px;
-      border-radius:999px;
-      font-weight:900;
-      text-transform:uppercase;
-      letter-spacing:.10em;
-      font-size:.9rem;
-      cursor:pointer;
-      background:#fff;
-      color:#111;
-      border:1px solid rgba(255,255,255,.25);
-      box-shadow:0 18px 44px rgba(0,0,0,.45);
-      transition:transform .14s ease, filter .14s ease, box-shadow .16s ease;
-    }
-
-    .hero-btn:hover{
-      filter:brightness(1.05);
-      transform:translateY(-1px);
-      box-shadow:0 24px 60px rgba(0,0,0,.55);
-    }
-
-    .hero-btn:active{
-      transform:translateY(0);
-      box-shadow:0 16px 36px rgba(0,0,0,.5);
-    }
-
-    @media (prefers-reduced-motion: reduce){
-      .hero video.hero-bg{ display:none !important; }
-      .hero{ background: url('Img/NEGRO.png') center/cover no-repeat; }
-    }
-
-    /* =============== SECCIONES / CARDS =============== */
-    .series{
-      padding:40px 0 22px;
-      text-align:center;
-    }
-    .series h2{
-      font-family:var(--sport);
-      font-size:clamp(28px,5vw,42px);
-      margin-bottom:8px;
-      color:var(--primary);
-      letter-spacing:.08em;
-      text-transform:uppercase;
-    }
-    .series p{
-      color:var(--muted);
-      max-width:820px;
-      margin:0 auto;
-      font-size:1.02rem;
-    }
-    .series h2::after{
-      content:"";
-      display:block;
-      width:70px;
-      height:4px;
-      margin:9px auto 0;
-      border-radius:999px;
-      background:linear-gradient(90deg, var(--primary), #f97316);
-      opacity:.9;
-    }
-
-    .features{ padding:26px 0 10px; }
-    .feature-grid{
-      list-style:none;
-      display:grid;
-      gap:14px;
-      grid-template-columns: repeat(4, minmax(0,1fr));
-    }
-    .feature-card{
-      background:rgba(255,255,255,.92);
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:14px;
-      display:grid;
-      grid-template-columns:auto 1fr;
-      column-gap:12px;
-      row-gap:6px;
-      align-items:center;
-      box-shadow:0 10px 30px rgba(15,23,42,.04);
-      transition:transform .14s ease, box-shadow .16s ease, border-color .14s ease, background .14s ease;
-    }
-    .feature-card:hover{
-      transform:translateY(-2px);
-      box-shadow:0 18px 44px rgba(15,23,42,.08);
-      border-color:#d0d7e2;
-      background:#ffffff;
-    }
-    .feature-card h3{ font-size:1.02rem; }
-    .feature-card p{ grid-column:1/-1; color:var(--muted); font-size:.92rem; }
-    .f-icon{
-      width:40px;
-      height:40px;
-      border-radius:14px;
-      display:grid;
-      place-items:center;
-      border:1px solid var(--line);
-      background:#fff;
-    }
-    .f-icon i{ font-size:18px; color:var(--primary); }
-
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap:18px;
-      margin-top:18px;
-    }
-    .card{
-      background:#fdfdfd;
-      border:1px solid #e4e7ec;
-      border-radius:18px;
-      display:flex;
-      flex-direction:column;
-      cursor:pointer;
-      overflow:hidden;
-      box-shadow:0 12px 34px rgba(15,23,42,.04);
-      transition:transform .16s ease, box-shadow .18s ease, border-color .16s ease;
-      position:relative;
-      outline:none;
-    }
-    .card:focus-visible{
-      box-shadow:0 0 0 3px rgba(17,17,17,.22), 0 18px 44px rgba(15,23,42,.10);
-    }
-    .card:hover{
-      transform:translateY(-3px);
-      box-shadow:0 20px 48px rgba(15,23,42,.10);
-      border-color:#d0d7e2;
-    }
-
-    .card-media{
-      position:relative;
-      margin:8px;
-      border:1px solid var(--line);
-      border-radius:14px;
-      overflow:hidden;
-      background:#fff;
-      aspect-ratio: 3 / 2;
-    }
-
-    .carousel{
-      position:relative;
-      overflow:hidden;
-      height:100%;
-      touch-action: pan-y pinch-zoom;
-    }
-    .carousel-track{
-      display:flex;
-      transition:transform .3s ease;
-      height:100%;
-      cursor:grab;
-      will-change: transform;
-    }
-    .carousel-track.dragging{
-      cursor:grabbing;
-      transition:none !important;
-    }
-    .carousel img{
-      width:100%;
-      height:100%;
-      flex:0 0 100%;
-      object-fit:contain;
-      background:#fff;
-      -webkit-user-drag:none;
-      user-select:none;
-      pointer-events:none;
-    }
-
-    .carousel-dots{
-      position:absolute;
-      bottom:8px;
-      left:50%;
-      transform:translateX(-50%);
-      display:flex;
-      gap:6px;
-      background:rgba(248,250,252,.96);
-      border:1px solid var(--line);
-      padding:2px 6px;
-      border-radius:999px;
-    }
-    .carousel-dots .dot{
-      width:8px;
-      height:8px;
-      border-radius:50%;
-      border:0;
-      background:#cbd5e1;
-      opacity:.9;
-      cursor:pointer;
-    }
-    .carousel-dots .dot.active{ background:#111; }
-
-    .chip-name{ display:none; }
-
-    .card-body{ padding:8px 12px 2px; }
-    .card-brand{
-      font-size:.72rem;
-      letter-spacing:.08em;
-      color:#6b7280;
-      text-transform:uppercase;
-      font-weight:900;
-    }
-    .title{
-      margin-top:4px;
-      font-size:1rem;
-      line-height:1.3;
-      font-weight:900;
-    }
-
-    .card-bottom{
-      margin-top:8px;
-      padding:10px 12px 12px;
-      border-top:1px solid var(--line);
-      background:rgba(248,250,252,.8);
-    }
-    .price-row{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      margin-bottom:6px;
-    }
-    .price-now{
-      font-size:1.08rem;
-      font-weight:900;
-      position:relative;
-    }
-    .price-was{
-      color:#9aa0a6;
-      text-decoration:line-through;
-      font-weight:700;
-      font-size:.9rem;
-    }
-
-    .btn-row{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    .btn-row a{
-      flex:1;
-      min-width:140px;
-    }
-
-    .btn-primary,
-    .btn-paypal{
-      display:block;
-      text-align:center;
-      font-weight:900;
-      border-radius:999px;
-      padding:9px 12px;
-      border:1px solid transparent;
-      font-size:.9rem;
-      transition:background .14s, color .14s, transform .12s, box-shadow .16s, border-color .14s;
-    }
-    .btn-primary{
-      background:#111;
-      color:#fff;
-      border-color:#111;
-      box-shadow:0 10px 24px rgba(15,23,42,.25);
-    }
-    .btn-primary:hover{
-      filter:brightness(1.05);
-      transform:translateY(-1px);
-      box-shadow:0 16px 32px rgba(15,23,42,.3);
-    }
-
-    .sr-only{
-      position:absolute;
-      width:1px;
-      height:1px;
-      padding:0;
-      margin:-1px;
-      overflow:hidden;
-      clip:rect(0,0,0,0);
-      white-space:nowrap;
-      border:0;
-    }
-
-    .btn-paypal{
-      background:#ffc439;
-      color:#111;
-      border-color:#f2ba36;
-      box-shadow:0 10px 26px rgba(255,196,57,.45);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-    }
-    .btn-paypal:hover{
-      filter:brightness(1.03);
-      transform:translateY(-1px);
-      box-shadow:0 16px 36px rgba(255,196,57,.55);
-    }
-    .btn-paypal:active{ transform:translateY(0); }
-    .btn-paypal .paypal-logo{ height:18px; width:auto; display:block; }
-    .btn-paypal .buy-text{ display:inline-block; font-weight:900; }
-
-    /* FAQ / Ubicación / Legal */
-    #faq h2{
-      margin:20px 0;
-      font-family:var(--sport);
-      letter-spacing:.08em;
-      text-transform:uppercase;
-    }
-    details{
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:10px 14px;
-      margin-bottom:10px;
-      background:#fff;
-      box-shadow:0 8px 24px rgba(15,23,42,.03);
-    }
-    summary{
-      cursor:pointer;
-      font-weight:900;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      list-style:none;
-    }
-    summary::-webkit-details-marker{ display:none; }
-    summary::after{ content:"+"; font-weight:700; color:#9ca3af; }
-    details[open] summary::after{ content:"–"; }
-
-    #ubicacion h2{
-      margin:20px 0 10px;
-      font-family:var(--sport);
-      text-align:left;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-    }
-    .map-embed{
-      width:100%;
-      height:300px;
-      border-radius:14px;
-      border:0;
-      box-shadow:0 16px 40px rgba(15,23,42,.16);
-    }
-
-    .legal{ padding:36px 0; }
-    .legal h2{
-      text-align:center;
-      font-family:var(--sport);
-      letter-spacing:.08em;
-      text-transform:uppercase;
-    }
-    .legal .columns{
-      display:grid;
-      grid-template-columns:repeat(2,1fr);
-      gap:16px;
-      max-width:1000px;
-      margin:16px auto 0;
-    }
-    .legal-update{
-      text-align:center;
-      margin-top:10px;
-      color:var(--muted);
-      font-size:.86rem;
-    }
-
-    .pagos{
-      padding:36px 0;
-      text-align:center;
-    }
-    .pagos h2{
-      font-family:var(--sport);
-      margin-bottom:18px;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-    }
-
-    /* ✅ NO TOCAR: volvemos a 6 logos */
-    .pagos-logos{
-      display:grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      justify-items:center;
-      align-items:center;
-      gap:18px 28px;
-      margin-top:8px;
-    }
-    .pagos-logos img{
-      max-width:100%;
-      height:34px;
-      display:block;
-      filter:grayscale(.2);
-      opacity:.9;
-      transition:filter .14s, transform .12s, opacity .14s;
-    }
-    .pagos-logos img:hover{
-      filter:grayscale(0);
-      transform:translateY(-1px);
-      opacity:1;
-    }
-
-    footer{
-      text-align:center;
-      padding:18px;
-      color:var(--muted);
-      font-size:.85rem;
-    }
-
-    @media (max-width:1024px){
-      .feature-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); }
-    }
-    @media (max-width:900px){
-      .legal .columns{ grid-template-columns:1fr; }
-    }
-
-    @media (max-width:980px){
-      nav.menu{ display:none; }
-      .burger{ display:grid; }
-    }
-
-    @media (max-width:640px){
-      .grid{ grid-template-columns:repeat(2,1fr); gap:10px; }
-      .card-media{ margin:6px; border-radius:10px; aspect-ratio:1/1; }
-      .chip-name{
-        display:block;
-        margin:6px 6px 10px;
-        padding:7px 10px;
-        border-radius:10px;
-        background:#111;
-        color:#fff;
-        font-weight:900;
-        font-size:.85rem;
-        text-align:center;
-        letter-spacing:.02em;
-      }
-      .card-body, .carousel-dots{ display:none !important; }
-      .btn-row{ flex-direction:column; }
-      .btn-row a{ width:100%; min-width:unset; }
-    }
-
-    /* PayPal button: mostrar COMPRAR en vez del logo (como lo tenías) */
-    .btn-paypal .paypal-logo{ display:none !important; }
-
-    /* En móvil: NO mostrar Vista / Comprar */
-    @media (max-width:768px){
-      .btn-row{ display:none !important; }
-    }
-  </style>
+  <!-- ✅ CSS EXTERNO -->
+  <link rel="stylesheet" href="css/styles.css?v=20260109" />
 </head>
 
 <body>
-  <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
 
-  <!-- HEADER -->
   <header id="siteHeader" aria-label="Barra superior">
     <div class="container nav">
       <div class="brand">
@@ -724,18 +69,15 @@
         <a href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
       </nav>
 
-      <!-- Burger (abre el menú que se inyecta desde partials/mobile-menu.html) -->
-      <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileMenu" type="button" disabled>
+      <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileMenu" type="button">
         <i class="fa-solid fa-bars" aria-hidden="true"></i>
       </button>
     </div>
   </header>
 
-  <!-- Slot donde se inyecta el menú móvil -->
   <div id="mobile-menu-slot"></div>
 
   <main id="main-content">
-    <!-- HERO -->
     <section class="hero" id="inicio" aria-label="Portada con vídeo">
       <video
         id="heroVideo"
@@ -745,7 +87,7 @@
         loop
         playsinline
         webkit-playsinline
-        preload="auto"
+        preload="metadata"
         poster="Img/NEGRO.png"
         disablepictureinpicture
         disableremoteplayback
@@ -762,7 +104,6 @@
       </div>
     </section>
 
-    <!-- ¿POR QUÉ ELEGIRNOS? -->
     <section class="features" aria-label="¿Por qué elegirnos?">
       <div class="container">
         <ul class="feature-grid">
@@ -790,7 +131,6 @@
       </div>
     </section>
 
-    <!-- SERIES N -->
     <section class="series">
       <div class="container">
         <h2>Series N</h2>
@@ -804,6 +144,7 @@
         <article class="card" id="p-n7pro" tabindex="0"
           data-name="N7PRO" data-was="387,50 €" data-now="215 €"
           data-link="n7pro.html"
+          data-paypal="PSFEEEULL7H5Y"
           aria-label="N7PRO — Patinete eléctrico urbano">
           <div class="card-media">
             <div class="carousel" data-carousel>
@@ -846,11 +187,12 @@
         <article class="card" id="p-s4" tabindex="0"
           data-name="S4" data-was="—" data-now="380 €"
           data-link="s4.html"
+          data-paypal="3HAMJE5SBQPTG"
           aria-label="ZWheel MASCOTER S4 — Homologado DGT">
           <div class="card-media">
             <div class="carousel" data-carousel>
               <div class="carousel-track">
-                <img src="Img-S4/1.jpg" alt="S4 vista 1" loading="eager" fetchpriority="high" decoding="async">
+                <img src="Img-S4/1.jpg" alt="S4 vista 1" loading="lazy" decoding="async">
                 <img src="Img-S4/5.jpg" alt="S4 plegado" loading="lazy" decoding="async">
                 <img src="Img-S4/2.jpg" alt="S4 freno trasero y amortiguación" loading="lazy" decoding="async">
                 <img src="Img-S4/3.jpg" alt="S4 rueda delantera y suspensión" loading="lazy" decoding="async">
@@ -885,7 +227,6 @@
       </div>
     </section>
 
-    <!-- SERIES GT -->
     <section class="series" id="series-g">
       <div class="container">
         <h2>Series GT</h2>
@@ -899,11 +240,12 @@
         <article class="card" id="p-g2" tabindex="0"
           data-name="G2" data-was="780 €" data-now="380 €"
           data-link="g2.html"
+          data-paypal="7AFW42AS3FC8Q"
           aria-label="G2 — Patinete eléctrico de alta potencia">
           <div class="card-media">
             <div class="carousel" data-carousel>
               <div class="carousel-track">
-                <img src="Img-G2/1.jpg" alt="G2 vista 1" loading="eager" fetchpriority="high" decoding="async">
+                <img src="Img-G2/1.jpg" alt="G2 vista 1" loading="lazy" decoding="async">
                 <img src="Img-G2/2.jpg" alt="G2 vista 2" loading="lazy" decoding="async">
                 <img src="Img-G2/3.jpg" alt="G2 vista 3" loading="lazy" decoding="async">
                 <img src="Img-G2/4.jpg" alt="G2 vista 4" loading="lazy" decoding="async">
@@ -939,11 +281,12 @@
         <article class="card" id="p-t10" tabindex="0"
           data-name="T10" data-was="850 €" data-now="450 €"
           data-link="t10.html"
+          data-paypal="WE5GUHM4PSVYQ"
           aria-label="T10 — Patinete eléctrico Ultra">
           <div class="card-media">
             <div class="carousel" data-carousel>
               <div class="carousel-track">
-                <img src="Img-T10/1.jpg" alt="T10 vista 1" loading="eager" fetchpriority="high" decoding="async">
+                <img src="Img-T10/1.jpg" alt="T10 vista 1" loading="lazy" decoding="async">
                 <img src="Img-T10/2.jpg" alt="T10 vista 2" loading="lazy" decoding="async">
                 <img src="Img-T10/3.jpg" alt="T10 vista 3" loading="lazy" decoding="async">
                 <img src="Img-T10/4.jpg" alt="T10 vista 4" loading="lazy" decoding="async">
@@ -977,7 +320,6 @@
       </div>
     </section>
 
-    <!-- SERIE IX -->
     <section class="series" id="series-ix">
       <div class="container">
         <h2>Serie IX</h2>
@@ -991,11 +333,12 @@
         <article class="card" id="p-ix3" tabindex="0"
           data-name="IX3" data-was="850 €" data-now="380 €"
           data-link="ix3.html"
+          data-paypal="7ML59E5E7UA66"
           aria-label="IX3 — Patinete eléctrico Serie IX">
           <div class="card-media">
             <div class="carousel" data-carousel>
               <div class="carousel-track">
-                <img src="Img-IX3/1.jpg" alt="IX3 vista 1" loading="eager" fetchpriority="high" decoding="async">
+                <img src="Img-IX3/1.jpg" alt="IX3 vista 1" loading="lazy" decoding="async">
                 <img src="Img-IX3/2.jpg" alt="IX3 vista 2" loading="lazy" decoding="async">
                 <img src="Img-IX3/3.jpg" alt="IX3 vista 3" loading="lazy" decoding="async">
                 <img src="Img-IX3/4.jpg" alt="IX3 vista 4" loading="lazy" decoding="async">
@@ -1085,7 +428,6 @@
       </div>
     </section>
 
-    <!-- MÉTODOS DE PAGO + FOOTER -->
     <section class="pagos">
       <div class="container">
         <h2>Métodos de pago aceptados</h2>
@@ -1108,7 +450,7 @@
     </section>
   </main>
 
-  <!-- ✅ JSON-LD completo: Merchant listings (image + shippingDetails + hasMerchantReturnPolicy) -->
+  <!-- JSON-LD (más robusto para Merchant listings: shippingDetails y return policy inline por Offer) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -1154,34 +496,6 @@
         },
         "inLanguage": "es-ES"
       },
-      {
-        "@type": "MerchantReturnPolicy",
-        "@id": "https://scootshop.co/#return-policy",
-        "applicableCountry": "ES",
-        "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
-        "merchantReturnDays": 30,
-        "returnMethod": "https://schema.org/ReturnByMail",
-        "returnFees": "https://schema.org/ReturnFeesCustomerResponsibility",
-        "url": "https://scootshop.co/#legal"
-      },
-      {
-        "@type": "OfferShippingDetails",
-        "@id": "https://scootshop.co/#shipping-es",
-        "shippingDestination": {
-          "@type": "DefinedRegion",
-          "addressCountry": "ES"
-        },
-        "deliveryTime": {
-          "@type": "ShippingDeliveryTime",
-          "transitTime": {
-            "@type": "QuantitativeValue",
-            "minValue": 6,
-            "maxValue": 8,
-            "unitCode": "DAY"
-          }
-        },
-        "shippingSettingsLink": "https://scootshop.co/#legal"
-      },
 
       {
         "@type": "Product",
@@ -1202,8 +516,31 @@
           "availability": "https://schema.org/InStock",
           "itemCondition": "https://schema.org/NewCondition",
           "seller": { "@id": "https://scootshop.co/#org" },
-          "shippingDetails": { "@id": "https://scootshop.co/#shipping-es" },
-          "hasMerchantReturnPolicy": { "@id": "https://scootshop.co/#return-policy" }
+          "shippingDetails": {
+            "@type": "OfferShippingDetails",
+            "shippingDestination": {
+              "@type": "DefinedRegion",
+              "addressCountry": "ES"
+            },
+            "deliveryTime": {
+              "@type": "ShippingDeliveryTime",
+              "transitTime": {
+                "@type": "QuantitativeValue",
+                "minValue": 6,
+                "maxValue": 8,
+                "unitCode": "DAY"
+              }
+            }
+          },
+          "hasMerchantReturnPolicy": {
+            "@type": "MerchantReturnPolicy",
+            "applicableCountry": "ES",
+            "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+            "merchantReturnDays": 30,
+            "returnMethod": "https://schema.org/ReturnByMail",
+            "returnFees": "https://schema.org/ReturnFeesCustomerResponsibility",
+            "url": "https://scootshop.co/#legal"
+          }
         }
       },
 
@@ -1226,8 +563,23 @@
           "availability": "https://schema.org/InStock",
           "itemCondition": "https://schema.org/NewCondition",
           "seller": { "@id": "https://scootshop.co/#org" },
-          "shippingDetails": { "@id": "https://scootshop.co/#shipping-es" },
-          "hasMerchantReturnPolicy": { "@id": "https://scootshop.co/#return-policy" }
+          "shippingDetails": {
+            "@type": "OfferShippingDetails",
+            "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "ES" },
+            "deliveryTime": {
+              "@type": "ShippingDeliveryTime",
+              "transitTime": { "@type": "QuantitativeValue", "minValue": 6, "maxValue": 8, "unitCode": "DAY" }
+            }
+          },
+          "hasMerchantReturnPolicy": {
+            "@type": "MerchantReturnPolicy",
+            "applicableCountry": "ES",
+            "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+            "merchantReturnDays": 30,
+            "returnMethod": "https://schema.org/ReturnByMail",
+            "returnFees": "https://schema.org/ReturnFeesCustomerResponsibility",
+            "url": "https://scootshop.co/#legal"
+          }
         }
       },
 
@@ -1250,8 +602,23 @@
           "availability": "https://schema.org/InStock",
           "itemCondition": "https://schema.org/NewCondition",
           "seller": { "@id": "https://scootshop.co/#org" },
-          "shippingDetails": { "@id": "https://scootshop.co/#shipping-es" },
-          "hasMerchantReturnPolicy": { "@id": "https://scootshop.co/#return-policy" }
+          "shippingDetails": {
+            "@type": "OfferShippingDetails",
+            "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "ES" },
+            "deliveryTime": {
+              "@type": "ShippingDeliveryTime",
+              "transitTime": { "@type": "QuantitativeValue", "minValue": 6, "maxValue": 8, "unitCode": "DAY" }
+            }
+          },
+          "hasMerchantReturnPolicy": {
+            "@type": "MerchantReturnPolicy",
+            "applicableCountry": "ES",
+            "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+            "merchantReturnDays": 30,
+            "returnMethod": "https://schema.org/ReturnByMail",
+            "returnFees": "https://schema.org/ReturnFeesCustomerResponsibility",
+            "url": "https://scootshop.co/#legal"
+          }
         }
       },
 
@@ -1274,8 +641,23 @@
           "availability": "https://schema.org/InStock",
           "itemCondition": "https://schema.org/NewCondition",
           "seller": { "@id": "https://scootshop.co/#org" },
-          "shippingDetails": { "@id": "https://scootshop.co/#shipping-es" },
-          "hasMerchantReturnPolicy": { "@id": "https://scootshop.co/#return-policy" }
+          "shippingDetails": {
+            "@type": "OfferShippingDetails",
+            "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "ES" },
+            "deliveryTime": {
+              "@type": "ShippingDeliveryTime",
+              "transitTime": { "@type": "QuantitativeValue", "minValue": 6, "maxValue": 8, "unitCode": "DAY" }
+            }
+          },
+          "hasMerchantReturnPolicy": {
+            "@type": "MerchantReturnPolicy",
+            "applicableCountry": "ES",
+            "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+            "merchantReturnDays": 30,
+            "returnMethod": "https://schema.org/ReturnByMail",
+            "returnFees": "https://schema.org/ReturnFeesCustomerResponsibility",
+            "url": "https://scootshop.co/#legal"
+          }
         }
       },
 
@@ -1298,24 +680,37 @@
           "availability": "https://schema.org/InStock",
           "itemCondition": "https://schema.org/NewCondition",
           "seller": { "@id": "https://scootshop.co/#org" },
-          "shippingDetails": { "@id": "https://scootshop.co/#shipping-es" },
-          "hasMerchantReturnPolicy": { "@id": "https://scootshop.co/#return-policy" }
+          "shippingDetails": {
+            "@type": "OfferShippingDetails",
+            "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "ES" },
+            "deliveryTime": {
+              "@type": "ShippingDeliveryTime",
+              "transitTime": { "@type": "QuantitativeValue", "minValue": 6, "maxValue": 8, "unitCode": "DAY" }
+            }
+          },
+          "hasMerchantReturnPolicy": {
+            "@type": "MerchantReturnPolicy",
+            "applicableCountry": "ES",
+            "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+            "merchantReturnDays": 30,
+            "returnMethod": "https://schema.org/ReturnByMail",
+            "returnFees": "https://schema.org/ReturnFeesCustomerResponsibility",
+            "url": "https://scootshop.co/#legal"
+          }
         }
       }
     ]
   }
   </script>
 
-  <script defer>
+  <script>
     (function(){
       'use strict';
 
       document.addEventListener('DOMContentLoaded', function(){
-        /* Año dinámico */
         var yearEl = document.getElementById('y');
         if(yearEl){ yearEl.textContent = new Date().getFullYear(); }
 
-        /* 100vh móvil con --vh */
         function setVh(){
           var vh = window.innerHeight * 0.01;
           document.documentElement.style.setProperty('--vh', vh + 'px');
@@ -1324,7 +719,7 @@
         window.addEventListener('resize', setVh, {passive:true});
         window.addEventListener('orientationchange', setVh, {passive:true});
 
-        /* ✅ HERO video: autoplay robusto + fallback */
+        /* HERO video: robusto */
         (function(){
           var v = document.getElementById('heroVideo');
           if(!v) return;
@@ -1387,7 +782,7 @@
           }, 3000);
         })();
 
-        /* Carruseles: dots + swipe */
+        /* Carousels */
         document.querySelectorAll('[data-carousel]').forEach(function(c){
           var track = c.querySelector('.carousel-track');
           if(!track) return;
@@ -1514,32 +909,40 @@
             });
           }
 
-          /* Evitar que los botones disparen click de la card */
           card.querySelectorAll('[data-buy-button]').forEach(function(el){
             el.addEventListener('click', function(e){ e.stopPropagation(); });
             el.addEventListener('keydown', function(e){ e.stopPropagation(); });
           });
 
-          /* PayPal: crea link a pago.html con name+price */
+          /* PayPal: crea link a pago.html con name + price + paypal hosted id */
           var payBtn = card.querySelector('[data-pay-button]');
           if(payBtn){
             var nameP = (card.dataset.name || 'producto').trim();
             var now = (card.dataset.now || '').trim();
+            var paypalId = (card.dataset.paypal || '').trim();
+
             var priceClean = now.replace(/[^\d,\.]/g,'').replace(',', '.');
             var n = Number(priceClean);
 
+            var url = 'pago.html?name=' + encodeURIComponent(nameP);
+
             if(Number.isFinite(n) && n > 0){
-              payBtn.href = 'pago.html?name=' + encodeURIComponent(nameP) + '&price=' + encodeURIComponent(n.toFixed(2));
+              url += '&price=' + encodeURIComponent(n.toFixed(2));
             }else{
-              payBtn.href = 'pago.html?name=' + encodeURIComponent(nameP) + '&price=' + encodeURIComponent(now);
+              url += '&price=' + encodeURIComponent(now);
             }
+
+            if(paypalId){
+              url += '&paypal=' + encodeURIComponent(paypalId);
+              url += '&hid=' + encodeURIComponent(paypalId);
+            }
+
+            payBtn.href = url;
             payBtn.setAttribute('aria-label', 'Comprar ' + nameP);
           }
         });
 
-        /* ===========================
-           ✅ Menú móvil
-           =========================== */
+        /* Menú móvil */
         function initMobileMenu(){
           var burger = document.getElementById('burger');
           var panel = document.getElementById('mobileMenu');
@@ -1550,8 +953,15 @@
 
           var productsToggle = document.getElementById('mmProductsToggle');
           var productsSub = document.getElementById('mmProductsSub');
-
           var lastFocus = null;
+
+          /* ✅ FIX: estado inicial SIEMPRE cerrado (aunque el partial venga raro) */
+          panel.classList.remove('open');
+          backdrop.classList.remove('show');
+          panel.hidden = true;
+          backdrop.hidden = true;
+          if(productsSub) productsSub.hidden = true;
+          if(productsToggle) productsToggle.setAttribute('aria-expanded','false');
 
           function lockScroll(lock){
             document.body.style.overflow = lock ? 'hidden' : '';
@@ -1627,7 +1037,6 @@
             burger.setAttribute('aria-expanded','false');
             lockScroll(false);
             setModalState(false);
-
             closeProductsSubmenu();
 
             if(lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
@@ -1662,14 +1071,37 @@
               e.preventDefault(); first.focus();
             }
           });
+        }
 
-          burger.disabled = false;
+        function fallbackMobileMenuHTML(){
+          return '' +
+            '<div id="mmBackdrop" hidden></div>' +
+            '<aside id="mobileMenu" hidden aria-label="Menú móvil">' +
+              '<div class="mm-head">' +
+                '<strong>Menú</strong>' +
+                '<button id="mmClose" type="button" aria-label="Cerrar menú">✕</button>' +
+              '</div>' +
+              '<nav class="mm-nav" aria-label="Navegación móvil">' +
+                '<a href="#inicio">Inicio</a>' +
+                '<button id="mmProductsToggle" type="button" aria-expanded="false" aria-controls="mmProductsSub">Productos</button>' +
+                '<div class="mm-sub" id="mmProductsSub" hidden>' +
+                  '<a href="#comprar">Series N</a>' +
+                  '<a href="#series-g">Series GT</a>' +
+                  '<a href="#series-ix">Serie IX</a>' +
+                '</div>' +
+                '<a href="#faq">Preguntas</a>' +
+                '<a href="#ubicacion">Ubicación</a>' +
+                '<a href="#legal">Legal</a>' +
+                '<a href="https://www.instagram.com/scootshopping" target="_blank" rel="noopener noreferrer">Instagram</a>' +
+                '<a href="https://www.facebook.com/61579248524907" target="_blank" rel="noopener noreferrer">Facebook</a>' +
+                '<a href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer">WhatsApp</a>' +
+              '</nav>' +
+            '</aside>';
         }
 
         function loadMobileMenuPartial(){
           var slot = document.getElementById('mobile-menu-slot');
-          var burger = document.getElementById('burger');
-          if(!slot || !burger) return;
+          if(!slot) return;
 
           fetch('partials/mobile-menu.html', { cache: 'no-cache' })
             .then(function(res){
@@ -1680,9 +1112,9 @@
               slot.innerHTML = html;
               initMobileMenu();
             })
-            .catch(function(err){
-              console.warn('[MobileMenu] Error:', err);
-              burger.disabled = true;
+            .catch(function(){
+              slot.innerHTML = fallbackMobileMenuHTML();
+              initMobileMenu();
             });
         }
 
@@ -1692,4 +1124,3 @@
   </script>
 </body>
 </html>
-```
