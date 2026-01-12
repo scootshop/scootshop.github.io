@@ -9,7 +9,10 @@
   <meta name="color-scheme" content="light" />
   <meta name="theme-color" content="#ffffff" />
   <meta name="format-detection" content="telephone=no" />
-  <link rel="icon" href="favicon.ico" sizes="any" />
+
+  <!-- ✅ Favicon -->
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="/Img/0.jpg" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -136,11 +139,7 @@
     }
     .card .body{ padding:12px 14px; display:grid; gap:10px; }
 
-    /* ===== resumen minimal ===== */
-    .summary{
-      display:grid;
-      gap:8px;
-    }
+    .summary{ display:grid; gap:8px; }
     .sum-row{
       display:flex;
       justify-content:space-between;
@@ -154,16 +153,13 @@
     .sum-row .k{ color:var(--muted); font-weight:800; font-size:.86rem; }
     .sum-row .v{ font-weight:900; text-align:right; font-size:.92rem; }
 
-    /* ===== selector de métodos (NO se montan en móvil) ===== */
     .pay-tabs{
       display:grid;
       gap:10px;
       grid-template-columns: repeat(3, minmax(0,1fr));
     }
     @media (max-width:560px){
-      .pay-tabs{
-        grid-template-columns: 1fr; /* 1 columna en móvil: NO se pisan */
-      }
+      .pay-tabs{ grid-template-columns: 1fr; }
     }
 
     .pay-tab{
@@ -200,28 +196,13 @@
       box-shadow: 0 14px 28px rgba(15,23,42,.14);
     }
 
-    .tab-left{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width:0;
-    }
-    .logo{
-      height:18px;
-      width:auto;
-      display:block;
-      flex:0 0 auto;
-    }
+    .tab-left{ display:flex; align-items:center; gap:10px; min-width:0; }
+    .logo{ height:18px; width:auto; display:block; flex:0 0 auto; }
     .pay-tab[aria-selected="true"] .logo{ filter:brightness(0) invert(1); }
     .tab-name{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .chev{
-      opacity:.6;
-      font-weight:900;
-      flex:0 0 auto;
-    }
+    .chev{ opacity:.6; font-weight:900; flex:0 0 auto; }
     .pay-tab[aria-selected="true"] .chev{ opacity:1; }
 
-    /* ===== panel ===== */
     .panel{ border:1px solid var(--line); border-radius:14px; overflow:hidden; background:#fff; }
     .panel[hidden]{ display:none; }
     .panel .phead{
@@ -236,7 +217,6 @@
     .panel .phead strong{ font-weight:900; text-transform:uppercase; letter-spacing:.06em; font-size:.82rem; }
     .panel .pbody{ padding:12px; display:grid; gap:10px; }
 
-    /* Texto desplegable (sin ruido) */
     details.note{
       border:1px solid var(--line);
       border-radius:12px;
@@ -265,7 +245,6 @@
       font-size:.86rem;
     }
 
-    /* KV + copy */
     .kv{
       display:flex;
       align-items:center;
@@ -284,6 +263,7 @@
       word-break:break-word;
     }
     .kv .left{ display:grid; gap:4px; min-width:0; }
+
     .copy{
       border:1px solid var(--line);
       background:#111;
@@ -301,12 +281,7 @@
     .copy:hover{ transform:translateY(-1px); filter:brightness(1.05); }
     .copy:active{ transform:translateY(0); }
 
-    /* Botones pequeños/estéticos: WhatsApp + Mail */
-    .actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; }
     .icon-btn{
       display:inline-flex;
       align-items:center;
@@ -327,22 +302,27 @@
     .icon-btn:hover{ transform:translateY(-1px); background:var(--soft); }
     .icon-btn:active{ transform:translateY(0); }
 
-    .icon{
-      width:18px; height:18px; display:block;
-    }
+    .icon{ width:18px; height:18px; display:block; }
     .wa{ border-color: rgba(34,193,94,.25); }
     .wa .icon path{ fill: var(--wa); }
-
     .mail{ border-color: rgba(17,17,17,.18); }
     .mail .icon path{ fill: #111; }
 
-    /* Hosted PayPal container */
     #paypal-hosted-wrap{
       padding:10px 12px;
       border:1px solid var(--line);
       border-radius:12px;
       background:#fff;
       overflow:hidden;
+    }
+
+    .paypal-note{
+      padding:10px 12px;
+      border:1px dashed #d1d5db;
+      border-radius:12px;
+      background:#fff;
+      color:var(--muted);
+      font-size:.86rem;
     }
 
     footer{
@@ -375,7 +355,7 @@
         </div>
       </header>
 
-      <!-- Resumen minimal -->
+      <!-- Resumen -->
       <section class="card" aria-label="Resumen del pedido">
         <div class="head">
           <h1>Resumen</h1>
@@ -397,7 +377,7 @@
         </div>
       </section>
 
-      <!-- Métodos minimal + intuitivo -->
+      <!-- Métodos -->
       <section class="card" aria-label="Métodos de pago">
         <div class="head">
           <h2>Método</h2>
@@ -405,7 +385,6 @@
         </div>
 
         <div class="body">
-          <!-- 3 botones (no se pisan en móvil) -->
           <div class="pay-tabs" role="tablist" aria-label="Seleccionar método de pago">
             <button class="pay-tab" id="tab-bizum" type="button" role="tab"
               aria-selected="false" aria-controls="panel-bizum" data-pay-tab="bizum">
@@ -419,7 +398,6 @@
             <button class="pay-tab" id="tab-bank" type="button" role="tab"
               aria-selected="false" aria-controls="panel-bank" data-pay-tab="bank">
               <span class="tab-left">
-                <!-- icono banco (svg) -->
                 <svg class="logo" viewBox="0 0 24 24" aria-hidden="true">
                   <path fill="#111" d="M12 2L2 7v2h20V7L12 2zm-7 9v8H3v2h18v-2h-2v-8h-2v8h-3v-8h-2v8H9v-8H7zm-2 0h18v-2H3v2z"/>
                 </svg>
@@ -438,7 +416,7 @@
             </button>
           </div>
 
-          <!-- PANEL PAYPAL -->
+          <!-- PAYPAL -->
           <div class="panel" id="panel-paypal" role="tabpanel" aria-labelledby="tab-paypal" data-pay-panel>
             <div class="phead">
               <strong>PayPal</strong>
@@ -446,8 +424,11 @@
             </div>
             <div class="pbody">
               <div id="paypal-hosted-wrap">
-                <div id="paypal-container-HVUTLMHPTLT9Y"></div>
+                <!-- ✅ container genérico (dinámico) -->
+                <div id="paypal-container"></div>
               </div>
+
+              <div class="paypal-note" id="paypalInfo" hidden></div>
 
               <details class="note">
                 <summary>
@@ -477,7 +458,7 @@
             </div>
           </div>
 
-          <!-- PANEL BIZUM -->
+          <!-- BIZUM -->
           <div class="panel" id="panel-bizum" role="tabpanel" aria-labelledby="tab-bizum" hidden data-pay-panel>
             <div class="phead">
               <strong>Bizum</strong>
@@ -528,7 +509,7 @@
             </div>
           </div>
 
-          <!-- PANEL TRANSFERENCIA -->
+          <!-- TRANSFERENCIA -->
           <div class="panel" id="panel-bank" role="tabpanel" aria-labelledby="tab-bank" hidden data-pay-panel>
             <div class="phead">
               <strong>Transferencia</strong>
@@ -546,7 +527,7 @@
               <div class="kv">
                 <div class="left">
                   <div class="label">IBAN</div>
-                  <code id="bankIban">ES00 0000 0000 0000 0000 0000</code>
+                  <code id="bankIban">ES78 1586 0001 4164 6643 2811</code>
                 </div>
                 <button class="copy" type="button" data-copy="#bankIban">Copiar</button>
               </div>
@@ -562,7 +543,7 @@
               <div class="actions">
                 <a class="icon-btn wa" id="waBank" href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer">
                   <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M20.52 3.48A11.86 11.86 0 0012.06 0C5.5 0 .16 5.3.16 11.84c0 2.1.55 4.15 1.6 5.96L0 24l6.37-1.67a11.86 11.86 0 005.69 1.46h.01c6.56 0 11.9-5.3 11.9-11.84 0-3.16-1.24-6.13-3.45-8.47zM12.06 21.8h-.01a9.9 9.9 0 01-5.06-1.4l-.36-.22-3.78.99 1.01-3.67-.24-.38a9.83 9.83 0 01-1.5-5.28c0-5.44 4.47-9.87 9.98-9.87 2.66 0 5.16 1.03 7.04 2.9a9.78 9.78 0 012.92 6.97c0 5.44-4.47 9.98-10 9.98zm5.73-7.4c-.31-.16-1.84-.9-2.13-1-.29-.1-.5-.16-.7.16-.2.31-.8 1-.98 1.2-.18.2-.36.23-.67.08-.31-.16-1.32-.48-2.51-1.54-.93-.83-1.56-1.86-1.75-2.17-.18-.31-.02-.48.14-.64.14-.14.31-.36.47-.54.16-.18.2-.31.31-.52.1-.2.05-.39-.03-.54-.08-.16-.7-1.67-.95-2.29-.25-.6-.5-.52-.7-.53h-.6c-.2 0-.54.08-.82.39-.28.31-1.08 1.05-1.08 2.56s1.1 2.97 1.25 3.18c.16.2 2.16 3.3 5.23 4.63.73.31 1.29.5 1.73.64.73.23 1.39.2 1.91.12.58-.08 1.84-.74 2.1-1.46.26-.72.26-1.33.18-1.46-.08-.13-.28-.2-.59-.36z"/>
+                    <path d="M20.52 3.48A11.86 11.86 0 0012.06 0C5.5 0 .16 5.3.16 11.84c0 2.1.55 4.15 1.6 5.96L0 24l6.37-1.67a11.86 11.86 0 005.69 1.46h.01c6.56 0 11.9-5.3 11.9-11.84 0-3.16-1.24-6.13-3.45-8.47zM12.06 21.8h-.01a9.9 9.9 0 01-5.06-1.4l-.36-.22-3.78.99 1.01-3.67-.24-.38a9.83 9.83 0 01-1.5-5.28c0-5.44 4.47-9.87 9.98-9.87 2.66 0 5.16 1.03 7.04 2.9a9.78 9.78 0 012.92 6.97c0 5.44-4.47 9.98-10 9.98zm5.73-7.4c-.31-.16-1.84-.9-2.13-1-.29-.1-.5-.16-.7.16-.2.31-.8 1-.98 1.2-.18.2-.36.23-.67.08-.31-.16-1.32-.48-2.51-1.54-.93-.83-1.56-1.86-1.75-2.17-.18-.31-.02-.48.14-.64.14-.14.31-.36.47-.54.16-.18.20-.31.31-.52.1-.2.05-.39-.03-.54-.08-.16-.7-1.67-.95-2.29-.25-.6-.5-.52-.7-.53h-.6c-.2 0-.54.08-.82.39-.28.31-1.08 1.05-1.08 2.56s1.1 2.97 1.25 3.18c.16.2 2.16 3.3 5.23 4.63.73.31 1.29.5 1.73.64.73.23 1.39.2 1.91.12.58-.08 1.84-.74 2.1-1.46.26-.72.26-1.33.18-1.46-.08-.13-.28-.2-.59-.36z"/>
                   </svg>
                   WhatsApp
                 </a>
@@ -611,6 +592,29 @@
         catch(e){ return null; }
       }
       function safeText(s){ return (s ? String(s).replace(/\s+/g,' ').trim() : ''); }
+
+      // ✅ Hosted Button ID dinámico por URL:
+      // pago.html?paypal=PSFEEEULL7H5Y
+      function getHostedButtonId(){
+        var raw = safeText(getParam('paypal')) || safeText(getParam('hb')) || '';
+        // Validación suave: ids suelen ser A-Z0-9
+        if(raw && /^[A-Z0-9]{8,25}$/.test(raw)) return raw;
+        return ''; // vacío => fallback
+      }
+
+      var DEFAULT_HOSTED_ID = "HVUTLMHPTLT9Y";
+      var hostedId = getHostedButtonId() || DEFAULT_HOSTED_ID;
+
+      var paypalInfo = document.getElementById('paypalInfo');
+      if(paypalInfo){
+        if(getHostedButtonId()){
+          paypalInfo.hidden = true;
+        }else{
+          paypalInfo.hidden = false;
+          paypalInfo.textContent =
+            'Aviso: no llegó el ID de PayPal del producto (param "paypal"). Se está mostrando el botón por defecto.';
+        }
+      }
 
       // Datos desde URL
       var name = safeText(getParam('name')) || 'Producto SCOOT SHOP';
@@ -736,18 +740,23 @@
         });
       });
 
-      // PayPal Hosted Buttons (render una vez)
+      // ✅ PayPal Hosted Buttons (dinámico por hostedId)
       var hostedRendered = false;
+
       function ensureHostedButtons(){
         if(hostedRendered) return;
+
+        var container = document.getElementById('paypal-container');
+        if(container) container.innerHTML = '';
+
         var tries = 0;
         function tryRender(){
           tries++;
           if(window.paypal && window.paypal.HostedButtons){
             try{
               window.paypal.HostedButtons({
-                hostedButtonId: "HVUTLMHPTLT9Y",
-              }).render("#paypal-container-HVUTLMHPTLT9Y");
+                hostedButtonId: hostedId
+              }).render("#paypal-container");
               hostedRendered = true;
             }catch(e){
               console.error(e);
