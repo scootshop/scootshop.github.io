@@ -1,0 +1,20 @@
+RewriteEngine On
+RewriteBase /api/
+
+RewriteRule ^health$ index.php?route=health [L,QSA]
+RewriteRule ^paypal/config$ index.php?route=paypal_config [L,QSA]
+RewriteRule ^paypal/create-order$ index.php?route=paypal_create_order [L,QSA]
+RewriteRule ^paypal/capture-order$ index.php?route=paypal_capture_order [L,QSA]
+RewriteRule ^stripe/config$ index.php?route=stripe_config [L,QSA]
+RewriteRule ^stripe/checkout$ index.php?route=stripe_checkout [L,QSA]
+RewriteRule ^stripe/session-status$ index.php?route=stripe_session_status [L,QSA]
+RewriteRule ^stripe/webhook$ index.php?route=stripe_webhook [L,QSA]
+
+RewriteRule ^orders/create$ index.php?route=orders_create [L,QSA]
+RewriteRule ^orders/([A-Za-z0-9\-]+)$ index.php?route=orders_get&id=$1 [L,QSA]
+
+RewriteRule ^admin/orders/([A-Za-z0-9\-]+)/status$ index.php?route=admin_status&id=$1 [L,QSA]
+RewriteRule ^admin/orders/([A-Za-z0-9\-]+)/detail$ index.php?route=admin_order_detail&id=$1 [L,QSA]
+RewriteRule ^admin/orders/([A-Za-z0-9\-]+)/resend-paid-email$ index.php?route=admin_resend_paid_email&id=$1 [L,QSA]
+
+RewriteRule ^paypal/ipn$ index.php?route=paypal_ipn [L,QSA]

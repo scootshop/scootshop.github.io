@@ -1,0 +1,68 @@
+/* icons.css — Font Awesome 6.5.0 subset (17 icons only)
+   Replaces the full all.min.css (~63 KB) with only what SCOOT SHOP uses.
+   Fonts still loaded from CDN (WOFF2, ~120KB solid + ~80KB brands vs ~300KB+ for all). */
+
+/* === @font-face: Solid 900 === */
+@font-face {
+  font-family: 'Font Awesome 6 Free';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/webfonts/fa-solid-900.woff2') format('woff2');
+}
+
+/* === @font-face: Brands 400 === */
+@font-face {
+  font-family: 'Font Awesome 6 Brands';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/webfonts/fa-brands-400.woff2') format('woff2');
+}
+
+/* === Base classes === */
+.fa-solid, .fas {
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  font-style: normal;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  display: inline-block;
+  text-rendering: auto;
+  line-height: 1;
+  font-variant: normal;
+}
+
+.fa-brands, .fab {
+  font-family: 'Font Awesome 6 Brands';
+  font-weight: 400;
+  font-style: normal;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  display: inline-block;
+  text-rendering: auto;
+  line-height: 1;
+  font-variant: normal;
+}
+
+/* === Solid icons (14) === */
+.fa-house::before          { content: "\f015"; }
+.fa-cart-shopping::before  { content: "\f07a"; }
+.fa-circle-question::before{ content: "\f059"; }
+.fa-location-dot::before   { content: "\f3c5"; }
+.fa-scale-balanced::before { content: "\f24e"; }
+.fa-bars::before           { content: "\f0c9"; }
+.fa-xmark::before          { content: "\f00d"; }
+.fa-chevron-down::before   { content: "\f078"; }
+.fa-bolt::before           { content: "\f0e7"; }
+.fa-shield-halved::before  { content: "\f3ed"; }
+.fa-rotate-left::before    { content: "\f2ea"; }
+.fa-screwdriver-wrench::before { content: "\f7d9"; }
+.fa-bag-shopping::before   { content: "\f290"; }
+.fa-bicycle::before        { content: "\f206"; }
+.fa-motorcycle::before     { content: "\f21c"; }
+
+/* === Brand icons (3) === */
+.fa-instagram::before      { content: "\f16d"; }
+.fa-facebook::before       { content: "\f09a"; }
+.fa-whatsapp::before       { content: "\f232"; }

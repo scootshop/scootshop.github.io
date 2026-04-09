@@ -1,0 +1,1012 @@
+﻿<!DOCTYPE html>
+<html lang="es-ES">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Datos de envío | SCOOT SHOP</title>
+  <meta name="description" content="Completa tus datos de envío antes del pago seguro en SCOOT SHOP." />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="asset-version" content="20260409-2" />
+
+  <link rel="canonical" href="https://scootshop.co/checkout" />
+  <link rel="icon" href="/favicon.ico?v=20260409-2" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=20260409-2" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=20260409-2" />
+  <link rel="manifest" href="/site.webmanifest?v=20260409-2" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" /></noscript>
+  <link rel="stylesheet" href="/css/icons.css?v=20260409-2" />
+  <link rel="stylesheet" href="/css/main.css?v=20260409-2" />
+  <script src="/js/asset-sync.js"></script>
+  <script src="/js/global-assets.js"></script>
+
+  <style>
+    :root{
+      --sport:'Russo One',sans-serif;
+      --ui:'Plus Jakarta Sans',ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans";
+      --bg:#f6f7f9;
+      --ink:#111315;
+      --muted:#68707f;
+      --line:#e5eaf1;
+      --surface:#ffffff;
+      --soft:#f7f9fc;
+      --radius:24px;
+    }
+
+    *{ box-sizing:border-box; margin:0; padding:0; }
+    html{ height:100%; }
+    body{
+      min-height:100%;
+      font-family:var(--ui);
+      color:var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,.96), transparent 30%),
+        radial-gradient(circle at top right, rgba(230,236,244,.92), transparent 34%),
+        linear-gradient(180deg, #fbfcfd 0%, #f3f5f8 100%);
+    }
+    a{ color:inherit; }
+    a:focus-visible,
+    button:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible,
+    select:focus-visible{
+      outline:3px solid rgba(17,17,17,.18);
+      outline-offset:2px;
+    }
+
+    .ck-wrap{
+      padding:28px 0 40px 0;
+      overflow:visible;
+      display:flex;
+      flex-direction:column;
+      align-items:stretch;
+      position:relative;
+    }
+    .ck-wrap::before{
+      content:"";
+      position:fixed;
+      left:0;
+      right:0;
+      top:calc(var(--header-h) + var(--sat));
+      height:90px;
+      background:linear-gradient(180deg, #f6f7f9 0%, rgba(246,247,249,.96) 58%, rgba(246,247,249,0) 100%);
+      pointer-events:none;
+      z-index:24;
+    }
+    /* ── Step indicator ── */
+    .ck-steps{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:0 0 18px;
+      padding-left:max(16px, calc((100vw - 1120px) / 2));
+      margin:0;
+      position:-webkit-sticky;
+      position:sticky;
+      top:calc(var(--header-h) + var(--sat) + 8px);
+      z-index:30;
+      isolation:isolate;
+    }
+    .ck-step{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      font-size:.78rem;
+      font-weight:800;
+      color:#b4bbc6;
+      letter-spacing:.02em;
+    }
+    .ck-step--active{ color:var(--ink); }
+    .ck-step-num{
+      width:22px;
+      height:22px;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:.7rem;
+      font-weight:900;
+      background:rgba(17,19,21,.06);
+      color:#98a2b3;
+    }
+    .ck-step--active .ck-step-num{
+      background:#111315;
+      color:#fff;
+    }
+    .ck-step-sep{
+      width:20px;
+      height:1px;
+      background:rgba(17,19,21,.12);
+    }
+    .ck-container{
+      width:min(1120px, calc(100% - 32px));
+      margin:0 auto;
+      display:grid;
+      grid-template-columns:minmax(0, 1fr) minmax(300px, 360px);
+      gap:20px;
+      align-items:start;
+      padding-left:0;
+      padding-right:0;
+    }
+
+    /* ── Left: form card ── */
+    .ck-card{
+      display:grid;
+      gap:0;
+      border:0;
+      border-radius:0;
+      background:transparent;
+      box-shadow:none;
+      overflow:visible;
+      padding-right:0;
+    }
+    .ck-body{ padding:0; }
+
+    /* ── Validation ── */
+    .field.field--error label{
+      color:#dc2626;
+    }
+    .field.field--error input,
+    .field.field--error select,
+    .field.field--error textarea{
+      color:#dc2626;
+    }
+    .field.field--error{
+      border-bottom-color:#fca5a5;
+    }
+    .field-error{
+      font-size:.72rem;
+      font-weight:700;
+      color:#dc2626;
+      margin-top:2px;
+      display:none;
+    }
+    .field.field--error .field-error{
+      display:block;
+    }
+
+    /* ── Order summary sidebar ── */
+    .ck-sidebar{
+      display:flex;
+      flex-direction:column;
+      position:sticky;
+      top:90px;
+      align-self:start;
+      width:100%;
+      max-width:360px;
+      justify-self:end;
+    }
+    .ck-summary{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      border:1px solid rgba(255,255,255,.78);
+      border-radius:var(--radius);
+      background:linear-gradient(180deg, rgba(255,255,255,.97), rgba(249,250,252,.99));
+      box-shadow:0 14px 34px rgba(15,23,42,.04);
+      overflow:hidden;
+    }
+    .ck-summary-head{
+      padding:20px 22px 14px;
+      border-bottom:1px solid rgba(17,19,21,.05);
+      cursor:default;
+      list-style:none;
+    }
+    .ck-summary-head::-webkit-details-marker{ display:none; }
+    .ck-summary-head::marker{ display:none; content:''; }
+    .ck-summary-head h2{
+      margin:0;
+      font-family:var(--sport);
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      font-size:.92rem;
+      color:var(--ink);
+    }
+    .ck-toggle-arrow{
+      display:none;
+      width:20px;
+      height:20px;
+      transition:transform .2s ease;
+    }
+
+    .ck-summary-body{
+      padding:18px 22px 22px;
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+      flex:1;
+    }
+
+    /* Product card inside summary */
+    .ck-product{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      padding:12px;
+      border-radius:16px;
+      background:rgba(17,19,21,.024);
+      border:1px solid rgba(17,19,21,.045);
+    }
+    .ck-product-img{
+      width:56px;
+      height:56px;
+      border-radius:12px;
+      border:1px solid rgba(17,19,21,.06);
+      object-fit:contain;
+      background:#fff;
+      flex:0 0 auto;
+    }
+    .ck-product-info{
+      display:grid;
+      gap:1px;
+      min-width:0;
+    }
+    .ck-product-name{
+      font-weight:800;
+      font-size:.9rem;
+      line-height:1.3;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .ck-product-sku{
+      font-size:.74rem;
+      color:var(--muted);
+      font-weight:600;
+    }
+
+    /* Price rows */
+    .ck-summary-rows{
+      display:grid;
+      gap:0;
+      margin-top:auto;
+    }
+    .ck-sum-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:10px 0;
+      border-bottom:1px solid rgba(17,19,21,.05);
+      font-size:1rem;
+    }
+    .ck-sum-row:last-child{ border-bottom:0; }
+    .ck-sum-row .ck-k{
+      color:var(--muted);
+      font-weight:700;
+      font-size:.96rem;
+    }
+    .ck-sum-row .ck-v{
+      font-weight:800;
+      text-align:right;
+      font-size:1rem;
+    }
+    .ck-sum-row--total{
+      padding-top:12px;
+      margin-top:2px;
+      border-top:1.5px solid rgba(17,19,21,.1);
+      border-bottom:0;
+    }
+    .ck-sum-row--total .ck-k{
+      font-weight:900;
+      color:var(--ink);
+      font-size:1.06rem;
+    }
+    .ck-sum-row--total .ck-v{
+      font-size:1.42rem;
+      font-weight:900;
+      color:var(--ink);
+    }
+
+    /* Recipient / address meta */
+    .ck-meta{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:.8rem;
+      color:var(--muted);
+      font-weight:600;
+      padding:10px 12px;
+      border-radius:12px;
+      background:rgba(17,19,21,.02);
+      border:1px solid rgba(17,19,21,.04);
+      line-height:1.4;
+    }
+    .ck-meta svg{
+      width:14px;
+      height:14px;
+      flex:0 0 auto;
+      opacity:.6;
+    }
+
+    /* Trust footer */
+    .ck-trust{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      color:var(--muted);
+      font-size:.73rem;
+      font-weight:600;
+      opacity:.7;
+    }
+    .ck-trust svg{
+      width:12px;
+      height:12px;
+      flex:0 0 auto;
+    }
+
+    .form-intro{
+      margin:0 0 14px;
+      color:var(--muted);
+      font-size:.92rem;
+      line-height:1.55;
+    }
+    /* ── Form: grouped cards with minimalist rows ── */
+    .shipping-form{
+      display:grid;
+      gap:16px;
+    }
+    .section-block{
+      border:1px solid rgba(255,255,255,.78);
+      border-radius:var(--radius);
+      background:linear-gradient(180deg, rgba(255,255,255,.97), rgba(249,250,252,.99));
+      box-shadow:0 14px 34px rgba(15,23,42,.04);
+      overflow:hidden;
+    }
+    .section-heading{
+      padding:18px 20px 10px;
+      border-bottom:1px solid rgba(17,19,21,.06);
+    }
+    .section-heading strong{
+      display:block;
+      font-family:var(--sport);
+      font-weight:400;
+      font-size:.95rem;
+      color:var(--ink);
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+    .section-heading span{
+      display:none;
+    }
+    .form-grid{
+      display:grid;
+      gap:0;
+      padding:0 20px;
+    }
+    .field{
+      display:grid;
+      gap:4px;
+      padding:14px 0;
+      border-bottom:1px solid var(--line);
+    }
+    .field:last-child{ border-bottom:0; }
+    .field--full{ grid-column:auto; }
+    .field label{
+      color:var(--muted);
+      font-weight:800;
+      font-size:.76rem;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+    .field input,
+    .field textarea,
+    .field select{
+      width:100%;
+      padding:0;
+      border:0;
+      border-radius:0;
+      background:transparent;
+      color:var(--ink);
+      font-family:var(--ui);
+      font-weight:600;
+      font-size:.95rem;
+      letter-spacing:.01em;
+      outline:none;
+    }
+    .field input:focus,
+    .field textarea:focus,
+    .field select:focus{
+      outline:none;
+      box-shadow:none;
+    }
+    .field input::placeholder,
+    .field textarea::placeholder{
+      color:#b4bbc6;
+      font-weight:500;
+    }
+    .field textarea{
+      min-height:56px;
+      resize:vertical;
+    }
+    .field select{
+      appearance:none;
+      -webkit-appearance:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%2368707f' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;
+      background-position:right 0 center;
+      padding-right:20px;
+      cursor:pointer;
+    }
+    .field-note{
+      font-size:.72rem;
+      color:#98a2b3;
+      line-height:1.4;
+      font-weight:600;
+    }
+
+    .actions{
+      display:grid;
+      gap:12px;
+      padding:0;
+    }
+    .actions a{
+      color:var(--muted);
+      font-weight:700;
+      text-decoration:none;
+      font-size:.88rem;
+      text-align:center;
+    }
+    .ck-btn{
+      appearance:none;
+      border:0;
+      border-radius:999px;
+      padding:18px 24px;
+      background:#111315;
+      color:#fff;
+      font-family:var(--ui);
+      font-weight:900;
+      font-size:1rem;
+      letter-spacing:.03em;
+      cursor:pointer;
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      transition:transform .12s ease, box-shadow .12s ease;
+    }
+    .ck-btn:hover{
+      transform:none;
+      box-shadow:none;
+      background:#1a1d20;
+    }
+
+    .empty{
+      text-align:center;
+      color:var(--muted);
+      line-height:1.6;
+      padding:14px 0 4px;
+    }
+
+    @media (max-width: 860px){
+      .ck-wrap{ padding:18px clamp(16px,2.5vw,22px) 28px; }
+      .ck-steps{ padding-left:0; }
+      .ck-container{
+        width:100%;
+        grid-template-columns:1fr;
+        padding-left:0;
+        padding-right:0;
+      }
+      .ck-card{
+        padding-right:0;
+      }
+      .ck-sidebar{
+        order:-1;
+        position:static;
+        align-self:auto;
+      }
+      .ck-summary{
+        width:100%;
+        border-radius:var(--radius);
+        border-right:1px solid rgba(255,255,255,.78);
+      }
+      .ck-summary-head{
+        cursor:pointer;
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+      }
+      .ck-toggle-arrow{
+        display:block;
+      }
+      .ck-summary[open] .ck-toggle-arrow{
+        transform:rotate(180deg);
+      }
+      .ck-summary:not([open]) .ck-summary-head{
+        border-bottom:0;
+      }
+    }
+    @media (max-width: 700px){
+      .ck-wrap{ padding:18px clamp(16px,2.5vw,22px) 28px; }
+      .ck-container{ width:100%; gap:12px; }
+      .ck-sidebar{ width:100%; max-width:none; }
+      .ck-summary-head{ width:100%; padding-left:18px; padding-right:18px; }
+      .ck-summary-body{ padding-left:18px; padding-right:18px; }
+      .ck-summary{ border-radius:22px; }
+      .section-block{ border-radius:22px; }
+      .actions{ align-items:stretch; }
+      .ck-btn{ width:100%; min-width:0; }
+    }
+  </style>
+</head>
+<body>
+  <div id="site-header-slot"></div>
+  <div id="mobile-menu-slot"></div>
+
+  <div class="ck-wrap">
+    <div class="ck-steps">
+      <span class="ck-step ck-step--active"><span class="ck-step-num">1</span> Envío</span>
+      <span class="ck-step-sep"></span>
+      <span class="ck-step"><span class="ck-step-num">2</span> Pago</span>
+      <span class="ck-step-sep"></span>
+      <span class="ck-step"><span class="ck-step-num">3</span> Confirmación</span>
+    </div>
+    <div class="ck-container">
+      <!-- LEFT: Formulario -->
+      <section class="ck-card" id="formCard" aria-label="Formulario de envío">
+        <div class="ck-body">
+          <form id="shippingForm" class="shipping-form" novalidate>
+            <div class="section-block section-block--contact">
+              <div class="section-heading">
+                <strong>Datos de contacto</strong>
+                <span>Usaremos esta información para confirmar el pedido y coordinar la entrega si fuera necesario.</span>
+              </div>
+              <div class="form-grid">
+                <div class="field field--full">
+                  <label for="fullName">Nombre y apellidos *</label>
+                  <input id="fullName" name="fullName" type="text" autocomplete="name" placeholder="Nombre completo" required />
+                  <span class="field-error">Introduce tu nombre</span>
+                </div>
+
+                <div class="field">
+                  <label for="email">Correo electrónico *</label>
+                  <input id="email" name="email" type="email" autocomplete="email" placeholder="tu@email.com" required />
+                  <span class="field-error">Introduce un email válido</span>
+                </div>
+
+                <div class="field">
+                  <label for="phone">Teléfono *</label>
+                  <input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="+34 600 000 000" required />
+                  <span class="field-error">Introduce un teléfono</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-block section-block--address">
+              <div class="section-heading">
+                <strong>Dirección de entrega</strong>
+                <span>Introduce la dirección donde quieres recibir tu pedido para continuar al pago seguro.</span>
+              </div>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="country">País *</label>
+                  <select id="country" name="country" autocomplete="country-name" required>
+                    <option value="España">España</option>
+                    <option value="Portugal">Portugal</option>
+                    <option value="Francia">Francia</option>
+                    <option value="Italia">Italia</option>
+                    <option value="Alemania">Alemania</option>
+                    <option value="Otro">Otro</option>
+                  </select>
+                </div>
+
+                <div class="field field--full">
+                  <label for="addressLine1">Dirección *</label>
+                  <input id="addressLine1" name="addressLine1" type="text" autocomplete="address-line1" placeholder="Calle, número y edificio" required />
+                  <span class="field-error">Introduce una dirección</span>
+                </div>
+
+                <div class="field field--full">
+                  <label for="addressLine2">Piso, puerta o referencia</label>
+                  <input id="addressLine2" name="addressLine2" type="text" autocomplete="address-line2" placeholder="Opcional" />
+                </div>
+
+                <div class="field">
+                  <label for="postalCode">Código postal *</label>
+                  <input id="postalCode" name="postalCode" type="text" autocomplete="postal-code" inputmode="numeric" placeholder="28001" required />
+                  <span class="field-error">Introduce el código postal</span>
+                </div>
+
+                <div class="field">
+                  <label for="city">Ciudad *</label>
+                  <input id="city" name="city" type="text" autocomplete="address-level2" placeholder="Madrid" required />
+                  <span class="field-error">Introduce la ciudad</span>
+                </div>
+
+                <div class="field">
+                  <label for="province">Provincia *</label>
+                  <select id="province" name="province" autocomplete="address-level1" required>
+                    <option value="">Selecciona una provincia</option>
+                  </select>
+                  <input id="provinceCustom" name="provinceCustom" type="text" autocomplete="address-level1" placeholder="Escribe tu provincia o región" hidden />
+                  <span class="field-note">En España podrás escoger la provincia directamente de la lista.</span>
+                  <span class="field-error">Selecciona una provincia</span>
+                </div>
+
+                <div class="field field--full">
+                  <label for="notes">Notas de entrega</label>
+                  <textarea id="notes" name="notes" placeholder="Ej.: portal, horario de entrega o cualquier indicación útil."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="ck-btn" type="submit">
+                Continuar a pago
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+              </button>
+              <a id="backToProduct" href="/">← Volver al producto</a>
+            </div>
+          </form>
+
+          <div class="empty" id="emptyState" hidden>
+            No hay un producto seleccionado. Vuelve al catálogo y prueba de nuevo.
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: Resumen del pedido -->
+      <aside class="ck-sidebar">
+        <details class="ck-summary" id="ckSummaryDetails">
+          <summary class="ck-summary-head">
+            <h2>Resumen del pedido</h2>
+            <svg class="ck-toggle-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </summary>
+          <div class="ck-summary-body">
+            <div class="ck-product" id="ckProduct">
+              <img class="ck-product-img" id="ckThumb" src="" alt="" hidden />
+              <div class="ck-product-info">
+                <span class="ck-product-name" id="ckName">—</span>
+                <span class="ck-product-sku" id="ckSku"></span>
+              </div>
+            </div>
+
+            <div class="ck-summary-rows">
+              <div class="ck-sum-row">
+                <span class="ck-k">Subtotal</span>
+                <span class="ck-v" id="ckSubtotal">—</span>
+              </div>
+              <div class="ck-sum-row">
+                <span class="ck-k">Envío</span>
+                <span class="ck-v" id="ckShipping" style="color:#1a8f4a;font-weight:800">Gratis</span>
+              </div>
+              <div class="ck-sum-row ck-sum-row--total">
+                <span class="ck-k">Total</span>
+                <span class="ck-v" id="ckTotal">—</span>
+              </div>
+            </div>
+
+            <div class="ck-meta" id="ckRecipient" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span id="ckRecipientName"></span>
+            </div>
+
+            <div class="ck-trust">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+              Pago seguro · SSL
+            </div>
+          </div>
+        </details>
+      </aside>
+
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      'use strict';
+
+      // Summary toggle: open on desktop, closed on mobile
+      var summaryDetails = document.getElementById('ckSummaryDetails');
+      function syncSummaryOpen(){
+        if (!summaryDetails) return;
+        if (window.innerWidth > 860) {
+          summaryDetails.open = true;
+        }
+      }
+      syncSummaryOpen();
+      window.addEventListener('resize', syncSummaryOpen);
+
+      function getParam(key){
+        try { return new URLSearchParams(location.search).get(key); }
+        catch (_) { return null; }
+      }
+
+      function safeText(value){
+        return value ? String(value).replace(/\s+/g, ' ').trim() : '';
+      }
+
+      function normalizePath(path){
+        var value = safeText(path);
+        if (!value) return '/';
+        if (/^https?:\/\//i.test(value)) {
+          try {
+            var url = new URL(value, location.origin);
+            return url.pathname + (url.search || '');
+          } catch (_) {
+            return value;
+          }
+        }
+        return value.charAt(0) === '/' ? value : '/' + value;
+      }
+
+      var name = safeText(getParam('name')) || 'Producto SCOOT SHOP';
+      var sku = safeText(getParam('sku')) || '';
+      var productUrl = normalizePath(getParam('url') || '/');
+      var productImage = safeText(getParam('image')) || '';
+      var priceRaw = safeText(getParam('price')) || '';
+      var priceNum = Number(priceRaw.replace(',', '.'));
+      var priceLabel = Number.isFinite(priceNum) && priceNum > 0 ? priceNum.toFixed(2) + ' €' : (priceRaw || '—');
+      var hasProduct = !!(safeText(getParam('name')) || safeText(getParam('price')) || safeText(getParam('sku')));
+
+      var backToProduct = document.getElementById('backToProduct');
+      var formCard = document.getElementById('formCard');
+      var emptyState = document.getElementById('emptyState');
+      var shippingForm = document.getElementById('shippingForm');
+      var countryField = document.getElementById('country');
+      var postalCodeField = document.getElementById('postalCode');
+      var provinceField = document.getElementById('province');
+      var provinceCustomField = document.getElementById('provinceCustom');
+
+      var SPAIN_PROVINCES = [
+        'A Coruña','Álava','Albacete','Alicante','Almería','Asturias','Ávila','Badajoz','Barcelona','Burgos',
+        'Cáceres','Cádiz','Cantabria','Castellón','Ceuta','Ciudad Real','Córdoba','Cuenca','Girona','Granada',
+        'Guadalajara','Gipuzkoa','Huelva','Huesca','Illes Balears','Jaén','La Rioja','Las Palmas','León','Lleida',
+        'Lugo','Madrid','Málaga','Melilla','Murcia','Navarra','Ourense','Palencia','Pontevedra','Salamanca',
+        'Santa Cruz de Tenerife','Segovia','Sevilla','Soria','Tarragona','Teruel','Toledo','Valencia','Valladolid','Vizcaya',
+        'Zamora','Zaragoza'
+      ];
+
+      if (backToProduct) backToProduct.href = productUrl || '/';
+
+      // Populate summary sidebar
+      var ckName = document.getElementById('ckName');
+      var ckSku = document.getElementById('ckSku');
+      var ckThumb = document.getElementById('ckThumb');
+      var ckSubtotal = document.getElementById('ckSubtotal');
+      var ckTotal = document.getElementById('ckTotal');
+
+      if (ckName) ckName.textContent = name;
+      if (ckSku && sku) ckSku.textContent = 'Ref: ' + sku;
+      if (ckThumb && productImage) {
+        ckThumb.src = productImage;
+        ckThumb.alt = name;
+        ckThumb.hidden = false;
+      }
+      if (ckSubtotal) ckSubtotal.textContent = priceLabel;
+      if (ckTotal) ckTotal.textContent = priceLabel;
+
+      if (!hasProduct) {
+        if (shippingForm) shippingForm.hidden = true;
+        if (emptyState) emptyState.hidden = false;
+      }
+
+      var STORAGE_KEY = 'ss_checkout_shipping';
+
+      function loadSavedShipping(){
+        try {
+          var raw = sessionStorage.getItem(STORAGE_KEY);
+          return raw ? JSON.parse(raw) : null;
+        } catch (_) {
+          return null;
+        }
+      }
+
+      function saveShipping(data){
+        try {
+          sessionStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        } catch (_) {}
+      }
+
+      function buildPaymentUrl(){
+        var params = new URLSearchParams(location.search || '');
+        params.set('checkout', '1');
+        return '/pago?' + params.toString();
+      }
+
+      function syncPostalCodeField(){
+        if (!countryField || !postalCodeField) return;
+
+        var isSpain = (safeText(countryField.value) || 'España') === 'España';
+
+        postalCodeField.value = isSpain
+          ? postalCodeField.value.replace(/\D+/g, '').slice(0, 5)
+          : postalCodeField.value;
+
+        if (isSpain) {
+          postalCodeField.setAttribute('inputmode', 'numeric');
+          postalCodeField.setAttribute('pattern', '[0-9]{5}');
+          postalCodeField.setAttribute('maxlength', '5');
+          postalCodeField.setAttribute('placeholder', '28001');
+          postalCodeField.title = 'Introduce un código postal válido de 5 dígitos.';
+        } else {
+          postalCodeField.setAttribute('inputmode', 'text');
+          postalCodeField.removeAttribute('pattern');
+          postalCodeField.removeAttribute('maxlength');
+          postalCodeField.setAttribute('placeholder', 'Código postal');
+          postalCodeField.title = '';
+        }
+      }
+
+      function syncProvinceField(selectedValue){
+        if (!countryField || !provinceField) return;
+
+        var countryValue = safeText(countryField.value) || 'España';
+        var isSpain = countryValue === 'España';
+        var currentValue = safeText(selectedValue);
+
+        if (isSpain) {
+          provinceField.innerHTML = '<option value="">Selecciona una provincia</option>' + SPAIN_PROVINCES.map(function(name){
+            return '<option value="' + name + '">' + name + '</option>';
+          }).join('');
+          provinceField.hidden = false;
+          provinceField.disabled = false;
+          provinceField.required = true;
+
+          if (provinceCustomField) {
+            provinceCustomField.hidden = true;
+            provinceCustomField.disabled = true;
+            provinceCustomField.required = false;
+            provinceCustomField.value = '';
+          }
+
+          if (currentValue && SPAIN_PROVINCES.indexOf(currentValue) !== -1) {
+            provinceField.value = currentValue;
+          }
+        } else {
+          provinceField.hidden = true;
+          provinceField.disabled = true;
+          provinceField.required = false;
+
+          if (provinceCustomField) {
+            provinceCustomField.hidden = false;
+            provinceCustomField.disabled = false;
+            provinceCustomField.required = true;
+            if (currentValue) provinceCustomField.value = currentValue;
+          }
+        }
+      }
+
+      function prefillForm(data){
+        if (!data) {
+          syncPostalCodeField();
+          syncProvinceField('');
+          return;
+        }
+        [
+          'fullName','email','phone','addressLine1','addressLine2',
+          'postalCode','city','country','notes'
+        ].forEach(function(key){
+          var field = document.getElementById(key);
+          if (field && data[key]) field.value = data[key];
+        });
+        syncPostalCodeField();
+        syncProvinceField(data.province || '');
+      }
+
+      prefillForm(loadSavedShipping());
+
+      // Live recipient name in summary
+      var ckRecipient = document.getElementById('ckRecipient');
+      var ckRecipientName = document.getElementById('ckRecipientName');
+      var fullNameField = document.getElementById('fullName');
+      if (fullNameField && ckRecipient && ckRecipientName) {
+        fullNameField.addEventListener('input', function(){
+          var val = safeText(fullNameField.value);
+          if (val) {
+            ckRecipientName.textContent = 'Para: ' + val;
+            ckRecipient.hidden = false;
+          } else {
+            ckRecipient.hidden = true;
+          }
+        });
+        // Trigger on prefill
+        var prefilled = safeText(fullNameField.value);
+        if (prefilled) {
+          ckRecipientName.textContent = 'Para: ' + prefilled;
+          ckRecipient.hidden = false;
+        }
+      }
+
+      // Validation: mark fields with errors on submit attempt
+      function clearFieldErrors(){
+        var errFields = shippingForm ? shippingForm.querySelectorAll('.field--error') : [];
+        for (var i = 0; i < errFields.length; i++) {
+          errFields[i].classList.remove('field--error');
+        }
+      }
+      function markInvalidFields(){
+        clearFieldErrors();
+        if (!shippingForm) return;
+        var inputs = shippingForm.querySelectorAll('input:not([hidden]),select:not([hidden]),textarea');
+        for (var i = 0; i < inputs.length; i++) {
+          if (!inputs[i].checkValidity()) {
+            var field = inputs[i].closest('.field');
+            if (field) field.classList.add('field--error');
+          }
+        }
+      }
+      // Clear error on input
+      if (shippingForm) {
+        shippingForm.addEventListener('input', function(e){
+          var field = e.target.closest('.field');
+          if (field) field.classList.remove('field--error');
+        });
+        shippingForm.addEventListener('change', function(e){
+          var field = e.target.closest('.field');
+          if (field) field.classList.remove('field--error');
+        });
+      }
+
+      if (countryField) {
+        countryField.addEventListener('change', function(){
+          syncPostalCodeField();
+          syncProvinceField('');
+        });
+      }
+
+      if (postalCodeField) {
+        postalCodeField.addEventListener('input', function(){
+          postalCodeField.setCustomValidity('');
+          if ((safeText(countryField && countryField.value) || 'España') === 'España') {
+            postalCodeField.value = postalCodeField.value.replace(/\D+/g, '').slice(0, 5);
+          }
+        });
+      }
+
+      if (shippingForm) {
+        shippingForm.addEventListener('submit', function(event){
+          event.preventDefault();
+          syncPostalCodeField();
+          markInvalidFields();
+          if (!shippingForm.reportValidity()) return;
+
+          if ((safeText(countryField && countryField.value) || 'España') === 'España' && !/^\d{5}$/.test(safeText(postalCodeField && postalCodeField.value))) {
+            if (postalCodeField) {
+              postalCodeField.setCustomValidity('Introduce un código postal español válido de 5 dígitos.');
+              postalCodeField.reportValidity();
+            }
+            return;
+          }
+          if (postalCodeField) postalCodeField.setCustomValidity('');
+
+          var payload = {
+            fullName: safeText(document.getElementById('fullName').value),
+            email: safeText(document.getElementById('email').value),
+            phone: safeText(document.getElementById('phone').value),
+            addressLine1: safeText(document.getElementById('addressLine1').value),
+            addressLine2: safeText(document.getElementById('addressLine2').value),
+            postalCode: safeText(document.getElementById('postalCode').value),
+            city: safeText(document.getElementById('city').value),
+            province: safeText(
+              provinceCustomField && !provinceCustomField.hidden
+                ? provinceCustomField.value
+                : document.getElementById('province').value
+            ),
+            country: safeText(document.getElementById('country').value),
+            notes: safeText(document.getElementById('notes').value),
+            product: {
+              name: name,
+              sku: sku,
+              price: priceLabel,
+              url: productUrl,
+              image: productImage
+            },
+            updatedAt: new Date().toISOString()
+          };
+
+          saveShipping(payload);
+          location.href = buildPaymentUrl();
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
+

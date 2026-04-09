@@ -1,0 +1,257 @@
+﻿<!DOCTYPE html>
+<html lang="es-ES">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Admin pedidos | SCOOT SHOP</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="asset-version" content="20260409-2" />
+  <script src="/js/asset-sync.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0}
+    body{font-family:system-ui,-apple-system,sans-serif;background:#f5f6f8;color:#111;min-height:100vh}
+    .wrap{max-width:860px;margin:0 auto;padding:24px 20px 48px}
+    h1{font-size:1.3rem;margin-bottom:20px}
+    .auth{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+    .auth input{padding:10px 12px;border:1px solid #d1d5db;border-radius:10px;font-size:.88rem;width:220px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px}
+    .row input,.row select{padding:10px 12px;border:1px solid #d1d5db;border-radius:10px;font-size:.88rem}
+    .row select{min-width:160px}
+    .row input[type=text]{min-width:200px}
+    button{padding:10px 18px;border:0;border-radius:10px;font-weight:700;font-size:.88rem;cursor:pointer;transition:filter .12s}
+    button:hover{filter:brightness(1.08)}
+    .btn-primary{background:#111;color:#fff}
+    .btn-secondary{background:#e5e7eb;color:#111}
+    .msg{padding:10px 14px;border-radius:10px;font-size:.86rem;font-weight:600;margin:10px 0}
+    .msg--ok{background:#dcfce7;color:#166534}
+    .msg--err{background:#fee2e2;color:#991b1b}
+    .msg--warn{background:#fef3c7;color:#92400e}
+    .card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden;margin-top:16px}
+    .card-head{padding:16px 20px 10px;border-bottom:1px solid #f0f0f0;font-weight:800;font-size:.9rem;text-transform:uppercase;letter-spacing:.04em;color:#555}
+    .card-body{padding:14px 20px 18px;display:grid;gap:10px}
+    .kv{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:.88rem}
+    .kv:last-child{border-bottom:0}
+    .kv .label{color:#6b7280;font-weight:700;font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+    .kv .val{text-align:right;font-weight:600;word-break:break-word}
+    .badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.74rem;font-weight:800;text-transform:uppercase}
+    .badge--paid{background:#dcfce7;color:#166534}
+    .badge--pending{background:#fef3c7;color:#92400e}
+    .badge--shipped{background:#dbeafe;color:#1e40af}
+    .badge--canceled{background:#fee2e2;color:#991b1b}
+    .badge--other{background:#f3f4f6;color:#374151}
+    .ship-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 20px}
+    @media(max-width:600px){.ship-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Admin pedidos</h1>
+
+    <div class="auth">
+      <input id="key" type="password" placeholder="ADMIN KEY" autocomplete="current-password">
+    </div>
+
+    <!-- Consultar pedido -->
+    <div class="row">
+      <input id="oid" type="text" placeholder="SS-YYYYMMDD-XXXXXX">
+      <button class="btn-primary" id="btnLoad">Consultar</button>
+    </div>
+
+    <div id="detail"></div>
+
+    <!-- Actualizar estado -->
+    <div class="card" id="updateCard" style="display:none">
+      <div class="card-head">Actualizar estado</div>
+      <div class="card-body">
+        <div class="row" style="margin:0">
+          <select id="status">
+            <option value="pending_payment">Pendiente pago</option>
+            <option value="paid">Pagado</option>
+            <option value="preparing">Preparando</option>
+            <option value="shipped">Enviado</option>
+            <option value="delivered">Entregado</option>
+            <option value="canceled">Cancelado</option>
+            <option value="refunded">Reembolsado</option>
+            <option value="dispute">En disputa</option>
+            <option value="payment_failed">Pago fallido</option>
+          </select>
+          <input id="tracking" type="text" placeholder="Tracking (opcional)">
+          <input id="message" type="text" placeholder="Mensaje (opcional)" style="min-width:260px">
+          <button class="btn-primary" id="btnSave">Guardar</button>
+        </div>
+        <div id="updateOut"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+
+  function esc(s){ const d=document.createElement('div');d.textContent=s;return d.innerHTML; }
+
+  function badgeClass(status){
+    if(status==='paid'||status==='delivered') return 'badge--paid';
+    if(status==='pending_payment') return 'badge--pending';
+    if(status==='shipped'||status==='preparing') return 'badge--shipped';
+    if(status==='canceled'||status==='refunded'||status==='payment_failed'||status==='dispute') return 'badge--canceled';
+    return 'badge--other';
+  }
+
+  async function apiGet(path){
+    const key = $('key').value.trim();
+    const urls = [
+      '/api/' + path,
+      '/api/index.php?route=' + path.replace(/\//g,'_').replace(/\?/,'&'),
+    ];
+    for(const url of urls){
+      try{
+        const r = await fetch(url,{headers:{'x-admin-key':key,'Accept':'application/json'}});
+        if(r.ok) return await r.json();
+      }catch(e){}
+    }
+    return null;
+  }
+
+  async function apiPost(path, body){
+    const key = $('key').value.trim();
+    const urls = [
+      '/api/' + path,
+      '/api/index.php?route=' + path.replace(/\//g,'_').replace(/\?/,'&'),
+    ];
+    for(const url of urls){
+      try{
+        const r = await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':key},body:JSON.stringify(body)});
+        if(r.ok) return await r.json();
+      }catch(e){}
+    }
+    return null;
+  }
+
+  function renderOrder(o){
+    const s = o.shipping || {};
+    const hasShipping = s.name || s.address || s.city;
+    let html = '';
+
+    // Info general
+    html += '<div class="card"><div class="card-head">Pedido</div><div class="card-body">';
+    html += kv('ID', o.id);
+    html += kv('Estado', '<span class="badge '+badgeClass(o.status)+'">'+esc(o.status)+'</span>');
+    html += kv('Producto', esc(o.name));
+    html += kv('SKU', esc(o.sku));
+    html += kv('Importe', esc(o.amount+' '+o.currency));
+    if(o.payer_email) html += kv('Email pagador', esc(o.payer_email));
+    if(o.payer_name) html += kv('Nombre pagador', esc(o.payer_name));
+    if(o.txn_id) html += kv('Txn ID', '<code style="font-size:.82rem">'+esc(o.txn_id)+'</code>');
+    if(o.tracking) html += kv('Tracking', esc(o.tracking));
+    if(o.message) html += kv('Mensaje', esc(o.message));
+    html += kv('Creado', esc(o.created_at));
+    html += kv('Actualizado', esc(o.updated_at));
+    html += '</div></div>';
+
+    // Dirección de envío
+    if(hasShipping){
+      html += '<div class="card"><div class="card-head">📦 Dirección de envío</div><div class="card-body"><div class="ship-grid">';
+      html += kv('Nombre', esc(s.name));
+      if(s.email) html += kv('Email', esc(s.email));
+      if(s.phone) html += kv('Teléfono', esc(s.phone));
+      html += kv('Dirección', esc([s.address, s.address2].filter(Boolean).join(', ')));
+      html += kv('Ciudad', esc([s.postal, s.city].filter(Boolean).join(' ')));
+      if(s.province) html += kv('Provincia', esc(s.province));
+      html += kv('País', esc(s.country || 'España'));
+      html += '</div></div></div>';
+    } else {
+      html += '<div class="msg msg--err">Sin datos de envío registrados</div>';
+    }
+
+    $('detail').innerHTML = html;
+    $('updateCard').style.display = '';
+    $('status').value = o.status;
+    $('tracking').value = o.tracking || '';
+    $('message').value = o.message || '';
+  }
+
+  function kv(label, val){
+    return '<div class="kv"><span class="label">'+esc(label)+'</span><span class="val">'+val+'</span></div>';
+  }
+
+  $('btnLoad').onclick = async () => {
+    const key = $('key').value.trim();
+    const oid = $('oid').value.trim();
+    if(!key) return alert('Introduce la ADMIN KEY');
+    if(!oid) return alert('Introduce el ID del pedido');
+
+    $('detail').innerHTML = '<div class="msg" style="background:#f3f4f6;color:#555">Cargando…</div>';
+    $('updateCard').style.display = 'none';
+
+    const data = await apiGet('admin/orders/'+encodeURIComponent(oid)+'/detail');
+    if(!data || !data.ok || !data.order){
+      $('detail').innerHTML = '<div class="msg msg--err">No se encontró el pedido o la key es incorrecta</div>';
+      return;
+    }
+
+    renderOrder(data.order);
+  };
+
+  $('btnSave').onclick = async () => {
+    const key = $('key').value.trim();
+    const oid = $('oid').value.trim();
+    if(!key || !oid) return alert('Falta ADMIN KEY o ID');
+
+    const body = {
+      status: $('status').value,
+      tracking: $('tracking').value.trim() || null,
+      message: $('message').value.trim() || null
+    };
+
+    $('updateOut').innerHTML = '<div class="msg" style="background:#f3f4f6;color:#555">Guardando…</div>';
+    const res = await apiPost('admin/orders/'+encodeURIComponent(oid)+'/status', body);
+
+    if(res && res.ok){
+      let className = 'msg msg--ok';
+      let text = 'Estado actualizado';
+
+      if(res.emailNotification){
+        if(res.emailNotification.reason === 'sent' && res.emailNotification.email){
+          text = 'Estado actualizado y correo enviado a ' + res.emailNotification.email;
+        }else if(res.emailNotification.reason === 'missing_customer_email'){
+          className = 'msg msg--warn';
+          text = 'Estado actualizado, pero el pedido no tiene email de cliente';
+        }else if(res.emailNotification.reason === 'send_failed'){
+          className = 'msg msg--warn';
+          text = 'Estado actualizado, pero el correo automático no se pudo enviar';
+        }else if(res.emailNotification.reason === 'status_unchanged'){
+          text = 'Datos guardados. No se envió correo porque el estado no cambió';
+        }
+      }
+
+      $('updateOut').innerHTML = '<div class="'+className+'">'+esc(text)+'</div>';
+      // Recargar detalle
+      $('btnLoad').click();
+    } else {
+      $('updateOut').innerHTML = '<div class="msg msg--err">Error al actualizar</div>';
+    }
+  };
+
+  // Enter para consultar
+  $('oid').addEventListener('keydown', e => { if(e.key==='Enter') $('btnLoad').click(); });
+})();
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

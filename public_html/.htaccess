@@ -1,0 +1,109 @@
+DirectoryIndex index.html index.php
+RewriteEngine On
+
+# ──────────────────────────────────────────────
+# Compresión GZIP
+# ──────────────────────────────────────────────
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml
+  AddOutputFilterByType DEFLATE application/javascript application/json
+  AddOutputFilterByType DEFLATE application/xml application/xhtml+xml
+  AddOutputFilterByType DEFLATE application/rss+xml application/atom+xml
+  AddOutputFilterByType DEFLATE image/svg+xml
+  AddOutputFilterByType DEFLATE font/ttf font/otf font/woff font/woff2
+  AddOutputFilterByType DEFLATE application/font-woff application/font-woff2
+  AddOutputFilterByType DEFLATE application/vnd.ms-fontobject
+</IfModule>
+
+# ──────────────────────────────────────────────
+# Cache de navegador
+# ──────────────────────────────────────────────
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault "access plus 1 month"
+
+  # HTML: cache corto (se revalida con asset-version)
+  ExpiresByType text/html "access plus 0 seconds"
+
+  # CSS / JS: cache largo (versionados con ?v=)
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+
+  # Imágenes
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/avif "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType image/x-icon "access plus 1 year"
+  ExpiresByType image/gif "access plus 1 year"
+
+  # Fuentes
+  ExpiresByType font/woff "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType font/ttf "access plus 1 year"
+  ExpiresByType application/font-woff "access plus 1 year"
+  ExpiresByType application/font-woff2 "access plus 1 year"
+
+  # JSON / Manifest
+  ExpiresByType application/json "access plus 1 month"
+  ExpiresByType application/manifest+json "access plus 1 month"
+</IfModule>
+
+# Cache-Control headers
+<IfModule mod_headers.c>
+  # HTML: no cachear
+  <FilesMatch "\.(html|htm)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+
+  # Assets versionados: cache largo
+  <FilesMatch "\.(css|js|svg|woff|woff2|ttf|otf|eot)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  # Imágenes: cache largo
+  <FilesMatch "\.(jpg|jpeg|png|gif|webp|avif|ico)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  # Seguridad básica
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# ──────────────────────────────────────────────
+# Seguridad
+# ──────────────────────────────────────────────
+
+# Bloquea acceso directo a archivos .env y env (con o sin punto)
+RewriteRule (^|/)\.env$ - [F,L,NC]
+RewriteRule (^|/)\.env\..*$ - [F,L,NC]
+RewriteRule (^|/)env$ - [F,L,NC]
+
+# Bloquea config.php (solo index.php debe ser accesible en /api)
+RewriteRule ^api/config\.php$ - [F,L,NC]
+
+# Bloquea archivos de desarrollo local (server.ps1, server.py, router.php)
+RewriteRule ^(server\.ps1|server\.py|router\.php)$ - [F,L,NC]
+
+# (Opcional) Fuerza HTTPS
+RewriteCond %{HTTPS} !=on
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+# /index.html -> /
+RewriteCond %{THE_REQUEST} \s/+index\.html[\s?] [NC]
+RewriteRule ^index\.html$ / [R=301,L]
+
+# /algo.html -> /algo
+RewriteCond %{THE_REQUEST} \s/+(.+?)\.html[\s?] [NC]
+RewriteRule ^ %1 [R=301,L]
+
+# /algo  o  /algo/  -> sirve algo.html si existe
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.+?)/?$ $1.html [L]
+
+# Evita duplicados con barra final (si no es un directorio real)
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.+)/$ $1 [R=301,L]

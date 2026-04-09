@@ -1,0 +1,939 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <!-- ===== Paginas principales ===== -->
+  <url>
+    <loc>https://scootshop.co/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/pago.html</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/pedido/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <!-- ===== Legal ===== -->
+  <url>
+    <loc>https://scootshop.co/legal/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/legal/envios-devoluciones/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/legal/garantia-servicio-tecnico/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/legal/uso-responsable-seguridad/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- ===== ACCESORIOS ===== -->
+  <url>
+    <loc>https://scootshop.co/accesorios/bolsa-almacenamiento/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://scootshop.co/img/accessories/storage-bag.jpg</image:loc><image:title>Bolsa de almacenamiento para scooter y bicicleta</image:title></image:image>
+  </url>
+  <url>
+    <loc>https://scootshop.co/accesorios/soporte-movil/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://scootshop.co/img/accessories/phone-holder.jpg</image:loc><image:title>Soporte móvil para patinete eléctrico</image:title></image:image>
+  </url>
+  <url>
+    <loc>https://scootshop.co/accesorios/pegatina-the-beast/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://scootshop.co/img/accessories/the-beast.jpg</image:loc><image:title>Pegatinas THE BEAST</image:title></image:image>
+  </url>
+  <url>
+    <loc>https://scootshop.co/accesorios/pegatinas-reflectantes/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://scootshop.co/img/accessories/reflective-stickers.jpg</image:loc><image:title>Pegatinas reflectantes para patinete</image:title></image:image>
+  </url>
+  <url>
+    <loc>https://scootshop.co/accesorios/luces-led-rgb/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://scootshop.co/img/accessories/led-rgb.svg</image:loc><image:title>Luces LED RGB para patinete y bicicleta</image:title></image:image>
+  </url>
+
+  <!-- ===== PRODUCTOS: Serie K ===== -->
+  <url>
+    <loc>https://scootshop.co/patinetes/series-k/g2-pro/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-k/g2-pro/img/1.webp</image:loc>
+      <image:title>KUKIRIN G2 PRO — Patinete electrico homologado DGT</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-k/g2-pro/img/2.webp</image:loc>
+      <image:title>KUKIRIN G2 PRO vista lateral</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-k/g2-pro/img/3.webp</image:loc>
+      <image:title>KUKIRIN G2 PRO detalle</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-k/g2-pro/img/4.webp</image:loc>
+      <image:title>KUKIRIN G2 PRO vista 4</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-k/g2-pro/img/5.webp</image:loc>
+      <image:title>KUKIRIN G2 PRO vista 5</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-k/g2-pro/img/6.webp</image:loc>
+      <image:title>KUKIRIN G2 PRO vista 6</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-k/g2-pro/img/7.webp</image:loc>
+      <image:title>KUKIRIN G2 PRO vista 7</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-k/g2-pro/img/8.webp</image:loc>
+      <image:title>KUKIRIN G2 PRO vista 8</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-k/g2-pro/img/9.webp</image:loc>
+      <image:title>KUKIRIN G2 PRO vista 9</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://scootshop.co/patinetes/series-k/g2/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-k/g2/img/1.webp</image:loc>
+      <image:title>KUKIRIN G2 — Patinete electrico todoterreno 800 W</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-k/g2/img/2.webp</image:loc>
+      <image:title>KUKIRIN G2 vista lateral</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-k/g2/img/3.webp</image:loc>
+      <image:title>KUKIRIN G2 detalle</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-k/g2/img/4.webp</image:loc>
+      <image:title>KUKIRIN G2 pantalla LCD</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-k/g2/img/5.webp</image:loc>
+      <image:title>KUKIRIN G2 plegado</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-k/g2/img/6.webp</image:loc>
+      <image:title>KUKIRIN G2 luz trasera</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-k/g2/img/7.webp</image:loc>
+      <image:title>KUKIRIN G2 todoterreno</image:title>
+    </image:image>
+  </url>
+
+  <!-- ===== PRODUCTOS: Serie N ===== -->
+  <url>
+    <loc>https://scootshop.co/patinetes/series-n/n7/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/n7/img/1.webp</image:loc>
+      <image:title>N7PRO — Patinete electrico urbano</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/n7/img/2.webp</image:loc>
+      <image:title>N7PRO vista 2</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/n7/img/3.webp</image:loc>
+      <image:title>N7PRO vista 3</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/n7/img/4.webp</image:loc>
+      <image:title>N7PRO vista 4</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/n7/img/5.webp</image:loc>
+      <image:title>N7PRO vista 5</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/n7/img/6.webp</image:loc>
+      <image:title>N7PRO vista 6</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/series-n/s4/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/s4/img/1.webp</image:loc>
+      <image:title>MASCOOTER S4 — Patinete electrico homologado DGT</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/s4/img/2.webp</image:loc>
+      <image:title>MASCOOTER S4 freno trasero y amortiguacion</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/s4/img/3.webp</image:loc>
+      <image:title>MASCOOTER S4 rueda delantera y suspension</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/s4/img/4.webp</image:loc>
+      <image:title>MASCOOTER S4 manillar y display</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/s4/img/5.webp</image:loc>
+      <image:title>MASCOOTER S4 plegado</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/series-n/s3/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/s3/img/1.webp</image:loc>
+      <image:title>S3-11 — Patinete electrico dual motor 6000 W</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/s3/img/2.webp</image:loc>
+      <image:title>S3-11 vista 2</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/s3/img/3.webp</image:loc>
+      <image:title>S3-11 vista 3</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/s3/img/4.webp</image:loc>
+      <image:title>S3-11 vista 4</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/s3/img/5.webp</image:loc>
+      <image:title>S3-11 vista 5</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/s3/img/6.webp</image:loc>
+      <image:title>S3-11 vista 6</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/s3/img/7.webp</image:loc>
+      <image:title>S3-11 vista 7</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/s3/img/8.webp</image:loc>
+      <image:title>S3-11 vista 8</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/s3/img/9.webp</image:loc>
+      <image:title>S3-11 vista 9</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/series-n/vs6/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/vs6/img/1.webp</image:loc>
+      <image:title>VS6 — Patinete electrico 1000 W</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/vs6/img/2.webp</image:loc>
+      <image:title>VS6 vista 2</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/vs6/img/3.webp</image:loc>
+      <image:title>VS6 vista 3</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/vs6/img/4.webp</image:loc>
+      <image:title>VS6 vista 4</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/vs6/img/5.webp</image:loc>
+      <image:title>VS6 vista 5</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/vs6/img/6.webp</image:loc>
+      <image:title>VS6 vista 6</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/series-n/v70-connected/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/v70-connected/img/1.jpg</image:loc>
+      <image:title>Cecotec Bongo V70 Connected — Patinete electrico homologado DGT</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/v70-connected/img/2.png</image:loc>
+      <image:title>Bongo V70 Connected vista 2</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/v70-connected/img/3.png</image:loc>
+      <image:title>Bongo V70 Connected vista 3</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/v70-connected/img/4.png</image:loc>
+      <image:title>Bongo V70 Connected vista 4</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/v70-connected/img/5.jpg</image:loc>
+      <image:title>Bongo V70 Connected vista 5</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/v70-connected/img/6.jpg</image:loc>
+      <image:title>Bongo V70 Connected vista 6</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/series-n/e8/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/e8/img/1.webp</image:loc>
+      <image:title>TODIMART-SEEMAR E8 — Patinete electrico 800 W</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/e8/img/2.webp</image:loc>
+      <image:title>E8 vista 2</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/e8/img/3.webp</image:loc>
+      <image:title>E8 vista 3</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/e8/img/4.webp</image:loc>
+      <image:title>E8 vista 4</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/e8/img/5.webp</image:loc>
+      <image:title>E8 vista 5</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/e8/img/6.webp</image:loc>
+      <image:title>E8 vista 6</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/e8/img/7.webp</image:loc>
+      <image:title>E8 vista 7</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/e8/img/8.webp</image:loc>
+      <image:title>E8 vista 8</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/e8/img/9.webp</image:loc>
+      <image:title>E8 vista 9</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/e8/img/10.webp</image:loc>
+      <image:title>E8 vista 10</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/e8/img/11.webp</image:loc>
+      <image:title>E8 vista 11</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/e8/img/12.webp</image:loc>
+      <image:title>E8 vista 12</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/series-n/d6/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/d6/img/1.webp</image:loc>
+      <image:title>D6 — Patinete electrico 800 W</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/d6/img/2.webp</image:loc>
+      <image:title>D6 vista 2</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/d6/img/3.webp</image:loc>
+      <image:title>D6 vista 3</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/d6/img/4.webp</image:loc>
+      <image:title>D6 vista 4</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/d6/img/5.webp</image:loc>
+      <image:title>D6 vista 5</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/d6/img/6.webp</image:loc>
+      <image:title>D6 vista 6</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/d6/img/7.webp</image:loc>
+      <image:title>D6 vista 7</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/d6/img/8.webp</image:loc>
+      <image:title>D6 vista 8</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/d6/img/9.webp</image:loc>
+      <image:title>D6 vista 9</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://scootshop.co/patinetes/series-n/d20/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/d20/img/1.webp</image:loc>
+      <image:title>D20 — Cecotec Bongo D20E Connected vista principal</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/d20/img/2.webp</image:loc>
+      <image:title>D20 vista 2</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/d20/img/3.webp</image:loc>
+      <image:title>D20 vista 3</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/d20/img/4.webp</image:loc>
+      <image:title>D20 vista 4</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/d20/img/5.webp</image:loc>
+      <image:title>D20 vista 5</image:title>
+    </image:image>
+  </url>
+
+  <!-- iENYRID iE-S1 — Serie N -->
+  <url>
+    <loc>https://scootshop.co/patinetes/series-n/ie-s1/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/ie-s1/img/1.webp</image:loc>
+      <image:title>iENYRID iE-S1 — Patinete eléctrico 800 W</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/ie-s1/img/2.webp</image:loc>
+      <image:title>iE-S1 vista lateral</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/ie-s1/img/3.webp</image:loc>
+      <image:title>iE-S1 detalle ruedas todoterreno</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/ie-s1/img/4.webp</image:loc>
+      <image:title>iE-S1 pantalla LCD</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/ie-s1/img/5.webp</image:loc>
+      <image:title>iE-S1 suspensión y frenos</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/ie-s1/img/6.webp</image:loc>
+      <image:title>iE-S1 plegado</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-n/ie-s1/img/7.webp</image:loc>
+      <image:title>iE-S1 variante de color</image:title>
+    </image:image>
+  </url>
+
+  <!-- ===== PRODUCTOS: Serie GT ===== -->
+  <url>
+    <loc>https://scootshop.co/patinetes/series-gt/g2/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/g2/img/1.webp</image:loc>
+      <image:title>G2 — Patinete electrico 500 W</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/g2/img/2.webp</image:loc>
+      <image:title>G2 vista 2</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/g2/img/3.webp</image:loc>
+      <image:title>G2 vista 3</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/g2/img/4.webp</image:loc>
+      <image:title>G2 vista 4</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/series-gt/t10/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/t10/img/1.webp</image:loc>
+      <image:title>T10 — Patinete electrico Ultra 1000 W</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/t10/img/2.webp</image:loc>
+      <image:title>T10 vista 2</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/t10/img/3.webp</image:loc>
+      <image:title>T10 vista 3</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/t10/img/4.webp</image:loc>
+      <image:title>T10 vista 4</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/t10/img/5.webp</image:loc>
+      <image:title>T10 vista 5</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/t10/img/6.webp</image:loc>
+      <image:title>T10 vista 6</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/t10/img/7.webp</image:loc>
+      <image:title>T10 vista 7</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/t10/img/8.webp</image:loc>
+      <image:title>T10 vista 8</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/t10/img/9.webp</image:loc>
+      <image:title>T10 vista 9</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/series-gt/t10-dual/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/t10-dual/img/1.webp</image:loc>
+      <image:title>JOYOR T10 DUAL — Patinete electrico doble motor 2×1000 W</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/t10-dual/img/2.webp</image:loc>
+      <image:title>JOYOR T10 DUAL vista 2</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/t10-dual/img/3.webp</image:loc>
+      <image:title>JOYOR T10 DUAL vista lateral</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/t10-dual/img/4.webp</image:loc>
+      <image:title>JOYOR T10 DUAL vista trasera</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/t10-dual/img/5.webp</image:loc>
+      <image:title>JOYOR T10 DUAL motor delantero</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/t10-dual/img/6.webp</image:loc>
+      <image:title>JOYOR T10 DUAL motor trasero</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/t10-dual/img/7.webp</image:loc>
+      <image:title>JOYOR T10 DUAL en uso</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/series-gt/tf3/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/tf3/img/1.webp</image:loc>
+      <image:title>TF3 — Patinete electrico 1000 W</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/tf3/img/2.webp</image:loc>
+      <image:title>TF3 vista 2</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/tf3/img/3.webp</image:loc>
+      <image:title>TF3 vista 3</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/tf3/img/4.webp</image:loc>
+      <image:title>TF3 vista 4</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/series-gt/t30/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/t30/img/1.webp</image:loc>
+      <image:title>T30 — Patinete electrico 3200 W</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/t30/img/2.webp</image:loc>
+      <image:title>T30 vista 2</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/t30/img/3.webp</image:loc>
+      <image:title>T30 vista 3</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/t30/img/4.webp</image:loc>
+      <image:title>T30 vista 4</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/series-gt/gt9/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/gt9/img/1.webp</image:loc>
+      <image:title>FENGQS GT9 — Patinete electrico 7000 W</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/gt9/img/2.webp</image:loc>
+      <image:title>GT9 vista 2</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/gt9/img/3.webp</image:loc>
+      <image:title>GT9 vista 3</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-gt/gt9/img/4.webp</image:loc>
+      <image:title>GT9 vista 4</image:title>
+    </image:image>
+  </url>
+
+  <!-- ===== PRODUCTOS: Serie IX ===== -->
+  <url>
+    <loc>https://scootshop.co/patinetes/series-ix/ix3/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-ix/ix3/img/1.webp</image:loc>
+      <image:title>iScooter IX3 — Patinete electrico 800 W</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-ix/ix3/img/2.webp</image:loc>
+      <image:title>IX3 vista 2</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-ix/ix3/img/3.webp</image:loc>
+      <image:title>IX3 vista 3</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-ix/ix3/img/4.webp</image:loc>
+      <image:title>IX3 vista 4</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-ix/ix3/img/5.webp</image:loc>
+      <image:title>IX3 vista 5</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-ix/ix3/img/6.webp</image:loc>
+      <image:title>IX3 vista 6</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/series-ix/w9/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-ix/w9/img/1.webp</image:loc>
+      <image:title>W9 — Patinete electrico 1000 W</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-ix/w9/img/2.webp</image:loc>
+      <image:title>W9 vista 2</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-ix/w9/img/3.webp</image:loc>
+      <image:title>W9 vista 3</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-ix/w9/img/4.webp</image:loc>
+      <image:title>W9 vista 4</image:title>
+    </image:image>
+  </url>
+
+  <!-- ===== PRODUCTOS: Bicicletas ===== -->
+  <url>
+    <loc>https://scootshop.co/bicicletas/g73/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/bicicletas/g73/img/1.webp</image:loc>
+      <image:title>G73 — Bicicleta electrica urbana 250 W</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/bicicletas/g73/img/2.webp</image:loc>
+      <image:title>G73 vista 2</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/bicicletas/g73/img/3.webp</image:loc>
+      <image:title>G73 vista 3</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/bicicletas/g73/img/4.webp</image:loc>
+      <image:title>G73 vista 4</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/bicicletas/g73/img/5.webp</image:loc>
+      <image:title>G73 vista 5</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://scootshop.co/bicicletas/gt900/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/bicicletas/gt900/img/1.webp</image:loc>
+      <image:title>Aairsk GT900 — Bicicleta electrica de montaña 250 W</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/bicicletas/gt900/img/2.webp</image:loc>
+      <image:title>Aairsk GT900 vista 2</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/bicicletas/gt900/img/3.webp</image:loc>
+      <image:title>Aairsk GT900 vista 3</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/bicicletas/gt900/img/4.webp</image:loc>
+      <image:title>Aairsk GT900 vista 4</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/bicicletas/gt900/img/5.webp</image:loc>
+      <image:title>Aairsk GT900 vista 5</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/bicicletas/gt900/img/6.webp</image:loc>
+      <image:title>Aairsk GT900 vista 6</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/bicicletas/gt900/img/7.webp</image:loc>
+      <image:title>Aairsk GT900 vista 7</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/bicicletas/gt900/img/8.webp</image:loc>
+      <image:title>Aairsk GT900 vista 8</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/bicicletas/gt900/img/9.webp</image:loc>
+      <image:title>Aairsk GT900 vista 9</image:title>
+    </image:image>
+  </url>
+
+  <!-- ===== PRODUCTOS: Motos eléctricas ===== -->
+  <url>
+    <loc>https://scootshop.co/motos/ev12m-pro/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/motos/ev12m-pro/img/1.webp</image:loc>
+      <image:title>EVERCROSS EV12M PRO — Moto electrica infantil de motocross</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/motos/ev12m-pro/img/2.webp</image:loc>
+      <image:title>EVERCROSS EV12M PRO vista lateral</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/motos/ev12m-pro/img/3.webp</image:loc>
+      <image:title>EVERCROSS EV12M PRO detalle</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/motos/ev12m-pro/img/4.webp</image:loc>
+      <image:title>EVERCROSS EV12M PRO luces LED</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/motos/ev12m-pro/img/5.webp</image:loc>
+      <image:title>EVERCROSS EV12M PRO suspension</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/motos/ev12m-pro/img/6.webp</image:loc>
+      <image:title>EVERCROSS EV12M PRO ruedas todoterreno</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/motos/ev12m-pro/img/7.webp</image:loc>
+      <image:title>EVERCROSS EV12M PRO Bluetooth</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/motos/ev12m-pro/img/8.webp</image:loc>
+      <image:title>EVERCROSS EV12M PRO asiento ergonomico</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/motos/ev12m-pro/img/9.webp</image:loc>
+      <image:title>EVERCROSS EV12M PRO vista trasera</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://scootshop.co/motos/ev05m/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/motos/ev05m/img/1.webp</image:loc>
+      <image:title>EVERCROSS EV05M — Moto electrica infantil</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/motos/ev05m/img/2.webp</image:loc>
+      <image:title>EVERCROSS EV05M vista lateral</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/motos/ev05m/img/3.webp</image:loc>
+      <image:title>EVERCROSS EV05M detalle</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/motos/ev05m/img/4.webp</image:loc>
+      <image:title>EVERCROSS EV05M ruedas 12 pulgadas</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/motos/ev05m/img/5.webp</image:loc>
+      <image:title>EVERCROSS EV05M asiento ergonomico</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/motos/ev05m/img/6.webp</image:loc>
+      <image:title>EVERCROSS EV05M chasis acero</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/motos/ev05m/img/7.webp</image:loc>
+      <image:title>EVERCROSS EV05M manillar</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/motos/ev05m/img/8.webp</image:loc>
+      <image:title>EVERCROSS EV05M bateria</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/motos/ev05m/img/9.webp</image:loc>
+      <image:title>EVERCROSS EV05M vista trasera</image:title>
+    </image:image>
+  </url>
+
+  <!-- CHALLENGER12 — Motos eléctricas -->
+  <url>
+    <loc>https://scootshop.co/motos/challenger12/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/motos/challenger12/img/1.webp</image:loc>
+      <image:title>CHALLENGER12 — Moto eléctrica infantil chopper</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/motos/challenger12/img/2.webp</image:loc>
+      <image:title>CHALLENGER12 vista lateral</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/motos/challenger12/img/3.webp</image:loc>
+      <image:title>CHALLENGER12 detalle</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/motos/challenger12/img/4.webp</image:loc>
+      <image:title>CHALLENGER12 ruedas 12×3 pulgadas</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/motos/challenger12/img/5.webp</image:loc>
+      <image:title>CHALLENGER12 asiento ergonómico</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/motos/challenger12/img/6.webp</image:loc>
+      <image:title>CHALLENGER12 chasis acero</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/motos/challenger12/img/7.webp</image:loc>
+      <image:title>CHALLENGER12 color verde</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/motos/challenger12/img/8.webp</image:loc>
+      <image:title>CHALLENGER12 color naranja</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/motos/challenger12/img/9.webp</image:loc>
+      <image:title>CHALLENGER12 color azul</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://scootshop.co/patinetes/series-ix/ix8/</loc>
+    <lastmod>2026-04-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-ix/ix8/img/1.jpg</image:loc>
+      <image:title>iScooter IX8 - Patinete electrico dual motor 2400 W</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-ix/ix8/img/2.jpg</image:loc>
+      <image:title>iScooter IX8 vista 2</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-ix/ix8/img/3.jpg</image:loc>
+      <image:title>iScooter IX8 vista 3</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-ix/ix8/img/4.jpg</image:loc>
+      <image:title>iScooter IX8 vista 4</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-ix/ix8/img/5.jpg</image:loc>
+      <image:title>iScooter IX8 vista 5</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/series-ix/ix8/img/6.jpg</image:loc>
+      <image:title>iScooter IX8 vista 6</image:title>
+    </image:image>
+  </url>
+</urlset>
+
