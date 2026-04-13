@@ -1,0 +1,172 @@
+<!-- /partials/site-header.html -->
+
+<!-- Fonts (igual que index) -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet" />
+
+<!-- Font Awesome (para que se vean los iconos) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<style>
+  /* Variables mínimas necesarias para que el header se vea EXACTO */
+  :root{
+    --sport:'Russo One',sans-serif;
+    --ui:'Plus Jakarta Sans',ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    --primary:#d10000;
+    --primary-soft: rgba(209,0,0,.08);
+    --line: rgba(15,23,42,.10);
+    --sat: env(safe-area-inset-top,0px);
+    --header-h:86px;
+  }
+
+  /* Container (porque el header depende de .container) */
+  .container{
+    width:min(1200px,100%);
+    padding-inline:clamp(16px,4vw,28px);
+    margin-inline:auto;
+  }
+
+  /* ====== Header / Nav (copiado del styles.css del index, pero “scoped” al #siteHeader) ====== */
+  #siteHeader{
+    position:fixed;
+    inset:0 0 auto 0;
+    z-index:80;
+    background:rgba(255,255,255,.92);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid rgba(0,0,0,.05);
+    padding-top: var(--sat);
+    font-family:var(--ui);
+  }
+
+  #siteHeader .nav{
+    display:grid;
+    grid-template-columns:auto 1fr auto;
+    align-items:center;
+    height:var(--header-h);
+    gap:16px;
+  }
+
+  #siteHeader .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:220px;
+  }
+
+  #siteHeader .brand a{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    text-decoration:none;
+    color:#0f172a;
+  }
+
+  #siteHeader .brand img{
+    height: 52px;
+    width:auto;
+    display:block;
+  }
+
+  #siteHeader .brand span{
+    font-family:'Tangerine',cursive;
+    font-size:27.2px;
+    line-height:1;
+    color:var(--primary);
+    letter-spacing:.2px;
+    transform:translateY(2px);
+    white-space:nowrap;
+  }
+
+  #siteHeader nav.menu{
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    gap:8px;
+  }
+
+  #siteHeader nav.menu a{
+    text-decoration:none;
+    color:#0f172a;
+    font-weight:800;
+    letter-spacing:.0em;
+    padding:10px 12px;
+    border-radius:999px;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    text-transform:uppercase;
+    font-size:.86rem;
+  }
+
+  #siteHeader nav.menu a[aria-current="page"]{
+    background:var(--primary-soft);
+    color:var(--primary);
+  }
+
+  #siteHeader nav.menu a:hover{
+    background:rgba(15,23,42,.06);
+  }
+
+  #siteHeader nav.menu a[aria-current="page"]:hover{
+    background:rgba(209,0,0,.12);
+  }
+
+  #siteHeader nav.menu a i{
+    opacity:.9;
+  }
+
+  #siteHeader .burger{
+    display:none;
+    width:44px;
+    height:44px;
+    border-radius:14px;
+    border:1px solid var(--line);
+    background:#fff;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+  }
+
+  #siteHeader .burger:hover{
+    background:rgba(15,23,42,.04);
+  }
+
+  #siteHeader .nav-icon{
+    width:18px;
+    text-align:center;
+  }
+
+  @media (max-width:980px){
+    #siteHeader nav.menu{ display:none; }
+    #siteHeader .burger{ display:grid; }
+    #siteHeader .brand{ min-width:auto; }
+  }
+</style>
+
+<header id="siteHeader" aria-label="Barra superior">
+  <div class="container nav">
+    <div class="brand">
+      <a href="/#inicio" aria-label="Ir al inicio">
+        <img src="/Img/0-removebg-preview.png" alt="SCOOT SHOP logo" decoding="async" fetchpriority="high" />
+        <span>Versátil</span>
+      </a>
+    </div>
+
+    <nav class="menu" aria-label="Navegación principal">
+      <!-- Si quieres que SIEMPRE se vea igual que el index, deja aria-current="page" en INICIO -->
+      <a href="/#inicio" aria-current="page"><i class="fa-solid fa-house nav-icon" aria-hidden="true"></i>Inicio</a>
+      <a href="/#comprar"><i class="fa-solid fa-cart-shopping nav-icon" aria-hidden="true"></i>Productos</a>
+      <a href="/#faq"><i class="fa-solid fa-circle-question nav-icon" aria-hidden="true"></i>Preguntas</a>
+      <a href="/#ubicacion"><i class="fa-solid fa-location-dot nav-icon" aria-hidden="true"></i>Ubicación</a>
+      <a href="/#legal"><i class="fa-solid fa-scale-balanced nav-icon" aria-hidden="true"></i>Legal</a>
+      <a href="https://www.instagram.com/scootshopping" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+      <a href="https://www.facebook.com/61579248524907" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook" aria-hidden="true"></i></a>
+      <a href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
+    </nav>
+
+    <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileMenu" type="button">
+      <i class="fa-solid fa-bars" aria-hidden="true"></i>
+    </button>
+  </div>
+</header>
