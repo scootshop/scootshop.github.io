@@ -1,0 +1,6 @@
+[mysqld]
+port=3307
+bind-address=127.0.0.1
+datadir=C:/Program Files/MariaDB 12.2/data
+socket=mysql
+skip-networking=0

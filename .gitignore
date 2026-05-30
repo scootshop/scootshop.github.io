@@ -1,0 +1,6 @@
+_cleanup_quarantine/
+public_html/.env
+public_html/.env.local
+public_html/tmp/
+public_html/.vscode/
+!public_html/.env.example
