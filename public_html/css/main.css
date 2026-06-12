@@ -1641,6 +1641,14 @@ button{ font-family:inherit; }
   font-size:.9rem;
 }
 
+/* Reglas generales de tamaño para recuadros de producto (checkout/pago/pedido) */
+:root{
+  --order-card-pad:12px;
+  --order-card-radius:22px;
+  --order-card-min-h:96px;
+  --order-card-img:56px;
+}
+
 /* Checkout / Payment: keep visual language aligned with cart cards */
 .order-summary--checkout,
 .order-summary--payment{
@@ -1655,28 +1663,18 @@ button{ font-family:inherit; }
 
 .order-summary--checkout .order-summary__product,
 .order-summary--payment .order-summary__product{
-  padding:12px;
+  padding:var(--order-card-pad);
   border:0;
   min-width:0;
   max-width:100%;
+  min-height:var(--order-card-min-h);
   overflow:hidden;
-  border-radius:22px;
+  border-radius:var(--order-card-radius);
   background:#fff;
   box-shadow:
     0 1px 0 rgba(255,255,255,.9) inset,
     0 18px 44px rgba(15,23,42,.08),
     0 6px 18px rgba(15,23,42,.04);
-  transition:box-shadow .16s ease, transform .16s ease, background .16s ease;
-}
-
-.order-summary--checkout .order-summary__product:hover,
-.order-summary--payment .order-summary__product:hover{
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.94) inset,
-    0 24px 56px rgba(15,23,42,.11),
-    0 10px 24px rgba(15,23,42,.05);
-  transform:translateY(-2px);
-  background:linear-gradient(180deg, rgba(255,255,255,.99) 0%, rgba(244,247,251,.97) 100%);
 }
 
 .order-summary--checkout .order-summary__product--line,
@@ -1704,8 +1702,9 @@ button{ font-family:inherit; }
 
 .order-summary--checkout .order-summary__product-image,
 .order-summary--payment .order-summary__product-image{
-  width:56px;
-  height:56px;
+  width:var(--order-card-img);
+  height:var(--order-card-img);
+  flex:0 0 var(--order-card-img);
   border-radius:16px;
   border:0;
   object-fit:contain;
@@ -1716,11 +1715,11 @@ button{ font-family:inherit; }
 
 .order-summary--checkout .order-summary__product-info,
 .order-summary--payment .order-summary__product-info{
-  display:flex;
+  display:grid;
+  justify-items:start;
+  align-content:center;
+  gap:5px;
   flex:1 1 auto;
-  flex-wrap:wrap;
-  align-items:center;
-  gap:6px 8px;
   min-width:0;
   max-width:100%;
 }
@@ -1776,15 +1775,16 @@ button{ font-family:inherit; }
 .order-summary--payment .order-summary__product-meta--color{
   margin-top:0;
   width:fit-content;
-  max-width:none;
+  min-width:0;
+  max-width:100%;
   padding:4px 9px;
   border-radius:999px;
   background:rgba(255,255,255,.82);
   color:#667085;
-  display:inline-flex;
+  display:inline-block;
   white-space:nowrap;
-  overflow:visible;
-  text-overflow:clip;
+  overflow:hidden;
+  text-overflow:ellipsis;
   letter-spacing:.06em;
   text-transform:uppercase;
   box-shadow:0 8px 18px rgba(15,23,42,.06);

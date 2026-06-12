@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es-ES">
 <head>
   <meta charset="utf-8" />
@@ -21,7 +21,7 @@
   <meta name="twitter:image" content="https://scootshop.co/img/0-removebg-preview.webp" />
   <meta name="robots" content="noindex,nofollow" />
   <title>Estado del pedido | SCOOT SHOP</title>
-  <meta name="asset-version" content="20260605-2" />
+  <meta name="asset-version" content="20260613-1" />
 
   <!-- Fuente (non-blocking) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,8 +29,8 @@
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" /></noscript>
-  <link rel="stylesheet" href="/css/icons.css?v=20260605-2" />
-  <link rel="stylesheet" href="/css/main.css?v=20260605-2" />
+  <link rel="stylesheet" href="/css/icons.css?v=20260613-1" />
+  <link rel="stylesheet" href="/css/main.css?v=20260613-1" />
   <script src="/js/asset-sync.js?v=20260605-2" defer></script>
 
   <style>
@@ -361,14 +361,8 @@
         0 12px 28px rgba(15,23,42,.06),
         0 4px 12px rgba(15,23,42,.03);
     }
-    .order-product-list-shell .order-summary__product:hover{
-      transform:none;
-    }
     .order-product-list-shell .order-summary__product-title{
       flex:1 1 100%;
-    }
-    .order-product-list-shell .order-summary__product-meta--color{
-      max-width:100%;
     }
     .section-heading{
       padding:18px 20px 10px;
@@ -985,6 +979,14 @@
         padding-left:12px;
         padding-right:12px;
       }
+      .order-kpis{
+        grid-template-columns:1fr;
+        gap:10px;
+      }
+      .order-product-list-shell .order-summary__product-line-total{
+        min-width:0;
+        font-size:1rem;
+      }
     }
 
   </style>
@@ -1207,7 +1209,7 @@
 
       function paymentMethodLabel(value){
         const m = String(value || '').trim().toLowerCase();
-        if (!m) return 'No especificado';
+        if (!m) return '';
         if (m === 'paypal') return 'PayPal';
         if (m === 'card') return 'Tarjeta';
         if (m === 'klarna') return 'Klarna';
@@ -1246,7 +1248,7 @@
             eyebrow: 'Estado del pedido',
             title: 'Pedido ' + orderNumber,
             lead: 'El pedido está creado, pero el pago todavía no se ha confirmado. Puedes retomarlo sin generar un pedido nuevo.',
-            note: 'Usa el mismo número de pedido para volver al pago cuando quieras.'
+            note: tracking ? ('Tracking activo: ' + tracking + '.') : 'Pendiente de Seguimiento/Tracking.'
           };
         }
         if (normalized === 'paid') {
@@ -1254,7 +1256,7 @@
             eyebrow: 'Estado del pedido',
             title: 'Pedido ' + orderNumber,
             lead: 'El pago ya está confirmado y el pedido ha quedado registrado para preparación.',
-            note: 'El equipo revisará el pedido antes de pasar a preparación.'
+            note: tracking ? ('Tracking activo: ' + tracking + '.') : 'Pendiente de Seguimiento/Tracking.'
           };
         }
         if (normalized === 'processing') {
@@ -1262,7 +1264,7 @@
             eyebrow: 'Estado del pedido',
             title: 'Pedido ' + orderNumber,
             lead: 'El pedido ya está en preparación. Aquí verás el siguiente avance en cuanto salga a envío.',
-            note: 'Todavía no hay tracking definitivo asignado.'
+            note: tracking ? ('Tracking activo: ' + tracking + '.') : 'Pendiente de Seguimiento/Tracking.'
           };
         }
         if (normalized === 'shipped') {
@@ -1270,7 +1272,7 @@
             eyebrow: 'Estado del pedido',
             title: 'Pedido ' + orderNumber,
             lead: 'El pedido ha salido y esta pantalla seguirá actualizándose con el seguimiento.',
-            note: tracking ? ('Tracking activo: ' + tracking + '.') : 'El tracking se está sincronizando.'
+            note: tracking ? ('Tracking activo: ' + tracking + '.') : 'Pendiente de Seguimiento/Tracking.'
           };
         }
         if (normalized === 'delivered') {
@@ -1338,7 +1340,8 @@
         return '<div class="order-products"><div class="order-product-list-shell order-summary order-summary--checkout"><div class="order-summary__product-list">' + items.map(function(item){
           const img = String(item.image || '').trim();
           const qty = Math.max(1, Number(item.qty || 1));
-          const colorLabel = String(item.color_label || item.color || '').trim();
+          let colorLabel = String(item.color_label || item.color || '').trim();
+          if (/^no especificado$/i.test(colorLabel)) colorLabel = '';
           const sku = String(item.sku || '').trim();
           const itemCurrency = String(item.currency || order.currency || currencyCode || 'EUR').toUpperCase();
           const rawUnitPrice = Number(item.unit_price || item.price || item.amount || item.total_amount || 0);
@@ -1349,11 +1352,11 @@
           return [
             '<article class="order-summary__product order-summary__product--line">',
             '  <div class="order-summary__product-main">',
-            img ? ('<img class="order-summary__product-image" src="' + esc(img) + '" alt="Producto ' + esc(item.name || 'SCOOT SHOP') + '">') : '<img class="order-summary__product-image" src="/img/0-removebg-preview.webp?v=20260605-2" alt="Producto SCOOT SHOP">',
+            img ? ('<img class="order-summary__product-image" src="' + esc(img) + '" alt="Producto ' + esc(item.name || 'SCOOT SHOP') + '">') : '<img class="order-summary__product-image" src="/img/0-removebg-preview.webp?v=20260613-1" alt="Producto SCOOT SHOP">',
             '  <div class="order-summary__product-info">',
             '    <span class="order-summary__product-title">' + esc(item.name || 'Producto') + '</span>',
             sku ? ('    <span class="order-summary__product-meta order-summary__product-meta--ref">Ref: ' + esc(sku) + '</span>') : '',
-            '    <span class="order-summary__product-meta order-summary__product-meta--color">Color: ' + esc(colorLabel || 'No especificado') + '</span>',
+            '    <span class="order-summary__product-meta order-summary__product-meta--color">Color: ' + esc(colorLabel || 'Cualquiera') + '</span>',
             '</div>',
             '  </div>',
             '  <div class="order-summary__product-side">',
@@ -1448,16 +1451,21 @@
         window.location.href = String(data.paymentUrl);
       }
 
+      let lastRenderKey = '';
+
       function renderDetail(order){
         if(!orderDetailSection || !orderDetailBody || !order){ return; }
+        const renderKey = JSON.stringify([order.status, order.tracking, order.updated_at, order.total_amount || order.amount, Array.isArray(order.order_items) ? order.order_items.length : 0]);
+        if (renderKey === lastRenderKey) return;
+        lastRenderKey = renderKey;
         const ship = (order.shipping && typeof order.shipping === 'object') ? order.shipping : {};
         const status = normalizeStatus(order.status || orderStatus);
         const isPendingPayment = status === 'pending_payment';
         const tracking = String(order.tracking || '').trim();
-        const fullName = String(order.customer_name || ship.name || order.payer_name || '').trim() || 'No disponible';
-        const email = String(order.customer_email || ship.email || order.payer_email || queryEmail || '').trim() || 'No disponible';
-        const phone = String(ship.phone || '').trim() || 'No disponible';
-        const address = buildAddress(ship) || 'No disponible';
+        const fullName = String(order.customer_name || ship.name || order.payer_name || '').trim();
+        const email = String(order.customer_email || ship.email || order.payer_email || queryEmail || '').trim();
+        const phone = String(ship.phone || '').trim();
+        const address = buildAddress(ship);
         const orderNumber = String(order.id || orderId || '—').trim();
         const amount = formatMoney(order.total_amount || order.amount || amountText, order.currency || currencyCode);
         const method = paymentMethodLabel(order.payment_method);
@@ -1483,17 +1491,17 @@
           '  <div class="order-detail-top">',
           '    <div class="detail-pill"><span class="detail-note"><strong>Referencia:</strong> ' + esc(orderNumber) + '</span></div>',
           '    ' + renderTracking(status),
-          tracking ? ('    <p class="detail-note"><strong>Número de seguimiento:</strong> ' + esc(tracking) + '</p>') : '    <p class="detail-note"><strong>Número de seguimiento:</strong> Pendiente de asignación.</p>',
+          tracking ? ('    <p class="detail-note"><strong>Número de seguimiento:</strong> <a href="https://t.17track.net/es#nums=' + encodeURIComponent(tracking) + '" target="_blank" rel="noopener noreferrer" style="text-decoration:underline;font-weight:800">' + esc(tracking) + '</a></p>') : '    <p class="detail-note"><strong>Número de seguimiento:</strong> Pendiente de Seguimiento/Tracking.</p>',
           '  </div>',
           '  <div class="order-kpis">',
           '    <div class="order-kpi"><span class="k">Número de pedido</span><span class="v">' + esc(orderNumber) + '</span></div>',
           '    <div class="order-kpi"><span class="k">Importe</span><span class="v">' + esc(amount) + '</span></div>',
-          '    <div class="order-kpi"><span class="k">Método de pago</span><span class="v">' + esc(method) + '</span></div>',
+          method ? ('    <div class="order-kpi"><span class="k">Método de pago</span><span class="v">' + esc(method) + '</span></div>') : '',
           '    <div class="order-kpi"><span class="k">Última actualización</span><span class="v">' + esc(updatedAt) + '</span></div>',
-          '    <div class="order-kpi"><span class="k">Nombre completo</span><span class="v">' + esc(fullName) + '</span></div>',
-          '    <div class="order-kpi"><span class="k">Teléfono</span><span class="v">' + esc(phone) + '</span></div>',
-          '    <div class="order-kpi is-wide"><span class="k">Correo</span><span class="v">' + esc(email) + '</span></div>',
-          '    <div class="order-kpi is-wide"><span class="k">Dirección de envío</span><span class="v">' + esc(address) + '</span></div>',
+          fullName ? ('    <div class="order-kpi"><span class="k">Nombre completo</span><span class="v">' + esc(fullName) + '</span></div>') : '',
+          phone ? ('    <div class="order-kpi"><span class="k">Teléfono</span><span class="v">' + esc(phone) + '</span></div>') : '',
+          email ? ('    <div class="order-kpi is-wide"><span class="k">Correo</span><span class="v">' + esc(email) + '</span></div>') : '',
+          address ? ('    <div class="order-kpi is-wide"><span class="k">Dirección de envío</span><span class="v">' + esc(address) + '</span></div>') : '',
           '  </div>',
           '  <div class="order-product-block">',
           '    <p class="detail-note"><strong>Productos del pedido</strong></p>',
@@ -1540,7 +1548,7 @@
         if (mailStepText) {
           mailStepText.textContent = isPendingPayment
             ? 'Pulsa en Volver al pago para completar el pedido sin cambiar el número.'
-            : (email !== 'No disponible' ? ('Revisa ' + email + ' para ver las actualizaciones del pedido.') : 'Revisa tu correo para ver la confirmación del pedido.');
+            : (email ? ('Revisa ' + email + ' para ver las actualizaciones del pedido.') : 'Revisa tu correo para ver la confirmación del pedido.');
         }
         if (nextStepText) {
           nextStepText.textContent = isPendingPayment
@@ -1722,9 +1730,10 @@
         };
       }
 
-      async function loadOrderDetail(){
+      async function loadOrderDetail(opts){
+        const silent = !!(opts && opts.silent);
         if(!orderId){
-          renderExpiredOrder();
+          if (!silent) renderExpiredOrder();
           return;
         }
 
@@ -1759,6 +1768,8 @@
           apiError = 'request_failed';
         }
 
+        if (silent) return;
+
         const previewOrder = buildPreviewOrder();
         if (previewOrder) {
           renderDetail(previewOrder);
@@ -1781,6 +1792,21 @@
         renderExpiredOrder();
       }
 
+      const ORDER_REFRESH_MS = 20000;
+      function startOrderAutoRefresh(){
+        if (!orderId) return;
+        setInterval(function(){
+          if (document.hidden) return;
+          loadOrderDetail({ silent: true });
+        }, ORDER_REFRESH_MS);
+        document.addEventListener('visibilitychange', function(){
+          if (!document.hidden) loadOrderDetail({ silent: true });
+        });
+        window.addEventListener('focus', function(){
+          loadOrderDetail({ silent: true });
+        });
+      }
+
       if(lead && productName){
         lead.textContent = 'Consulta aquí el estado de ' + productName + ', el pago y los siguientes pasos sin salir de esta página.';
       }
@@ -1788,12 +1814,20 @@
         supportText.textContent = 'Si necesitas ayuda con este pedido, te atendemos por WhatsApp o email.';
       }
 
+      const waSupportLink = document.querySelector('a[href^="https://wa.me/"]');
+      if (waSupportLink && orderId) {
+        const waBase = waSupportLink.href.split('?')[0];
+        waSupportLink.href = waBase + '?text=' + encodeURIComponent('Hola, necesito ayuda con mi pedido ' + orderId + '.');
+      }
+
       loadOrderDetail();
+      startOrderAutoRefresh();
     })();
   </script>
   <script src="/js/global-assets.js?v=20260605-2"></script>
 </body>
 </html>
+
 
 
 

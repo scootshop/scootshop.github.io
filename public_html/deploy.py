@@ -154,9 +154,10 @@ def upload_files(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Deploy files to FTP")
-    parser.add_argument("--host", required=True, help="FTP host")
+    # Hostinger: host=ftp.scootshop.co, remote-base=/domains/scootshop.co/public_html
+    parser.add_argument("--host", required=True, help="FTP host (ej: ftp.scootshop.co)")
     parser.add_argument("--port", type=int, default=21, help="FTP port")
-    parser.add_argument("--remote-base", required=True, help="Remote base folder")
+    parser.add_argument("--remote-base", required=True, help="Ruta remota raiz (ej: /domains/scootshop.co/public_html)")
     parser.add_argument("--all-changed", action="store_true", help="Deploy git changed files")
     parser.add_argument("--allow-bulk", action="store_true", help="Allow bulk deploy when using --all-changed")
     parser.add_argument("--files", help="Comma-separated file list")

@@ -123,7 +123,7 @@
         customer_name: 'Cliente local',
         payment_method: 'manual',
         order_items: [
-          { sku: 'M41TANK', name: 'M41 Tank Ultimate 1000W', qty: 1, unit_price: 530, line_total: 530, image: image, color_label: 'No especificado' },
+          { sku: 'M41TANK', name: 'M41 Tank Ultimate 1000W', qty: 1, unit_price: 530, line_total: 530, image: image, color_label: '' },
           { sku: 'SOPMOVIL', name: 'Soporte móvil', qty: 1, unit_price: 24.95, line_total: 24.95, image: supportImage, color_label: 'Negro' },
           { sku: 'BOLSAALM', name: 'Bolsa de almacenamiento', qty: 1, unit_price: 33.95, line_total: 33.95, image: bagImage, color_label: 'Negro' }
         ],
