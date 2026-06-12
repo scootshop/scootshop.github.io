@@ -1,4 +1,4 @@
-﻿// /data/products.js
+// /data/products.js
 // Catalogo global enriquecido para hosting estatico.
 (function () {
   var dgtTooltipText = 'Este distintivo indica que el modelo esta homologado y certificado por la DGT, de acuerdo con la normativa vigente aplicable a vehiculos de movilidad personal.';
@@ -72,15 +72,27 @@
 
   var seriesDefinitions = [
     {
+      key: 'ecoxtrem',
+      label: 'Ecoxtrem',
+      categoryKey: 'electric-scooters',
+      menuOrder: 0,
+      homeOrder: 0,
+      homeSectionId: 'ecoxtrem',
+      listingSectionId: 'comprar',
+      homeTitle: 'Ecoxtrem',
+      homeDescription: 'Movilidad urbana equilibrada, cómoda y preparada para el día a día.',
+      homeAriaLabel: 'Lista de productos Ecoxtrem'
+    },
+    {
       key: 'k',
-      label: 'Serie K',
+      label: 'KuKirin',
       categoryKey: 'electric-scooters',
       menuOrder: 1,
       homeOrder: 1,
       homeSectionId: 'series-k',
       listingSectionId: 'comprar',
-      homeTitle: 'Serie K',
-      homeDescription: 'Modelos KuKirin para trayectos mixtos y uso diario potente. Primer modelo: G2 PRO.',
+      homeTitle: 'KuKirin',
+      homeDescription: 'Rendimiento sólido para desplazamientos diarios y recorridos mixtos.',
       homeAriaLabel: 'Lista de productos Series K'
     },
     {
@@ -91,7 +103,7 @@
       homeOrder: 2,
       homeSectionId: 'series-n',
       homeTitle: 'Series N',
-      homeDescription: 'La familia N combina chasis solido, electronica fiable y modelos urbanos y potentes como N7PRO, VS6, E8 y Bongo V70 Connected.',
+      homeDescription: 'Serie versátil con enfoque en estabilidad, autonomía y uso cotidiano.',
       homeAriaLabel: 'Lista de productos Series N'
     },
     {
@@ -102,7 +114,7 @@
       homeOrder: 3,
       homeSectionId: 'series-g',
       homeTitle: 'Series GT',
-      homeDescription: 'Urbanos, super potentes y suspensión a otro nivel. Modelos: G2, T10, T10 DUAL, TF3, T30 y GT9.',
+      homeDescription: 'Gama de alto rendimiento para quienes buscan potencia y control.',
       homeAriaLabel: 'Lista de productos Series GT'
     },
     {
@@ -113,7 +125,7 @@
       homeOrder: 4,
       homeSectionId: 'series-ix',
       homeTitle: 'Serie IX',
-      homeDescription: 'Modelos: IX3, W9 e IX8.',
+      homeDescription: 'Línea práctica y eficiente para ciudad y trayectos habituales.',
       homeAriaLabel: 'Lista de productos Serie IX'
     }
     ,{
@@ -125,7 +137,7 @@
       homeSectionId: 'series-accessories',
       listingSectionId: 'comprar',
       homeTitle: 'Accesorios',
-      homeDescription: 'Selección de bolsas, soportes, pegatinas y luces para tu patinete o bicicleta.',
+      homeDescription: 'Complementos clave para mejorar comodidad, seguridad y funcionalidad.',
       homeAriaLabel: 'Lista de accesorios'
     }
     ,{
@@ -137,7 +149,7 @@
       homeSectionId: 'series-b',
       listingSectionId: 'comprar',
       homeTitle: 'Bicicletas — Serie B',
-      homeDescription: 'Bicicletas eléctricas de alta calidad, con componentes premium y diseño moderno.',
+      homeDescription: 'Bicicletas eléctricas orientadas a confort, eficiencia y uso urbano.',
       homeAriaLabel: 'Lista de bicicletas eléctricas'
     }
     ,{
@@ -149,12 +161,206 @@
       homeSectionId: 'series-motos',
       listingSectionId: 'comprar',
       homeTitle: 'Motos eléctricas',
-      homeDescription: 'Motos eléctricas infantiles de motocross con motor potente, Bluetooth y luces LED.',
+      homeDescription: 'Motos eléctricas infantiles pensadas para diversión segura y progresiva.',
       homeAriaLabel: 'Lista de motos eléctricas'
     }
   ];
 
   var products = [
+    {
+      id: 'ecoxtrem-m41-tank-ultimate-1000w',
+      sku: 'M41TANK',
+      name: 'M41 Tank Ultimate 1000W',
+      menuLabel: 'M41 Tank Ultimate',
+      badgeText: 'M41 TANK',
+      brand: 'Ecoxtrem',
+      series: 'ecoxtrem',
+      productType: 'electric-scooter',
+      catalogType: 'vehicle',
+      categoryKey: 'electric-scooters',
+      priceText: '530 €',
+      compareAtPriceText: '620 €',
+      stock: 'in_stock',
+      paypalId: 'M41TANKULTIMATE1K',
+      href: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/',
+      image: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/1.webp',
+      alt: 'Patinete eléctrico Ecoxtrem M41 Tank Ultimate 1000W',
+      colorVariants: [
+        {
+          key: 'negro',
+          label: 'Negro',
+          swatch: '#111111',
+          range: [1, 3],
+          default: true
+        },
+        {
+          key: 'verde',
+          label: 'Verde - Fluor',
+          swatch: '#d9ff43',
+          range: [4, 6]
+        },
+        {
+          key: 'rojo',
+          label: 'Rojo',
+          swatch: '#c91f2c',
+          range: [7, 9]
+        }
+      ],
+      specs: ['1000 W', 'Homologado DGT', '60-65 km'],
+      homeOrder: 1,
+      homeTitle: 'Ecoxtrem M41 — Tank Ultimate 1000W',
+      homeAriaLabel: 'Ecoxtrem M41 — Tank Ultimate 1000W',
+      priceAriaLabel: 'Precio M41 — Tank Ultimate',
+      dgtCertified: true,
+      dgtTooltipText: dgtTooltipText,
+      gallery: [
+        { src: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/1.webp', alt: 'Ecoxtrem M41 Tank Ultimate 1000W' },
+        { src: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/2.webp', alt: 'Ecoxtrem M41 Tank vista 2' },
+        { src: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/3.webp', alt: 'Ecoxtrem M41 Tank vista 3' },
+        { src: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/4.webp', alt: 'Ecoxtrem M41 Tank vista 4' },
+        { src: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/5.webp', alt: 'Ecoxtrem M41 Tank vista 5' },
+        { src: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/6.webp', alt: 'Ecoxtrem M41 Tank vista 6' },
+        { src: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/7.webp', alt: 'Ecoxtrem M41 Tank vista 7' },
+        { src: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/8.webp', alt: 'Ecoxtrem M41 Tank vista 8' },
+        { src: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/9.webp', alt: 'Ecoxtrem M41 Tank vista 9' }
+      ]
+    },
+    {
+      id: 'ecoxtrem-bison-gt-carbon-design',
+      sku: 'BISONGT',
+      name: 'Bison GT Carbon Design',
+      menuLabel: 'Bison GT Carbon',
+      badgeText: 'BISON GT',
+      brand: 'Ecoxtrem',
+      series: 'ecoxtrem',
+      productType: 'electric-scooter',
+      catalogType: 'vehicle',
+      categoryKey: 'electric-scooters',
+      priceText: '470 €',
+      compareAtPriceText: '560 €',
+      stock: 'in_stock',
+      paypalId: 'BISONGTCARBONDESIGN',
+      href: '/patinetes/ecoxtrem/bison-gt-carbon-design/',
+      image: '/patinetes/ecoxtrem/bison-gt-carbon-design/img/1.webp',
+      alt: 'Patinete eléctrico Ecoxtrem Bison GT Carbon Design',
+      colorVariants: [
+        {
+          key: 'rojo-negro',
+          label: 'Rojo/Negro',
+          swatch: 'linear-gradient(90deg, #c91f2c 50%, #111111 50%)',
+          range: [1, 3],
+          default: true
+        },
+        {
+          key: 'gris',
+          label: 'Gris',
+          swatch: '#8c9099',
+          range: [4, 6]
+        },
+        {
+          key: 'negro',
+          label: 'Negro',
+          swatch: '#111111',
+          range: [7, 9]
+        }
+      ],
+      specs: ['800 W', 'Homologado DGT', '40-50 km'],
+      homeOrder: 2,
+      homeTitle: 'Ecoxtrem Bison — GT Carbon Design',
+      homeAriaLabel: 'Ecoxtrem Bison — GT Carbon Design',
+      priceAriaLabel: 'Precio Bison — GT Carbon',
+      dgtCertified: true,
+      dgtTooltipText: dgtTooltipText,
+      gallery: [
+        { src: '/patinetes/ecoxtrem/bison-gt-carbon-design/img/1.webp', alt: 'Ecoxtrem Bison GT Carbon Design vista 1' },
+        { src: '/patinetes/ecoxtrem/bison-gt-carbon-design/img/2.webp', alt: 'Ecoxtrem Bison GT Carbon Design vista 2' },
+        { src: '/patinetes/ecoxtrem/bison-gt-carbon-design/img/3.webp', alt: 'Ecoxtrem Bison GT Carbon Design vista 3' },
+        { src: '/patinetes/ecoxtrem/bison-gt-carbon-design/img/4.webp', alt: 'Ecoxtrem Bison GT Carbon Design vista 4' },
+        { src: '/patinetes/ecoxtrem/bison-gt-carbon-design/img/5.webp', alt: 'Ecoxtrem Bison GT Carbon Design vista 5' },
+        { src: '/patinetes/ecoxtrem/bison-gt-carbon-design/img/6.webp', alt: 'Ecoxtrem Bison GT Carbon Design vista 6' },
+        { src: '/patinetes/ecoxtrem/bison-gt-carbon-design/img/7.webp', alt: 'Ecoxtrem Bison GT Carbon Design vista 7' },
+        { src: '/patinetes/ecoxtrem/bison-gt-carbon-design/img/8.webp', alt: 'Ecoxtrem Bison GT Carbon Design vista 8' },
+        { src: '/patinetes/ecoxtrem/bison-gt-carbon-design/img/9.webp', alt: 'Ecoxtrem Bison GT Carbon Design vista 9' }
+      ]
+    },
+    {
+      id: 'ecoxtrem-m41-armored-dual',
+      sku: 'M41DUAL',
+      name: 'M41 ARMORED DUAL',
+      menuLabel: 'M41 Armored Dual',
+      badgeText: 'M41 ARM DUAL',
+      brand: 'Ecoxtrem',
+      series: 'ecoxtrem',
+      productType: 'electric-scooter',
+      catalogType: 'vehicle',
+      categoryKey: 'electric-scooters',
+      priceText: '765 €',
+      compareAtPriceText: '899 €',
+      stock: 'in_stock',
+      paypalId: 'M41ARMOREDDUAL',
+      href: '/patinetes/ecoxtrem/m41-armored-dual/',
+      image: '/patinetes/ecoxtrem/m41-armored-dual/img/1.webp',
+      alt: 'Patinete eléctrico Ecoxtrem M41 ARMORED DUAL',
+      colorVariants: [
+        {
+          key: 'blanco',
+          label: 'BLANCO',
+          swatch: '#f8fafc',
+          range: [1, 4],
+          default: true
+        },
+        {
+          key: 'gris-amarillo',
+          label: 'Gris y Amarillo',
+          swatch: 'linear-gradient(90deg, #8c9099 50%, #eab308 50%)',
+          range: [8, 12]
+        },
+        {
+          key: 'azul',
+          label: 'Azul',
+          swatch: '#0a1f66',
+          range: [13, 16]
+        },
+        {
+          key: 'granate',
+          label: 'Granate',
+          swatch: '#7f1d1d',
+          range: [17, 21]
+        }
+      ],
+      specs: ['2 x 1000 W', '60 V 24 Ah', '80-90 km'],
+      homeOrder: 3,
+      homeTitle: 'Ecoxtrem M41 — Armored Dual',
+      homeAriaLabel: 'Ecoxtrem M41 — Armored Dual',
+      priceAriaLabel: 'Precio M41 — Armored Dual',
+      dgtCertified: true,
+      dgtTooltipText: dgtTooltipText,
+      gallery: [
+        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/1.webp', alt: 'Ecoxtrem M41 Armored Dual vista 1' },
+        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/2.webp', alt: 'Ecoxtrem M41 Armored Dual vista 2' },
+        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/3.webp', alt: 'Ecoxtrem M41 Armored Dual vista 3' },
+        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/4.webp', alt: 'Ecoxtrem M41 Armored Dual vista 4' },
+        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/5.webp', alt: 'Ecoxtrem M41 Armored Dual vista 5' },
+        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/6.webp', alt: 'Ecoxtrem M41 Armored Dual vista 6' },
+        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/7.webp', alt: 'Ecoxtrem M41 Armored Dual vista 7' },
+        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/8.webp', alt: 'Ecoxtrem M41 Armored Dual vista 8' },
+        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/9.webp', alt: 'Ecoxtrem M41 Armored Dual vista 9' },
+        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/10.webp', alt: 'Ecoxtrem M41 Armored Dual vista 10' },
+        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/11.webp', alt: 'Ecoxtrem M41 Armored Dual vista 11' },
+        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/12.webp', alt: 'Ecoxtrem M41 Armored Dual vista 12' },
+        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/13.webp', alt: 'Ecoxtrem M41 Armored Dual vista 13' },
+        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/14.webp', alt: 'Ecoxtrem M41 Armored Dual vista 14' },
+        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/15.webp', alt: 'Ecoxtrem M41 Armored Dual vista 15' },
+        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/16.webp', alt: 'Ecoxtrem M41 Armored Dual vista 16' },
+        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/17.webp', alt: 'Ecoxtrem M41 Armored Dual vista 17' },
+        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/18.jpg', alt: 'Ecoxtrem M41 Armored Dual vista 18' },
+        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/19.webp', alt: 'Ecoxtrem M41 Armored Dual vista 19' },
+        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/20.webp', alt: 'Ecoxtrem M41 Armored Dual vista 20' },
+        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/21.webp', alt: 'Ecoxtrem M41 Armored Dual vista 21' },
+        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/22.webp', alt: 'Ecoxtrem M41 Armored Dual vista 22' },
+        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/DSC00442%20copia.jpg', alt: 'Ecoxtrem M41 Armored Dual vista adicional' }
+      ]
+    },
     {
       id: 'k-g2-pro',
       sku: 'G2PRO',
@@ -166,7 +372,7 @@
       productType: 'electric-scooter',
       catalogType: 'vehicle',
       categoryKey: 'electric-scooters',
-      priceText: '550 €',
+      priceText: '515 €',
       compareAtPriceText: '660 €',
       stock: 'in_stock',
       paypalId: 'S5A5HD7BQ4XSA',
@@ -235,7 +441,7 @@
       productType: 'electric-scooter',
       catalogType: 'vehicle',
       categoryKey: 'electric-scooters',
-      priceText: '1 €',
+      priceText: '185 €',
       compareAtPriceText: '220,50 €',
       stock: 'in_stock',
       paypalId: 'PSFEEEULL7H5Y',
@@ -371,7 +577,7 @@
       compareAtPriceText: '805 €',
       stock: 'in_stock',
       href: '/patinetes/series-n/v70-connected/',
-      image: '/patinetes/series-n/v70-connected/img/2.png',
+      image: '/patinetes/series-n/v70-connected/img/2.webp',
       alt: 'Patinete electrico Cecotec Bongo V70 Connected',
       specs: ['1500 W max.', 'Hasta 70 km', '48 V 15 Ah'],
       homeOrder: 5,
@@ -381,50 +587,12 @@
       dgtCertified: true,
       dgtTooltipText: dgtTooltipText,
       gallery: [
-        { src: '/patinetes/series-n/v70-connected/img/2.png', alt: 'Bongo V70 Connected vista principal' },
-        { src: '/patinetes/series-n/v70-connected/img/1.jpg', alt: 'Bongo V70 Connected vista 1' },
-        { src: '/patinetes/series-n/v70-connected/img/3.png', alt: 'Bongo V70 Connected vista 3' },
-        { src: '/patinetes/series-n/v70-connected/img/4.png', alt: 'Bongo V70 Connected vista 4' },
-        { src: '/patinetes/series-n/v70-connected/img/5.jpg', alt: 'Bongo V70 Connected vista 5' },
-        { src: '/patinetes/series-n/v70-connected/img/6.jpg', alt: 'Bongo V70 Connected vista 6' }
-      ]
-    },
-    {
-      id: 'e8',
-      sku: 'E8',
-      name: 'TODIMART-SEEMAR E8',
-      menuLabel: 'E8',
-      badgeText: 'E8',
-      brand: 'TODIMART - SEEMAR',
-      series: 'n',
-      productType: 'electric-scooter',
-      catalogType: 'vehicle',
-      categoryKey: 'electric-scooters',
-      priceText: '399 €',
-      compareAtPriceText: '500 €',
-      stock: 'in_stock',
-      paypalId: 'WYSPHQTDE9Z6Y',
-      href: '/patinetes/series-n/e8/',
-      image: '/patinetes/series-n/e8/img/1.webp',
-      alt: 'Patinete eléctrico TODIMART-SEEMAR E8',
-      specs: ['800 W', 'Hasta 60 km', '48 V 13 Ah'],
-      homeOrder: 5,
-      homeTitle: 'E8 — Patinete eléctrico (Serie N)',
-      homeAriaLabel: 'E8 — Serie N',
-      priceAriaLabel: 'Precio E8',
-      gallery: [
-        { src: '/patinetes/series-n/e8/img/1.webp', alt: 'E8 vista 1' },
-        { src: '/patinetes/series-n/e8/img/2.webp', alt: 'E8 vista 2' },
-        { src: '/patinetes/series-n/e8/img/3.webp', alt: 'E8 vista 3' },
-        { src: '/patinetes/series-n/e8/img/4.webp', alt: 'E8 vista 4' },
-        { src: '/patinetes/series-n/e8/img/5.webp', alt: 'E8 vista 5' },
-        { src: '/patinetes/series-n/e8/img/6.webp', alt: 'E8 vista 6' },
-        { src: '/patinetes/series-n/e8/img/7.webp', alt: 'E8 vista 7' },
-        { src: '/patinetes/series-n/e8/img/8.webp', alt: 'E8 vista 8' },
-        { src: '/patinetes/series-n/e8/img/9.webp', alt: 'E8 vista 9' },
-        { src: '/patinetes/series-n/e8/img/10.webp', alt: 'E8 vista 10' },
-        { src: '/patinetes/series-n/e8/img/11.webp', alt: 'E8 vista 11' },
-        { src: '/patinetes/series-n/e8/img/12.webp', alt: 'E8 vista 12' }
+        { src: '/patinetes/series-n/v70-connected/img/2.webp', alt: 'Bongo V70 Connected vista principal' },
+        { src: '/patinetes/series-n/v70-connected/img/1.webp', alt: 'Bongo V70 Connected vista 1' },
+        { src: '/patinetes/series-n/v70-connected/img/3.webp', alt: 'Bongo V70 Connected vista 3' },
+        { src: '/patinetes/series-n/v70-connected/img/4.webp', alt: 'Bongo V70 Connected vista 4' },
+        { src: '/patinetes/series-n/v70-connected/img/5.webp', alt: 'Bongo V70 Connected vista 5' },
+        { src: '/patinetes/series-n/v70-connected/img/6.webp', alt: 'Bongo V70 Connected vista 6' }
       ]
     },
     {
@@ -789,7 +957,7 @@
       compareAtPriceText: '',
       stock: 'in_stock',
       href: '/accesorios/bolsa-almacenamiento/',
-      image: '/img/accessories/storage-bag.jpg',
+      image: '/accesorios/bolsa-almacenamiento/img/1.webp',
       alt: 'Bolsa de almacenamiento impermeable para patinete o bicicleta',
       specs: ['Impermeable', '25 × 12 × 10 cm', 'Para patinete y bici'],
       homeOrder: 1,
@@ -797,10 +965,10 @@
       homeAriaLabel: 'Bolsa de almacenamiento para patinete o bicicleta',
       priceAriaLabel: 'Precio bolsa de almacenamiento',
       gallery: [
-        { src: '/img/accessories/storage-bag.jpg', alt: 'Bolsa de almacenamiento impermeable' },
-        { src: '/img/accessories/storage-bag-2.jpg', alt: 'Bolsa de almacenamiento montada en el manillar' },
-        { src: '/img/accessories/storage-bag-3.jpg', alt: 'Bolsa de almacenamiento – interior' },
-        { src: '/img/accessories/storage-bag-4.jpg', alt: 'Bolsa de almacenamiento – vista lateral' }
+        { src: '/accesorios/bolsa-almacenamiento/img/1.webp', alt: 'Bolsa de almacenamiento impermeable' },
+        { src: '/accesorios/bolsa-almacenamiento/img/2.webp', alt: 'Bolsa de almacenamiento montada en el manillar' },
+        { src: '/accesorios/bolsa-almacenamiento/img/3.webp', alt: 'Bolsa de almacenamiento – interior' },
+        { src: '/accesorios/bolsa-almacenamiento/img/4.webp', alt: 'Bolsa de almacenamiento – vista lateral' }
       ]
     }
     ,{
@@ -818,7 +986,7 @@
       compareAtPriceText: '',
       stock: 'in_stock',
       href: '/accesorios/soporte-movil/',
-      image: '/img/accessories/phone-holder-2.jpg',
+      image: '/accesorios/soporte-movil/img/2.webp',
       alt: 'Soporte móvil antivibración para patinete eléctrico',
       specs: ['Antivibración', 'Giro 360°', '5,4–7,2”'],
       homeOrder: 2,
@@ -826,9 +994,9 @@
       homeAriaLabel: 'Soporte móvil antivibración para patinete',
       priceAriaLabel: 'Precio soporte móvil',
       gallery: [
-        { src: '/img/accessories/phone-holder-2.jpg', alt: 'Soporte móvil antivibración – vista principal' },
-        { src: '/img/accessories/phone-holder-3.jpg', alt: 'Soporte móvil antivibración – contenido del pack' },
-        { src: '/img/accessories/phone-holder-4.jpg', alt: 'Soporte móvil antivibración – vista lateral' }
+        { src: '/accesorios/soporte-movil/img/2.webp', alt: 'Soporte móvil antivibración – vista principal' },
+        { src: '/accesorios/soporte-movil/img/3.webp', alt: 'Soporte móvil antivibración – contenido del pack' },
+        { src: '/accesorios/soporte-movil/img/4.webp', alt: 'Soporte móvil antivibración – vista lateral' }
       ]
     }
     ,{
@@ -846,7 +1014,7 @@
       compareAtPriceText: '',
       stock: 'in_stock',
       href: '/accesorios/pegatina-the-beast/',
-      image: '/img/accessories/the-beast-2.jpg',
+      image: '/accesorios/pegatina-the-beast/img/2.webp',
       alt: 'Pegatinas THE BEAST impermeables de vinilo',
       specs: ['2 uds.', 'PVC impermeable', '18 × 3,3 cm'],
       homeOrder: 3,
@@ -854,10 +1022,10 @@
       homeAriaLabel: 'Pegatinas THE BEAST para casco o patinete',
       priceAriaLabel: 'Precio pegatinas THE BEAST',
       gallery: [
-        { src: '/img/accessories/the-beast-2.jpg', alt: 'Pegatinas THE BEAST – pack' },
-        { src: '/img/accessories/the-beast.jpg', alt: 'Pegatinas THE BEAST – ejemplo de uso' },
-        { src: '/img/accessories/the-beast-3.jpg', alt: 'Pegatinas THE BEAST – detalle' },
-        { src: '/img/accessories/the-beast-4.jpg', alt: 'Pegatinas THE BEAST – aplicación' }
+        { src: '/accesorios/pegatina-the-beast/img/2.webp', alt: 'Pegatinas THE BEAST – pack' },
+        { src: '/accesorios/pegatina-the-beast/img/1.webp', alt: 'Pegatinas THE BEAST – ejemplo de uso' },
+        { src: '/accesorios/pegatina-the-beast/img/3.webp', alt: 'Pegatinas THE BEAST – detalle' },
+        { src: '/accesorios/pegatina-the-beast/img/4.webp', alt: 'Pegatinas THE BEAST – aplicación' }
       ]
     }
     ,{
@@ -875,7 +1043,7 @@
       compareAtPriceText: '',
       stock: 'in_stock',
       href: '/accesorios/pegatinas-reflectantes/',
-      image: '/img/accessories/reflective-stickers.jpg',
+      image: '/accesorios/pegatinas-reflectantes/img/1.webp',
       alt: 'Pegatinas reflectantes para patinete eléctrico o bicicleta',
       specs: ['Efecto fluorescente', 'Para Xiaomi/Ninebot', 'Mayor visibilidad'],
       homeOrder: 4,
@@ -883,10 +1051,10 @@
       homeAriaLabel: 'Pegatinas reflectantes de seguridad',
       priceAriaLabel: 'Precio pegatinas reflectantes',
       gallery: [
-        { src: '/img/accessories/reflective-stickers.jpg', alt: 'Pegatinas reflectantes para patinete' },
-        { src: '/img/accessories/reflective-stickers-2.jpg', alt: 'Pegatinas reflectantes – detalle' },
-        { src: '/img/accessories/reflective-stickers-3.jpg', alt: 'Pegatinas reflectantes – aplicación' },
-        { src: '/img/accessories/reflective-stickers-4.jpg', alt: 'Pegatinas reflectantes – pack' }
+        { src: '/accesorios/pegatinas-reflectantes/img/1.webp', alt: 'Pegatinas reflectantes para patinete' },
+        { src: '/accesorios/pegatinas-reflectantes/img/2.webp', alt: 'Pegatinas reflectantes – detalle' },
+        { src: '/accesorios/pegatinas-reflectantes/img/3.webp', alt: 'Pegatinas reflectantes – aplicación' },
+        { src: '/accesorios/pegatinas-reflectantes/img/4.webp', alt: 'Pegatinas reflectantes – pack' }
       ]
     }
     ,{
@@ -904,7 +1072,7 @@
       compareAtPriceText: '',
       stock: 'in_stock',
       href: '/accesorios/luces-led-rgb/',
-      image: '/img/accessories/led-rgb-1.jpg',
+      image: '/accesorios/luces-led-rgb/img/1.webp',
       alt: 'Luces LED RGB para patinete o bicicleta',
       specs: ['Mando RF', 'Recarga USB', 'Kit 4 luces'],
       homeOrder: 5,
@@ -912,9 +1080,9 @@
       homeAriaLabel: 'Luces LED RGB para patinete y bicicleta',
       priceAriaLabel: 'Precio luces LED RGB',
       gallery: [
-        { src: '/img/accessories/led-rgb-1.jpg', alt: 'Luces LED RGB para patinete o bicicleta' },
-        { src: '/img/accessories/led-rgb-2.jpg', alt: 'Luces LED RGB – detalle' },
-        { src: '/img/accessories/led-rgb-3.jpg', alt: 'Luces LED RGB – montadas' }
+        { src: '/accesorios/luces-led-rgb/img/1.webp', alt: 'Luces LED RGB para patinete o bicicleta' },
+        { src: '/accesorios/luces-led-rgb/img/2.webp', alt: 'Luces LED RGB – detalle' },
+        { src: '/accesorios/luces-led-rgb/img/3.webp', alt: 'Luces LED RGB – montadas' }
       ]
     }
     ,{
@@ -1101,7 +1269,7 @@
       compareAtPriceText: '770 €',
       stock: 'in_stock',
       href: '/patinetes/series-ix/ix8/',
-      image: '/patinetes/series-ix/ix8/img/1.jpg',
+      image: '/patinetes/series-ix/ix8/img/1.webp',
       alt: 'Patinete electrico iScooter IX8 todoterreno',
       specs: ['2400 W', '65-70 km', '48 V 20 Ah'],
       homeOrder: 3,
@@ -1109,12 +1277,12 @@
       homeAriaLabel: 'IX8 - 2400 W y hasta 70 km',
       priceAriaLabel: 'Precio IX8',
       gallery: [
-        { src: '/patinetes/series-ix/ix8/img/1.jpg', alt: 'IX8 vista 1' },
-        { src: '/patinetes/series-ix/ix8/img/2.jpg', alt: 'IX8 vista 2' },
-        { src: '/patinetes/series-ix/ix8/img/3.jpg', alt: 'IX8 vista 3' },
-        { src: '/patinetes/series-ix/ix8/img/4.jpg', alt: 'IX8 vista 4' },
-        { src: '/patinetes/series-ix/ix8/img/5.jpg', alt: 'IX8 vista 5' },
-        { src: '/patinetes/series-ix/ix8/img/6.jpg', alt: 'IX8 vista 6' }
+        { src: '/patinetes/series-ix/ix8/img/1.webp', alt: 'IX8 vista 1' },
+        { src: '/patinetes/series-ix/ix8/img/2.webp', alt: 'IX8 vista 2' },
+        { src: '/patinetes/series-ix/ix8/img/3.webp', alt: 'IX8 vista 3' },
+        { src: '/patinetes/series-ix/ix8/img/4.webp', alt: 'IX8 vista 4' },
+        { src: '/patinetes/series-ix/ix8/img/5.webp', alt: 'IX8 vista 5' },
+        { src: '/patinetes/series-ix/ix8/img/6.webp', alt: 'IX8 vista 6' }
       ]
     }];
 
@@ -1124,10 +1292,20 @@
     }) : [];
   }
 
+  function cloneColorVariants(colorVariants) {
+    return Array.isArray(colorVariants) ? colorVariants.map(function (variant) {
+      var copy = Object.assign({}, variant);
+      if (Array.isArray(variant.images)) copy.images = variant.images.slice();
+      if (Array.isArray(variant.range)) copy.range = variant.range.slice();
+      return copy;
+    }) : [];
+  }
+
   function cloneProducts() {
     return products.map(function (product) {
       var copy = Object.assign({}, product);
       copy.gallery = cloneGallery(product.gallery);
+      copy.colorVariants = cloneColorVariants(product.colorVariants);
       return copy;
     });
   }
@@ -1267,6 +1445,123 @@
       .flatMap(function (category) { return category.series; });
   }
 
+  function compactKey(value) {
+    return String(value || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '');
+  }
+
+  function toVariantIndexes(variant, total) {
+    var indexes = [];
+    if (!variant || !Number.isFinite(total) || total <= 0) return indexes;
+
+    if (Array.isArray(variant.images) && variant.images.length) {
+      variant.images.forEach(function (raw) {
+        var parsed = typeof raw === 'number' ? raw : parseInt(raw, 10);
+        if (Number.isFinite(parsed) && parsed >= 1 && parsed <= total) indexes.push(parsed);
+      });
+      return indexes;
+    }
+
+    var start = null;
+    var end = null;
+    if (Array.isArray(variant.range) && variant.range.length >= 2) {
+      start = parseInt(variant.range[0], 10);
+      end = parseInt(variant.range[1], 10);
+    } else if (variant.from !== undefined || variant.to !== undefined) {
+      start = parseInt(variant.from, 10);
+      end = parseInt(variant.to, 10);
+    } else if (variant.start !== undefined || variant.end !== undefined) {
+      start = parseInt(variant.start, 10);
+      end = parseInt(variant.end, 10);
+    }
+
+    if (!Number.isFinite(start) || !Number.isFinite(end)) return indexes;
+    if (start > end) {
+      var swap = start;
+      start = end;
+      end = swap;
+    }
+
+    for (var i = start; i <= end; i++) {
+      if (i >= 1 && i <= total) indexes.push(i);
+    }
+
+    return indexes;
+  }
+
+  function validateCatalogColors(productsList) {
+    var warnings = [];
+    var errors = [];
+    var list = Array.isArray(productsList) ? productsList : [];
+
+    list.forEach(function (product) {
+      var productId = product.id || product.sku || product.name || 'producto-sin-id';
+      var gallery = Array.isArray(product.gallery) ? product.gallery : [];
+      var variants = Array.isArray(product.colorVariants) ? product.colorVariants : [];
+
+      if (!variants.length) return;
+
+      if (!gallery.length) {
+        errors.push('[' + productId + '] Tiene colorVariants pero no tiene gallery.');
+        return;
+      }
+
+      var defaultCount = variants.filter(function (variant) {
+        return variant && (variant.default === true || variant.defaultColor === true);
+      }).length;
+
+      if (defaultCount === 0) {
+        warnings.push('[' + productId + '] Sin variante default/defaultColor. Se usara la primera.');
+      } else if (defaultCount > 1) {
+        warnings.push('[' + productId + '] Tiene ' + defaultCount + ' variantes marcadas como default.');
+      }
+
+      var seenKeys = Object.create(null);
+      var usedIndexes = Object.create(null);
+
+      variants.forEach(function (variant) {
+        var label = (variant && (variant.label || variant.name || variant.key)) || 'variante-sin-nombre';
+        var key = compactKey(variant && variant.key);
+
+        if (!key) {
+          errors.push('[' + productId + '] Variante "' + label + '" sin key.');
+        } else if (seenKeys[key]) {
+          errors.push('[' + productId + '] key duplicada en colorVariants: "' + key + '".');
+        } else {
+          seenKeys[key] = true;
+        }
+
+        var indexes = toVariantIndexes(variant, gallery.length);
+        if (!indexes.length) {
+          errors.push('[' + productId + '] Variante "' + label + '" no resuelve imagenes validas (1-' + gallery.length + ').');
+          return;
+        }
+
+        indexes.forEach(function (idx) {
+          var media = gallery[idx - 1];
+          if (!media || !media.src) {
+            errors.push('[' + productId + '] Variante "' + label + '" referencia indice ' + idx + ' sin src valido.');
+          }
+
+          if (usedIndexes[idx]) {
+            warnings.push('[' + productId + '] Solape de indice ' + idx + ' entre variantes de color.');
+          }
+          usedIndexes[idx] = true;
+        });
+      });
+    });
+
+    return {
+      checkedProducts: list.length,
+      warnings: warnings,
+      errors: errors,
+      ok: errors.length === 0
+    };
+  }
+
   window.SCOOTSHOP_CATEGORIES = cloneCategoryDefinitions();
   window.SCOOTSHOP_SERIES = cloneSeriesDefinitions();
   window.SCOOTSHOP_PRODUCTS = cloneProducts();
@@ -1282,5 +1577,20 @@
   window.SCOOTSHOP_getCategoryProducts = getCategoryProducts;
   window.SCOOTSHOP_getCategorySeries = getCategorySeries;
   window.SCOOTSHOP_getSeriesProducts = getSeriesProducts;
+  window.SCOOTSHOP_validateCatalogColors = function () {
+    var report = validateCatalogColors(window.SCOOTSHOP_PRODUCTS || []);
+    return report;
+  };
+
+  if (typeof location !== 'undefined' && /^(localhost|127\.0\.0\.1)$/i.test(location.hostname || '')) {
+    try {
+      var report = validateCatalogColors(window.SCOOTSHOP_PRODUCTS || []);
+      if (!report.ok) {
+        console.warn('[SCOOTSHOP] Catalogo con errores de color:', report.errors);
+      } else if (report.warnings.length) {
+        console.warn('[SCOOTSHOP] Catalogo con avisos de color:', report.warnings);
+      }
+    } catch (_) {}
+  }
 })();
 

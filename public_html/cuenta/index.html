@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="es-ES">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Mi cuenta | SCOOT SHOP</title>
+  <meta name="description" content="Accede a tu cuenta SCOOT SHOP con Google, revisa tus pedidos y gestiona tu perfil de cliente." />
+  <meta name="robots" content="noindex,nofollow,max-image-preview:large" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="color-scheme" content="only light" />
+  <meta name="asset-version" content="20260531-3" />
+
+  <link rel="canonical" href="https://scootshop.co/cuenta/" />
+  <link rel="icon" href="/favicon.ico?v=20260605-2" sizes="any" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=20260605-2" />
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png?v=20260605-2" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png?v=20260605-2" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=20260605-2" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=20260605-2" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=20260605-2" />
+  <link rel="manifest" href="/site.webmanifest?v=20260605-2" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" />
+  <link rel="stylesheet" href="/css/icons.css?v=20260605-2" />
+  <link rel="stylesheet" href="/css/main.css?v=20260605-2" />
+  <link rel="stylesheet" href="/css/partials.mobile-menu.css?v=20260605-2" />
+
+  <style>
+    html {
+      background: #eef2f6;
+    }
+    body.account-page {
+      margin: 0;
+      min-height: 100dvh;
+      background-color: #eef2f6;
+      background-image: radial-gradient(1200px 500px at 20% -10%, #ffffff 0%, #f3f5f8 40%, #eef2f6 100%);
+      color: #0f172a;
+      font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+    }
+    .account-shell {
+      min-height: 100vh;
+    }
+    .account-main {
+      padding: 12px 0 64px;
+    }
+    .account-hero {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+      align-items: stretch;
+      margin-top: 4px;
+    }
+    .account-card,
+    .account-panel,
+    .account-order {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-left: 0;
+      box-shadow: none;
+    }
+    .account-card {
+      order: 1;
+      border-radius: 14px;
+      padding: 18px 18px 16px;
+      border-top: 1px solid #e5e7eb;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .account-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: #f8fafc;
+      color: #475569;
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+    }
+    .account-title {
+      margin: 14px 0 10px;
+      font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+      font-size: clamp(1.6rem, 2.6vw, 2.1rem);
+      line-height: 1.12;
+      letter-spacing: -.02em;
+    }
+    .account-session-state {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #2563eb;
+      background: #eff6ff;
+      color: #1d4ed8;
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      margin-top: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    .account-session-state::before {
+      content: none;
+    }
+    .account-session-state--guest { color: #1d4ed8; background: #eff6ff; border-color: #2563eb; }
+    .account-session-state--logged-in { color: #0f766e; background: #ecfeff; border-color: #14b8a6; }
+    .account-session-state--expired { color: #9a3412; background: #fff7ed; border-color: #fdba74; }
+    .account-lead {
+      margin: 0;
+      color: #475569;
+      font-size: .98rem;
+      line-height: 1.55;
+      max-width: 56ch;
+    }
+    .account-points {
+      margin: 18px 0 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 8px;
+    }
+    .account-points li {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      color: #334155;
+      font-weight: 500;
+      font-size: .94rem;
+    }
+    .account-points i {
+      margin-top: 2px;
+      color: #0f172a;
+    }
+    .account-stats {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 9px;
+      border-top: 1px solid #eef2f7;
+      border-bottom: 1px solid #eef2f7;
+      padding: 10px 0;
+    }
+    .account-stat {
+      padding: 12px 12px;
+      border-radius: 10px;
+      background: #fafbfc;
+      border: 1px solid #edf1f5;
+      border-right: 1px solid #edf1f5;
+    }
+    .account-stat:last-child {
+      border-right: 1px solid #edf1f5;
+    }
+    .account-stat span {
+      display: block;
+      font-size: .66rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 5px;
+    }
+    .account-stat strong {
+      display: block;
+      font-size: .98rem;
+      color: #0f172a;
+      line-height: 1.2;
+      word-break: break-word;
+    }
+    .account-panel {
+      order: 0;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      padding: 0;
+      width: 100%;
+      max-width: none;
+      align-self: start;
+      position: relative;
+      top: 0;
+    }
+    .account-session-shell {
+      position: relative;
+      overflow: hidden;
+      background: #ffffff;
+      border: 0;
+      border-radius: 22px;
+      padding: 20px;
+      min-height: 0;
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.92) inset,
+        0 18px 44px rgba(15,23,42,.08),
+        0 6px 18px rgba(15,23,42,.04);
+      color: #0f172a;
+    }
+    .account-session-shell.is-guest .account-session-state {
+      color: #1d4ed8;
+      background: #eff6ff;
+      border-color: #2564eb00;
+    }
+    .account-session-shell.is-guest .account-meta strong {
+      font-size: 1.12rem;
+    }
+    .account-session-shell.is-guest #accountStatusRow {
+      display: none !important;
+    }
+    .account-session-shell.is-logged #accountStatusRow {
+      display: flex;
+    }
+    .account-session-shell::before {
+      content: none;
+    }
+    .account-session-shell::after {
+      content: none;
+    }
+    .account-panel h2 {
+      margin: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      font-size: clamp(1.2rem, 2.5vw, 1.52rem);
+      letter-spacing: -.03em;
+      text-transform: none;
+      color: #0f172a;
+      font-weight: 800;
+      line-height: 1.15;
+      position: relative;
+      z-index: 1;
+      padding-right: 0;
+    }
+    .account-session-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+      position: relative;
+      z-index: 1;
+    }
+    .account-panel h2::before {
+      content: none;
+    }
+    .account-session-shell .account-session-state {
+      position: static;
+      margin: 0;
+    }
+    .account-session-shell .account-session-state::before {
+      display: none;
+    }
+    .orders-title {
+      margin: 0 0 8px;
+      font-size: 1.05rem;
+      letter-spacing: -.02em;
+      text-transform: none;
+      color: #0f172a;
+    }
+    .account-panel p,
+    .account-note,
+    .account-empty {
+      color: #64748b;
+      line-height: 1.55;
+    }
+    .account-status {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 0;
+      border-radius: 0;
+      background: transparent;
+      color: #0f172a;
+      border: 0;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
+    }
+    .account-status-row {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 2px;
+    }
+    #accountAvatarWrap {
+      width: 52px;
+      height: 52px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+    }
+    .account-status-row .account-meta {
+      min-width: 0;
+    }
+    .account-login {
+      margin-top: 14px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      border-radius: 0;
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 10px;
+    }
+    .account-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 999px;
+      object-fit: cover;
+      background: #ffffff;
+      border: 1px solid #d8e1ea;
+      box-shadow: 0 8px 18px rgba(15,23,42,.06);
+      flex-shrink: 0;
+    }
+    .account-avatar-fallback {
+      width: 52px;
+      height: 52px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: #f8fafc;
+      border: 1px solid #d8e1ea;
+      font-size: 1.08rem;
+      font-weight: 800;
+      color: #334155;
+      box-shadow: 0 8px 18px rgba(15,23,42,.06);
+      flex-shrink: 0;
+    }
+    .account-meta strong {
+      display: block;
+      font-size: 1.24rem;
+      line-height: 1.1;
+      margin-bottom: 5px;
+      color: #111827;
+    }
+    .account-meta span {
+      display: block;
+      color: #6b7280;
+      font-size: .92rem;
+      line-height: 1.4;
+    }
+    .account-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    #accountLoggedInBox {
+      margin-top: 12px;
+    }
+    #accountLoggedInBox .account-note {
+      display: none;
+    }
+    #accountLoggedInBox .account-actions {
+      margin-top: 0;
+    }
+    .account-session-shell.is-guest .account-login {
+      margin-top: 0;
+      padding: 0;
+      border: 0;
+      width: 100%;
+      max-width: 100%;
+    }
+    .account-session-shell.is-guest .account-login strong {
+      display: none;
+    }
+    .account-session-shell.is-guest .account-login .account-note {
+      display: none;
+    }
+    .account-session-shell.is-guest #googleLoginButton {
+      min-height: 44px;
+      margin-top: 0;
+    }
+    .account-insights {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .session-metric {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(255,255,255,.99) 0%, rgba(248,251,254,.97) 100%);
+      border: 1px solid rgba(15,23,42,.06);
+      border-radius: 16px;
+      padding: 10px 11px;
+      min-height: 84px;
+      display: grid;
+      align-content: start;
+      gap: 6px;
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.92) inset,
+        0 10px 24px rgba(15,23,42,.07),
+        0 3px 9px rgba(15,23,42,.03);
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+    .session-metric::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(15,23,42,.22), rgba(15,23,42,.06));
+      opacity: .65;
+      border-radius: 999px;
+    }
+    .session-metric-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .session-metric:hover {
+      border-color: rgba(15,23,42,.11);
+      transform: translateY(-1px);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.96) inset,
+        0 14px 30px rgba(15,23,42,.1),
+        0 5px 12px rgba(15,23,42,.05);
+    }
+    .session-metric-label {
+      font-size: .66rem;
+      font-weight: 900;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: #67768c;
+      line-height: 1.1;
+    }
+    .session-metric-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #eef3f8;
+      color: #334155;
+      font-size: .76rem;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
+      flex: 0 0 auto;
+    }
+    .session-metric-icon svg {
+      width: 13px;
+      height: 13px;
+      display: block;
+    }
+    .session-metric strong {
+      font-size: 1.08rem;
+      font-weight: 800;
+      letter-spacing: -.01em;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+    .session-metric small {
+      font-size: .72rem;
+      color: #6b7280;
+      line-height: 1.25;
+    }
+    .session-metric--cta {
+      text-decoration: none;
+      color: inherit;
+      background: #ffffff;
+      border-color: rgba(15,23,42,.06);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.92) inset,
+        0 10px 24px rgba(15,23,42,.07),
+        0 3px 9px rgba(15,23,42,.03);
+    }
+    .session-metric--orders::before {
+      background: linear-gradient(90deg, rgba(37,99,235,.45), rgba(37,99,235,.12));
+    }
+    .session-metric--tracking::before {
+      background: linear-gradient(90deg, rgba(255, 119, 0, 0.5), rgba(255, 119, 0, 0.5));
+    }
+    .session-metric--orders .session-metric-icon {
+      background: #eaf2ff;
+      color: #1d4ed8;
+    }
+    .session-metric--tracking .session-metric-icon {
+      background: #f8f4ed;
+      color: #654b16;
+    }
+    .session-metric--cta .session-metric-icon {
+      background: #eef3f8;
+      color: #334155;
+    }
+    .session-metric--cta strong {
+      color: #0f172a;
+    }
+    .session-metric--cta small {
+      color: #6b7280;
+    }
+    .session-metric--cta:hover,
+    .session-metric--cta:focus-visible {
+      border-color: rgba(15,23,42,.11);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.96) inset,
+        0 14px 30px rgba(15,23,42,.1),
+        0 5px 12px rgba(15,23,42,.05);
+      outline: none;
+    }
+    #logoutBtn {
+      background: #0f172a;
+      border-color: #0f172a;
+      color: #ffffff;
+    }
+    #logoutBtn:hover,
+    #logoutBtn:active {
+      background: #1f2937;
+      border-color: #1f2937;
+      color: #ffffff;
+    }
+    .btn-accent,
+    .btn-ghost,
+    .btn-outline {
+      appearance: none;
+      border: 1px solid transparent;
+      border-bottom: 1px solid transparent;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font: inherit;
+      font-weight: 700;
+      font-size: .9rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .14s ease, color .14s ease, border-color .14s ease;
+    }
+    .btn-accent {
+      background: #d10000;
+      color: #ffffff;
+      border-color: #d10000;
+    }
+    .btn-ghost,
+    .btn-outline {
+      background: #ffffff;
+      border-color: #d1d5db;
+      color: #0f172a;
+    }
+    .btn-accent:hover,
+    .btn-ghost:hover,
+    .btn-outline:hover {
+      background: rgba(15, 23, 42, 0.03);
+    }
+    .account-login {
+      margin-top: 14px;
+      padding: 12px 0 0;
+      border-radius: 0;
+      background: transparent;
+      border: 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.18);
+      border-bottom: 0;
+      position: relative;
+      z-index: 1;
+    }
+    .account-session-shell.is-guest .account-login {
+      margin-top: 0;
+      padding: 0;
+      border-top: 0;
+      width: 100%;
+      max-width: 100%;
+    }
+    .account-session-shell.is-guest .account-login strong,
+    .account-session-shell.is-guest .account-login .account-note {
+      display: none;
+    }
+    .account-session-shell.is-guest #googleLoginButton {
+      margin-top: 0;
+      width: 100%;
+      min-height: 48px;
+    }
+    .account-session-shell.is-guest #authMessage {
+      display: none;
+    }
+    #googleLoginButton {
+      min-height: 44px;
+      margin-top: 10px;
+      width: 100%;
+      visibility: hidden;
+    }
+    #googleLoginButton[data-gsi-ready="1"] {
+      visibility: visible;
+    }
+    .account-note {
+      margin-top: 10px;
+      font-size: .88rem;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+      color: #475569;
+    }
+    .account-session-shell .account-note,
+    .account-session-shell .account-login strong {
+      color: #4b5563;
+    }
+    .account-session-shell .btn-accent {
+      background: #0f172a;
+      color: #ffffff;
+      border-color: #0f172a;
+    }
+    .account-session-shell .btn-ghost,
+    .account-session-shell .btn-outline {
+      background: #ffffff;
+      border-color: #d1d5db;
+      color: #111827;
+    }
+    .account-note--error {
+      color: #b91c1c;
+    }
+    .account-note--success {
+      color: #166534;
+    }
+    .orders-section {
+      margin-top: 12px;
+      display: grid;
+      gap: 14px;
+      border-top: 0;
+      padding-top: 0;
+    }
+    .orders-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 0 4px;
+    }
+    .orders-header p {
+      margin: 4px 0 0;
+      color: #64748b;
+    }
+    .orders-grid {
+      display: grid;
+      gap: 14px;
+    }
+    .order-history-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding: 0 2px 10px;
+      border-bottom: 1px solid #e7edf4;
+    }
+    .order-history-head h2,
+    .tracking-head h2 {
+      margin: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      font-size: clamp(1.2rem, 2.5vw, 1.52rem);
+      letter-spacing: -.03em;
+      color: #0f172a;
+      font-weight: 800;
+      line-height: 1.15;
+    }
+    .order-history-head h2::before,
+    .tracking-head h2::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: #0f172a;
+      opacity: .7;
+      font-family: "Font Awesome 6 Free";
+      flex-shrink: 0;
+    }
+    .history-go {
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #f8fafc;
+      color: #0f172a;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+    .order-history-list {
+      display: grid;
+      gap: 12px;
+    }
+    .order-history-item {
+      background: linear-gradient(180deg, rgba(255,255,255,.99) 0%, rgba(247,250,253,.97) 100%);
+      border: 0;
+      border-radius: 20px;
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+      cursor: pointer;
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.9) inset,
+        0 18px 44px rgba(15,23,42,.08),
+        0 6px 18px rgba(15,23,42,.04);
+      transform: translate3d(0, 0, 0);
+      transition: transform .34s cubic-bezier(.22, 1, .36, 1), box-shadow .32s ease-out;
+      will-change: transform, box-shadow;
+      backface-visibility: hidden;
+    }
+    .order-history-link {
+      display: block;
+      color: inherit;
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .order-history-link:focus-visible .order-history-item {
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.94) inset,
+        0 22px 48px rgba(15,23,42,.10),
+        0 9px 22px rgba(15,23,42,.05);
+      transform: translate3d(0, -2px, 0);
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .order-history-link:hover .order-history-item {
+        box-shadow:
+          0 1px 0 rgba(255,255,255,.94) inset,
+          0 22px 48px rgba(15,23,42,.10),
+          0 9px 22px rgba(15,23,42,.05);
+        transform: translate3d(0, -2px, 0);
+      }
+    }
+    .order-history-link:focus-visible {
+      outline: none;
+    }
+    .history-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding-top: 2px;
+    }
+    .history-action-link,
+    .history-action-resume {
+      border-radius: 999px;
+      border: 1px solid #d9dee7;
+      background: #f8fafc;
+      color: #0f172a;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: .84rem;
+      line-height: 1;
+      padding: 9px 14px;
+      cursor: pointer;
+      transition: border-color .18s ease, background-color .18s ease, color .18s ease;
+    }
+    .history-action-link:hover,
+    .history-action-link:focus-visible,
+    .history-action-resume:hover,
+    .history-action-resume:focus-visible {
+      border-color: #cbd5e1;
+      background: #ffffff;
+      outline: none;
+    }
+    .history-action-resume {
+      border-color: #0f172a;
+      background: #0f172a;
+      color: #ffffff;
+    }
+    .history-action-resume:hover,
+    .history-action-resume:focus-visible {
+      border-color: #1f2937;
+      background: #1f2937;
+    }
+    .history-action-resume:disabled {
+      opacity: .68;
+      cursor: wait;
+    }
+    .history-top {
+      display: grid;
+      grid-template-columns: 66px 1fr auto;
+      align-items: center;
+      gap: 12px;
+      overflow: visible;
+    }
+    .history-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: #31343a;
+      color: #f8fafc;
+      font-size: 1.6rem;
+      font-weight: 700;
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+    .history-avatar--product {
+
+      background: #ffffff;
+      box-shadow: 0px 0px 9px #e5e5e5;
+      background-color: #ffffff !important;
+      background-image: none !important;
+      border: 1px solid #d8e1ea00;
+    }
+    .history-avatar-img {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .history-avatar-img--single {
+      object-fit: contain;
+      object-position: center 58%;
+      transform: scale(.86);
+      transform-origin: center;
+      filter: saturate(1.04) contrast(1.02);
+    }
+    .history-avatar--collage {
+      border: 1px solid #d8e1ea;
+      background: #ffffff;
+      padding: 0;
+      overflow: visible;
+      place-items: stretch;
+    }
+    .history-avatar-grid {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+      gap: 1px;
+      line-height: 0;
+      min-height: 0;
+      border-radius: inherit;
+      overflow: hidden;
+      background: #eef3f8;
+    }
+    .history-avatar-tile {
+      width: 100%;
+      height: 100%;
+      border-radius: 0;
+      background: #eef3f8;
+      overflow: hidden;
+    }
+    .history-avatar-img--tile {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+    .history-avatar-badge {
+      position: absolute;
+      right: -8px;
+      top: -8px;
+      min-width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 7px;
+      background: #0f172a;
+      color: #ffffff;
+      border: 2px solid #ffffff;
+      font-size: .68rem;
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: .01em;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.28);
+      z-index: 6;
+      pointer-events: none;
+    }
+    .history-avatar--multi-fallback {
+      background: #1f2937;
+      color: #f8fafc;
+      font-size: .95rem;
+      letter-spacing: .02em;
+    }
+    .history-main strong {
+      display: block;
+      font-size: .98rem;
+      color: #111827;
+      line-height: 1.22;
+      letter-spacing: -.015em;
+      font-weight: 800;
+    }
+    .history-main span {
+      display: block;
+      margin-top: 2px;
+      color: #6b7280;
+      font-size: .82rem;
+      font-weight: 700;
+    }
+    .history-date {
+      color: #8b929d;
+      font-size: .78rem;
+      font-weight: 700;
+      white-space: nowrap;
+      padding-left: 8px;
+      align-self: start;
+      justify-self: end;
+    }
+    .tracking-inline {
+      display: grid;
+      gap: 8px;
+      --timeline-icon-size: 29px;
+      padding-inline: 0;
+      margin-top: 2px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(15,23,42,.07);
+    }
+    .tracking-status {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.1;
+    }
+    .track-line {
+      position: relative;
+      height: 10px;
+      border-radius: 999px;
+      background: #e7ebf0;
+      overflow: visible;
+      margin-top: 8px;
+      margin-bottom: 18px;
+      --icon-size: var(--timeline-icon-size);
+    }
+    .track-line > i {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: var(--progress, 40%);
+      background: linear-gradient(90deg, #d946ef, #7c3aed);
+      border-radius: 999px;
+    }
+    .tracking-icons {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      --icon-size: var(--timeline-icon-size);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transform: translateY(calc(-50% - 0.9px));
+      z-index: 3;
+      pointer-events: none;
+    }
+    .tracking-icons span {
+      width: var(--icon-size);
+      height: var(--icon-size);
+      border-radius: 999px;
+      background: #ffffff;
+      color: #111827;
+      border: 3px solid #f8fafc;
+      display: grid;
+      place-items: center;
+      font-size: .9rem;
+      opacity: 1;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.30);
+      transition: opacity .16s ease, transform .16s ease;
+    }
+    .tracking-icons span.is-on {
+      opacity: 1;
+    }
+    .track-line.is-delivered > i {
+      background: linear-gradient(90deg, #22c55e, #16a34a);
+    }
+    .history-empty {
+      margin: 8px 0 2px;
+      color: #6b7280;
+      font-size: .92rem;
+    }
+    .history-card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 28px;
+      padding: 10px 0;
+    }
+    .history-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+    }
+    .history-row + .history-row {
+      border-top: 1px solid #edf1f5;
+    }
+    .tracking-empty {
+      margin: 8px 0 2px;
+      color: #6b7280;
+      font-size: .92rem;
+    }
+    .account-order {
+      border-radius: 10px;
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      border-top: 1px solid #e5e7eb;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .order-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      align-items: start;
+    }
+    .order-title {
+      margin: 0;
+      font-size: 1.02rem;
+      letter-spacing: -.02em;
+    }
+    .order-sub {
+      margin: 4px 0 0;
+      color: #64748b;
+      font-size: .9rem;
+    }
+    .order-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    .badge {
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+    .badge--paid { color: #166534; background: #ecfdf3; }
+    .badge--pending { color: #92400e; background: #fffbeb; }
+    .badge--error { color: #991b1b; background: #fef2f2; }
+    .badge--account { color: #0f172a; background: #f1f5f9; }
+    .order-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .order-field {
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #fafbfc;
+      border: 1px solid #edf1f5;
+      border-right: 1px solid #edf1f5;
+    }
+    .order-field:last-child {
+      border-right: 1px solid #edf1f5;
+    }
+    .order-field span {
+      display: block;
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 5px;
+    }
+    .order-field strong {
+      display: block;
+      font-size: .95rem;
+      color: #0f172a;
+      word-break: break-word;
+    }
+    .order-timeline {
+      display: grid;
+      gap: 10px;
+      margin-top: 2px;
+    }
+    .timeline-step {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 9px 10px;
+      border-radius: 10px;
+      background: #fafbfc;
+      border: 1px solid #edf1f5;
+      border-bottom: 1px solid #edf1f5;
+    }
+    .timeline-step .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: #cbd5e1;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+    .timeline-step.is-done .dot { background: #16a34a; }
+    .timeline-step.is-active .dot { background: #b91c1c; }
+    .timeline-step strong {
+      display: block;
+      font-size: .76rem;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: #475569;
+      margin-bottom: 3px;
+    }
+    .timeline-step span {
+      display: block;
+      font-size: .88rem;
+      color: #334155;
+      line-height: 1.45;
+    }
+    .order-note {
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #fafbfc;
+      border: 1px solid #edf1f5;
+      border-top: 1px solid #edf1f5;
+      color: #334155;
+      font-size: .88rem;
+      line-height: 1.5;
+    }
+    .account-empty {
+      padding: 16px;
+      border-radius: 10px;
+      border: 1px dashed #d1d5db;
+      border-top: 1px dashed #d1d5db;
+      border-bottom: 1px dashed #d1d5db;
+      background: #ffffff;
+      text-align: center;
+    }
+    .loading-state {
+      display: grid;
+      gap: 10px;
+      padding: 6px 0 12px;
+      border-radius: 0;
+      background: transparent;
+      border: 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      position: relative;
+      z-index: 1;
+    }
+    .account-panel .loading-state,
+    .account-panel .account-status {
+      border-left: 0 !important;
+      border-right: 0 !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      background: transparent !important;
+    }
+    .skeleton {
+      height: 10px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(148,163,184,.22), rgba(226,232,240,.45), rgba(148,163,184,.22));
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite linear;
+    }
+    .skeleton.wide { width: 72%; height: 12px; }
+    .skeleton.mid { width: 56%; }
+    .skeleton.small { width: 34%; }
+    #accountStatus[hidden],
+    #accountStatusLoading[hidden],
+    #accountLoginBox[hidden],
+    #accountLoggedInBox[hidden] {
+      display: none !important;
+    }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    @media (max-width: 980px) {
+      .account-hero { grid-template-columns: 1fr; }
+      .account-panel { position: relative; top: 0; max-width: 100%; }
+      .account-panel { order: 0; }
+      .account-stats { grid-template-columns: 1fr; }
+      .order-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .account-main { padding-top: 8px; }
+      .account-card,
+      .account-order { border-radius: 10px; padding: 12px; }
+      .account-session-shell { border-radius: 16px; padding: 14px; min-height: 0; }
+      .account-panel h2 {
+        gap: 7px;
+        padding: 0;
+        font-size: 1.08rem;
+      }
+      .orders-section { margin-top: 14px; }
+      .order-history-head { margin-bottom: 10px; }
+      .order-history-head h2,
+      .tracking-head h2 {
+        gap: 7px;
+        padding: 0;
+        font-size: 1.08rem;
+      }
+      .account-insights { gap: 7px; }
+      .session-metric { min-height: 78px; padding: 9px 8px; }
+      .session-metric strong { font-size: .96rem; }
+      .session-metric small { font-size: .69rem; }
+      .session-metric-icon { width: 22px; height: 22px; font-size: .7rem; }
+      .orders-header { align-items: flex-start; }
+      .history-top {
+        grid-template-columns: 62px 1fr auto;
+      }
+      .history-date {
+        grid-column: 3;
+        grid-row: 1;
+        padding-left: 0;
+        margin-top: 0;
+      }
+      .history-actions {
+        gap: 8px;
+      }
+      .tracking-icons {
+        --icon-size: 26px;
+      }
+      .tracking-icons span {
+        font-size: .82rem;
+      }
+      .tracking-inline {
+        --timeline-icon-size: 25px;
+      }
+    }
+  </style>
+
+  <script src="/js/global-assets.js?v=20260531-3" defer></script>
+  <script src="/js/account.js?v=20260531-3" defer></script>
+</head>
+<body class="account-page">
+  <div class="account-shell">
+    <div id="site-header-slot"></div>
+    <div id="mobile-menu-slot"></div>
+
+    <main class="account-main">
+      <h1 class="sr-only">Mi cuenta de SCOOT SHOP</h1>
+      <section class="container">
+        <div class="account-hero">
+
+          <aside class="account-panel">
+            <div class="account-session-shell" id="accountSessionShell">
+              <div class="account-session-head">
+                <h2>Estado de sesión</h2>
+                <div id="accountSessionState" class="account-session-state">Comprando como invitado</div>
+              </div>
+              <div id="accountStatusLoading" class="loading-state" aria-hidden="true">
+                <div class="skeleton wide"></div>
+                <div class="skeleton"></div>
+                <div class="skeleton mid"></div>
+                <div class="skeleton small"></div>
+              </div>
+              <div id="accountStatus" hidden>
+                <div id="accountStatusRow" class="account-status-row" hidden>
+                  <div id="accountAvatarWrap" aria-hidden="true">
+                    <div class="account-avatar-fallback" aria-hidden="true">U</div>
+                  </div>
+                  <div class="account-meta">
+                    <strong id="accountUserName">Sesión lista</strong>
+                    <span id="accountUserEmail">Inicia sesión para vincular pedidos</span>
+                  </div>
+                </div>
+                <div id="accountLoginBox" class="account-login" hidden>
+                  <strong>Acceder con Google</strong>
+                  <p class="account-note">Solo para vincular tus pedidos.</p>
+                  <div id="googleLoginButton"></div>
+                  <div id="authMessage" class="account-note"></div>
+                </div>
+                <div class="account-insights" id="accountInsights" aria-label="Resumen de cuenta">
+                  <article class="session-metric session-metric--orders" aria-live="polite">
+                    <div class="session-metric-head">
+                      <span class="session-metric-label">Pedidos</span>
+                      <span class="session-metric-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M3 8.5L12 13L21 8.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                          <path d="M12 13V21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                          <path d="M20.5 8.8V16.5C20.5 17.3 20.05 18.03 19.34 18.38L13.34 21.38C12.49 21.81 11.51 21.81 10.66 21.38L4.66 18.38C3.95 18.03 3.5 17.3 3.5 16.5V8.8C3.5 8 3.95 7.27 4.66 6.92L10.66 3.92C11.51 3.49 12.49 3.49 13.34 3.92L19.34 6.92C20.05 7.27 20.5 8 20.5 8.8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                        </svg>
+                      </span>
+                    </div>
+                    <strong id="accountQuickOrders">0</strong>
+                    <small>Total vinculados</small>
+                  </article>
+                  <article class="session-metric session-metric--tracking" aria-live="polite">
+                    <div class="session-metric-head">
+                      <span class="session-metric-label">Trackings</span>
+                      <span class="session-metric-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <circle cx="6" cy="6" r="2.2" stroke="currentColor" stroke-width="1.8"/>
+                          <circle cx="18" cy="18" r="2.2" stroke="currentColor" stroke-width="1.8"/>
+                          <path d="M8.3 6H11.4C14.2 6 16.5 8.3 16.5 11.1V12.9C16.5 15.7 14.2 18 11.4 18H8.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </span>
+                    </div>
+                    <strong id="accountQuickTrackings">0</strong>
+                    <small>Con seguimiento</small>
+                  </article>
+                  <a class="session-metric session-metric--cta" href="https://wa.me/34666318747?text=Hola%20SCOOT%20SHOP%2C%20necesito%20soporte%20con%20mi%20pedido" target="_blank" rel="noopener noreferrer" aria-label="Abrir soporte por WhatsApp">
+                    <div class="session-metric-head">
+                      <span class="session-metric-label">Soporte</span>
+                      <span class="session-metric-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M4.5 12.3C4.5 8.16 7.86 4.8 12 4.8C16.14 4.8 19.5 8.16 19.5 12.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                          <rect x="4" y="11" width="3.6" height="6.2" rx="1.4" stroke="currentColor" stroke-width="1.8"/>
+                          <rect x="16.4" y="11" width="3.6" height="6.2" rx="1.4" stroke="currentColor" stroke-width="1.8"/>
+                          <path d="M16.4 18.1C15.8 19.6 14.3 20.7 12.5 20.7H11.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        </svg>
+                      </span>
+                    </div>
+                    <strong id="accountQuickSupport">WhatsApp</strong>
+                    <small>Abrir chat ahora</small>
+                  </a>
+                </div>
+                <div id="accountLoggedInBox" hidden>
+                  <p class="account-note" id="accountLoggedInCopy"></p>
+                  <div class="account-actions">
+                    <button class="btn-ghost" id="logoutBtn" type="button"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i> Cerrar sesión</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <section class="orders-section">
+          <div id="ordersGrid" class="orders-grid"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
+

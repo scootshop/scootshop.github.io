@@ -9,18 +9,6 @@
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
-  <url>
-    <loc>https://scootshop.co/pago.html</loc>
-    <lastmod>2026-04-05</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
-  </url>
-  <url>
-    <loc>https://scootshop.co/pedido/</loc>
-    <lastmod>2026-04-05</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
-  </url>
 
   <!-- ===== Legal ===== -->
   <url>
@@ -54,35 +42,99 @@
     <lastmod>2026-04-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
-    <image:image><image:loc>https://scootshop.co/img/accessories/storage-bag.jpg</image:loc><image:title>Bolsa de almacenamiento para scooter y bicicleta</image:title></image:image>
+    <image:image><image:loc>https://scootshop.co/accesorios/bolsa-almacenamiento/img/1.webp</image:loc><image:title>Bolsa de almacenamiento para scooter y bicicleta</image:title></image:image>
   </url>
   <url>
     <loc>https://scootshop.co/accesorios/soporte-movil/</loc>
     <lastmod>2026-04-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
-    <image:image><image:loc>https://scootshop.co/img/accessories/phone-holder.jpg</image:loc><image:title>Soporte móvil para patinete eléctrico</image:title></image:image>
+    <image:image><image:loc>https://scootshop.co/accesorios/soporte-movil/img/2.webp</image:loc><image:title>Soporte móvil para patinete eléctrico</image:title></image:image>
   </url>
   <url>
     <loc>https://scootshop.co/accesorios/pegatina-the-beast/</loc>
     <lastmod>2026-04-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
-    <image:image><image:loc>https://scootshop.co/img/accessories/the-beast.jpg</image:loc><image:title>Pegatinas THE BEAST</image:title></image:image>
+    <image:image><image:loc>https://scootshop.co/accesorios/pegatina-the-beast/img/2.webp</image:loc><image:title>Pegatinas THE BEAST</image:title></image:image>
   </url>
   <url>
     <loc>https://scootshop.co/accesorios/pegatinas-reflectantes/</loc>
     <lastmod>2026-04-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
-    <image:image><image:loc>https://scootshop.co/img/accessories/reflective-stickers.jpg</image:loc><image:title>Pegatinas reflectantes para patinete</image:title></image:image>
+    <image:image><image:loc>https://scootshop.co/accesorios/pegatinas-reflectantes/img/1.webp</image:loc><image:title>Pegatinas reflectantes para patinete</image:title></image:image>
   </url>
   <url>
     <loc>https://scootshop.co/accesorios/luces-led-rgb/</loc>
     <lastmod>2026-04-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
-    <image:image><image:loc>https://scootshop.co/img/accessories/led-rgb.svg</image:loc><image:title>Luces LED RGB para patinete y bicicleta</image:title></image:image>
+    <image:image><image:loc>https://scootshop.co/accesorios/luces-led-rgb/img/1.webp</image:loc><image:title>Luces LED RGB para patinete y bicicleta</image:title></image:image>
+  </url>
+
+  <!-- ===== PRODUCTOS: Ecoxtrem ===== -->
+  <url>
+    <loc>https://scootshop.co/patinetes/ecoxtrem/m41-tank-ultimate-1000w/</loc>
+    <lastmod>2026-05-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/1.webp</image:loc>
+      <image:title>ECOXTREM M41 TANK ULTIMATE 1000W — Patinete eléctrico homologado DGT</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/2.webp</image:loc>
+      <image:title>ECOXTREM M41 TANK vista 2</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/3.webp</image:loc>
+      <image:title>ECOXTREM M41 TANK vista 3</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/ecoxtrem/bison-gt-carbon-design/</loc>
+    <lastmod>2026-05-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/ecoxtrem/bison-gt-carbon-design/img/1.webp</image:loc>
+      <image:title>ECOXTREM BISON GT CARBON DESIGN — Patinete eléctrico homologado DGT</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/ecoxtrem/bison-gt-carbon-design/img/2.webp</image:loc>
+      <image:title>ECOXTREM BISON GT vista 2</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/ecoxtrem/bison-gt-carbon-design/img/3.webp</image:loc>
+      <image:title>ECOXTREM BISON GT vista lateral</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/ecoxtrem/bison-gt-carbon-design/img/4.webp</image:loc>
+      <image:title>ECOXTREM BISON GT vista trasera</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/ecoxtrem/bison-gt-carbon-design/img/5.webp</image:loc>
+      <image:title>ECOXTREM BISON GT detalle Carbon</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/ecoxtrem/bison-gt-carbon-design/img/6.webp</image:loc>
+      <image:title>ECOXTREM BISON GT Carbon Design detalle</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/ecoxtrem/m41-armored-dual/</loc>
+    <lastmod>2026-06-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/ecoxtrem/m41-armored-dual/img/1.webp</image:loc>
+      <image:title>ECOXTREM M41 ARMORED DUAL — Patinete eléctrico homologado DGT</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://scootshop.co/patinetes/ecoxtrem/m41-armored-dual/img/2.webp</image:loc>
+      <image:title>ECOXTREM M41 ARMORED DUAL vista 2</image:title>
+    </image:image>
   </url>
 
   <!-- ===== PRODUCTOS: Serie K ===== -->
@@ -321,60 +373,6 @@
     <image:image>
       <image:loc>https://scootshop.co/patinetes/series-n/v70-connected/img/6.jpg</image:loc>
       <image:title>Bongo V70 Connected vista 6</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://scootshop.co/patinetes/series-n/e8/</loc>
-    <lastmod>2026-04-05</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-    <image:image>
-      <image:loc>https://scootshop.co/patinetes/series-n/e8/img/1.webp</image:loc>
-      <image:title>TODIMART-SEEMAR E8 — Patinete electrico 800 W</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://scootshop.co/patinetes/series-n/e8/img/2.webp</image:loc>
-      <image:title>E8 vista 2</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://scootshop.co/patinetes/series-n/e8/img/3.webp</image:loc>
-      <image:title>E8 vista 3</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://scootshop.co/patinetes/series-n/e8/img/4.webp</image:loc>
-      <image:title>E8 vista 4</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://scootshop.co/patinetes/series-n/e8/img/5.webp</image:loc>
-      <image:title>E8 vista 5</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://scootshop.co/patinetes/series-n/e8/img/6.webp</image:loc>
-      <image:title>E8 vista 6</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://scootshop.co/patinetes/series-n/e8/img/7.webp</image:loc>
-      <image:title>E8 vista 7</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://scootshop.co/patinetes/series-n/e8/img/8.webp</image:loc>
-      <image:title>E8 vista 8</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://scootshop.co/patinetes/series-n/e8/img/9.webp</image:loc>
-      <image:title>E8 vista 9</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://scootshop.co/patinetes/series-n/e8/img/10.webp</image:loc>
-      <image:title>E8 vista 10</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://scootshop.co/patinetes/series-n/e8/img/11.webp</image:loc>
-      <image:title>E8 vista 11</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://scootshop.co/patinetes/series-n/e8/img/12.webp</image:loc>
-      <image:title>E8 vista 12</image:title>
     </image:image>
   </url>
   <url>

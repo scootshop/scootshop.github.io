@@ -1,0 +1,24 @@
+{
+    "version": "20260530-1",
+    "busted_at": "2026-05-30T00:49:32+00:00",
+    "bust_stamp": "20260530-1-004932",
+    "scope": "sitewide",
+    "stats": {
+        "html_files_scanned": 46,
+        "html_files_rewritten": 45,
+        "meta_updates": 44,
+        "meta_injected": 0,
+        "stamp_updates": 0,
+        "stamp_injected": 44,
+        "cache_meta_updates": 0,
+        "cache_meta_updates_injected": 44,
+        "pragma_meta_updates": 0,
+        "pragma_meta_updates_injected": 44,
+        "expires_meta_updates": 0,
+        "expires_meta_updates_injected": 44,
+        "asset_ref_updates": 785,
+        "content_ref_updates": 72,
+        "asset_sync_updates": 4,
+        "asset_sync_injected": 40
+    }
+}

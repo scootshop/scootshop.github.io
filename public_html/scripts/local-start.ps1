@@ -52,6 +52,13 @@ function Test-ApiHealth([string]$Base){
   }
 }
 
+function Get-ErrLogPath([string]$LogPath){
+  if($LogPath -match '\.[^\\/\.]+$'){
+    return ($LogPath -replace '\.[^\\/\.]+$','.err.log')
+  }
+  return "$LogPath.err"
+}
+
 $envPath = '.env.local'
 if(-not (Test-Path $envPath)){ Fail '.env.local no existe.' }
 
@@ -84,7 +91,8 @@ if($dbSocket){
   Write-Host "DB OK (ya escuchando en $DbPort)." -ForegroundColor Green
 } else {
   New-Item -ItemType Directory -Path 'tmp' -Force | Out-Null
-  $dbProc = Start-Process -FilePath $mariadbdExe -ArgumentList "--defaults-file=$MariaDbConfig" -PassThru -WindowStyle Hidden -RedirectStandardOutput $DbLog -RedirectStandardError $DbLog
+  $dbErrLog = Get-ErrLogPath $DbLog
+  $dbProc = Start-Process -FilePath $mariadbdExe -ArgumentList "--defaults-file=$MariaDbConfig" -PassThru -WindowStyle Hidden -RedirectStandardOutput $DbLog -RedirectStandardError $dbErrLog
   if(-not $dbProc){ Fail 'No se pudo iniciar mariadbd.' }
 
   $ok = $false
@@ -105,7 +113,8 @@ if($apiSocket){
   Write-Host "API OK (ya escuchando en $ApiPort)." -ForegroundColor Green
 } else {
   New-Item -ItemType Directory -Path 'tmp' -Force | Out-Null
-  $apiProc = Start-Process -FilePath $phpCmd.Source -ArgumentList @('-S',"$BindHost`:$ApiPort",'-t','.') -PassThru -WindowStyle Hidden -RedirectStandardOutput $ApiLog -RedirectStandardError $ApiLog
+  $apiErrLog = Get-ErrLogPath $ApiLog
+  $apiProc = Start-Process -FilePath $phpCmd.Source -ArgumentList @('-S',"$BindHost`:$ApiPort",'-t','.') -PassThru -WindowStyle Hidden -RedirectStandardOutput $ApiLog -RedirectStandardError $apiErrLog
   if(-not $apiProc){ Fail 'No se pudo iniciar API PHP.' }
 
   $okApi = $false

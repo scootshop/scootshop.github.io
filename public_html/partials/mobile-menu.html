@@ -1,35 +1,42 @@
-﻿<!-- /partials/mobile-menu.html - Menú móvil reconstruido -->
+﻿<!-- /partials/mobile-menu.html — Drawer + Drill-down -->
 
 <div class="mm-backdrop" id="mmBackdrop"></div>
 
-<nav class="mm-panel" id="mobileMenu" aria-label="Menú móvil">
+<nav class="mm-panel" id="mobileMenu" role="dialog" aria-modal="true" aria-label="Menú móvil">
   <div class="mm-head">
-    <div class="mm-brand">
-      <img src="/img/0-removebg-preview.png?v=20260409-2" alt="Logo SCOOT SHOP" loading="lazy" decoding="async" />
-      <div class="mm-brand-text">
-        <span class="mm-brand-name">SCOOT SHOP</span>
-        <span class="mm-brand-tag">Scooters eléctricos</span>
-      </div>
-    </div>
+    <span class="mm-head-title">Menú</span>
     <button class="mm-close" id="mmClose" aria-label="Cerrar menú" type="button">
       <i class="fa-solid fa-xmark"></i>
     </button>
   </div>
 
-  <div class="mm-content">
-    <div class="mm-links-group">
-      <a class="mm-link" href="/#inicio">INICIO</a>
+  <div class="mm-viewport" id="mmViewport">
+    <!-- View 0: Main nav -->
+    <div class="mm-view mm-view--main">
+      <div class="mm-nav">
+        <a class="mm-link" href="/#inicio">
+          <span class="mm-link-content"><i class="fa-solid fa-house mm-ico" aria-hidden="true"></i>Inicio</span>
+        </a>
+        <button class="mm-link mm-link--products" id="mmProductsToggle" type="button" aria-expanded="false">
+          <span class="mm-link-content"><i class="fa-solid fa-cart-shopping mm-ico" aria-hidden="true"></i>Productos</span>
+          <i class="fa-solid fa-chevron-right mm-arrow" aria-hidden="true"></i>
+        </button>
+        <a class="mm-link" href="/#faq">
+          <span class="mm-link-content"><i class="fa-solid fa-circle-question mm-ico" aria-hidden="true"></i>Preguntas</span>
+        </a>
+        <a class="mm-link" href="/#ubicacion">
+          <span class="mm-link-content"><i class="fa-solid fa-location-dot mm-ico" aria-hidden="true"></i>Ubicación</span>
+        </a>
+        <a class="mm-link" href="/#legal">
+          <span class="mm-link-content"><i class="fa-solid fa-scale-balanced mm-ico" aria-hidden="true"></i>Legal</span>
+        </a>
+      </div>
 
-      <button class="mm-link mm-link--toggle" id="mmProductsToggle" type="button" aria-expanded="false">
-        <span>PRODUCTOS</span>
-        <i class="fa-solid fa-chevron-down mm-chevron"></i>
-      </button>
+    </div>
 
-      <div class="mm-sub" id="mmProductsSub" data-products-mobile-root></div>
-
-      <a class="mm-link" href="/#faq">PREGUNTAS</a>
-      <a class="mm-link" href="/#ubicacion">UBICACIÓN</a>
-      <a class="mm-link" href="/#legal">LEGAL</a>
+    <!-- View 1: Products drill-down -->
+    <div class="mm-view mm-view--products">
+      <div class="mm-products-scroll" id="mmProductsSub" data-products-mobile-root></div>
     </div>
   </div>
 
@@ -47,17 +54,3 @@
     </div>
   </div>
 </nav>
-
-
-
-
-
-
-
-
-
-
-
-
-
-

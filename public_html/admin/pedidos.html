@@ -6,8 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Admin | SCOOT SHOP</title>
   <meta name="robots" content="noindex,nofollow" />
-  <meta name="asset-version" content="20260529-1" />
-  <script src="/js/asset-sync.js?v=20260529-1" defer></script>
+  <meta name="asset-version" content="20260605-2" />
+  <script src="/js/asset-sync.js?v=20260605-2" defer></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -150,7 +150,7 @@
     /* BADGES */
     .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:.67rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
     .b-paid{background:var(--green-bg);color:var(--green-t)}
-    .b-pend{background:var(--yellow-bg);color:var(--yellow-t)}
+    .b-pend{background:#f3e8ff;color:#7c3aed}
     .b-ship{background:var(--blue-bg);color:var(--blue-t)}
     .b-res{background:#ede9fe;color:#5b21b6}
     .b-canc{background:var(--red-bg);color:var(--red-t)}
@@ -1201,6 +1201,29 @@
   let currentOrderCustomerEmail = '';
   const actionLocks = { save:false, resend:false, notes:false, delete:false, cache:false, ultraCache:false };
 
+  function defaultCustomerMessageForStatus(status){
+    switch(String(status || '')){
+      case 'pending_payment': return 'Tu pedido está pendiente de pago. Puedes completarlo cuando quieras desde el enlace de pago.';
+      case 'paid': return 'Hemos confirmado tu pago correctamente. Tu pedido ya ha sido recibido y pasa a preparación.';
+      case 'preparing': return 'Tu pedido está en preparación. Te avisaremos en cuanto salga de almacén.';
+      case 'shipped': return 'Tu pedido ya ha sido enviado. Puedes seguirlo con el número de seguimiento cuando esté disponible.';
+      case 'delivered': return 'Tu pedido figura como entregado. Esperamos que lo disfrutes.';
+      case 'canceled': return 'Tu pedido ha sido cancelado. Si necesitas ayuda, contáctanos y lo revisamos contigo.';
+      case 'refunded': return 'Hemos registrado el reembolso de tu pedido. Si tienes dudas sobre los plazos, contáctanos.';
+      case 'dispute': return 'Tu pedido está siendo revisado por una incidencia. Te contactaremos con una actualización lo antes posible.';
+      case 'payment_failed': return 'No hemos podido confirmar el pago de tu pedido. Puedes intentarlo de nuevo o contactar con soporte.';
+      case 'error': return 'Se ha detectado una incidencia con el pago de tu pedido. Nuestro equipo lo está revisando.';
+      default: return '';
+    }
+  }
+
+  function applyDefaultCustomerMessage(){
+    var statusEl = $('status');
+    var messageEl = $('message');
+    if(!statusEl || !messageEl) return;
+    messageEl.value = defaultCustomerMessageForStatus(statusEl.value);
+  }
+
   /* ---- UTILS ---- */
   function esc(s){ if(s==null)return''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function normalizeOrderItemImage(url){
@@ -1290,39 +1313,21 @@
     }
     return '<div class="prod-lines">'+lines+rest+'</div>';
   }
-  function normalizeAdminOrderStatus(st){
-    var raw = String(st || '').trim().toLowerCase();
-    if(raw === 'paid' || raw === 'approved' || raw === 'complete' || raw === 'completed' || raw === 'pagado') return 'paid';
-    if(raw === 'pending' || raw === 'pending_payment') return 'pending_payment';
-    if(raw === 'processing' || raw === 'preparing') return 'processing';
-    if(raw === 'shipped' || raw === 'shipping') return 'shipped';
-    if(raw === 'delivered') return 'delivered';
-    if(raw === 'cancelled' || raw === 'canceled' || raw === 'failed' || raw === 'denied') return 'cancelled';
-    if(raw === 'payment_failed') return 'payment_failed';
-    if(raw === 'dispute') return 'dispute';
-    if(raw === 'reserved') return 'reserved';
-    if(raw === 'refunded') return 'refunded';
-    if(raw === 'error') return 'error';
-    return raw || 'pending_payment';
-  }
   function badgeClass(st){
-    var normalized = normalizeAdminOrderStatus(st);
-    if(normalized==='paid'||normalized==='delivered') return 'b-paid';
-    if(normalized==='pending_payment'||normalized==='processing') return 'b-pend';
-    if(normalized==='reserved') return 'b-res';
-    if(normalized==='shipped') return 'b-ship';
-    if(normalized==='cancelled'||normalized==='refunded'||normalized==='error'||normalized==='payment_failed'||normalized==='dispute') return 'b-canc';
+    if(st==='paid'||st==='delivered') return 'b-paid';
+    if(st==='pending_payment'||st==='preparing') return 'b-pend';
+    if(st==='reserved') return 'b-res';
+    if(st==='shipped') return 'b-ship';
+    if(st==='canceled'||st==='refunded'||st==='error'||st==='payment_failed'||st==='dispute') return 'b-canc';
     return 'b-other';
   }
   function statusLabel(st){
-    var normalized = normalizeAdminOrderStatus(st);
-    const m={pending_payment:'Pendiente pago',paid:'Pagado',processing:'Preparando',reserved:'Reservado',shipped:'Enviado',delivered:'Entregado',cancelled:'Cancelado',refunded:'Reembolsado',dispute:'En disputa',payment_failed:'Pago fallido',error:'Error'};
-    return m[normalized]||normalized;
+    const m={pending_payment:'Pendiente pago',paid:'Pagado',preparing:'Preparando',reserved:'Reservado',shipped:'Enviado',delivered:'Entregado',canceled:'Cancelado',refunded:'Reembolsado',dispute:'En disputa',payment_failed:'Pago fallido',error:'Error'};
+    return m[st]||st;
   }
   function statusIcon(st){
-    var normalized = normalizeAdminOrderStatus(st);
-    const m={pending_payment:'\u23F3',paid:'\u2705',processing:'\uD83D\uDCE6',reserved:'\uD83D\uDCC5',shipped:'\uD83D\uDE9A',delivered:'\uD83C\uDFE0',cancelled:'\u274C',refunded:'\u21A9\uFE0F',dispute:'\u26A0\uFE0F',payment_failed:'\uD83D\uDCB3',error:'\uD83D\uDD34'};
-    return m[normalized]||'';
+    const m={pending_payment:'\u23F3',paid:'\u2705',preparing:'\uD83D\uDCE6',reserved:'\uD83D\uDCC5',shipped:'\uD83D\uDE9A',delivered:'\uD83C\uDFE0',canceled:'\u274C',refunded:'\u21A9\uFE0F',dispute:'\u26A0\uFE0F',payment_failed:'\uD83D\uDCB3',error:'\uD83D\uDD34'};
+    return m[st]||'';
   }
   function paymentLabel(method){
     const key = String(method||'').trim().toLowerCase();
@@ -1468,7 +1473,11 @@
   function normalizePriceText(raw){
     const n = parsePriceNumber(raw);
     if(n==null) return null;
-    return formatMoney(n);
+    const isInteger = Number.isInteger(n);
+    return n.toLocaleString('es-ES',{
+      minimumFractionDigits: isInteger ? 0 : 2,
+      maximumFractionDigits: isInteger ? 0 : 2
+    })+' €';
   }
   function buildPriceWarning(n){
     if(!Number.isFinite(n)) return '';
@@ -1661,11 +1670,10 @@
     return Number.isNaN(d.getTime()) ? null : d;
   }
   function isRiskStatus(st){
-    return ['pending_payment','payment_failed','error','dispute'].includes(normalizeAdminOrderStatus(st));
+    return ['pending_payment','payment_failed','error','dispute'].includes(String(st||''));
   }
   function buildOrderSearchText(o){
-    const normalizedStatus = normalizeAdminOrderStatus(o.status||'');
-    const status = statusLabel(normalizedStatus);
+    const status = statusLabel(o.status||'');
     const payment = paymentLabel(o.payment_method||'');
     const itemText = orderItemsFromOrder(o).map(function(item){ return [item.name, item.sku, item.colorLabel].join(' '); }).join(' ');
     const parts = [
@@ -1680,7 +1688,7 @@
       o.product,
       o.name,
       o.sku,
-      normalizedStatus,
+      o.status,
       status,
       o.payment_method,
       payment,
@@ -1700,7 +1708,7 @@
       const d = parseDateSafe(o[key] || o.updated_at || o.created_at);
       return d ? d.getTime() : 0;
     }
-    if(key==='status') return normalizeText(statusLabel(normalizeAdminOrderStatus(o.status||'')));
+    if(key==='status') return normalizeText(statusLabel(o.status||''));
     if(key==='payment') return normalizeText(paymentLabel(o.payment_method||''));
     if(key==='customer') return normalizeText(o.customer||o.payer_name||o.ship_name||'');
     if(key==='email') return normalizeText(o.email||o.ship_email||o.payer_email||'');
@@ -1731,18 +1739,16 @@
       const track = String(o.tracking||'').trim();
       const amount = Number(o.amount||0);
       const created = parseDateSafe(o.created_at);
-      const normalizedStatus = normalizeAdminOrderStatus(o.status||'');
-      const normalizedFilterStatus = status ? normalizeAdminOrderStatus(status) : '';
 
-      if(normalizedFilterStatus && normalizedStatus !== normalizedFilterStatus) return false;
+      if(status && o.status !== status) return false;
       if(payment){
         const pm = normalizeText(o.payment_method||'');
         if(!pm.includes(payment)) return false;
       }
       if(shippingState === 'with_tracking' && !track) return false;
       if(shippingState === 'without_tracking' && track) return false;
-      if(shippingState === 'paid_without_tracking' && !(normalizedStatus === 'paid' && !track)) return false;
-      if(risk === 'risk' && !isRiskStatus(normalizedStatus)) return false;
+      if(shippingState === 'paid_without_tracking' && !(o.status === 'paid' && !track)) return false;
+      if(risk === 'risk' && !isRiskStatus(o.status)) return false;
       if(skuText){
         const skuHay = normalizeText((o.sku||'') + ' ' + (o.product||'') + ' ' + (o.name||'') + ' ' + orderItemsFromOrder(o).map(function(item){ return [item.sku, item.name].join(' '); }).join(' '));
         if(!skuHay.includes(skuText)) return false;
@@ -2547,6 +2553,7 @@
     $('status').value = o.status;
     $('tracking').value = o.tracking || '';
     $('message').value = o.message || '';
+    if(!$('message').value.trim()) applyDefaultCustomerMessage();
     $('editAmount').value = o.amount || '';
     $('editProductName').value = o.name || '';
     $('editImage').value = o.product_image_url || '';
@@ -2595,6 +2602,7 @@
       + rows;
   }
   $('editImage').addEventListener('input', updateImagePreview);
+  $('status').addEventListener('change', applyDefaultCustomerMessage);
 
   /* ---- SAVE ORDER ---- */
   $('btnSave').onclick = async ()=>{

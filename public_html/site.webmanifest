@@ -1,12 +1,24 @@
 {
-  "name": "SCOOT SHOP",
-  "short_name": "SCOOT SHOP",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
-  "icons": [
-    { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png" }
-  ]
+    "name": "SCOOT SHOP",
+    "short_name": "SCOOT SHOP",
+    "start_url": "/?v=20260530-1",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#ffffff",
+    "icons": [
+        {
+            "src": "/android-chrome-192x192.png?v=20260530-1",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/android-chrome-512x512.png?v=20260530-1",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "scope": "/",
+    "id": "/?shell=20260530-1",
+    "version": "20260530-1",
+    "scootshop_cache_bust": "20260530-1-004932"
 }

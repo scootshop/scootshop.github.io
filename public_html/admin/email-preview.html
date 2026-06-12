@@ -1,10 +1,15 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Preview email pedidos | SCOOT SHOP</title>
   <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="color-scheme" content="only light" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" />
   <style>
     :root{
       --page:#f6f7f9;
@@ -128,36 +133,24 @@
       box-shadow:0 12px 32px rgba(15,23,42,.05);
     }
     .header{
-      padding:30px 32px 22px;
+      padding:18px 32px 22px;
     }
-    .brand-row{
-      display:flex;
-      align-items:center;
-      gap:12px;
+    .hero-top{
+      padding:24px 28px 0;
+      background:linear-gradient(40deg,#fafafa,#ffffff,#ffffff,#ffffff);
+      text-align:center;
     }
-    .logo{
-      width:56px;
-      height:56px;
-      object-fit:contain;
+    .hero-top img{
+      width:140px;
+      height:auto;
       display:block;
-      flex:0 0 auto;
+      margin:0 auto;
+      border:0;
     }
-    .brand-copy small,
-    .brand-copy span{
-      display:block;
-    }
-    .brand-copy small{
-      margin-bottom:4px;
-      color:var(--muted);
-      font-size:11px;
-      font-weight:700;
-      letter-spacing:.18em;
-      text-transform:uppercase;
-    }
-    .brand-copy span{
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.6;
+    .hero-line{
+      width:100%;
+      height:3px;
+      background:var(--accent);
     }
     .status-pill{
       display:inline-block;
@@ -296,21 +289,278 @@
       font-size:15px;
       line-height:1.6;
     }
+    .order-items{
+      display:grid;
+      gap:10px;
+    }
+    .email-summary-shell{
+      border:0;
+      border-radius:0;
+      background:transparent;
+      box-shadow:none;
+    }
+    .email-summary-shell .order-summary__product-list{
+      display:grid;
+      gap:10px;
+      font-family:'Plus Jakarta Sans',ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans";
+    }
+    .email-summary-shell .order-summary__product{
+      padding:12px;
+      border:0;
+      border-radius:22px;
+      background:linear-gradient(180deg, rgba(255,255,255,.998) 0%, rgba(252,253,255,.996) 100%);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.9) inset,
+        0 18px 44px rgba(15,23,42,.08),
+        0 6px 18px rgba(15,23,42,.04);
+    }
+    .email-summary-shell .order-summary__product--line{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:10px;
+      align-items:center;
+    }
+    .email-summary-shell .order-summary__product-main{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+    .email-summary-shell .order-summary__product-side{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      justify-content:flex-start;
+      gap:8px;
+      align-self:start;
+      min-width:96px;
+    }
+    .email-summary-shell .order-summary__product-image{
+      width:56px;
+      height:56px;
+      border-radius:16px;
+      border:0;
+      object-fit:contain;
+      background:radial-gradient(circle at 30% 20%, #ffffff 0%, #f4f7fb 100%);
+      padding:4px;
+      box-shadow:0 10px 24px rgba(15,23,42,.07);
+      flex:0 0 auto;
+    }
+    .email-summary-shell .order-summary__product-info{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:6px 8px;
+      min-width:0;
+    }
+    .email-summary-shell .order-summary__product-title{
+      flex:1 1 100%;
+      margin-bottom:1px;
+      font-size:.95rem;
+      line-height:1.22;
+      letter-spacing:-.015em;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      font-weight:800;
+      color:var(--ink);
+    }
+    .email-summary-shell .order-summary__product-meta{
+      display:inline-flex;
+      align-items:center;
+      width:auto;
+      font-size:.72rem;
+      font-weight:800;
+      color:#6b7280;
+      line-height:1.2;
+      max-width:100%;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .email-summary-shell .order-summary__product-meta--price{
+      display:none;
+    }
+    .email-summary-shell .order-summary__product-meta--ref,
+    .email-summary-shell .order-summary__product-meta--price,
+    .email-summary-shell .order-summary__product-meta--qty{
+      padding:4px 9px;
+      border-radius:999px;
+      background:rgba(17,19,21,.045);
+    }
+    .email-summary-shell .order-summary__product-meta--ref{
+      letter-spacing:0;
+      text-transform:none;
+      font-kerning:normal;
+      font-feature-settings:"kern" 1;
+    }
+    .email-summary-shell .order-summary__product-meta--color{
+      margin-top:0;
+      width:fit-content;
+      max-width:none;
+      padding:4px 9px;
+      border-radius:999px;
+      background:rgba(255,255,255,.82);
+      color:#667085;
+      display:inline-flex;
+      white-space:nowrap;
+      overflow:visible;
+      text-overflow:clip;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      font-kerning:normal;
+      font-feature-settings:"kern" 1;
+      box-shadow:0 8px 18px rgba(15,23,42,.06);
+    }
+    .email-summary-shell .order-summary__product-meta--qty{
+      background:rgba(17,19,21,.08);
+      color:#374151;
+      font-weight:900;
+    }
+    .email-summary-shell .order-summary__product-line-total{
+      align-self:flex-start;
+      min-width:96px;
+      font-size:1.1rem;
+      font-weight:900;
+      letter-spacing:-.02em;
+      text-align:right;
+    }
     .message p:last-child{ margin-bottom:0; }
+    .amount-summary{
+      margin:0 28px 18px;
+    }
+    .post-summary-grid{
+      margin:0 28px 14px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      align-items:stretch;
+    }
+    .post-box{
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#fff;
+      padding:14px;
+      box-shadow:0 10px 26px rgba(15,23,42,.06);
+      min-height:100%;
+    }
+    .post-box .card-head{
+      margin-bottom:10px;
+    }
+    .post-box .card-head .eyebrow{
+      margin:0;
+    }
+    .post-box .detail-list{
+      display:grid;
+      gap:10px;
+    }
+    .post-box .action-hints{
+      padding:0;
+      margin-bottom:12px;
+    }
+    .post-box .message p{
+      margin:0 0 10px;
+      font-size:14px;
+      line-height:1.62;
+      color:var(--ink);
+    }
+    .post-box .message p:last-child{
+      margin-bottom:0;
+    }
+    .post-box .cta-wrap{
+      padding:0;
+      margin-top:10px;
+    }
+    .amount-summary-card{
+      border:1px solid var(--line);
+      border-radius:14px;
+      overflow:hidden;
+      background:linear-gradient(180deg, rgba(255,255,255,.998) 0%, rgba(252,253,255,.996) 100%);
+    }
+    .amount-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
+      border-bottom:1px solid var(--line);
+      font-size:13px;
+      color:var(--muted);
+    }
+    .amount-row strong{ color:var(--ink); font-weight:700; }
+    .amount-row--total{
+      border-bottom:0;
+      font-size:14px;
+      font-weight:700;
+      color:var(--ink);
+    }
+    .amount-row--total strong{
+      font-size:16px;
+      font-weight:900;
+    }
+    .action-hints{
+      padding:0 28px 12px;
+    }
+    .action-hints p{
+      margin:0;
+      font-size:13px;
+      line-height:1.65;
+    }
+    .action-hints .recovery{
+      margin-bottom:8px;
+      color:var(--ink);
+      font-weight:700;
+    }
+    .action-hints .next-step{
+      color:var(--muted);
+    }
     .cta-wrap{
       padding:0 28px 14px;
       text-align:left;
+      display:flex;
+      flex-wrap:nowrap;
+      align-items:center;
+      gap:10px;
     }
     .cta{
       display:inline-block;
-      padding:13px 24px;
+      min-height:46px;
+      line-height:46px;
+      padding:0 20px;
       border-radius:999px;
-      background:#111315;
-      color:#fff;
+      border:1px solid #ff7d67;
+      background:#ff6b57;
+      background-image:linear-gradient(180deg,#ff8a73 0%,#ff5b43 100%);
+      color:#111111;
       text-decoration:none;
-      font-size:14px;
+      font-family:'Plus Jakarta Sans',ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans";
+      font-size:.81rem;
+      font-weight:900;
+      letter-spacing:.03em;
+      text-transform:uppercase;
+      text-align:center;
+      vertical-align:middle;
+      white-space:nowrap;
+      -webkit-text-stroke:.45px rgba(255,255,255,.28);
+      text-shadow:0 1px 0 rgba(255,255,255,.34),0 0 1px rgba(0,0,0,.35);
+    }
+    .cta-secondary{
+      display:inline-block;
+      min-height:46px;
+      line-height:46px;
+      padding:0 16px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--ink);
+      text-decoration:none;
+      font-family:'Plus Jakarta Sans',ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans";
+      font-size:12px;
       font-weight:700;
-      line-height:1.2;
+      letter-spacing:.01em;
+      text-align:center;
+      vertical-align:middle;
+      white-space:nowrap;
     }
     .footer{
       padding:0 28px 26px;
@@ -359,17 +609,35 @@
       .toolbar{ padding:16px; }
       .email-stage{ padding:12px; border-radius:24px; }
       .email-frame{ padding:14px 8px; }
-      .header{ padding:22px 18px 18px; }
+      .hero-top{ padding:22px 18px 0; }
+      .hero-top img{ width:128px; }
+      .header{ padding:16px 18px 18px; }
       .header h2{ font-size:28px; }
       .body{ padding:6px 18px 0; }
       .card{ margin:2px 18px 16px; }
+      .amount-summary{ margin:0 18px 16px; }
+      .post-summary-grid{ margin:0 18px 14px; grid-template-columns:1fr; gap:10px; }
+      .action-hints{ padding:0 18px 12px; }
       .cta-wrap{ padding:0 18px 14px; }
       .footer{ padding:0 18px 24px; }
       .product-grid{ grid-template-columns:1fr; }
       .product-media{ width:112px; }
+      .email-summary-shell .order-summary__product{
+        padding:12px;
+      }
+      .email-summary-shell .order-summary__product-image{
+        width:52px;
+        height:52px;
+      }
+      .email-summary-shell .order-summary__product-title{ font-size:.96rem; }
+      .email-summary-shell .order-summary__product-meta{ font-size:.78rem; }
+      .email-summary-shell .order-summary__product-line-total{ font-size:1.04rem; }
+      .cta-wrap{ gap:8px; }
+      .cta{ min-height:44px; line-height:44px; padding:0 16px; font-size:.74rem; }
+      .cta-secondary{ min-height:44px; line-height:44px; padding:0 14px; font-size:11px; }
     }
   </style>
-  <meta name="asset-version" content="{0}" />
+  <meta name="asset-version" content="20260605-2" />
 </head>
 <body>
   <div class="shell">
@@ -383,8 +651,8 @@
         <select id="statusSelect">
           <option value="pending_payment">Pendiente de pago</option>
           <option value="paid">Pagado</option>
-          <option value="preparing" selected>Preparando</option>
-          <option value="shipped">Enviado</option>
+          <option value="preparing">Preparando</option>
+          <option value="shipped" selected>Enviado</option>
           <option value="delivered">Entregado</option>
           <option value="canceled">Cancelado</option>
           <option value="refunded">Reembolsado</option>
@@ -420,41 +688,51 @@
       pending_payment: {
         title: 'Pedido pendiente de pago',
         statusLabel: 'pendiente de pago',
+        preheader: 'Tu pedido sigue activo. Entra para completarlo cuando quieras.',
+        nextStep: 'Si ya pagaste, ignora este mensaje. Si no, entra a Ver pedido para finalizar.',
         paragraphs: [
-          'Hemos recibido tu pedido (SS-20260409-AB12CD), pero el pago todavía no figura como completado.',
+          'Hemos recibido tu pedido ({orderId}), pero el pago todavía no figura como completado.',
           'En cuanto el pago se confirme, recibirás una nueva actualización automática por correo.'
         ]
       },
       paid: {
         title: 'Pago confirmado',
         statusLabel: 'pagado',
+        preheader: 'Pago confirmado. Te avisaremos cuando el pedido avance al siguiente paso.',
+        nextStep: 'Tu pago ya esta confirmado. Nosotros seguimos con la preparacion.',
         paragraphs: [
-          'Ya hemos confirmado el pago de tu pedido (SS-20260409-AB12CD).',
+          'Ya hemos confirmado el pago de tu pedido ({orderId}).',
           'Nuestro equipo ya ha iniciado la preparación para dejarlo listo lo antes posible.'
         ]
       },
       preparing: {
         title: 'Pedido en preparación',
         statusLabel: 'en preparación',
+        preheader: 'Tu pedido ya esta en preparacion. Te avisaremos cuando se envie.',
+        nextStep: 'Estamos preparando tu pedido. Te avisaremos en cuanto salga de almacen.',
         paragraphs: [
-          'Tu pedido (SS-20260409-AB12CD) ya está en preparación.',
+          'Tu pedido ({orderId}) ya está en preparación.',
           'Te avisaremos de nuevo en cuanto quede entregado al transportista.'
         ]
       },
       shipped: {
         title: 'Pedido enviado',
         statusLabel: 'enviado',
+        preheader: 'Tu pedido ya fue enviado. Revisa el estado y seguimiento cuando quieras.',
+        nextStep: 'Tu pedido va en camino. Revisa el seguimiento para ver el avance.',
         paragraphs: [
-          'Tu pedido (SS-20260409-AB12CD) ya ha salido de nuestras instalaciones.',
-          'Tu número de seguimiento es: MRW-839201-ES.',
+          'Tu pedido ({orderId}) ya ha salido de nuestras instalaciones.',
+          'Tu número de seguimiento es: {tracking}.',
           'En breve deberías empezar a ver movimientos en el seguimiento del transporte.'
         ]
       },
       delivered: {
         title: 'Pedido entregado',
         statusLabel: 'entregado',
+        preheader: 'Tu pedido figura como entregado. Si necesitas ayuda, estamos disponibles.',
+        nextStep: 'Si hubo cualquier incidencia con la entrega, responde a este correo.',
         paragraphs: [
-          'La empresa de transporte marca tu pedido (SS-20260409-AB12CD) como entregado.',
+          'La empresa de transporte marca tu pedido ({orderId}) como entregado.',
           'Si todo está correcto, ya puedes disfrutarlo.',
           'Si detectas cualquier incidencia, responde a este correo y lo revisamos.'
         ]
@@ -462,47 +740,86 @@
       canceled: {
         title: 'Pedido cancelado',
         statusLabel: 'cancelado',
+        preheader: 'Tu pedido fue cancelado. Podemos ayudarte a tramitar uno nuevo.',
+        nextStep: 'Si quieres, podemos ayudarte a gestionar un nuevo pedido rapidamente.',
         paragraphs: [
-          'El pedido (SS-20260409-AB12CD) ha sido cancelado.',
+          'El pedido ({orderId}) ha sido cancelado.',
           'Si necesitas ayuda para tramitar uno nuevo o resolver una incidencia, contáctanos.'
         ]
       },
       refunded: {
         title: 'Reembolso procesado',
         statusLabel: 'reembolsado',
+        preheader: 'Reembolso procesado. El abono puede reflejarse en los proximos dias.',
+        nextStep: 'El reembolso ya esta en curso y puede tardar unos dias segun tu banco.',
         paragraphs: [
-          'Hemos tramitado el reembolso de tu pedido (SS-20260409-AB12CD).',
+          'Hemos tramitado el reembolso de tu pedido ({orderId}).',
           'El abono puede tardar unos días en reflejarse según tu banco o método de pago.'
         ]
       },
       dispute: {
         title: 'Pedido en revisión',
         statusLabel: 'en disputa',
+        preheader: 'Tu pedido esta en revision. Te contactaremos si necesitamos mas datos.',
+        nextStep: 'Nuestro equipo esta revisando el caso y te contactara si hace falta.',
         paragraphs: [
-          'Tu pedido (SS-20260409-AB12CD) ha pasado a revisión.',
+          'Tu pedido ({orderId}) ha pasado a revisión.',
           'Nuestro equipo lo revisará y te contactará si necesitamos más información.'
         ]
       },
       payment_failed: {
         title: 'Pago no confirmado',
         statusLabel: 'pago fallido',
+        preheader: 'No se pudo confirmar el pago. Retoma el pedido para completarlo.',
+        nextStep: 'Retoma el pedido con Ver pedido y prueba de nuevo el pago.',
         paragraphs: [
-          'No hemos podido confirmar el pago de tu pedido (SS-20260409-AB12CD).',
+          'No hemos podido confirmar el pago de tu pedido ({orderId}).',
           'Si has intentado pagar recientemente, revisaremos la incidencia y te avisaremos si necesitamos algo más.'
         ]
       }
     };
 
     const previewContext = {
-      orderId: 'SS-20260409-AB12CD',
-      customerName: 'Carlos',
-      productName: 'KuKirin N7 10.4Ah',
-      productImageUrl: '/img/0.jpg?v=20260409-1',
-      tracking: 'MRW-839201-ES',
-      message: 'Tu pedido ya está reservado y pasando el control de calidad final antes del envío.',
+      orderId: 'SS-20260530-9D4156',
+      customerName: 'Jean Pierre Polo',
+      tracking: 'MRW-918274-ES',
+      message: 'Tu pedido ya salió de almacén y está en tránsito con MRW. Te recomendamos revisar el seguimiento en las próximas horas para ver el primer escaneo.',
       siteUrl: 'https://scootshop.co',
-      logoUrl: '/img/0-removebg-preview.webp?v=20260409-1',
-      orderUrl: '/patinetes/series-n/n7'
+      logoUrl: '/img/0-removebg-preview.png',
+      orderUrl: '/pedido/?order=SS-20260530-9D4156',
+      supportUrl: 'https://wa.me/34612654818?text=Hola%20SCOOT%20SHOP%2C%20necesito%20ayuda%20con%20mi%20pedido%20SS-20260530-9D4156',
+      subtotalAmount: 3017.9,
+      shippingAmount: 0,
+      totalAmount: 3017.9,
+      orderItems: [
+        {
+          name: 'M41 Tank Ultimate 1000W',
+          sku: 'M41TANK',
+          color: 'Negro',
+          qty: 3,
+          price: 530,
+          image: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/1.webp',
+          url: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/'
+        },
+        {
+          name: 'KuKirin G2 Pro',
+          sku: 'G2PRO',
+          color: 'Amarillo',
+          qty: 2,
+          price: 689,
+          image: '/patinetes/series-k/g2-pro/img/1.webp',
+          url: '/patinetes/series-k/g2-pro/'
+        },
+        {
+          name: 'Bolsa Almacenamiento Universal',
+          sku: 'BOLSA-UNI',
+          color: 'Negro',
+          qty: 1,
+          price: 49.9,
+          image: '/accesorios/bolsa-almacenamiento/img/1.webp',
+          url: '/accesorios/bolsa-almacenamiento/'
+        }
+      ]
     };
 
     function esc(value){
@@ -514,8 +831,38 @@
         .replace(/'/g, '&#39;');
     }
 
-    function paragraphHtml(texts){
-      return texts.map((text) => '<p>' + esc(text) + '</p>').join('');
+    function paragraphHtml(texts, replacements){
+      const values = replacements || {};
+      return texts.map((text) => {
+        const rendered = String(text).replace(/\{(\w+)\}/g, (_, key) => {
+          const value = values[key];
+          return value === undefined || value === null ? '' : String(value);
+        });
+        return '<p>' + esc(rendered) + '</p>';
+      }).join('');
+    }
+
+    function money(value){
+      const n = Number(value);
+      if (!Number.isFinite(n) || n <= 0) return '';
+      return n.toFixed(2) + ' €';
+    }
+
+    function appendQueryParams(url, params){
+      try {
+        const u = new URL(url, window.location.origin);
+        Object.keys(params || {}).forEach((key) => {
+          const value = params[key];
+          if (value === undefined || value === null || value === '') return;
+          u.searchParams.set(key, String(value));
+        });
+        if (!/^https?:/i.test(url) && url.startsWith('/')) {
+          return u.pathname + u.search + u.hash;
+        }
+        return u.toString();
+      } catch (_) {
+        return url;
+      }
     }
 
     function renderEmail(status){
@@ -538,10 +885,11 @@
       document.documentElement.style.setProperty('--pill-border', pillBorder);
       document.documentElement.style.setProperty('--pill-color', pillColor);
 
+      const totalUnits = (previewContext.orderItems || []).reduce((sum, item) => sum + Math.max(1, Number(item.qty || 1)), 0);
       const details = [
         ['Pedido', previewContext.orderId],
         ['Estado', state.statusLabel],
-        ['Producto', previewContext.productName]
+        ['Artículos', String(totalUnits)]
       ];
 
       if (status === 'shipped') {
@@ -555,29 +903,120 @@
         '</div>'
       )).join('');
 
-      const showMessage = !['canceled', 'refunded', 'payment_failed'].includes(status);
-      const messageBlock = showMessage
-        ? '<section class="card card--soft">' +
-            '<div class="card-inner message">' +
-              '<div class="card-head">' +
-                '<p class="eyebrow">Mensaje adicional</p>' +
-                '<div class="mini-segment"></div>' +
-              '</div>' +
-              '<p>' + esc(previewContext.message) + '</p>' +
+      const subtotal = Number(previewContext.subtotalAmount || 0);
+      const shipping = Number(previewContext.shippingAmount || 0);
+      const total = Number(previewContext.totalAmount || subtotal + shipping || 0);
+      const showAmountSummary = subtotal > 0 || total > 0;
+      const amountSummaryBlock = showAmountSummary
+        ? '<section class="amount-summary">' +
+            '<div class="card-head">' +
+              '<p class="eyebrow">Resumen economico</p>' +
+              '<div class="mini-segment"></div>' +
+            '</div>' +
+            '<div class="amount-summary-card">' +
+              '<div class="amount-row"><span>Subtotal</span><strong>' + esc(money(subtotal) || '---') + '</strong></div>' +
+              '<div class="amount-row"><span>Envio</span><strong>' + esc(shipping <= 0 ? 'Gratis' : (money(shipping) || '---')) + '</strong></div>' +
+              '<div class="amount-row amount-row--total"><span>Total</span><strong>' + esc(money(total) || '---') + '</strong></div>' +
             '</div>' +
           '</section>'
         : '';
 
-      const html = '' +
-        '<article class="email-card">' +
-          '<header class="header">' +
-            '<div class="brand-row">' +
-              '<img class="logo" src="' + esc(previewContext.logoUrl) + '" alt="SCOOT SHOP">' +
-              '<div class="brand-copy">' +
-                '<small>SCOOT SHOP</small>' +
-                '<span>Actualización automática de tu pedido</span>' +
+      const actionHintsBlock = '';
+
+      const trackingParams = {
+        utm_source: 'transactional_email',
+        utm_medium: 'email',
+        utm_campaign: 'order_status',
+        utm_content: 'cta_ver_pedido',
+        utm_term: status,
+        order: previewContext.orderId
+      };
+      const trackedOrderUrl = appendQueryParams(previewContext.orderUrl, trackingParams);
+      const trackedSupportUrl = appendQueryParams(previewContext.supportUrl, {
+        utm_source: 'transactional_email',
+        utm_medium: 'email',
+        utm_campaign: 'order_status',
+        utm_content: 'secondary_support',
+        order: previewContext.orderId
+      });
+
+      document.title = 'Preview email pedidos | ' + (state.preheader || 'SCOOT SHOP');
+
+      const itemsHtml = (previewContext.orderItems || []).map((item) => {
+        const qty = Math.max(1, Number(item.qty || 1));
+        const lineTotalText = money(Number(item.price || 0) * qty);
+        const itemName = esc(item.name || 'Producto');
+        const itemRef = item.sku ? ('<span class="order-summary__product-meta order-summary__product-meta--ref">Ref: ' + esc(item.sku) + '</span>') : '';
+        const itemColorText = item.color || '';
+        const itemColor = itemColorText ? ('<span class="order-summary__product-meta order-summary__product-meta--color">Color: ' + esc(itemColorText) + '</span>') : '';
+        const itemUnitPrice = '<span class="order-summary__product-meta order-summary__product-meta--price">Precio: ' + money(item.price) + '</span>';
+        const itemQty = qty > 1 ? ('<span class="order-summary__product-meta order-summary__product-meta--qty">Cant: ' + qty + '</span>') : '';
+        const itemImage = item.image
+          ? ('<img class="order-summary__product-image" src="' + esc(item.image) + '" alt="' + itemName + '" loading="lazy" decoding="async">')
+          : ('<div class="order-summary__product-image" aria-hidden="true"></div>');
+
+        return '' +
+          '<article class="order-summary__product order-summary__product--line">' +
+            '<div class="order-summary__product-main">' +
+              itemImage +
+              '<div class="order-summary__product-info">' +
+                '<span class="order-summary__product-title">' + itemName + '</span>' +
+                itemRef +
+                itemColor +
+                itemUnitPrice +
               '</div>' +
             '</div>' +
+            '<div class="order-summary__product-side">' +
+              '<strong class="order-summary__product-line-total">' + esc(lineTotalText) + '</strong>' +
+              itemQty +
+            '</div>' +
+          '</article>';
+      }).join('');
+
+      const summaryShellHtml = '' +
+        '<div class="order-summary order-summary--checkout email-summary-shell">' +
+          '<div class="order-summary__product-list">' +
+            itemsHtml +
+          '</div>' +
+        '</div>';
+
+      const showMessage = !['canceled', 'refunded', 'payment_failed'].includes(status);
+      const messageBlock = showMessage
+        ? '<div class="message">' +
+            '<div class="card-head">' +
+              '<p class="eyebrow">Mensaje adicional</p>' +
+              '<div class="mini-segment"></div>' +
+            '</div>' +
+            '<p>' + esc(previewContext.message) + '</p>' +
+          '</div>'
+        : '';
+
+      const detailCardBlock = '' +
+        '<div class="post-box">' +
+          '<div class="card-head">' +
+            '<p class="eyebrow">Detalle del estado</p>' +
+            '<div class="mini-segment"></div>' +
+          '</div>' +
+          '<div class="detail-list">' + detailRows + '</div>' +
+        '</div>';
+
+      const actionsCardBlock = '' +
+        '<div class="post-box">' +
+          messageBlock +
+          actionHintsBlock +
+          '<div class="cta-wrap">' +
+            '<a class="cta" href="' + esc(trackedOrderUrl) + '">Ver pedido</a>' +
+            '<a class="cta-secondary" href="' + esc(trackedSupportUrl) + '">Soporte WhatsApp</a>' +
+          '</div>' +
+        '</div>';
+
+      const html = '' +
+        '<article class="email-card">' +
+          '<div class="hero-top">' +
+            '<img src="' + esc(previewContext.logoUrl) + '" alt="SCOOT SHOP">' +
+          '</div>' +
+          '<div class="hero-line"></div>' +
+          '<header class="header">' +
             '<span class="status-pill">' + esc(state.statusLabel) + '</span>' +
             '<h2>' + esc(state.title) + '</h2>' +
             '<p>Pedido ' + esc(previewContext.orderId) + '</p>' +
@@ -585,37 +1024,24 @@
           '</header>' +
           '<section class="body">' +
             '<p class="greeting">Hola ' + esc(previewContext.customerName) + ',</p>' +
-            paragraphHtml(state.paragraphs) +
+            paragraphHtml(state.paragraphs, {
+              orderId: previewContext.orderId,
+              tracking: previewContext.tracking
+            }) +
           '</section>' +
           '<section class="card card--soft">' +
             '<div class="card-inner">' +
-              '<div class="product-grid">' +
-                '<div class="product-media">' +
-                  '<img src="' + esc(previewContext.productImageUrl) + '" alt="' + esc(previewContext.productName) + '">' +
-                '</div>' +
-                '<div class="product-copy">' +
-                  '<div class="card-head">' +
-                    '<p class="eyebrow">Producto</p>' +
-                    '<div class="mini-segment"></div>' +
-                  '</div>' +
-                  '<h3>' + esc(previewContext.productName) + '</h3>' +
-                  '<p>Seguimos trabajando para mantenerte informado en cada paso del proceso.</p>' +
-                '</div>' +
-              '</div>' +
-            '</div>' +
-          '</section>' +
-          '<section class="card">' +
-            '<div class="card-inner">' +
               '<div class="card-head">' +
-                '<p class="eyebrow">Detalle del estado</p>' +
+                '<p class="eyebrow">Productos del pedido</p>' +
                 '<div class="mini-segment"></div>' +
               '</div>' +
-              '<div class="detail-list">' + detailRows + '</div>' +
+              '<div class="order-items">' + summaryShellHtml + '</div>' +
             '</div>' +
           '</section>' +
-          messageBlock +
-          '<div class="cta-wrap">' +
-            '<a class="cta" href="' + esc(previewContext.orderUrl) + '">Ver producto</a>' +
+          amountSummaryBlock +
+          '<div class="post-summary-grid">' +
+            detailCardBlock +
+            actionsCardBlock +
           '</div>' +
           '<footer class="footer">' +
             '<p>Gracias por confiar en SCOOT SHOP.</p>' +
@@ -644,4 +1070,40 @@
   </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

@@ -1,39 +1,36 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es-ES">
 <head>
   <meta charset="utf-8" />
+  <meta name="color-scheme" content="only light" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Datos de envío | SCOOT SHOP</title>
   <meta name="description" content="Completa tus datos de envío antes del pago seguro en SCOOT SHOP." />
   <meta name="robots" content="noindex,nofollow" />
   <meta name="theme-color" content="#ffffff" />
-  <meta name="asset-version" content="20260409-2" />
+  <meta name="asset-version" content="20260605-2" />
 
   <link rel="canonical" href="https://scootshop.co/checkout" />
-  <link rel="icon" href="/favicon.ico?v=20260409-2" sizes="any" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=20260409-2" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=20260409-2" />
-  <link rel="manifest" href="/site.webmanifest?v=20260409-2" />
+  <link rel="icon" href="/favicon.ico?v=20260605-2" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=20260605-2" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=20260605-2" />
+  <link rel="manifest" href="/site.webmanifest?v=20260605-2" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" /></noscript>
-  <link rel="stylesheet" href="/css/icons.css?v=20260409-2" />
-  <link rel="stylesheet" href="/css/main.css?v=20260409-2" />
-  <script src="/js/asset-sync.js"></script>
-  <script src="/js/global-assets.js"></script>
+  <link rel="stylesheet" href="/css/icons.css?v=20260605-2" />
+  <link rel="stylesheet" href="/css/main.css?v=20260605-2" />
+  <script src="/js/asset-sync.js?v=20260605-2" defer></script>
+  <script src="/js/global-assets.js?v=20260605-2" defer></script>
 
   <style>
     :root{
-      --sport:'Russo One',sans-serif;
-      --ui:'Plus Jakarta Sans',ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans";
       --bg:#f6f7f9;
-      --ink:#111315;
-      --muted:#68707f;
+      --muted:#5f6877;
       --line:#e5eaf1;
-      --surface:#ffffff;
       --soft:#f7f9fc;
       --radius:24px;
     }
@@ -48,6 +45,8 @@
         radial-gradient(circle at top left, rgba(255,255,255,.96), transparent 30%),
         radial-gradient(circle at top right, rgba(230,236,244,.92), transparent 34%),
         linear-gradient(180deg, #fbfcfd 0%, #f3f5f8 100%);
+      background-attachment:fixed;
+      background-color:#f3f5f8;
     }
     a{ color:inherit; }
     a:focus-visible,
@@ -78,38 +77,61 @@
       pointer-events:none;
       z-index:24;
     }
-    /* ── Step indicator ── */
+    /* -- Step indicator -- */
     .ck-steps{
       display:flex;
       align-items:center;
-      gap:10px;
-      padding:0 0 18px;
-      padding-left:max(16px, calc((100vw - 1120px) / 2));
+      gap:14px;
+      padding:8px 0 18px;
       margin:0;
       position:-webkit-sticky;
       position:sticky;
-      top:calc(var(--header-h) + var(--sat) + 8px);
+      top:calc(var(--header-h) + var(--sat) - 2px);
       z-index:30;
+    .ck-sidebar,
+    .ck-summary,
+    .ck-summary-body,
+    .ck-product{
+      min-width:0;
+      max-width:100%;
+    }
+    .ck-summary{
+      overflow-x:clip;
+    }
+    .ck-product-info{
+      min-width:0;
+      max-width:100%;
+      flex:1 1 auto;
+    }
+    .ck-product-name{
+      display:block;
+      width:100%;
+      max-width:100%;
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
       isolation:isolate;
     }
     .ck-step{
       display:flex;
       align-items:center;
-      gap:6px;
-      font-size:.78rem;
+      gap:9px;
+      font-size:.95rem;
       font-weight:800;
       color:#b4bbc6;
       letter-spacing:.02em;
     }
     .ck-step--active{ color:var(--ink); }
     .ck-step-num{
-      width:22px;
-      height:22px;
+      width:30px;
+      height:30px;
       border-radius:50%;
       display:flex;
       align-items:center;
       justify-content:center;
-      font-size:.7rem;
+      font-size:.86rem;
       font-weight:900;
       background:rgba(17,19,21,.06);
       color:#98a2b3;
@@ -119,25 +141,32 @@
       color:#fff;
     }
     .ck-step-sep{
-      width:20px;
+      width:24px;
       height:1px;
       background:rgba(17,19,21,.12);
     }
     .ck-container{
-      width:min(1120px, calc(100% - 32px));
+      width:min(1160px, calc(100% - 40px));
       margin:0 auto;
       display:grid;
-      grid-template-columns:minmax(0, 1fr) minmax(300px, 360px);
-      gap:20px;
+      grid-template-columns:minmax(0, 1fr) minmax(320px, 380px);
+      gap:18px 26px;
       align-items:start;
       padding-left:0;
       padding-right:0;
     }
+    .ck-container > *{
+      min-width:0;
+    }
+    .ck-steps{
+      grid-column:1 / -1;
+    }
 
-    /* ── Left: form card ── */
+    /* -- Left: form card -- */
     .ck-card{
       display:grid;
       gap:0;
+      min-width:0;
       border:0;
       border-radius:0;
       background:transparent;
@@ -147,30 +176,53 @@
     }
     .ck-body{ padding:0; }
 
-    /* ── Validation ── */
+    /* -- Validation -- */
     .field.field--error label{
       color:#dc2626;
     }
     .field.field--error input,
     .field.field--error select,
     .field.field--error textarea{
-      color:#dc2626;
-    }
-    .field.field--error{
-      border-bottom-color:#fca5a5;
+      border-bottom-color:#e05555 !important;
+      background-image: linear-gradient(#e05555, #e05555);
+      background-repeat: no-repeat;
+      background-size: 100% 2px;
+      background-position: left bottom;
     }
     .field-error{
-      font-size:.72rem;
-      font-weight:700;
-      color:#dc2626;
-      margin-top:2px;
-      display:none;
+      /* Keep validation text available for assistive tech, but not visually rendered. */
+      position:absolute;
+      width:1px;
+      height:1px;
+      padding:0;
+      margin:-1px;
+      overflow:hidden;
+      clip:rect(0, 0, 0, 0);
+      white-space:nowrap;
+      border:0;
     }
-    .field.field--error .field-error{
-      display:block;
+    .field.field--province .field-error{
+      display:none;
+      min-height:0;
+      margin-top:0;
+    }
+    .field.field--error input::placeholder,
+    .field.field--error textarea::placeholder{
+      color:#e28a8a;
+      opacity:1;
+    }
+    .field.field--error .phone-prefix,
+    .field.field--error .phone-group input#phone{
+      border-bottom-color:#e05555 !important;
+    }
+    .field.field--error .phone-group input#phone{
+      background-image: linear-gradient(#e05555, #e05555) !important;
+      background-repeat: no-repeat !important;
+      background-size: 100% 2px !important;
+      background-position: left bottom !important;
     }
 
-    /* ── Order summary sidebar ── */
+    /* -- Order summary sidebar -- */
     .ck-sidebar{
       display:flex;
       flex-direction:column;
@@ -178,35 +230,15 @@
       top:90px;
       align-self:start;
       width:100%;
-      max-width:360px;
+      max-width:380px;
       justify-self:end;
     }
-    .ck-summary{
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      border:1px solid rgba(255,255,255,.78);
-      border-radius:var(--radius);
-      background:linear-gradient(180deg, rgba(255,255,255,.97), rgba(249,250,252,.99));
-      box-shadow:0 14px 34px rgba(15,23,42,.04);
-      overflow:hidden;
-    }
     .ck-summary-head{
-      padding:20px 22px 14px;
-      border-bottom:1px solid rgba(17,19,21,.05);
       cursor:default;
       list-style:none;
     }
     .ck-summary-head::-webkit-details-marker{ display:none; }
     .ck-summary-head::marker{ display:none; content:''; }
-    .ck-summary-head h2{
-      margin:0;
-      font-family:var(--sport);
-      letter-spacing:.06em;
-      text-transform:uppercase;
-      font-size:.92rem;
-      color:var(--ink);
-    }
     .ck-toggle-arrow{
       display:none;
       width:20px;
@@ -214,115 +246,95 @@
       transition:transform .2s ease;
     }
 
-    .ck-summary-body{
-      padding:18px 22px 22px;
-      display:flex;
-      flex-direction:column;
-      gap:18px;
-      flex:1;
-    }
-
-    /* Product card inside summary */
-    .ck-product{
-      display:flex;
-      align-items:center;
-      gap:14px;
-      padding:12px;
-      border-radius:16px;
-      background:rgba(17,19,21,.024);
-      border:1px solid rgba(17,19,21,.045);
-    }
-    .ck-product-img{
-      width:56px;
-      height:56px;
-      border-radius:12px;
-      border:1px solid rgba(17,19,21,.06);
-      object-fit:contain;
-      background:#fff;
-      flex:0 0 auto;
-    }
-    .ck-product-info{
-      display:grid;
-      gap:1px;
-      min-width:0;
-    }
-    .ck-product-name{
-      font-weight:800;
-      font-size:.9rem;
-      line-height:1.3;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-    }
-    .ck-product-sku{
-      font-size:.74rem;
-      color:var(--muted);
-      font-weight:600;
-    }
-
-    /* Price rows */
-    .ck-summary-rows{
-      display:grid;
-      gap:0;
-      margin-top:auto;
-    }
-    .ck-sum-row{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding:10px 0;
-      border-bottom:1px solid rgba(17,19,21,.05);
-      font-size:1rem;
-    }
-    .ck-sum-row:last-child{ border-bottom:0; }
-    .ck-sum-row .ck-k{
-      color:var(--muted);
-      font-weight:700;
-      font-size:.96rem;
-    }
-    .ck-sum-row .ck-v{
-      font-weight:800;
-      text-align:right;
-      font-size:1rem;
-    }
-    .ck-sum-row--total{
-      padding-top:12px;
-      margin-top:2px;
-      border-top:1.5px solid rgba(17,19,21,.1);
-      border-bottom:0;
-    }
-    .ck-sum-row--total .ck-k{
-      font-weight:900;
-      color:var(--ink);
-      font-size:1.06rem;
-    }
-    .ck-sum-row--total .ck-v{
-      font-size:1.42rem;
-      font-weight:900;
-      color:var(--ink);
-    }
-
     /* Recipient / address meta */
     .ck-meta{
+      pointer-events:none;
+      user-select:none;
+    }
+    .ck-meta-title{
+      display:block;
+      margin-bottom:8px;
+      font-size:.68rem;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:#687385;
+    }
+    .ck-meta-row{
       display:flex;
       align-items:center;
       gap:8px;
       font-size:.8rem;
       color:var(--muted);
       font-weight:600;
-      padding:10px 12px;
-      border-radius:12px;
-      background:rgba(17,19,21,.02);
-      border:1px solid rgba(17,19,21,.04);
       line-height:1.4;
+      transition:opacity .18s ease, color .18s ease;
     }
-    .ck-meta svg{
+    .ck-meta-row + .ck-meta-row{
+      margin-top:8px;
+      padding-top:8px;
+      border-top:1px solid rgba(17,19,21,.06);
+    }
+    .ck-meta-row.is-placeholder{
+      opacity:.72;
+    }
+    .ck-meta-row svg{
       width:14px;
       height:14px;
       flex:0 0 auto;
       opacity:.6;
     }
+    .ck-meta-icon{
+      width:14px;
+      height:14px;
+      flex:0 0 auto;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      opacity:.7;
+      font-size:14px;
+      font-weight:900;
+      line-height:1;
+    }
 
+    /* Trust bar below submit button */
+    .trust-bar{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:center;
+      gap:10px 18px;
+      order:2;
+      padding:10px 12px;
+      border-radius:12px;
+      background:rgba(22,163,74,.03);
+      border:1px dashed rgba(22,163,74,.24);
+      margin-top:0;
+    }
+    .trust-bar span{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-size:.74rem;
+      font-weight:700;
+      color:#16a34a;
+      white-space:nowrap;
+    }
+    .trust-bar span i{
+      font-size:.82rem;
+    }
+    .legal-note{
+      order:3;
+      font-size:.72rem;
+      color:#9aa3b0;
+      text-align:center;
+      line-height:1.5;
+      margin-top:2px;
+    }
+    .legal-note a{
+      color:#9aa3b0;
+      text-decoration:underline;
+    }
     /* Trust footer */
     .ck-trust{
       display:flex;
@@ -330,9 +342,9 @@
       justify-content:center;
       gap:6px;
       color:var(--muted);
-      font-size:.73rem;
-      font-weight:600;
-      opacity:.7;
+      font-size:.74rem;
+      font-weight:700;
+      opacity:.82;
     }
     .ck-trust svg{
       width:12px;
@@ -346,26 +358,34 @@
       font-size:.92rem;
       line-height:1.55;
     }
-    /* ── Form: grouped cards with minimalist rows ── */
+    /* -- Form: grouped cards with minimalist rows -- */
     .shipping-form{
       display:grid;
-      gap:16px;
+      gap:18px;
     }
     .section-block{
-      border:1px solid rgba(255,255,255,.78);
-      border-radius:var(--radius);
-      background:linear-gradient(180deg, rgba(255,255,255,.97), rgba(249,250,252,.99));
-      box-shadow:0 14px 34px rgba(15,23,42,.04);
+      border:0;
+      border-radius:22px;
+      background:#fff;
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.9) inset,
+        0 18px 44px rgba(15,23,42,.08),
+        0 6px 18px rgba(15,23,42,.04);
       overflow:hidden;
     }
+
+    .section-block--contact{
+      background:#fff;
+    }
+
     .section-heading{
-      padding:18px 20px 10px;
+      padding:18px 20px 12px;
       border-bottom:1px solid rgba(17,19,21,.06);
     }
     .section-heading strong{
       display:block;
       font-family:var(--sport);
-      font-weight:400;
+      font-weight:700;
       font-size:.95rem;
       color:var(--ink);
       text-transform:uppercase;
@@ -376,49 +396,71 @@
     }
     .form-grid{
       display:grid;
+      grid-template-columns:1fr;
       gap:0;
       padding:0 20px;
     }
     .field{
       display:grid;
-      gap:4px;
-      padding:14px 0;
-      border-bottom:1px solid var(--line);
+      gap:6px;
+      padding:15px 0 14px;
     }
-    .field:last-child{ border-bottom:0; }
-    .field--full{ grid-column:auto; }
+    .field[hidden]{ display:none; }
+    .field--full{ grid-column:1 / -1; }
     .field label{
       color:var(--muted);
-      font-weight:800;
-      font-size:.76rem;
-      text-transform:uppercase;
-      letter-spacing:.08em;
+      font-weight:700;
+      font-size:.78rem;
+      text-transform:none;
+      letter-spacing:.01em;
+    }
+    .field label .opt{
+      font-weight:500;
+      color:#aab0ba;
+      font-size:.74rem;
+      margin-left:4px;
     }
     .field input,
     .field textarea,
     .field select{
       width:100%;
-      padding:0;
+      padding:8px 0;
       border:0;
+      border-bottom:1.5px solid rgba(17,19,21,.14);
       border-radius:0;
       background:transparent;
       color:var(--ink);
       font-family:var(--ui);
       font-weight:600;
-      font-size:.95rem;
+      font-size:16px !important;
       letter-spacing:.01em;
       outline:none;
+      min-height:40px;
+      transition:border-bottom-color .32s cubic-bezier(.4,0,.2,1), border-bottom-width .32s cubic-bezier(.4,0,.2,1), padding-bottom .32s cubic-bezier(.4,0,.2,1);
     }
     .field input:focus,
     .field textarea:focus,
     .field select:focus{
       outline:none;
+      border-bottom-width:2.5px;
+      border-bottom-color:#424242;
+      padding-bottom:6.5px;
       box-shadow:none;
     }
     .field input::placeholder,
     .field textarea::placeholder{
-      color:#b4bbc6;
+      color:#b8c0cc;
       font-weight:500;
+    }
+    .field.field--valid input,
+    .field.field--valid select{
+      border-bottom-color:#16a34a;
+      border-bottom-width:2.5px;
+    }
+    .field.field--valid .phone-prefix,
+    .field.field--valid .phone-group input#phone{
+      border-bottom-color:#16a34a !important;
+      border-bottom-width:2.5px !important;
     }
     .field textarea{
       min-height:56px;
@@ -430,20 +472,117 @@
       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%2368707f' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
       background-repeat:no-repeat;
       background-position:right 0 center;
-      padding-right:20px;
+      padding-right:22px;
       cursor:pointer;
     }
     .field-note{
+      font-size:.73rem;
+      color:#748093;
+      line-height:1.45;
+      font-weight:700;
+    }
+    .geo-disclaimer{
+      margin-top:8px;
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid rgba(180,83,9,.18);
+      background:rgba(245,158,11,.08);
+      color:#92400e;
       font-size:.72rem;
-      color:#98a2b3;
-      line-height:1.4;
-      font-weight:600;
+      font-weight:700;
+      line-height:1.45;
+    }
+    .field--email-wrap{ position:relative; }
+    .field--email-wrap .email-check{
+      position:absolute;
+      right:12px;
+      top:50%;
+      transform:translateY(-50%);
+      color:#22c55e;
+      opacity:0;
+      transition:opacity .2s ease;
+      pointer-events:none;
+    }
+    .field--email-wrap.is-valid .email-check{ opacity:1; }
+
+    /* Phone prefix + number group */
+    .phone-group{
+      display:flex;
+      align-items:flex-end;
+      gap:12px;
+      border:0;
+      border-radius:0;
+      background:transparent;
+      min-height:40px;
+      overflow:visible;
+    }
+    .phone-group:focus-within{
+      box-shadow:none;
+    }
+    /* Neutralize generic .field input styles only for phone number field */
+    .phone-group input:not(.phone-prefix){
+      border:0 !important;
+      border-radius:0 !important;
+      background:transparent !important;
+      box-shadow:none !important;
+      min-height:0 !important;
+    }
+    .phone-prefix{
+      width:auto;
+      min-width:48px;
+      max-width:64px;
+      padding:8px 8px 8px 0 !important;
+      border:0 !important;
+      border-bottom:1.5px solid rgba(17,19,21,.14) !important;
+      border-radius:0;
+      background:transparent;
+      color:var(--muted);
+      font-family:var(--ui);
+      font-weight:700;
+      font-size:16px !important;
+      letter-spacing:.01em;
+      outline:none;
+      text-align:center;
+      flex:0 0 auto;
+      min-height:0;
+      line-height:1.25;
+      transition:border-bottom-color .32s cubic-bezier(.4,0,.2,1), border-bottom-width .32s cubic-bezier(.4,0,.2,1);
+    }
+    .phone-prefix:focus{
+      color:var(--ink);
+      outline:none;
+      border-bottom-width:2.5px;
+      border-bottom-color:#424242;
+    }
+    .phone-group input#phone{
+      padding-left:10px;
+      padding-top:8px;
+      padding-bottom:8px;
+      flex:1;
+      min-width:0;
+      border:0 !important;
+      border-bottom:1.5px solid rgba(17,19,21,.14) !important;
+      border-radius:0;
+      background:transparent;
+      min-height:0;
+      line-height:1.25;
+      transition:border-bottom-color .32s cubic-bezier(.4,0,.2,1), border-bottom-width .32s cubic-bezier(.4,0,.2,1);
+    }
+    .phone-group input#phone:focus{
+      outline:none;
+      border-bottom-width:2.5px !important;
+      border-bottom-color:#424242 !important;
+      box-shadow:none !important;
     }
 
     .actions{
       display:grid;
       gap:12px;
       padding:0;
+      border:0;
+      border-radius:0;
+      background:transparent;
+      box-shadow:none;
     }
     .actions a{
       color:var(--muted);
@@ -453,11 +592,12 @@
       text-align:center;
     }
     .ck-btn{
+      order:1;
       appearance:none;
-      border:0;
+      border:1px solid #6b6c6c;
       border-radius:999px;
       padding:18px 24px;
-      background:#111315;
+      background:linear-gradient(180deg, #373737 0%, #111111 100%);
       color:#fff;
       font-family:var(--ui);
       font-weight:900;
@@ -469,12 +609,20 @@
       align-items:center;
       justify-content:center;
       gap:10px;
-      transition:transform .12s ease, box-shadow .12s ease;
+      box-shadow:none;
+      transition:transform .18s ease, background .18s ease, box-shadow .18s ease, border-color .18s ease;
     }
     .ck-btn:hover{
-      transform:none;
+      transform:translateY(-1px);
+      border-color:#8f8f8f;
+      background:linear-gradient(180deg, #4a4a4a 0%, #171717 100%);
       box-shadow:none;
-      background:#1a1d20;
+    }
+    .ck-btn:focus,
+    .ck-btn:focus-visible,
+    .ck-btn:active{
+      outline:none;
+      box-shadow:none;
     }
 
     .empty{
@@ -484,9 +632,41 @@
       padding:14px 0 4px;
     }
 
-    @media (max-width: 860px){
+    @media (min-width: 1201px){
+      .ck-steps{ gap:14px; }
+      .ck-step{
+        font-size:.95rem;
+        gap:9px;
+      }
+      .ck-step-num{
+        width:30px;
+        height:30px;
+        font-size:.86rem;
+      }
+      .ck-step-sep{ width:24px; }
+      .section-heading{
+        padding:20px 24px 12px;
+      }
+      .section-heading strong{ font-size:1rem; }
+      .form-grid{
+        grid-template-columns:repeat(2, minmax(0, 1fr));
+        column-gap:18px;
+        padding:0 24px;
+      }
+      .field{
+        gap:7px;
+        padding:16px 0;
+      }
+      .field label{ font-size:.78rem; }
+      .field input,
+      .field textarea,
+      .field select{ font-size:1rem; }
+      .phone-prefix{ font-size:1rem; }
+      .actions a{ font-size:.9rem; }
+    }
+    @media (max-width: 1200px){
       .ck-wrap{ padding:18px clamp(16px,2.5vw,22px) 28px; }
-      .ck-steps{ padding-left:0; }
+      .ck-steps{ padding-left:0; order:-2; }
       .ck-container{
         width:100%;
         grid-template-columns:1fr;
@@ -494,17 +674,23 @@
         padding-right:0;
       }
       .ck-card{
+        order:1;
         padding-right:0;
+      }
+      .form-grid{
+        grid-template-columns:1fr;
       }
       .ck-sidebar{
         order:-1;
         position:static;
         align-self:auto;
+        width:100%;
+        max-width:none;
+        justify-self:stretch;
       }
       .ck-summary{
         width:100%;
-        border-radius:var(--radius);
-        border-right:1px solid rgba(255,255,255,.78);
+        max-width:none;
       }
       .ck-summary-head{
         cursor:pointer;
@@ -522,17 +708,220 @@
         border-bottom:0;
       }
     }
-    @media (max-width: 700px){
-      .ck-wrap{ padding:18px clamp(16px,2.5vw,22px) 28px; }
+    @media (max-width: 640px){
+      .ck-wrap{ padding:18px clamp(16px,2.5vw,22px) 30px; }
+      .ck-steps{
+        gap:12px;
+        padding-bottom:16px;
+        overflow-x:auto;
+        scrollbar-width:none;
+      }
+      .ck-steps::-webkit-scrollbar{ display:none; }
+      .ck-step{
+        gap:8px;
+        font-size:.9rem;
+        white-space:nowrap;
+      }
+      .ck-step-num{
+        width:28px;
+        height:28px;
+        font-size:.8rem;
+      }
+      .ck-step-sep{ width:18px; }
       .ck-container{ width:100%; gap:12px; }
       .ck-sidebar{ width:100%; max-width:none; }
-      .ck-summary-head{ width:100%; padding-left:18px; padding-right:18px; }
-      .ck-summary-body{ padding-left:18px; padding-right:18px; }
-      .ck-summary{ border-radius:22px; }
+      /* Summary sizing handled in /css/main.css */
       .section-block{ border-radius:22px; }
-      .actions{ align-items:stretch; }
-      .ck-btn{ width:100%; min-width:0; }
+      .section-heading{
+        padding:18px 18px 12px;
+      }
+      .section-heading strong{ font-size:1rem; }
+      .shipping-form{ gap:14px; }
+      .form-grid{ padding:0 18px; }
+      .field{
+        gap:6px;
+        padding:13px 0;
+      }
+      .field label{
+        font-size:.82rem;
+        letter-spacing:.07em;
+      }
+      .field input,
+      .field textarea,
+      .field select{
+        font-size:1.05rem;
+        line-height:1.45;
+        min-height:30px;
+      }
+      .phone-prefix{
+        font-size:1.05rem;
+        min-width:56px;
+        max-width:72px;
+        padding-right:10px !important;
+      }
+      .phone-group input#phone{
+        padding-left:12px;
+      }
+      .field input::placeholder,
+      .field textarea::placeholder{
+        font-size:1.05rem;
+      }
+      .field textarea{
+        min-height:84px;
+      }
+      .field-note{
+        font-size:.78rem;
+        line-height:1.45;
+      }
+      .field-error{ font-size:.76rem; }
+      .actions{
+        align-items:stretch;
+        padding:0;
+        border-radius:0;
+      }
+      .ck-btn{
+        width:100%;
+        min-width:0;
+        min-height:52px;
+        font-size:1rem;
+      }
     }
+
+    @media (max-width: 420px){
+      .ck-wrap{ padding-top:14px; }
+    }
+
+    @media (min-width: 821px){
+      .ck-steps{ gap:14px; }
+      .ck-step{
+        font-size:.95rem;
+        gap:9px;
+      }
+      .ck-step-num{
+        width:30px;
+        height:30px;
+        font-size:.86rem;
+      }
+      .ck-step-sep{ width:24px; }
+
+    }
+
+    /* ==========================================================
+       CHECKOUT HEADER — simplified: hide nav links, keep logo + WhatsApp
+       ========================================================== */
+    #site-header-slot .nav-links,
+    #site-header-slot .nav-list,
+    #site-header-slot nav ul,
+    #site-header-slot .header-nav,
+    #site-header-slot .menu-toggle,
+    #site-header-slot .burger,
+    #site-header-slot [class*="hamburger"],
+    #site-header-slot [class*="nav-toggle"],
+    #site-header-slot [class*="nav-menu"],
+    #site-header-slot [class*="main-nav"]{
+      display:none !important;
+    }
+    #site-header-slot .site-header,
+    #site-header-slot header{
+      box-shadow:none;
+    }
+
+    /* ==========================================================
+       PREMIUM POLISH LAYER — checkout/index.html
+       Minimalist refinements: form, CTA, sidebar.
+       ========================================================== */
+    .ck-card{
+      border-radius:24px;
+      box-shadow:0 1px 0 rgba(0, 0, 125, 0), 0 12px 32px rgba(15, 23, 42, 0);
+    }
+    .field{
+      transition: background .18s ease;
+      border-radius:10px;
+    }
+    .field:focus-within{
+      background: rgba(17,19,21,.015);
+    }
+    .field label{
+      color:#5b6168;
+    }
+    .field:focus-within label{
+      color:#111315;
+    }
+    .field input,
+    .field textarea,
+    .field select{
+      transition: border-color .18s ease, box-shadow .18s ease;
+    }
+    .field input:focus,
+    .field textarea:focus,
+    .field select:focus{
+      outline:none;
+    }
+
+    /* Continue CTA */
+    .ck-btn{
+      background:linear-gradient(180deg, #373737 0%, #111111 100%);
+      color:#fff;
+      border:1px solid #6b6c6c;
+      border-radius:14px;
+      font-weight:900;
+      letter-spacing:.01em;
+      box-shadow:none;
+      transition:transform .18s ease, background .18s ease, box-shadow .18s ease, border-color .18s ease;
+      min-height:52px;
+    }
+    .ck-btn:hover{
+      transform:translateY(-1px);
+      border-color:#8f8f8f;
+      background:linear-gradient(180deg, #4a4a4a 0%, #171717 100%);
+      box-shadow:none;
+    }
+    .ck-btn:active{
+      transform:translateY(0);
+    }
+    .ck-btn svg{ transition: transform .18s ease; }
+    .ck-btn:hover svg{ transform: translateX(3px); }
+
+    /* Back to product link */
+    #backToProduct{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:8px 0;
+      color:#5b6168;
+      font-weight:700;
+      font-size:.86rem;
+      text-decoration:none;
+      transition: color .18s ease, transform .18s ease;
+    }
+    #backToProduct:hover{
+      color:#111315;
+      transform: translateX(-2px);
+    }
+
+    /* Section heading subtitles */
+    .section-heading span{
+      color:#5b6168;
+      font-size:.84rem;
+      line-height:1.5;
+    }
+
+    /* Sidebar summary visuals handled in /css/main.css */
+
+    /* Steps polish */
+    .ck-step--active .ck-step-num{
+      background:#111315;
+      color:#fff;
+    }
+
+    /* Notes toggle hover */
+    #notesToggle{
+      transition: color .18s ease;
+    }
+    #notesToggle:hover{
+      color:#111315 !important;
+    }
+
   </style>
 </head>
 <body>
@@ -540,6 +929,8 @@
   <div id="mobile-menu-slot"></div>
 
   <div class="ck-wrap">
+    <h1 class="sr-only">Datos de envío de tu pedido</h1>
+    <div class="ck-container">
     <div class="ck-steps">
       <span class="ck-step ck-step--active"><span class="ck-step-num">1</span> Envío</span>
       <span class="ck-step-sep"></span>
@@ -547,32 +938,37 @@
       <span class="ck-step-sep"></span>
       <span class="ck-step"><span class="ck-step-num">3</span> Confirmación</span>
     </div>
-    <div class="ck-container">
       <!-- LEFT: Formulario -->
       <section class="ck-card" id="formCard" aria-label="Formulario de envío">
         <div class="ck-body">
           <form id="shippingForm" class="shipping-form" novalidate>
             <div class="section-block section-block--contact">
               <div class="section-heading">
-                <strong>Datos de contacto</strong>
+                <strong>Contacto <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-left:5px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></strong>
                 <span>Usaremos esta información para confirmar el pedido y coordinar la entrega si fuera necesario.</span>
               </div>
               <div class="form-grid">
                 <div class="field field--full">
                   <label for="fullName">Nombre y apellidos *</label>
-                  <input id="fullName" name="fullName" type="text" autocomplete="name" placeholder="Nombre completo" required />
+                  <input id="fullName" name="fullName" type="text" autocomplete="name" placeholder="Nombre completo" maxlength="190" required />
                   <span class="field-error">Introduce tu nombre</span>
                 </div>
 
                 <div class="field">
                   <label for="email">Correo electrónico *</label>
-                  <input id="email" name="email" type="email" autocomplete="email" placeholder="tu@email.com" required />
+                  <div class="field--email-wrap">
+                    <input id="email" name="email" type="email" autocomplete="email" placeholder="tu@email.com" maxlength="190" required />
+                    <svg class="email-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </div>
                   <span class="field-error">Introduce un email válido</span>
                 </div>
 
                 <div class="field">
                   <label for="phone">Teléfono *</label>
-                  <input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="+34 600 000 000" required />
+                  <div class="phone-group">
+                    <input id="phonePrefix" name="phonePrefix" type="tel" class="phone-prefix" value="+34" data-auto-prefix="+34" maxlength="5" autocomplete="tel-country-code" aria-label="Prefijo telefónico" />
+                    <input id="phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="600 000 000" maxlength="19" required />
+                  </div>
                   <span class="field-error">Introduce un teléfono</span>
                 </div>
               </div>
@@ -580,7 +976,7 @@
 
             <div class="section-block section-block--address">
               <div class="section-heading">
-                <strong>Dirección de entrega</strong>
+                <strong>Dirección <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-left:5px"><path d="M20 9v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9"/><path d="M9 22V12h6v10"/><path d="M2 10.6L12 2l10 8.6"/></svg></strong>
                 <span>Introduce la dirección donde quieres recibir tu pedido para continuar al pago seguro.</span>
               </div>
               <div class="form-grid">
@@ -592,56 +988,65 @@
                     <option value="Francia">Francia</option>
                     <option value="Italia">Italia</option>
                     <option value="Alemania">Alemania</option>
-                    <option value="Otro">Otro</option>
                   </select>
                 </div>
 
                 <div class="field field--full">
                   <label for="addressLine1">Dirección *</label>
-                  <input id="addressLine1" name="addressLine1" type="text" autocomplete="address-line1" placeholder="Calle, número y edificio" required />
+                  <input id="addressLine1" name="addressLine1" type="text" autocomplete="address-line1" placeholder="Calle, número y edificio" maxlength="255" required />
+                  <span id="geoPrecisionNote" class="geo-disclaimer" hidden></span>
                   <span class="field-error">Introduce una dirección</span>
                 </div>
 
                 <div class="field field--full">
-                  <label for="addressLine2">Piso, puerta o referencia</label>
-                  <input id="addressLine2" name="addressLine2" type="text" autocomplete="address-line2" placeholder="Opcional" />
+                  <label for="addressLine2">Piso, puerta o referencia <span class="opt">(opcional)</span></label>
+                  <input id="addressLine2" name="addressLine2" type="text" autocomplete="address-line2" placeholder="Ej: 2ºB, escalera derecha…" maxlength="255" />
                 </div>
 
                 <div class="field">
                   <label for="postalCode">Código postal *</label>
-                  <input id="postalCode" name="postalCode" type="text" autocomplete="postal-code" inputmode="numeric" placeholder="28001" required />
+                  <input id="postalCode" name="postalCode" type="text" autocomplete="postal-code" inputmode="numeric" placeholder="28001" maxlength="16" required />
                   <span class="field-error">Introduce el código postal</span>
                 </div>
 
                 <div class="field">
                   <label for="city">Ciudad *</label>
-                  <input id="city" name="city" type="text" autocomplete="address-level2" placeholder="Madrid" required />
+                  <input id="city" name="city" type="text" autocomplete="address-level2" placeholder="Madrid" maxlength="100" required />
                   <span class="field-error">Introduce la ciudad</span>
                 </div>
 
-                <div class="field">
+                <div class="field field--province">
                   <label for="province">Provincia *</label>
                   <select id="province" name="province" autocomplete="address-level1" required>
                     <option value="">Selecciona una provincia</option>
                   </select>
-                  <input id="provinceCustom" name="provinceCustom" type="text" autocomplete="address-level1" placeholder="Escribe tu provincia o región" hidden />
-                  <span class="field-note">En España podrás escoger la provincia directamente de la lista.</span>
+                  <input id="provinceCustom" name="provinceCustom" type="text" autocomplete="address-level1" placeholder="Escribe tu provincia o región" maxlength="100" hidden />
                   <span class="field-error">Selecciona una provincia</span>
                 </div>
 
-                <div class="field field--full">
+                <div class="field field--full" id="notesBlock" hidden>
                   <label for="notes">Notas de entrega</label>
-                  <textarea id="notes" name="notes" placeholder="Ej.: portal, horario de entrega o cualquier indicación útil."></textarea>
+                  <textarea id="notes" name="notes" placeholder="Ej.: portal, horario de entrega o cualquier indicación útil." maxlength="160"></textarea>
+                  <span class="field-note" id="notesCount" style="text-align:right;font-size:.7rem;color:#aab0ba">0 / 160</span>
+                </div>
+                <div class="field field--full" id="notesToggleWrap">
+                  <a href="#" id="notesToggle" style="color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:.76rem;text-transform:uppercase;letter-spacing:.08em"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Añadir nota de entrega</a>
                 </div>
               </div>
             </div>
 
             <div class="actions">
-              <button class="ck-btn" type="submit">
+              <button class="ck-btn" type="submit" id="submitBtn">
                 Continuar a pago
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
               </button>
-              <a id="backToProduct" href="/">← Volver al producto</a>
+              <div class="trust-bar">
+                <span><i class="fa-solid fa-lock" aria-hidden="true"></i> Pago seguro SSL</span>
+                <span><i class="fa-solid fa-truck" aria-hidden="true"></i> Entrega coordinada</span>
+                <span><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Garantía oficial</span>
+                <span><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Soporte postventa</span>
+              </div>
+              <p class="legal-note">Al continuar aceptas nuestra <a href="/legal/" target="_blank">Política de privacidad</a>. Tus datos se usan exclusivamente para gestionar el pedido.</p>
             </div>
           </form>
 
@@ -651,43 +1056,55 @@
         </div>
       </section>
 
-      <!-- RIGHT: Resumen del pedido -->
+      <!-- RIGHT: Tu pedido -->
       <aside class="ck-sidebar">
-        <details class="ck-summary" id="ckSummaryDetails">
-          <summary class="ck-summary-head">
-            <h2>Resumen del pedido</h2>
+        <details class="ck-summary order-summary order-summary--checkout" id="ckSummaryDetails">
+          <summary class="ck-summary-head order-summary__header order-summary__toggle">
+            <h2 class="order-summary__title">Resumen del pedido</h2>
             <svg class="ck-toggle-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </summary>
-          <div class="ck-summary-body">
-            <div class="ck-product" id="ckProduct">
-              <img class="ck-product-img" id="ckThumb" src="" alt="" hidden />
-              <div class="ck-product-info">
-                <span class="ck-product-name" id="ckName">—</span>
-                <span class="ck-product-sku" id="ckSku"></span>
+          <div class="ck-summary-body order-summary__body">
+            <div class="ck-product order-summary__product" id="ckProduct">
+              <img class="ck-product-img order-summary__product-image" id="ckThumb" src="" alt="" hidden />
+              <div class="ck-product-info order-summary__product-info">
+                <span class="ck-product-name order-summary__product-title" id="ckName">—</span>
+                <span class="ck-product-sku order-summary__product-meta" id="ckSku"></span>
+                <span class="ck-product-color order-summary__product-meta" id="ckColor"></span>
               </div>
             </div>
 
-            <div class="ck-summary-rows">
-              <div class="ck-sum-row">
-                <span class="ck-k">Subtotal</span>
-                <span class="ck-v" id="ckSubtotal">—</span>
+            <div class="ck-summary-rows order-summary__rows">
+              <div class="ck-sum-row order-summary__row">
+                <span class="ck-k order-summary__row-label">Subtotal</span>
+                <span class="ck-v order-summary__row-value" id="ckSubtotal">—</span>
               </div>
-              <div class="ck-sum-row">
-                <span class="ck-k">Envío</span>
-                <span class="ck-v" id="ckShipping" style="color:#1a8f4a;font-weight:800">Gratis</span>
+              <div class="ck-sum-row order-summary__row">
+                <span class="ck-k order-summary__row-label">Envío</span>
+                <span class="ck-v order-summary__row-value" id="ckShipping" style="color:#1a8f4a;font-weight:800">Gratis</span>
               </div>
-              <div class="ck-sum-row ck-sum-row--total">
-                <span class="ck-k">Total</span>
-                <span class="ck-v" id="ckTotal">—</span>
+              <div class="ck-sum-row ck-sum-row--total order-summary__row order-summary__total">
+                <span class="ck-k order-summary__row-label">Total</span>
+                <span class="ck-v order-summary__row-value" id="ckTotal">—</span>
               </div>
             </div>
 
-            <div class="ck-meta" id="ckRecipient" hidden>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              <span id="ckRecipientName"></span>
+            <div class="ck-meta order-summary__box order-summary__info-box order-summary__info-box--checkout" id="ckContactMeta" aria-label="Resumen de contacto">
+              <span class="ck-meta-title order-summary__box-title order-summary__info-title">Tus datos</span>
+              <div class="ck-meta-row order-summary__info-line is-placeholder" id="ckRecipientRow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span class="order-summary__box-text" id="ckRecipientName">Nombre pendiente</span>
+              </div>
+              <div class="ck-meta-row order-summary__info-line is-placeholder" id="ckEmailRow">
+                <span class="ck-meta-icon" aria-hidden="true">@</span>
+                <span class="order-summary__box-text" id="ckEmailValue">Email pendiente</span>
+              </div>
+              <div class="ck-meta-row order-summary__info-line is-placeholder" id="ckPhoneRow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.08 4.18 2 2 0 014.06 2h3a2 2 0 012 1.72c.12.9.33 1.77.63 2.61a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.47-1.18a2 2 0 012.11-.45c.84.3 1.71.51 2.61.63A2 2 0 0122 16.92z"/></svg>
+                <span class="order-summary__box-text" id="ckPhoneValue">Teléfono pendiente</span>
+              </div>
             </div>
 
-            <div class="ck-trust">
+            <div class="ck-trust order-summary__muted">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
               Pago seguro · SSL
             </div>
@@ -702,16 +1119,12 @@
     (function(){
       'use strict';
 
-      // Summary toggle: open on desktop, closed on mobile
+      // Summary toggle: desktop open, mobile/tablet collapsed
       var summaryDetails = document.getElementById('ckSummaryDetails');
-      function syncSummaryOpen(){
-        if (!summaryDetails) return;
-        if (window.innerWidth > 860) {
-          summaryDetails.open = true;
-        }
+      if (summaryDetails) {
+        var isCompactCheckout = window.matchMedia('(max-width: 1200px)').matches;
+        summaryDetails.open = !isCompactCheckout;
       }
-      syncSummaryOpen();
-      window.addEventListener('resize', syncSummaryOpen);
 
       function getParam(key){
         try { return new URLSearchParams(location.search).get(key); }
@@ -736,51 +1149,753 @@
         return value.charAt(0) === '/' ? value : '/' + value;
       }
 
+      var CART_STORAGE_KEY = 'ss_cart_v1';
+      var CHECKOUT_CART_SNAPSHOT_KEY = 'ss_checkout_cart_snapshot';
+
+      function readStorageValue(key){
+        try {
+          var fromSession = sessionStorage.getItem(key);
+          if (fromSession) return fromSession;
+        } catch (_) {}
+        try {
+          return localStorage.getItem(key);
+        } catch (_) {
+          return null;
+        }
+      }
+
+      function writeStorageValue(key, value){
+        try { sessionStorage.setItem(key, value); } catch (_) {}
+        try { localStorage.setItem(key, value); } catch (_) {}
+      }
+
+      function parseMoney(value){
+        var raw = safeText(value);
+        if(!raw) return 0;
+        var cleaned = raw.replace(/[^\d.,-]/g, '').replace(',', '.');
+        var num = Number(cleaned);
+        return Number.isFinite(num) ? Math.max(0, num) : 0;
+      }
+
+      function formatMoney(value){
+        var num = Number(value);
+        if(!Number.isFinite(num)) num = 0;
+        return num.toFixed(2) + ' €';
+      }
+
+      function escapeHtml(value){
+        return String(value == null ? '' : value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      function loadCartItems(){
+        try {
+          var raw = readStorageValue(CART_STORAGE_KEY);
+          if(!raw) return [];
+          var parsed = JSON.parse(raw);
+          if(!Array.isArray(parsed)) return [];
+
+          return parsed.map(function(item){
+            var qty = parseInt(item && item.qty, 10);
+            qty = Number.isFinite(qty) && qty > 0 ? qty : 1;
+            var price = parseMoney(item && item.price);
+            var sku = safeText(item && item.sku);
+            var name = safeText(item && item.name);
+            if(!name || price <= 0) return null;
+            return {
+              key: safeText(item && item.key) || (sku || name),
+              sku: sku,
+              name: name,
+              qty: qty,
+              price: Number(price.toFixed(2)),
+              url: normalizePath(item && (item.url || item.href) || '/'),
+              image: safeText(item && item.image),
+              color: safeText(item && item.color),
+              colorLabel: safeText(item && item.colorLabel)
+            };
+          }).filter(Boolean);
+        } catch (_) {
+          return [];
+        }
+      }
+
+      function cartSubtotal(items){
+        var list = Array.isArray(items) ? items : [];
+        var total = 0;
+        for(var i = 0; i < list.length; i++) total += list[i].price * list[i].qty;
+        return Number(total.toFixed(2));
+      }
+
       var name = safeText(getParam('name')) || 'Producto SCOOT SHOP';
       var sku = safeText(getParam('sku')) || '';
       var productUrl = normalizePath(getParam('url') || '/');
       var productImage = safeText(getParam('image')) || '';
       var priceRaw = safeText(getParam('price')) || '';
+      var colorKey = safeText(getParam('color')) || '';
+      var colorLabel = safeText(getParam('colorLabel')) || '';
       var priceNum = Number(priceRaw.replace(',', '.'));
-      var priceLabel = Number.isFinite(priceNum) && priceNum > 0 ? priceNum.toFixed(2) + ' €' : (priceRaw || '—');
+      var priceLabel = Number.isFinite(priceNum) && priceNum > 0
+        ? (Number.isInteger(priceNum) ? priceNum + ' €' : priceNum.toFixed(2) + ' €')
+        : (priceRaw || '€');
+      var isCartMode = getParam('cart') === '1';
+      var cartItems = isCartMode ? loadCartItems() : [];
       var hasProduct = !!(safeText(getParam('name')) || safeText(getParam('price')) || safeText(getParam('sku')));
+
+      if (isCartMode && cartItems.length) {
+        var firstCartItem = cartItems[0];
+        var cartUnits = 0;
+        for (var c = 0; c < cartItems.length; c++) cartUnits += cartItems[c].qty;
+        var totalCartPrice = cartSubtotal(cartItems);
+
+        name = 'Carrito SCOOT SHOP (' + cartUnits + (cartUnits === 1 ? ' artículo)' : ' artículos)');
+        sku = firstCartItem.sku || 'CART';
+        productUrl = firstCartItem.url || '/';
+        productImage = firstCartItem.image || '';
+        priceNum = totalCartPrice;
+        priceLabel = formatMoney(totalCartPrice);
+        hasProduct = true;
+
+        writeStorageValue(CHECKOUT_CART_SNAPSHOT_KEY, JSON.stringify(cartItems));
+      }
 
       var backToProduct = document.getElementById('backToProduct');
       var formCard = document.getElementById('formCard');
       var emptyState = document.getElementById('emptyState');
       var shippingForm = document.getElementById('shippingForm');
+      var emailField = document.getElementById('email');
+      var phoneField = document.getElementById('phone');
       var countryField = document.getElementById('country');
       var postalCodeField = document.getElementById('postalCode');
+      var cityField = document.getElementById('city');
       var provinceField = document.getElementById('province');
       var provinceCustomField = document.getElementById('provinceCustom');
+      var addressLine1Field = document.getElementById('addressLine1');
+      var geoPrecisionNote = document.getElementById('geoPrecisionNote');
+      var addressSection = document.querySelector('.section-block--address');
 
-      var SPAIN_PROVINCES = [
-        'A Coruña','Álava','Albacete','Alicante','Almería','Asturias','Ávila','Badajoz','Barcelona','Burgos',
-        'Cáceres','Cádiz','Cantabria','Castellón','Ceuta','Ciudad Real','Córdoba','Cuenca','Girona','Granada',
-        'Guadalajara','Gipuzkoa','Huelva','Huesca','Illes Balears','Jaén','La Rioja','Las Palmas','León','Lleida',
-        'Lugo','Madrid','Málaga','Melilla','Murcia','Navarra','Ourense','Palencia','Pontevedra','Salamanca',
-        'Santa Cruz de Tenerife','Segovia','Sevilla','Soria','Tarragona','Teruel','Toledo','Valencia','Valladolid','Vizcaya',
-        'Zamora','Zaragoza'
-      ];
+      function compactKey(value){
+        return safeText(value).toLowerCase()
+          .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-z0-9]+/g, '');
+      }
+
+      function withAssetVersion(path){
+        var meta = document.querySelector('meta[name="asset-version"]');
+        var ver = meta ? safeText(meta.getAttribute('content')) : '';
+        if (!ver) return path;
+        return path + (path.indexOf('?') > -1 ? '&' : '?') + 'v=' + encodeURIComponent(ver);
+      }
+
+      var catalogPromise = null;
+      function loadProductCatalog(){
+        if (Array.isArray(window.SCOOTSHOP_PRODUCTS)) return Promise.resolve(window.SCOOTSHOP_PRODUCTS);
+        if (catalogPromise) return catalogPromise;
+
+        catalogPromise = new Promise(function(resolve){
+          var existing = document.querySelector('script[data-products-catalog="true"]');
+          if (existing) {
+            existing.addEventListener('load', function(){ resolve(window.SCOOTSHOP_PRODUCTS || []); }, { once:true });
+            existing.addEventListener('error', function(){ resolve([]); }, { once:true });
+            return;
+          }
+
+          var script = document.createElement('script');
+          script.src = withAssetVersion('/data/products.js');
+          script.defer = true;
+          script.dataset.productsCatalog = 'true';
+          script.addEventListener('load', function(){ resolve(window.SCOOTSHOP_PRODUCTS || []); }, { once:true });
+          script.addEventListener('error', function(){ resolve([]); }, { once:true });
+          document.head.appendChild(script);
+        });
+
+        return catalogPromise;
+      }
+
+      function findCatalogProduct(products){
+        if (!Array.isArray(products) || !products.length) return null;
+
+        var skuKey = compactKey(sku);
+        var nameKey = compactKey(name);
+        var pathKey = normalizePath(productUrl);
+
+        if (skuKey) {
+          for (var i = 0; i < products.length; i++) {
+            if (compactKey(products[i] && products[i].sku) === skuKey) return products[i];
+          }
+        }
+
+        if (pathKey) {
+          for (var j = 0; j < products.length; j++) {
+            if (normalizePath(products[j] && products[j].href) === pathKey) return products[j];
+          }
+        }
+
+        if (nameKey) {
+          for (var k = 0; k < products.length; k++) {
+            var productName = compactKey(products[k] && products[k].name);
+            if (productName && (productName === nameKey || productName.indexOf(nameKey) > -1 || nameKey.indexOf(productName) > -1)) {
+              return products[k];
+            }
+          }
+        }
+
+        return null;
+      }
+
+      function toIndexList(variant, total){
+        var indexes = [];
+        if (!variant) return indexes;
+
+        if (Array.isArray(variant.images) && variant.images.length) {
+          for (var i = 0; i < variant.images.length; i++) {
+            var raw = variant.images[i];
+            var parsed = typeof raw === 'number' ? raw : parseInt(raw, 10);
+            if (Number.isFinite(parsed) && parsed >= 1 && parsed <= total) indexes.push(parsed);
+          }
+          return indexes;
+        }
+
+        var start = null;
+        var end = null;
+        if (Array.isArray(variant.range) && variant.range.length >= 2) {
+          start = parseInt(variant.range[0], 10);
+          end = parseInt(variant.range[1], 10);
+        } else if (variant.from !== undefined || variant.to !== undefined) {
+          start = parseInt(variant.from, 10);
+          end = parseInt(variant.to, 10);
+        } else if (variant.start !== undefined || variant.end !== undefined) {
+          start = parseInt(variant.start, 10);
+          end = parseInt(variant.end, 10);
+        }
+
+        if (!Number.isFinite(start) || !Number.isFinite(end)) return indexes;
+        if (start > end) { var swap = start; start = end; end = swap; }
+
+        for (var j = start; j <= end; j++) {
+          if (j >= 1 && j <= total) indexes.push(j);
+        }
+        return indexes;
+      }
+
+      function resolveColorMetaFromProduct(product){
+        if (!product) return null;
+        var variants = Array.isArray(product.colorVariants) ? product.colorVariants : [];
+        var gallery = Array.isArray(product.gallery) ? product.gallery : [];
+        if (!variants.length || !gallery.length) return null;
+
+        var keyMatch = compactKey(colorKey);
+        var labelMatch = compactKey(colorLabel);
+        var variant = null;
+
+        for (var i = 0; i < variants.length; i++) {
+          var key = compactKey(variants[i] && variants[i].key);
+          var label = compactKey(variants[i] && variants[i].label);
+          if ((keyMatch && key === keyMatch) || (labelMatch && label === labelMatch)) {
+            variant = variants[i];
+            break;
+          }
+        }
+
+        if (!variant) return null;
+        var indexes = toIndexList(variant, gallery.length);
+        var firstIndex = indexes.length ? indexes[0] : 1;
+        var galleryItem = gallery[firstIndex - 1] || gallery[0];
+        return {
+          image: galleryItem && galleryItem.src ? safeText(galleryItem.src) : '',
+          key: safeText(variant.key),
+          label: safeText(variant.label)
+        };
+      }
+
+      function renderColorLabel(nextColorLabel){
+        if (!ckColor) return;
+        var normalizedLabel = safeText(nextColorLabel);
+        if (!normalizedLabel) return;
+        colorLabel = normalizedLabel;
+        ckColor.textContent = 'Color: ' + normalizedLabel;
+        ckColor.classList.add('order-summary__product-meta--color');
+        ckColor.style.display = 'inline-flex';
+      }
+
+      function applyResolvedProductImage(nextImage){
+        var normalized = safeText(nextImage);
+        if (!normalized) return;
+
+        productImage = normalized;
+
+        if (ckThumb) {
+          ckThumb.src = normalized;
+          ckThumb.alt = name;
+          ckThumb.hidden = false;
+        }
+
+        try {
+          var params = new URLSearchParams(location.search || '');
+          if (params.get('image') !== normalized) {
+            params.set('image', normalized);
+            history.replaceState(null, '', location.pathname + '?' + params.toString() + location.hash);
+          }
+        } catch (_) {}
+      }
+
+      function sanitizePhoneValue(value){
+        return String(value || '').replace(/\D+/g, '').slice(0, 15);
+      }
+
+      function formatPhoneDisplay(value){
+        var digits = sanitizePhoneValue(value);
+        return digits.replace(/(\d{3})(?=\d)/g, '$1 ').trim();
+      }
+
+      var COUNTRY_PROVINCES = {
+        'España': [
+          'A Coruña','Álava','Albacete','Alicante','Almería','Asturias','Ávila','Badajoz','Barcelona','Burgos',
+          'Cáceres','Cádiz','Cantabria','Castellón','Ciudad Real','Córdoba','Cuenca','Girona','Granada',
+          'Guadalajara','Gipuzkoa','Huelva','Huesca','Jaén','La Rioja','León','Lleida',
+          'Lugo','Madrid','Málaga','Murcia','Navarra','Ourense','Palencia','Pontevedra','Salamanca',
+          'Segovia','Sevilla','Soria','Tarragona','Teruel','Toledo','Valencia','Valladolid','Vizcaya',
+          'Zamora','Zaragoza'
+        ],
+        'Portugal': [
+          'Aveiro','Beja','Braga','Bragança','Castelo Branco','Coimbra','Évora','Faro','Guarda','Leiria',
+          'Lisboa','Portalegre','Porto','Santarém','Setúbal','Viana do Castelo','Vila Real','Viseu'
+        ],
+        'Francia': [
+          'Auvergne-Rhône-Alpes','Bourgogne-Franche-Comté','Bretagne','Centre-Val de Loire',
+          'Grand Est','Hauts-de-France','Île-de-France','Normandie','Nouvelle-Aquitaine',
+          'Occitanie','Pays de la Loire','Provence-Alpes-Côte d\'Azur'
+        ],
+        'Italia': [
+          'Abruzzo','Basilicata','Calabria','Campania','Emilia-Romagna','Friuli Venezia Giulia',
+          'Lazio','Liguria','Lombardia','Marche','Molise','Piemonte','Puglia',
+          'Toscana','Trentino-Alto Adige','Umbria','Valle d\'Aosta','Veneto'
+        ],
+        'Alemania': [
+          'Baden-Württemberg','Bayern','Berlin','Brandenburg','Bremen','Hamburg','Hessen',
+          'Mecklenburg-Vorpommern','Niedersachsen','Nordrhein-Westfalen','Rheinland-Pfalz',
+          'Saarland','Sachsen','Sachsen-Anhalt','Schleswig-Holstein','Thüringen'
+        ]
+      };
+
+      var COUNTRY_POSTAL_CONFIG = {
+        'España':   { apiCode:'es', digits:5, inputmode:'numeric', maxlength:'5',  placeholder:'28001',    hyphen:false },
+        'Portugal': { apiCode:'pt', digits:4, inputmode:'text',    maxlength:'8',  placeholder:'1000-001', hyphen:true  },
+        'Francia':  { apiCode:'fr', digits:5, inputmode:'numeric', maxlength:'5',  placeholder:'75001',    hyphen:false },
+        'Italia':   { apiCode:'it', digits:5, inputmode:'numeric', maxlength:'5',  placeholder:'00100',    hyphen:false },
+        'Alemania': { apiCode:'de', digits:5, inputmode:'numeric', maxlength:'5',  placeholder:'10115',    hyphen:false }
+      };
+
+      var SPAIN_POSTAL_MAP = Object.freeze({
+        '01':'Álava','02':'Albacete','03':'Alicante','04':'Almería','05':'Ávila','06':'Badajoz','08':'Barcelona','09':'Burgos',
+        '10':'Cáceres','11':'Cádiz','12':'Castellón','13':'Ciudad Real','14':'Córdoba','15':'A Coruña','16':'Cuenca','17':'Girona','18':'Granada','19':'Guadalajara',
+        '20':'Gipuzkoa','21':'Huelva','22':'Huesca','23':'Jaén','24':'León','25':'Lleida','26':'La Rioja','27':'Lugo','28':'Madrid','29':'Málaga',
+        '30':'Murcia','31':'Navarra','32':'Ourense','33':'Asturias','34':'Palencia','36':'Pontevedra','37':'Salamanca','39':'Cantabria',
+        '40':'Segovia','41':'Sevilla','42':'Soria','43':'Tarragona','44':'Teruel','45':'Toledo','46':'Valencia','47':'Valladolid','48':'Vizcaya','49':'Zamora',
+        '50':'Zaragoza'
+      });
+
+      var API_STATE_ALIASES = {
+        'Francia': {
+          'Alsace':'Grand Est','Champagne-Ardenne':'Grand Est','Lorraine':'Grand Est',
+          'Aquitaine':'Nouvelle-Aquitaine','Limousin':'Nouvelle-Aquitaine','Poitou-Charentes':'Nouvelle-Aquitaine',
+          'Auvergne':'Auvergne-Rhône-Alpes','Rhône-Alpes':'Auvergne-Rhône-Alpes',
+          'Bourgogne':'Bourgogne-Franche-Comté','Franche-Comté':'Bourgogne-Franche-Comté',
+          'Basse-Normandie':'Normandie','Haute-Normandie':'Normandie',
+          'Languedoc-Roussillon':'Occitanie','Midi-Pyrénées':'Occitanie',
+          'Nord-Pas-de-Calais':'Hauts-de-France','Picardie':'Hauts-de-France',
+          'Centre':'Centre-Val de Loire'
+        }
+      };
+      var postalLookupCache = Object.create(null);
+      var postalLookupToken = 0;
+
+      function getSpainProvinceFromPostalCode(postalCode){
+        var clean = String(postalCode || '').replace(/\D+/g, '').slice(0, 5);
+        if (clean.length < 2) return '';
+        return SPAIN_POSTAL_MAP[clean.slice(0, 2)] || '';
+      }
+
+      function getCurrentCountry(){
+        return safeText(countryField && countryField.value) || 'España';
+      }
+
+      function getPostalConfig(country){
+        return COUNTRY_POSTAL_CONFIG[country] || null;
+      }
+
+      function cleanPostalCode(value, country){
+        var cfg = getPostalConfig(country);
+        if (!cfg) return String(value || '').trim();
+        if (cfg.hyphen) {
+          var d = String(value || '').replace(/[^\d-]/g, '').replace(/-/g, '');
+          if (d.length > 4) return d.slice(0, 4) + '-' + d.slice(4, 7);
+          return d.slice(0, 4);
+        }
+        return String(value || '').replace(/\D+/g, '').slice(0, cfg.digits);
+      }
+
+      function isPostalReady(value, country){
+        var cfg = getPostalConfig(country);
+        if (!cfg) return value.length >= 3;
+        if (cfg.hyphen) return /^\d{4}(-\d{3})?$/.test(value) && value.length >= 4;
+        return value.replace(/\D/g, '').length === cfg.digits;
+      }
+
+      function getPostalApiUrl(postalCode, country){
+        var cfg = getPostalConfig(country);
+        if (!cfg) return '';
+        var code = cfg.hyphen ? postalCode : postalCode.replace(/\D/g, '');
+        return 'https://api.zippopotam.us/' + cfg.apiCode + '/' + encodeURIComponent(code);
+      }
+
+      function resolveApiState(apiState, country){
+        if (!apiState) return '';
+        var aliases = API_STATE_ALIASES[country];
+        if (aliases && aliases[apiState]) return aliases[apiState];
+        return apiState;
+      }
+
+      function matchProvinceInList(value, country){
+        var list = COUNTRY_PROVINCES[country];
+        if (!list || !value) return '';
+        var lower = value.toLowerCase();
+        for (var i = 0; i < list.length; i++) {
+          if (list[i].toLowerCase() === lower) return list[i];
+        }
+        for (var j = 0; j < list.length; j++) {
+          if (list[j].toLowerCase().indexOf(lower) !== -1 || lower.indexOf(list[j].toLowerCase()) !== -1) return list[j];
+        }
+        return '';
+      }
+
+      function setFieldValueAndNotify(field, nextValue){
+        if (!field) return;
+        field.value = safeText(nextValue);
+        field.dispatchEvent(new Event('input', { bubbles:true }));
+        field.dispatchEvent(new Event('change', { bubbles:true }));
+      }
+
+      function fillFieldIfEmpty(field, nextValue){
+        if (!field) return;
+        if (safeText(field.value)) return;
+        var value = safeText(nextValue);
+        if (!value) return;
+        setFieldValueAndNotify(field, value);
+      }
+
+      function hasStreetNumber(value){
+        return /\b\d+[A-Za-z]?\b/.test(safeText(value));
+      }
+
+      function setGeoPrecisionNote(message){
+        if (!geoPrecisionNote) return;
+        var text = safeText(message);
+        if (!text) {
+          geoPrecisionNote.hidden = true;
+          geoPrecisionNote.textContent = '';
+          return;
+        }
+        geoPrecisionNote.textContent = text;
+        geoPrecisionNote.hidden = false;
+      }
+
+      function normalizeCountryName(value){
+        var raw = safeText(value);
+        if (!raw) return '';
+        var key = compactKey(raw);
+        var map = {
+          'spain':'España',
+          'espana':'España',
+          'españa':'España',
+          'portugal':'Portugal',
+          'france':'Francia',
+          'francia':'Francia',
+          'italy':'Italia',
+          'italia':'Italia',
+          'germany':'Alemania',
+          'alemania':'Alemania',
+          'deutschland':'Alemania'
+        };
+        return map[key] || raw;
+      }
+
+      function buildAddressLine1(street, number, displayName){
+        var s = safeText(street);
+        var n = safeText(number);
+        if (s && n) return (s + ' ' + n).trim();
+        if (s && !n) {
+          var parts = safeText(displayName).split(',').map(function(part){ return safeText(part); }).filter(Boolean);
+          var maybeNumber = '';
+          if (parts.length > 1 && /^\d+[A-Za-z]?$/.test(parts[1])) {
+            maybeNumber = parts[1];
+          } else if (parts.length > 0) {
+            var m = parts[0].match(/\b(\d+[A-Za-z]?)\b/);
+            if (m) maybeNumber = m[1];
+          }
+          if (maybeNumber) return (s + ' ' + maybeNumber).trim();
+          return s;
+        }
+        if (!s && displayName) {
+          var firstPart = safeText(displayName).split(',')[0] || '';
+          return safeText(firstPart);
+        }
+        return '';
+      }
+
+      function reverseGeocodeFromCoords(lat, lon){
+        var nominatimUrl = 'https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&zoom=18&lat=' + encodeURIComponent(lat) + '&lon=' + encodeURIComponent(lon) + '&accept-language=es';
+        return fetch(nominatimUrl, { headers: { 'Accept':'application/json' } })
+          .then(function(res){
+            if (!res.ok) throw new Error('nominatim_failed');
+            return res.json();
+          })
+          .then(function(data){
+            var addr = data && data.address ? data.address : {};
+            var street = safeText(addr.road || addr.pedestrian || addr.footway || addr.path || addr.neighbourhood || '');
+            var number = safeText(addr.house_number || '');
+            var displayName = safeText(data && data.display_name ? data.display_name : '');
+            return {
+              country: normalizeCountryName(addr.country || ''),
+              province: safeText(addr.state || addr.region || ''),
+              city: safeText(addr.city || addr.town || addr.village || addr.municipality || addr.county || ''),
+              postalCode: safeText(addr.postcode || ''),
+              addressLine1: buildAddressLine1(street, number, displayName)
+            };
+          })
+          .catch(function(){
+            var fallbackUrl = 'https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + encodeURIComponent(lat) + '&longitude=' + encodeURIComponent(lon) + '&localityLanguage=es';
+            return fetch(fallbackUrl, { headers: { 'Accept':'application/json' } })
+              .then(function(res){
+                if (!res.ok) throw new Error('reverse_geocode_failed');
+                return res.json();
+              })
+              .then(function(data){
+                return {
+                  country: normalizeCountryName(data && data.countryName),
+                  province: safeText(data && data.principalSubdivision),
+                  city: safeText((data && (data.city || data.locality)) || ''),
+                  postalCode: safeText(data && data.postcode),
+                  addressLine1: ''
+                };
+              });
+          });
+      }
+
+      function applyDetectedLocationToForm(locationData){
+        if (!locationData) return;
+
+        var normalizedCountry = normalizeCountryName(locationData.country);
+        if (countryField && normalizedCountry) {
+          var targetCountry = '';
+          for (var i = 0; i < countryField.options.length; i++) {
+            if (compactKey(countryField.options[i].value) === compactKey(normalizedCountry)) {
+              targetCountry = countryField.options[i].value;
+              break;
+            }
+          }
+          if (targetCountry && targetCountry !== safeText(countryField.value)) {
+            setFieldValueAndNotify(countryField, targetCountry);
+          }
+        }
+
+        fillFieldIfEmpty(postalCodeField, locationData.postalCode);
+        fillFieldIfEmpty(cityField, locationData.city);
+        fillFieldIfEmpty(addressLine1Field, locationData.addressLine1);
+
+        var resolvedAddress = safeText(addressLine1Field && addressLine1Field.value);
+        if (resolvedAddress) {
+          if (hasStreetNumber(resolvedAddress)) {
+            setGeoPrecisionNote('Dirección autocompletada con ubicación aproximada. Revisa que portal, piso y puerta sean correctos.');
+          } else {
+            setGeoPrecisionNote('Dirección autocompletada de forma aproximada. No se detectó número de portal; añádelo manualmente para evitar errores de entrega.');
+          }
+        } else {
+          setGeoPrecisionNote('Ubicación detectada con precisión aproximada. Revisa y completa la dirección manualmente.');
+        }
+
+        var country = getCurrentCountry();
+        var provinceCandidate = safeText(locationData.province);
+        if (provinceCandidate) {
+          var matchedProvince = matchProvinceInList(provinceCandidate, country);
+          if (matchedProvince && !safeText(provinceField && provinceField.value)) {
+            syncProvinceField(matchedProvince);
+          }
+        }
+
+        if (postalCodeField && safeText(postalCodeField.value)) {
+          autofillLocationFromPostalCode(postalCodeField.value);
+        }
+      }
+
+      function setAutoFilledCity(cityName){
+        if (!cityField) return;
+        var nextValue = safeText(cityName);
+        if (!nextValue) return;
+        var currentValue = safeText(cityField.value);
+        var previousAutoValue = cityField.getAttribute('data-auto-filled') || '';
+        if (!currentValue || currentValue === previousAutoValue) {
+          cityField.value = nextValue;
+          cityField.setAttribute('data-auto-filled', nextValue);
+        }
+      }
+
+      function autofillLocationFromPostalCode(postalCode){
+        var country = getCurrentCountry();
+        var cfg = getPostalConfig(country);
+        if (!cfg) return Promise.resolve();
+
+        var clean = cleanPostalCode(postalCode, country);
+        if (!isPostalReady(clean, country)) return Promise.resolve();
+
+        // España: instant province from prefix
+        var provinceFromPostal = '';
+        if (country === 'España') {
+          provinceFromPostal = getSpainProvinceFromPostalCode(clean);
+          if (provinceFromPostal) syncProvinceField(provinceFromPostal);
+        }
+
+        var cacheKey = country + ':' + clean;
+        if (postalLookupCache[cacheKey]) {
+          if (postalLookupCache[cacheKey].city) setAutoFilledCity(postalLookupCache[cacheKey].city);
+          if (postalLookupCache[cacheKey].province) syncProvinceField(postalLookupCache[cacheKey].province);
+          return Promise.resolve(postalLookupCache[cacheKey]);
+        }
+
+        var apiUrl = getPostalApiUrl(clean, country);
+        if (!apiUrl) return Promise.resolve();
+
+        var requestToken = ++postalLookupToken;
+        return fetch(apiUrl, { headers: { 'Accept': 'application/json' } })
+          .then(function(res){
+            if (!res.ok) throw new Error('postal_lookup_failed');
+            return res.json();
+          })
+          .then(function(data){
+            var place = data && data.places && data.places[0] ? data.places[0] : null;
+            var cityName = place ? safeText(place['place name']) : '';
+            var apiState = place ? safeText(place['state']) : '';
+            var resolved = resolveApiState(apiState, country);
+            var matched = matchProvinceInList(resolved, country) || provinceFromPostal;
+
+            postalLookupCache[cacheKey] = { city: cityName, province: matched };
+            if (requestToken !== postalLookupToken) return postalLookupCache[cacheKey];
+            if (cityName) setAutoFilledCity(cityName);
+            if (matched) syncProvinceField(matched);
+            return postalLookupCache[cacheKey];
+          })
+          .catch(function(){
+            postalLookupCache[cacheKey] = { city: '', province: provinceFromPostal };
+            return postalLookupCache[cacheKey];
+          });
+      }
 
       if (backToProduct) backToProduct.href = productUrl || '/';
 
       // Populate summary sidebar
       var ckName = document.getElementById('ckName');
       var ckSku = document.getElementById('ckSku');
+      var ckColor = document.getElementById('ckColor');
       var ckThumb = document.getElementById('ckThumb');
       var ckSubtotal = document.getElementById('ckSubtotal');
       var ckTotal = document.getElementById('ckTotal');
 
       if (ckName) ckName.textContent = name;
       if (ckSku && sku) ckSku.textContent = 'Ref: ' + sku;
+      if (ckColor && colorLabel) renderColorLabel(colorLabel);
       if (ckThumb && productImage) {
         ckThumb.src = productImage;
         ckThumb.alt = name;
         ckThumb.hidden = false;
       }
+
+      if (isCartMode && cartItems.length) {
+        var ckProduct = document.getElementById('ckProduct');
+        if (ckSku) ckSku.textContent = cartItems.length + (cartItems.length === 1 ? ' producto en carrito' : ' productos en carrito');
+        if (ckColor) ckColor.textContent = '';
+
+        if (ckProduct) {
+          ckProduct.hidden = true;
+          ckProduct.style.display = 'none';
+        }
+
+        if (ckProduct && !document.getElementById('ckCartItemsList')) {
+          var cartList = document.createElement('div');
+          cartList.id = 'ckCartItemsList';
+          cartList.className = 'order-summary__product-list';
+
+          cartList.innerHTML = cartItems.map(function(item){
+            var itemName = escapeHtml(item.name || 'Producto');
+            var itemRef = item.sku ? ('<span class="order-summary__product-meta order-summary__product-meta--ref">Ref: ' + escapeHtml(item.sku) + '</span>') : '';
+            var itemColorText = item.colorLabel || item.color || '';
+            var itemColor = itemColorText ? ('<span class="order-summary__product-meta order-summary__product-meta--color">Color: ' + escapeHtml(itemColorText) + '</span>') : '';
+            var itemQty = (Number(item.qty) > 1)
+              ? ('<span class="order-summary__product-meta order-summary__product-meta--qty">Cant: ' + escapeHtml(item.qty) + '</span>')
+              : '';
+            var itemUnitPrice = '<span class="order-summary__product-meta order-summary__product-meta--price">Precio: ' + ((Number(item.price) || 0).toFixed(2)) + ' €</span>';
+            var lineTotal = ((Number(item.price) || 0) * (Number(item.qty) || 1)).toFixed(2) + ' €';
+            var itemImage = item.image
+              ? ('<img class="order-summary__product-image" src="' + escapeHtml(item.image) + '" alt="' + itemName + '" loading="lazy" decoding="async" />')
+              : ('<div class="order-summary__product-image" aria-hidden="true"></div>');
+
+            return '' +
+              '<article class="order-summary__product order-summary__product--line">' +
+                '<div class="order-summary__product-main">' +
+                  itemImage +
+                  '<div class="order-summary__product-info">' +
+                    '<span class="order-summary__product-title">' + itemName + '</span>' +
+                    itemRef +
+                    itemColor +
+                    itemUnitPrice +
+                  '</div>' +
+                '</div>' +
+                '<div class="order-summary__product-side">' +
+                  '<strong class="order-summary__product-line-total">' + lineTotal + '</strong>' +
+                  itemQty +
+                '</div>' +
+              '</article>';
+          }).join('');
+
+          ckProduct.parentNode.insertBefore(cartList, ckProduct.nextSibling);
+        }
+      }
+
+      if (!isCartMode) {
+        loadProductCatalog()
+          .then(function(products){
+            var product = findCatalogProduct(products);
+            var colorMeta = resolveColorMetaFromProduct(product);
+            if (colorMeta) {
+              if (!colorLabel && colorMeta.label) renderColorLabel(colorMeta.label);
+              if (!colorKey && colorMeta.key) colorKey = colorMeta.key;
+              if (colorMeta.image) {
+                applyResolvedProductImage(colorMeta.image);
+                return;
+              }
+            }
+            if (!productImage && product && product.image) {
+              applyResolvedProductImage(product.image);
+            }
+          })
+          .catch(function(){
+            // Keep URL image fallback if catalog loading fails.
+          });
+      }
+
       if (ckSubtotal) ckSubtotal.textContent = priceLabel;
       if (ckTotal) ckTotal.textContent = priceLabel;
+
+      // Inject price into submit button
+      var submitBtn = document.getElementById('submitBtn');
+      if (submitBtn && priceLabel && priceLabel !== '€') {
+        var btnText = submitBtn.firstChild;
+        if (btnText && btnText.nodeType === 3) {
+          btnText.textContent = 'Continuar a pago — ' + priceLabel + ' ';
+        }
+      }
 
       if (!hasProduct) {
         if (shippingForm) shippingForm.hidden = true;
@@ -791,7 +1906,7 @@
 
       function loadSavedShipping(){
         try {
-          var raw = sessionStorage.getItem(STORAGE_KEY);
+          var raw = readStorageValue(STORAGE_KEY);
           return raw ? JSON.parse(raw) : null;
         } catch (_) {
           return null;
@@ -799,32 +1914,79 @@
       }
 
       function saveShipping(data){
-        try {
-          sessionStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        } catch (_) {}
+        writeStorageValue(STORAGE_KEY, JSON.stringify(data));
       }
 
       function buildPaymentUrl(){
         var params = new URLSearchParams(location.search || '');
+        if (isCartMode && cartItems.length) {
+          params.set('cart', '1');
+          params.set('name', name);
+          params.set('sku', sku || 'CART');
+          params.set('price', Number.isFinite(priceNum) ? priceNum.toFixed(2) : '0.00');
+          params.set('url', productUrl || '/');
+          if (productImage) params.set('image', productImage);
+        }
         params.set('checkout', '1');
         return '/pago?' + params.toString();
+      }
+
+      var COUNTRY_PLACEHOLDERS = {
+        'España':   { city:'Madrid',    address:'Calle Gran Vía 1',      phone:'600 000 000' },
+        'Portugal': { city:'Lisboa',    address:'Rua Augusta 1',         phone:'912 345 678' },
+        'Francia':  { city:'Paris',     address:'12 Rue de Rivoli',      phone:'06 12 34 56 78' },
+        'Italia':   { city:'Roma',      address:'Via del Corso 1',       phone:'312 345 6789' },
+        'Alemania': { city:'Berlin',    address:'Friedrichstraße 1',     phone:'170 123 4567' }
+      };
+
+      var COUNTRY_PHONE_PREFIXES = {
+        'España':   '+34',
+        'Portugal': '+351',
+        'Francia':  '+33',
+        'Italia':   '+39',
+        'Alemania': '+49'
+      };
+      var phonePrefixField = document.getElementById('phonePrefix');
+
+      function syncPlaceholders(){
+        var country = getCurrentCountry();
+        var ph = COUNTRY_PLACEHOLDERS[country] || { city:'Ciudad', address:'Calle, número y edificio', phone:'600 000 000' };
+        if (cityField) cityField.setAttribute('placeholder', ph.city);
+        var addrField = document.getElementById('addressLine1');
+        if (addrField) addrField.setAttribute('placeholder', ph.address);
+        if (phoneField) phoneField.setAttribute('placeholder', ph.phone);
+      }
+
+      function syncPhonePrefix(){
+        if (!phonePrefixField) return;
+        var country = getCurrentCountry();
+        var prefix = COUNTRY_PHONE_PREFIXES[country] || '+34';
+        // Only auto-update if user hasn't manually edited it, or on first load
+        var wasAutoSet = phonePrefixField.getAttribute('data-auto-prefix');
+        var currentVal = safeText(phonePrefixField.value);
+        if (!currentVal || currentVal === wasAutoSet) {
+          phonePrefixField.value = prefix;
+          phonePrefixField.setAttribute('data-auto-prefix', prefix);
+        }
       }
 
       function syncPostalCodeField(){
         if (!countryField || !postalCodeField) return;
 
-        var isSpain = (safeText(countryField.value) || 'España') === 'España';
+        var country = getCurrentCountry();
+        var cfg = getPostalConfig(country);
 
-        postalCodeField.value = isSpain
-          ? postalCodeField.value.replace(/\D+/g, '').slice(0, 5)
-          : postalCodeField.value;
-
-        if (isSpain) {
-          postalCodeField.setAttribute('inputmode', 'numeric');
-          postalCodeField.setAttribute('pattern', '[0-9]{5}');
-          postalCodeField.setAttribute('maxlength', '5');
-          postalCodeField.setAttribute('placeholder', '28001');
-          postalCodeField.title = 'Introduce un código postal válido de 5 dígitos.';
+        if (cfg) {
+          postalCodeField.value = cleanPostalCode(postalCodeField.value, country);
+          postalCodeField.setAttribute('inputmode', cfg.inputmode);
+          postalCodeField.setAttribute('maxlength', cfg.maxlength);
+          postalCodeField.setAttribute('placeholder', cfg.placeholder);
+          if (!cfg.hyphen) {
+            postalCodeField.setAttribute('pattern', '[0-9]{' + cfg.digits + '}');
+          } else {
+            postalCodeField.removeAttribute('pattern');
+          }
+          postalCodeField.title = '';
         } else {
           postalCodeField.setAttribute('inputmode', 'text');
           postalCodeField.removeAttribute('pattern');
@@ -837,13 +1999,13 @@
       function syncProvinceField(selectedValue){
         if (!countryField || !provinceField) return;
 
-        var countryValue = safeText(countryField.value) || 'España';
-        var isSpain = countryValue === 'España';
+        var countryValue = getCurrentCountry();
+        var provinceList = COUNTRY_PROVINCES[countryValue];
         var currentValue = safeText(selectedValue);
 
-        if (isSpain) {
-          provinceField.innerHTML = '<option value="">Selecciona una provincia</option>' + SPAIN_PROVINCES.map(function(name){
-            return '<option value="' + name + '">' + name + '</option>';
+        if (provinceList) {
+          provinceField.innerHTML = '<option value="">Selecciona provincia / región</option>' + provinceList.map(function(name){
+            return '<option value="' + name.replace(/'/g, '&#39;') + '">' + name + '</option>';
           }).join('');
           provinceField.hidden = false;
           provinceField.disabled = false;
@@ -856,7 +2018,7 @@
             provinceCustomField.value = '';
           }
 
-          if (currentValue && SPAIN_PROVINCES.indexOf(currentValue) !== -1) {
+          if (currentValue && provinceList.indexOf(currentValue) !== -1) {
             provinceField.value = currentValue;
           }
         } else {
@@ -877,6 +2039,8 @@
         if (!data) {
           syncPostalCodeField();
           syncProvinceField('');
+          syncPlaceholders();
+          syncPhonePrefix();
           return;
         }
         [
@@ -886,33 +2050,101 @@
           var field = document.getElementById(key);
           if (field && data[key]) field.value = data[key];
         });
+        // Restore phone prefix
+        if (phonePrefixField && data.phonePrefix) {
+          phonePrefixField.value = data.phonePrefix;
+          phonePrefixField.setAttribute('data-auto-prefix', data.phonePrefix);
+        }
         syncPostalCodeField();
+        syncPlaceholders();
+        syncPhonePrefix();
+        if (phoneField && phoneField.value) {
+          phoneField.value = formatPhoneDisplay(phoneField.value);
+        }
         syncProvinceField(data.province || '');
+        if ((!data.city || !data.province) && data.postalCode) {
+          autofillLocationFromPostalCode(data.postalCode);
+        }
+        if (data.notes) {
+          var nb = document.getElementById('notesBlock');
+          var nw = document.getElementById('notesToggleWrap');
+          if (nb) nb.hidden = false;
+          if (nw) nw.hidden = true;
+        }
       }
 
       prefillForm(loadSavedShipping());
+      syncPlaceholders();
 
-      // Live recipient name in summary
-      var ckRecipient = document.getElementById('ckRecipient');
-      var ckRecipientName = document.getElementById('ckRecipientName');
-      var fullNameField = document.getElementById('fullName');
-      if (fullNameField && ckRecipient && ckRecipientName) {
-        fullNameField.addEventListener('input', function(){
-          var val = safeText(fullNameField.value);
-          if (val) {
-            ckRecipientName.textContent = 'Para: ' + val;
-            ckRecipient.hidden = false;
-          } else {
-            ckRecipient.hidden = true;
-          }
-        });
-        // Trigger on prefill
-        var prefilled = safeText(fullNameField.value);
-        if (prefilled) {
-          ckRecipientName.textContent = 'Para: ' + prefilled;
-          ckRecipient.hidden = false;
+      // Live contact details in summary
+      function syncSummaryMeta(group, row, valueEl, prefix, value, placeholder){
+        if (!group || !row || !valueEl) return;
+        var text = safeText(value);
+        if (text) {
+          valueEl.textContent = prefix ? (prefix + text) : text;
+          row.classList.remove('is-placeholder');
+        } else {
+          valueEl.textContent = placeholder;
+          row.classList.add('is-placeholder');
         }
+        group.hidden = false;
       }
+
+      function bindSummaryMetaField(field, group, row, valueEl, prefix, formatter, placeholder){
+        if (!field || !group || !row || !valueEl) return;
+        function update(){
+          var value = typeof formatter === 'function' ? formatter(field.value) : field.value;
+          syncSummaryMeta(group, row, valueEl, prefix, value, placeholder);
+        }
+        field.addEventListener('input', update);
+        field.addEventListener('change', update);
+        update();
+      }
+
+      var ckContactMeta = document.getElementById('ckContactMeta');
+      var recipientRow = document.getElementById('ckRecipientRow');
+      var ckRecipientName = document.getElementById('ckRecipientName');
+      var emailRow = document.getElementById('ckEmailRow');
+      var ckEmailValue = document.getElementById('ckEmailValue');
+      var phoneRow = document.getElementById('ckPhoneRow');
+      var ckPhoneValue = document.getElementById('ckPhoneValue');
+      var fullNameField = document.getElementById('fullName');
+
+      bindSummaryMetaField(fullNameField, ckContactMeta, recipientRow, ckRecipientName, 'Para: ', null, 'Nombre pendiente');
+      bindSummaryMetaField(emailField, ckContactMeta, emailRow, ckEmailValue, '', null, 'Email pendiente');
+
+      // Phone summary: combine prefix + number
+      function updatePhoneSummary(){
+        var prefix = safeText(phonePrefixField ? phonePrefixField.value : '');
+        var number = phoneField ? formatPhoneDisplay(phoneField.value) : '';
+        var full = number ? (prefix + ' ' + number).trim() : '';
+        syncSummaryMeta(ckContactMeta, phoneRow, ckPhoneValue, '', full, 'Teléfono pendiente');
+      }
+      if (phoneField) {
+        phoneField.addEventListener('input', updatePhoneSummary);
+        phoneField.addEventListener('change', updatePhoneSummary);
+      }
+      if (phonePrefixField) {
+        phonePrefixField.addEventListener('input', updatePhoneSummary);
+        phonePrefixField.addEventListener('change', updatePhoneSummary);
+      }
+      updatePhoneSummary();
+
+      // Email valid check
+      var emailWrap = emailField ? emailField.closest('.field--email-wrap') : null;
+      function updateEmailCheck(){
+        if (!emailWrap || !emailField) return;
+        var val = safeText(emailField.value);
+        var valid = val.length > 4 && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(val);
+        emailWrap.classList.toggle('is-valid', valid);
+      }
+      if (emailField) {
+        emailField.addEventListener('input', updateEmailCheck);
+        emailField.addEventListener('blur', updateEmailCheck);
+        updateEmailCheck();
+      }
+
+
 
       // Validation: mark fields with errors on submit attempt
       function clearFieldErrors(){
@@ -932,54 +2164,229 @@
           }
         }
       }
+      // Validate field on blur (show error immediately when leaving a field)
+      function validateFieldOnBlur(input){
+        if (!input) return;
+        input.addEventListener('blur', function(){
+          var field = input.closest('.field');
+          if (!field) return;
+          if (input.required || input.value) {
+            var valid = input.checkValidity() && input.value.trim() !== '';
+            field.classList.toggle('field--error', !valid && (input.required ? true : !!input.value));
+            field.classList.toggle('field--valid', valid);
+          }
+        });
+      }
+
       // Clear error on input
       if (shippingForm) {
         shippingForm.addEventListener('input', function(e){
           var field = e.target.closest('.field');
-          if (field) field.classList.remove('field--error');
+          if (field) { field.classList.remove('field--error'); }
         });
         shippingForm.addEventListener('change', function(e){
           var field = e.target.closest('.field');
-          if (field) field.classList.remove('field--error');
+          if (field) { field.classList.remove('field--error'); }
         });
+        // Attach blur validation to all required fields
+        var requiredInputs = shippingForm.querySelectorAll('input[required],select[required],textarea[required]');
+        for (var bi = 0; bi < requiredInputs.length; bi++) {
+          validateFieldOnBlur(requiredInputs[bi]);
+        }
       }
 
       if (countryField) {
         countryField.addEventListener('change', function(){
           syncPostalCodeField();
           syncProvinceField('');
+          syncPlaceholders();
+          syncPhonePrefix();
+          if (postalCodeField && postalCodeField.value) {
+            autofillLocationFromPostalCode(postalCodeField.value);
+          }
         });
+      }
+
+      // Notes toggle
+      var notesToggle = document.getElementById('notesToggle');
+      var notesBlock = document.getElementById('notesBlock');
+      var notesToggleWrap = document.getElementById('notesToggleWrap');
+      if (notesToggle && notesBlock && notesToggleWrap) {
+        notesToggle.addEventListener('click', function(e){
+          e.preventDefault();
+          notesBlock.hidden = false;
+          notesToggleWrap.hidden = true;
+          var ta = document.getElementById('notes');
+          if (ta) ta.focus();
+        });
+      }
+      // Notes character counter
+      var notesTA = document.getElementById('notes');
+      var notesCount = document.getElementById('notesCount');
+      if (notesTA && notesCount) {
+        var notesMax = parseInt(notesTA.getAttribute('maxlength') || '160', 10);
+        if (!Number.isFinite(notesMax) || notesMax <= 0) notesMax = 160;
+        var notesWarnAt = Math.max(notesMax - 20, Math.floor(notesMax * 0.85));
+
+        function updateNotesCounter(){
+          var len = notesTA.value.length;
+          notesCount.textContent = len + ' / ' + notesMax;
+          notesCount.style.color = len >= notesWarnAt ? '#dc2626' : '#aab0ba';
+        }
+
+        notesTA.addEventListener('input', updateNotesCounter);
+        updateNotesCounter();
       }
 
       if (postalCodeField) {
         postalCodeField.addEventListener('input', function(){
           postalCodeField.setCustomValidity('');
-          if ((safeText(countryField && countryField.value) || 'España') === 'España') {
-            postalCodeField.value = postalCodeField.value.replace(/\D+/g, '').slice(0, 5);
+          var country = getCurrentCountry();
+          var cfg = getPostalConfig(country);
+          if (cfg) {
+            postalCodeField.value = cleanPostalCode(postalCodeField.value, country);
+            if (isPostalReady(postalCodeField.value, country)) {
+              autofillLocationFromPostalCode(postalCodeField.value);
+            }
           }
         });
+      }
+
+      if (cityField) {
+        cityField.addEventListener('input', function(){
+          var currentValue = safeText(cityField.value);
+          var autoValue = cityField.getAttribute('data-auto-filled') || '';
+          if (currentValue !== autoValue) {
+            cityField.removeAttribute('data-auto-filled');
+          }
+        });
+      }
+
+      if (phoneField) {
+        phoneField.addEventListener('beforeinput', function(event){
+          if (event.data && /\D/.test(event.data)) {
+            event.preventDefault();
+          }
+        });
+        phoneField.addEventListener('input', function(){
+          phoneField.setCustomValidity('');
+          phoneField.value = formatPhoneDisplay(phoneField.value);
+        });
+        phoneField.addEventListener('blur', function(){
+          phoneField.value = formatPhoneDisplay(phoneField.value);
+        });
+      }
+
+      // Phone prefix: allow only + and digits, mark manual edits
+      if (phonePrefixField) {
+        phonePrefixField.addEventListener('beforeinput', function(event){
+          if (event.data && /[^+\d]/.test(event.data)) {
+            event.preventDefault();
+          }
+        });
+        phonePrefixField.addEventListener('input', function(){
+          var val = phonePrefixField.value.replace(/[^+\d]/g, '');
+          if (val && val.charAt(0) !== '+') val = '+' + val;
+          phonePrefixField.value = val;
+          // Mark as user-edited so country change doesn't overwrite
+          phonePrefixField.setAttribute('data-auto-prefix', '');
+        });
+      }
+
+      function requestGeoPermissionOnly(){
+        if (!navigator.geolocation) return;
+        // Trigger browser-native permission prompt and auto-fill if accepted.
+        navigator.geolocation.getCurrentPosition(function(position){
+          var lat = position && position.coords ? position.coords.latitude : null;
+          var lon = position && position.coords ? position.coords.longitude : null;
+          if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+          reverseGeocodeFromCoords(lat, lon)
+            .then(function(locationData){
+              applyDetectedLocationToForm(locationData);
+            })
+            .catch(function(){
+              // Silent fail: keep checkout usable even if reverse geocoding fails.
+            });
+        }, function(){
+          // User may deny permission or browser may fail; keep silent.
+        }, {
+          enableHighAccuracy:true,
+          timeout:12000,
+          maximumAge:60000
+        });
+      }
+
+      if (addressSection) {
+        var geoPromptTriggered = false;
+        function triggerGeoPromptOnce(){
+          if (geoPromptTriggered) return;
+          geoPromptTriggered = true;
+          requestGeoPermissionOnly();
+        }
+
+        if ('IntersectionObserver' in window) {
+          var geoPromptObserver = new IntersectionObserver(function(entries){
+            for (var i = 0; i < entries.length; i++) {
+              if (entries[i].isIntersecting) {
+                triggerGeoPromptOnce();
+                geoPromptObserver.disconnect();
+                break;
+              }
+            }
+          }, { threshold:0.12, rootMargin:'0px 0px -15% 0px' });
+          geoPromptObserver.observe(addressSection);
+
+          // Fallback if section is already visible when observer starts.
+          var rect = addressSection.getBoundingClientRect();
+          if (rect.top < window.innerHeight * 0.92 && rect.bottom > window.innerHeight * 0.08) {
+            triggerGeoPromptOnce();
+            geoPromptObserver.disconnect();
+          }
+        } else {
+          triggerGeoPromptOnce();
+        }
       }
 
       if (shippingForm) {
         shippingForm.addEventListener('submit', function(event){
           event.preventDefault();
           syncPostalCodeField();
+          if (phoneField) {
+            var phoneDigits = sanitizePhoneValue(phoneField.value);
+            phoneField.value = formatPhoneDisplay(phoneDigits);
+            phoneField.setCustomValidity(phoneDigits.length >= 9 && phoneDigits.length <= 15 ? '' : 'Introduce un teléfono válido de 9 a 15 dígitos.');
+          }
           markInvalidFields();
           if (!shippingForm.reportValidity()) return;
 
-          if ((safeText(countryField && countryField.value) || 'España') === 'España' && !/^\d{5}$/.test(safeText(postalCodeField && postalCodeField.value))) {
-            if (postalCodeField) {
-              postalCodeField.setCustomValidity('Introduce un código postal español válido de 5 dígitos.');
+          var submitCountry = getCurrentCountry();
+          var submitCfg = getPostalConfig(submitCountry);
+          if (submitCfg && postalCodeField) {
+            var postalVal = safeText(postalCodeField.value);
+            var postalValid = submitCfg.hyphen
+              ? /^\d{4}(-\d{3})?$/.test(postalVal)
+              : new RegExp('^\\d{' + submitCfg.digits + '}$').test(postalVal);
+            if (!postalValid) {
+              var errorMsgs = {
+                'España':'Introduce un código postal español válido de 5 dígitos.',
+                'Portugal':'Introduce un código postal portugués válido (ej: 1000-001).',
+                'Francia':'Introduce un código postal francés válido de 5 dígitos.',
+                'Italia':'Introduce un código postal italiano válido de 5 dígitos.',
+                'Alemania':'Introduce un código postal alemán válido de 5 dígitos.'
+              };
+              postalCodeField.setCustomValidity(errorMsgs[submitCountry] || 'Introduce un código postal válido.');
               postalCodeField.reportValidity();
+              return;
             }
-            return;
           }
           if (postalCodeField) postalCodeField.setCustomValidity('');
 
           var payload = {
             fullName: safeText(document.getElementById('fullName').value),
             email: safeText(document.getElementById('email').value),
-            phone: safeText(document.getElementById('phone').value),
+            phone: safeText(phonePrefixField ? phonePrefixField.value : '') + sanitizePhoneValue(document.getElementById('phone').value),
+            phonePrefix: safeText(phonePrefixField ? phonePrefixField.value : '+34'),
+            phoneNumber: sanitizePhoneValue(document.getElementById('phone').value),
             addressLine1: safeText(document.getElementById('addressLine1').value),
             addressLine2: safeText(document.getElementById('addressLine2').value),
             postalCode: safeText(document.getElementById('postalCode').value),
@@ -1009,4 +2416,40 @@
   </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

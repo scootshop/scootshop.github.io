@@ -1,45 +1,45 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es-ES">
 <head>
   <meta charset="utf-8" />
+  <meta name="color-scheme" content="only light" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="description" content="Confirmación de pedido SCOOT SHOP y próximos pasos de entrega y contacto." />
+  <meta name="description" content="Estado del pedido SCOOT SHOP, seguimiento, pago y próximos pasos." />
   <link rel="canonical" href="https://scootshop.co/pedido/" />
 
   <meta property="og:url" content="https://scootshop.co/pedido/" />
-  <meta property="og:title" content="Gracias por tu compra | SCOOT SHOP" />
-  <meta property="og:description" content="Confirmación de pedido SCOOT SHOP y próximos pasos de entrega y contacto." />
+  <meta property="og:title" content="Estado del pedido | SCOOT SHOP" />
+  <meta property="og:description" content="Estado del pedido SCOOT SHOP, seguimiento, pago y próximos pasos." />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="SCOOT SHOP" />
   <meta property="og:locale" content="es_ES" />
-  <meta property="og:image" content="https://scootshop.co/img/0-removebg-preview.png" />
+  <meta property="og:image" content="https://scootshop.co/img/0-removebg-preview.webp" />
 
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Gracias por tu compra | SCOOT SHOP" />
-  <meta name="twitter:description" content="Confirmación de pedido SCOOT SHOP y próximos pasos de entrega y contacto." />
-  <meta name="twitter:image" content="https://scootshop.co/img/0-removebg-preview.png" />
+  <meta name="twitter:title" content="Estado del pedido | SCOOT SHOP" />
+  <meta name="twitter:description" content="Estado del pedido SCOOT SHOP, seguimiento, pago y próximos pasos." />
+  <meta name="twitter:image" content="https://scootshop.co/img/0-removebg-preview.webp" />
   <meta name="robots" content="noindex,nofollow" />
-  <title>Gracias por tu compra | SCOOT SHOP</title>
-  <meta name="asset-version" content="20260409-2" />
+  <title>Estado del pedido | SCOOT SHOP</title>
+  <meta name="asset-version" content="20260605-2" />
 
   <!-- Fuente (non-blocking) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" media="print" onload="this.media='all'" />
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" /></noscript>
-  <script src="/js/asset-sync.js"></script>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" /></noscript>
+  <link rel="stylesheet" href="/css/icons.css?v=20260605-2" />
+  <link rel="stylesheet" href="/css/main.css?v=20260605-2" />
+  <script src="/js/asset-sync.js?v=20260605-2" defer></script>
 
   <style>
     :root{
-      --sport:'Russo One',sans-serif;
-      --ui:'Plus Jakarta Sans',ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans",sans-serif;
       --bg:#f6f7f9;
-      --ink:#111315;
       --muted:#68707f;
       --line:#e5eaf1;
-      --surface:#ffffff;
       --radius:24px;
+      --header-h:72px;
     }
 
     *{ box-sizing:border-box; }
@@ -48,55 +48,126 @@
       min-height:100vh;
       font-family:var(--ui);
       color:var(--ink);
-      background:
-        radial-gradient(circle at top left, rgba(255,255,255,.96), transparent 30%),
-        radial-gradient(circle at top right, rgba(230,236,244,.92), transparent 34%),
-        linear-gradient(180deg, #fbfcfd 0%, #f3f5f8 100%);
+      background:var(--bg);
+      padding-top:calc(var(--header-h, 88px) + var(--sat, 0px));
+      position:relative;
       -webkit-font-smoothing:antialiased;
       text-rendering:optimizeLegibility;
+    }
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      background-image:
+        radial-gradient(circle at top left, rgba(255,255,255,.95), transparent 30%),
+        radial-gradient(circle at top right, rgba(230,236,244,.9), transparent 34%),
+        linear-gradient(180deg, #fbfcfd 0%, #f3f5f8 100%);
+      background-repeat:no-repeat;
+      background-size:cover;
+      z-index:-1;
+      pointer-events:none;
     }
     a{ color:inherit; text-decoration:none; }
     img{ max-width:100%; display:block; }
 
     .wrap{
-      min-height:100vh;
+      min-height:calc(100vh - (var(--header-h, 88px) + var(--sat, 0px)));
       display:flex;
-      flex-direction:column;
-      align-items:center;
-      padding:28px clamp(16px,4vw,28px) 40px;
+      justify-content:center;
+      padding:28px 0 48px;
+      position:relative;
+    }
+    .wrap::before{
+      content:"";
+      position:fixed;
+      left:0;
+      right:0;
+      top:calc(var(--header-h) + var(--sat, 0px));
+      height:90px;
+      background:linear-gradient(180deg, #f6f7f9 0%, rgba(246,247,249,.96) 58%, rgba(246,247,249,0) 100%);
+      pointer-events:none;
+      z-index:24;
     }
 
-    .container{
-      width:min(660px,100%);
+    .order-page-container{
+      width:min(1160px, calc(100% - 40px));
+      padding-inline:0 !important;
+      margin-inline:auto;
       display:grid;
-      gap:16px;
+      grid-template-columns:minmax(0, 1fr) minmax(320px, 380px);
+      gap:18px 26px;
+      align-items:start;
     }
 
-    /* ── Step indicator ── */
+    .card:not(.order-summary){
+      border:0;
+      border-radius:22px;
+      background:#fff;
+      overflow:hidden;
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.9) inset,
+        0 18px 44px rgba(15,23,42,.08),
+        0 6px 18px rgba(15,23,42,.04);
+      isolation:isolate;
+    }
+    .card .head:not(.order-summary__header){
+      padding:18px 20px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .card .head:not(.order-summary__header) h1,
+    .card .head:not(.order-summary__header) h2{
+      font-family:var(--sport);
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      font-size:.95rem;
+    }
+    .card .body:not(.order-summary__body){
+      padding:8px 20px 20px;
+      display:grid;
+      gap:12px;
+    }
+    .card--detail .body{
+      padding-top:8px;
+    }
+
+    /* -- Step indicator -- */
     .ck-steps{
       display:flex;
       align-items:center;
-      gap:10px;
-      padding:0 0 18px;
+      gap:14px;
+      grid-column:1 / -1;
+      padding:8px 0 16px;
+      margin:0;
+      position:-webkit-sticky;
+      position:sticky;
+      top:calc(var(--header-h) + var(--sat, 0px));
+      z-index:30;
+      isolation:isolate;
+      background:var(--bg, #f6f7f9);
+      overflow:auto hidden;
     }
     .ck-step{
       display:flex;
       align-items:center;
-      gap:6px;
-      font-size:.78rem;
+      gap:9px;
+      font-size:.95rem;
       font-weight:800;
       color:#b4bbc6;
       letter-spacing:.02em;
     }
     .ck-step--done{ color:#68707f; }
+    .ck-step--active{ color:#111315; }
     .ck-step-num{
-      width:22px;
-      height:22px;
+      width:30px;
+      height:30px;
       border-radius:50%;
       display:flex;
       align-items:center;
       justify-content:center;
-      font-size:.7rem;
+      font-size:.86rem;
       font-weight:900;
       background:rgba(17,19,21,.06);
       color:#98a2b3;
@@ -105,23 +176,199 @@
       background:#25d366;
       color:#fff;
     }
+    .ck-step--active .ck-step-num{
+      background:#111315;
+      color:#fff;
+    }
     .ck-step-sep{
-      width:20px;
+      width:24px;
       height:1px;
       background:rgba(17,19,21,.12);
     }
     .ck-step-check{
-      width:12px;
-      height:12px;
+      width:14px;
+      height:14px;
     }
 
-    /* ── Section blocks (same as checkout) ── */
+    .hero-shell{
+      grid-column:2;
+      grid-row:2 / span 2;
+      align-self:start;
+      position:sticky;
+      top:90px;
+      margin-top:0 !important;
+    }
+    #orderDetailSection,
+    .section-block--steps{
+      grid-column:1;
+    }
+    .actions,
+    .support-line,
+    .foot{
+      grid-column:1 / -1;
+    }
+
+    /* -- Section blocks (same as checkout) -- */
     .section-block{
-      border:1px solid rgba(255,255,255,.78);
+      border:1px solid rgba(17,19,21,.06);
       border-radius:var(--radius);
-      background:linear-gradient(180deg, rgba(255,255,255,.97), rgba(249,250,252,.99));
-      box-shadow:0 14px 34px rgba(15,23,42,.04);
+      background:linear-gradient(180deg, rgba(255,255,255,.98), rgba(249,250,252,.99));
+      box-shadow:0 18px 38px rgba(15,23,42,.06);
       overflow:hidden;
+    }
+    .detail-note{margin:0;color:var(--muted);font-weight:700;font-size:.92rem;line-height:1.6}
+    .detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .detail-pill{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .detail-pill .status-pill{margin:0}
+    .order-detail-shell{display:grid;gap:18px}
+    .order-detail-top{
+      display:grid;
+      gap:16px;
+      padding:16px;
+      border-radius:22px;
+      background:linear-gradient(180deg, rgba(255,255,255,.98), rgba(255, 255, 255, 0.98));
+      box-shadow:0 14px 30px rgba(15,23,42,.06);
+    }
+    .order-detail-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .order-detail-actions .order-cta{cursor:pointer}
+    .order-detail-actions .order-cta:disabled{opacity:.72;cursor:wait}
+    .order-kpis{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+    }
+    .order-kpi{
+      display:grid;
+      gap:6px;
+      padding:14px 16px;
+      border:1px solid rgba(17,19,21,.06);
+      border-radius:18px;
+      background:#fff;
+      box-shadow:0 10px 22px rgba(15,23,42,.04);
+      min-width:0;
+    }
+    .order-kpi.is-wide{
+      grid-column:1 / -1;
+    }
+    .order-kpi .k{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+    .order-kpi .v{font-size:1.02rem;font-weight:800;color:var(--ink);line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .order-kpi.is-wide .v{white-space:normal;overflow:visible;text-overflow:clip}
+    .order-empty-state{
+      display:grid;
+      gap:10px;
+      padding:16px;
+      border:1px solid rgba(185,30,30,.18);
+      border-radius:18px;
+      background:linear-gradient(180deg,#fff8f8 0%, #fff 100%);
+      box-shadow:0 10px 24px rgba(15,23,42,.05);
+    }
+    .order-empty-state strong{
+      font-family:var(--sport);
+      font-weight:400;
+      font-size:.86rem;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      color:#9f1d1d;
+    }
+    .order-empty-state p{
+      margin:0;
+      font-size:.96rem;
+      line-height:1.65;
+      color:#334155;
+      font-weight:700;
+    }
+    .order-tracking{display:grid;gap:8px}
+    .tracking-inline {
+      display: grid;
+      gap: 8px;
+      --timeline-icon-size: 29px;
+      padding-inline: calc(var(--timeline-icon-size) / 2);
+    }
+    .tracking-status {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.1;
+    }
+    .track-line {
+      position: relative;
+      height: 10px;
+      border-radius: 999px;
+      background: #e7ebf0;
+      overflow: visible;
+      margin-top: 8px;
+      margin-bottom: 18px;
+      --icon-size: var(--timeline-icon-size);
+    }
+    .track-line > i {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: var(--progress, 40%);
+      background: linear-gradient(90deg, #d946ef, #7c3aed);
+      border-radius: 999px;
+    }
+    .track-line.is-delivered > i {
+      background: linear-gradient(90deg, #22c55e, #16a34a);
+    }
+    .tracking-icons {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      --icon-size: var(--timeline-icon-size);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transform: translateY(calc(-50% - 0.9px));
+      z-index: 3;
+      pointer-events: none;
+    }
+    .tracking-icons span {
+      width: var(--icon-size);
+      height: var(--icon-size);
+      border-radius: 999px;
+      background: #ffffff;
+      color: #111827;
+      border: 3px solid #f8fafc;
+      display: grid;
+      place-items: center;
+      font-size: .9rem;
+      opacity: 1;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.30);
+    }
+    .order-products{display:grid;gap:12px}
+    .order-product-block{
+      display:grid;
+      gap:12px;
+      background:transparent;
+      box-shadow:none;
+    }
+    .order-product-list-shell.order-summary--checkout{
+      border:0;
+      border-radius:0;
+      background:transparent;
+      box-shadow:none;
+      overflow:visible;
+    }
+    .order-product-list-shell .order-summary__product-list{
+      display:grid;
+      gap:12px;
+    }
+    .order-product-list-shell .order-summary__product{
+      cursor:default;
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.92) inset,
+        0 12px 28px rgba(15,23,42,.06),
+        0 4px 12px rgba(15,23,42,.03);
+    }
+    .order-product-list-shell .order-summary__product:hover{
+      transform:none;
+    }
+    .order-product-list-shell .order-summary__product-title{
+      flex:1 1 100%;
+    }
+    .order-product-list-shell .order-summary__product-meta--color{
+      max-width:100%;
     }
     .section-heading{
       padding:18px 20px 10px;
@@ -142,7 +389,7 @@
       gap:14px;
     }
 
-    /* ── Hero success ── */
+    /* -- Hero success -- */
     .success-icon{
       width:56px;
       height:56px;
@@ -186,15 +433,15 @@
       line-height:1.5;
     }
 
-    /* ── Status pill ── */
+    /* -- Status pill -- */
     .status-pill{
       display:inline-flex;
       align-items:center;
-      gap:8px;
+      gap:0;
       padding:8px 14px;
       border-radius:999px;
       background:rgba(37,211,102,.08);
-      border:1px solid rgba(37,211,102,.18);
+      border: 1px solid rgb(255 255 255 / 0%);
       color:#12854a;
       font-weight:800;
       font-size:.74rem;
@@ -202,15 +449,100 @@
       text-transform:uppercase;
       width:fit-content;
     }
-    .status-dot{
-      width:8px;
-      height:8px;
-      border-radius:50%;
-      background:#25d366;
-      box-shadow:0 0 0 3px rgba(37,211,102,.16);
+    .hero-shell .order-summary__title{
+      line-height:1.1;
+    }
+    .hero-shell .order-summary__product{
+      cursor:default;
+    }
+    .hero-shell .order-summary__product-main{
+      align-items:flex-start;
+    }
+    .order-summary__hero-thumbs{
+      display:flex;
+      align-items:flex-start;
+      flex:0 0 auto;
+      min-width:56px;
+      padding-top:2px;
+    }
+    .order-summary__hero-thumb{
+      width:56px;
+      height:56px;
+      border-radius:16px;
+      border:0;
+      object-fit:contain;
+      background:radial-gradient(circle at 30% 20%, #ffffff 0%, #ffffff 100%);
+      padding:4px;
+      box-shadow:0 10px 24px rgba(15,23,42,.07);
+      display:block;
+    }
+    .hero-shell .order-summary__hero-thumbs--stack{
+      flex-direction:column;
+      align-items:flex-start;
+      padding-top:0;
+      gap:4px;
+    }
+    .hero-shell .order-summary__hero-thumbs--stack .order-summary__hero-thumb{
+      margin-left:0;
+      margin-top:0;
+    }
+    .order-summary__hero-thumb--more{
+      display:grid;
+      place-items:center;
+      font-size:.74rem;
+      font-weight:900;
+      color:#4b5563;
+      background:linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+    }
+    .hero-shell .sum-meta{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      cursor:default;
+      pointer-events:none;
+    }
+    .hero-shell .sum-meta:hover{
+      background:rgba(17,19,21,.02);
+      border-color:rgba(17,19,21,.06);
+    }
+    .hero-shell .sum-meta-text{
+      color:var(--muted);
+    }
+    .order-summary__row-value--status{
+      display:flex;
+      justify-content:flex-end;
+      align-items:center;
+    }
+    .order-summary__product--hero .order-summary__product-meta--color{
+      white-space:normal;
+    }
+    .order-summary__product--hero .order-summary__product-title{
+      white-space:normal;
+      overflow:visible;
+      text-overflow:clip;
+      line-height:1.14;
+    }
+    .order-summary__hero-lead{
+      display:block !important;
+      width:100% !important;
+      max-width:100% !important;
+      padding:0 !important;
+      border-radius:0 !important;
+      background:transparent !important;
+      box-shadow:none !important;
+      color:var(--muted) !important;
+      font-size:.92rem !important;
+      font-weight:700 !important;
+      line-height:1.55 !important;
+      letter-spacing:0 !important;
+      text-transform:none !important;
+      white-space:normal !important;
+      overflow:visible !important;
+      text-overflow:clip !important;
+      align-items:flex-start !important;
     }
 
-    /* ── Info rows (minimalist separator lines) ── */
+    /* -- Info rows (minimalist separator lines) -- */
     .info-list{
       display:grid;
       gap:0;
@@ -261,7 +593,7 @@
       line-height:1.4;
     }
 
-    /* ── Steps list ── */
+    /* -- Steps list -- */
     .next-steps{
       display:grid;
       gap:0;
@@ -306,29 +638,31 @@
       line-height:1.4;
     }
 
-    /* ── Actions ── */
+    /* -- Actions -- */
     .actions{
       display:grid;
       gap:10px;
     }
-    .btn{
+      .order-cta{
       display:flex;
       align-items:center;
       justify-content:center;
       gap:8px;
-      min-height:48px;
-      padding:13px 20px;
+      min-height:46px;
+      padding:0 16px;
       border-radius:999px;
-      border:1px solid rgba(17,19,21,.10);
+      border:1px solid #6b6c6c;
       font-weight:800;
-      font-size:.84rem;
-      letter-spacing:.04em;
+      font-size:.79rem;
+      letter-spacing:.03em;
       text-transform:uppercase;
       cursor:pointer;
-      transition:transform .12s ease, box-shadow .16s ease;
+      white-space:nowrap;
+      transition:background .16s ease, box-shadow .16s ease, transform .16s ease, color .16s ease;
       text-decoration:none;
     }
-    .btn svg{
+    .order-cta svg{
+      display:none;
       width:16px;
       height:16px;
       stroke:currentColor;
@@ -337,26 +671,37 @@
       stroke-linecap:round;
       stroke-linejoin:round;
     }
-    .btn-primary{
-      background:#111315;
+    .order-cta--primary{
+      background:linear-gradient(180deg, #373737 0%, #111111 100%);
       color:#fff;
-      border-color:#111315;
-      box-shadow:0 8px 24px rgba(17,19,21,.14);
+      border-color:#6b6c6c;
+      box-shadow:none;
     }
-    .btn-primary:hover{
-      transform:translateY(-1px);
-      box-shadow:0 12px 32px rgba(17,19,21,.18);
+    .order-cta--primary:hover{
+      transform:none;
+      box-shadow:none;
+      background:linear-gradient(180deg, #373737 0%, #111111 100%);
+      border-color:#6b6c6c;
+      color:#fff;
     }
-    .btn-ghost{
+    .order-cta--primary:focus-visible,
+    .order-cta--primary:active{
+      box-shadow:none;
+      transform:none;
+      color:#fff;
+      background:linear-gradient(180deg, #373737 0%, #111111 100%);
+      border-color:#6b6c6c;
+    }
+    .order-cta--ghost{
       background:rgba(255,255,255,.8);
       color:var(--ink);
     }
-    .btn-ghost:hover{
+    .order-cta--ghost:hover{
       transform:translateY(-1px);
       box-shadow:0 8px 24px rgba(15,23,42,.06);
     }
 
-    /* ── Footer ── */
+    /* -- Footer -- */
     .foot{
       padding-top:8px;
       text-align:center;
@@ -369,175 +714,1120 @@
       font-weight:800;
     }
 
-    /* ── Responsive ── */
+    /* -- Responsive -- */
+    #site-header-slot,
+    #mobile-menu-slot{
+      width:100%;
+    }
+
+    #site-header-slot #siteHeader .brand span,
+    #site-header-slot .brand span{
+      font-family:'Tangerine',cursive;
+      font-weight:700;
+    }
+
+    .order-page-container{
+      width:min(1160px, calc(100% - 40px));
+      gap:18px 26px;
+    }
+    .hero-shell{
+      overflow:hidden;
+    }
+    .order-overview{
+      display:grid;
+      gap:18px;
+    }
+    .order-overview__head{
+      display:grid;
+      gap:12px;
+      align-items:start;
+    }
+    .order-overview__copy{
+      display:grid;
+      gap:8px;
+    }
+    .order-overview__copy h1{
+      margin:0;
+      font-size:clamp(1.3rem, 1rem + .9vw, 2rem);
+      line-height:1.05;
+      letter-spacing:-.02em;
+    }
+    .order-overview__copy .lead{
+      max-width:62ch;
+      margin:0;
+      color:var(--muted);
+      font-weight:700;
+      font-size:.97rem;
+      line-height:1.6;
+    }
+    .order-overview__meta{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0,1fr));
+      gap:12px;
+    }
+    .order-overview__meta-card{
+      display:grid;
+      gap:5px;
+      min-width:0;
+      padding:14px 16px;
+      border:1px solid rgba(17,19,21,.07);
+      border-radius:18px;
+      background:#fff;
+      box-shadow:0 8px 20px rgba(15,23,42,.04);
+    }
+    .order-overview__meta-label{
+      font-size:.72rem;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+    .order-overview__meta-value{
+      min-width:0;
+      font-size:1rem;
+      font-weight:800;
+      color:var(--ink);
+      line-height:1.35;
+      word-break:break-word;
+    }
+    .eyebrow{
+      display:inline-flex;
+      width:fit-content;
+      align-items:center;
+      gap:8px;
+      padding:7px 12px;
+      border-radius:999px;
+      background:rgba(17,19,21,.04);
+      color:var(--muted);
+      font-weight:800;
+      font-size:.72rem;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+    }
+      .section-block--steps .section-heading{
+        padding:18px 22px 10px;
+        border-bottom:1px solid rgba(17,19,21,.05);
+      }
+      .section-block--steps .section-heading strong{
+        font-family:var(--ui);
+        font-weight:900;
+        font-size:.75rem;
+        letter-spacing:.14em;
+        text-transform:uppercase;
+        color:#4b5563;
+      }
+      .section-block--steps .section-body{
+        padding:6px 22px 14px;
+      }
+    .status-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      justify-content:flex-start;
+    }
+    .status-pill--warn{
+      background:rgba(245,158,11,.12);
+      border-color:rgba(245,158,11,.22);
+      color:#b45309;
+    }
+    .status-pill--neutral{
+      background:rgba(17,19,21,.06);
+      border-color:rgba(17,19,21,.09);
+      color:#4b5563;
+    }
+    .micro-note{
+      color:var(--muted);
+      font-weight:700;
+      font-size:.84rem;
+      text-align:left;
+    }
+    .mini-summary{
+      margin:0;
+      font-weight:800;
+      color:var(--ink);
+      font-size:.92rem;
+      text-align:left;
+    }
+    .mini-steps{
+      display:grid;
+      gap:12px;
+    }
+    .mini-step{
+      display:flex;
+      gap:14px;
+      align-items:flex-start;
+      padding:14px 16px;
+      border:1px solid rgba(17,19,21,.06);
+      border-radius:18px;
+      background:#fff;
+      box-shadow:0 10px 22px rgba(15,23,42,.04);
+    }
+    .mini-step-num{
+      width:28px;
+      height:28px;
+      border-radius:50%;
+          background: rgb(0 0 0 / 4%);
+    border: 1px solid rgb(17 19 21 / 0%);
+
+      color:#111315;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:.74rem;
+      font-weight:800;
+      flex:0 0 auto;
+    }
+    .mini-step p{
+      margin:0;
+      color:#4b5563;
+      font-weight:700;
+      font-size:.93rem;
+      line-height:1.52;
+      letter-spacing:.01em;
+    }
+    .actions{
+      grid-template-columns:1fr;
+      max-width:380px;
+      width:100%;
+      margin:0 auto;
+    }
+    .order-detail-actions{
+      display:grid;
+    }
+    .order-detail-actions .order-cta,
+    .actions .order-cta{
+      width:100%;
+    }
+    .support-line{
+      margin:2px 0 0;
+      text-align:center;
+      color:var(--muted);
+      font-size:.84rem;
+      font-weight:700;
+      line-height:1.5;
+    }
+    .support-line a{
+      color:var(--ink);
+      font-weight:800;
+    }
+
+    @media (max-width:820px){
+      .wrap{
+        padding:18px clamp(16px,2.5vw,22px) 26px;
+      }
+      .order-page-container{
+        width:100%;
+        grid-template-columns:1fr;
+        gap:12px;
+      }
+      .hero-shell,
+      #orderDetailSection,
+      .section-block--steps,
+      .actions,
+      .support-line,
+      .foot{
+        grid-column:auto;
+        grid-row:auto;
+      }
+      .hero-shell{
+        position:static;
+      }
+    }
+
     @media (max-width:700px){
-      .wrap{ padding:18px clamp(14px,2.5vw,20px) 28px; }
-      .section-block{ border-radius:22px; }
+      .wrap{ padding:14px clamp(16px,2.5vw,22px) 20px; }
+      .section-block{ border-radius:18px; }
       .section-body{ padding:16px; }
       .section-heading{ padding:16px 16px 10px; }
+      .ck-steps{padding:8px 0 12px;}
+      .order-kpis{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:14px}
+      .order-product-list-shell .order-summary__product-image{width:52px;height:52px}
+      .section-block--steps .section-heading{ padding:16px 16px 10px; }
+      .section-block--steps .section-body{ padding:4px 16px 14px; }
+      .order-overview__meta{grid-template-columns:1fr;}
     }
+
+    @media (max-width:640px){
+      .ck-steps{
+        gap:12px;
+        padding-bottom:16px;
+        overflow-x:auto;
+        scrollbar-width:none;
+      }
+      .ck-steps::-webkit-scrollbar{ display:none; }
+      .ck-step{
+        gap:8px;
+        font-size:.9rem;
+        white-space:nowrap;
+      }
+      .ck-step-num{
+        width:28px;
+        height:28px;
+        font-size:.8rem;
+      }
+      .ck-step-sep{ width:18px; }
+      .order-cta{
+        font-size:.75rem;
+        letter-spacing:.02em;
+      }
+    }
+
+    @media (max-width:420px){
+      .card:not(.order-summary){
+        border-radius:18px;
+      }
+      .order-summary{
+        border-radius:24px;
+      }
+      .card .head:not(.order-summary__header),
+      .card .body:not(.order-summary__body){
+        padding-left:12px;
+        padding-right:12px;
+      }
+    }
+
   </style>
-  <meta name="asset-version" content="20260409-2" />
 </head>
 
-<body>
+<body class="order-confirmation-page">
+  <div id="site-header-slot"></div>
+  <div id="mobile-menu-slot"></div>
   <main class="wrap">
-    <div class="ck-steps">
-      <span class="ck-step ck-step--done">
-        <span class="ck-step-num">
-          <svg class="ck-step-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    <div class="order-page-container">
+      <div class="ck-steps">
+        <span class="ck-step ck-step--done" id="stepShipping">
+          <span class="ck-step-num">
+            <svg class="ck-step-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
+          Envío
         </span>
-        Envío
-      </span>
-      <span class="ck-step-sep"></span>
-      <span class="ck-step ck-step--done">
-        <span class="ck-step-num">
-          <svg class="ck-step-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span class="ck-step-sep"></span>
+        <span class="ck-step ck-step--done" id="stepPayment">
+          <span class="ck-step-num">
+            <svg class="ck-step-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
+          Pago
         </span>
-        Pago
-      </span>
-      <span class="ck-step-sep"></span>
-      <span class="ck-step ck-step--done">
-        <span class="ck-step-num">
-          <svg class="ck-step-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span class="ck-step-sep"></span>
+        <span class="ck-step ck-step--done" id="stepConfirmation">
+          <span class="ck-step-num">
+            <svg class="ck-step-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
+          Confirmación
         </span>
-        Confirmación
-      </span>
-    </div>
-
-    <div class="container">
-
-      <!-- Bloque: Confirmación -->
-      <div class="section-block">
-        <div class="section-heading"><strong>Pedido confirmado</strong></div>
-        <div class="section-body">
-          <div style="display:flex;gap:14px;align-items:center">
-            <div class="success-icon">
-              <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-            <div class="hero-text">
-              <h1>Gracias por tu compra</h1>
-              <p class="lead">Te hemos enviado un correo con los detalles del pedido.</p>
-            </div>
-          </div>
-          <div class="status-pill" id="statusPill">
-            <span class="status-dot"></span>
-            Pago recibido
-          </div>
-        </div>
       </div>
 
-      <!-- Bloque: Qué hacer ahora -->
-      <div class="section-block">
-        <div class="section-heading"><strong>Qué hacer ahora</strong></div>
-        <div class="section-body">
-          <div class="next-steps">
-            <div class="step">
-              <div class="step-num">1</div>
-              <div class="t">
-                <strong>Abre el email de confirmación</strong>
-                <span>Verás el resumen del pedido, el importe y la información de contacto.</span>
-              </div>
-            </div>
-            <div class="step">
-              <div class="step-num">2</div>
-              <div class="t">
-                <strong>Si no llega en 5 minutos</strong>
-                <span>Revisa Spam/Promociones y añade <strong>info@scootshop.co</strong> a tus contactos.</span>
-              </div>
-            </div>
-            <div class="step">
-              <div class="step-num">3</div>
-              <div class="t">
-                <strong>Te avisaremos del estado</strong>
-                <span>Cuando el pedido esté preparado o enviado, recibirás otro email.</span>
+      <section class="card card--detail" id="orderDetailSection" hidden>
+        <div class="head"><h2>Detalle del pedido</h2></div>
+        <div class="body" id="orderDetailBody"></div>
+      </section>
+
+      <section class="card card--summary order-summary order-summary--payment hero-shell" aria-label="Estado del pedido">
+        <div class="head order-summary__header">
+          <h1 class="order-summary__title" id="heroTitle">Pedido en seguimiento</h1>
+        </div>
+        <div class="body order-summary__body">
+          <div class="sum-product order-summary__product order-summary__product--line order-summary__product--hero">
+            <div class="order-summary__product-main">
+              <div class="order-summary__hero-thumbs" id="heroThumbStack" hidden></div>
+              <div class="order-summary__product-info">
+                <span class="order-summary__product-title" id="miniSummary">Pedido SCOOT SHOP</span>
+                <span class="order-summary__product-meta order-summary__product-meta--ref" id="orderEyebrow">Estado del pedido</span>
+                <span class="order-summary__product-meta order-summary__hero-lead" id="heroLead">Consulta aquí el estado real del pedido, el pago y los siguientes pasos sin salir de esta página.</span>
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <!-- Bloque: Información -->
-      <div class="section-block">
-        <div class="section-heading"><strong>Información</strong></div>
-        <div class="section-body">
-          <div class="info-list">
-            <div class="info-row">
-              <div class="ico">
-                <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22 7 12 13 2 7"/></svg>
-              </div>
-              <div class="t">
-                <span class="label">Soporte</span>
-                <span class="value">info@scootshop.co</span>
-              </div>
+          <div class="sum-rows order-summary__rows">
+            <div class="sum-row order-summary__row">
+              <span class="k order-summary__row-label">Estado</span>
+              <span class="v order-summary__row-value order-summary__row-value--status"><span class="status-pill" id="statusPill">Pedido recibido</span></span>
             </div>
-            <div class="info-row">
-              <div class="ico">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              </div>
-              <div class="t">
-                <span class="label">Estado</span>
-                <span class="value" id="orderHint">Confirmado — detalles enviados por email</span>
-              </div>
+            <div class="sum-row order-summary__row">
+              <span class="k order-summary__row-label">Importe</span>
+              <span class="v order-summary__row-value" id="heroAmount">—</span>
+            </div>
+            <div class="sum-row order-summary__row">
+              <span class="k order-summary__row-label">Actualización</span>
+              <span class="v order-summary__row-value" id="heroUpdatedAt">Pendiente</span>
+            </div>
+          </div>
+
+          <div class="sum-meta order-summary__box order-summary__info-box order-summary__info-box--payment">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span id="microNote" class="sum-meta-text order-summary__box-text order-summary__info-line order-summary__info-line--stack">Aquí verás cualquier cambio importante del pedido.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card card--detail section-block--steps">
+        <div class="head"><h2>Siguientes pasos</h2></div>
+        <div class="body">
+          <div class="mini-steps">
+            <div class="mini-step">
+              <span class="mini-step-num">1</span>
+              <p id="mailStepText">Revisa tu correo para ver la Confirmación del pedido.</p>
+            </div>
+            <div class="mini-step">
+              <span class="mini-step-num">2</span>
+              <p id="nextStepText">Prepararemos tu pedido y te avisaremos cuando avance.</p>
+            </div>
+            <div class="mini-step">
+              <span class="mini-step-num">3</span>
+              <p id="supportText">Si necesitas ayuda, escríbenos por WhatsApp o email.</p>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- Acciones -->
       <div class="actions">
-        <a class="btn btn-primary" href="/">
-          <svg viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z"/></svg>
+        <a class="order-cta order-cta--primary" id="primaryOrderCta" href="/">
           Volver a la tienda
         </a>
-        <a class="btn btn-ghost" href="mailto:info@scootshop.co">
-          <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22 7 12 13 2 7"/></svg>
-          Contactar soporte
-        </a>
       </div>
 
-      <footer class="foot">
-        <strong>SCOOT SHOP</strong> · Gracias por confiar en nosotros · <a href="/">scootshop.co</a>
-      </footer>
+      <p class="support-line">
+        ¿Necesitas ayuda? <a href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer">WhatsApp</a> · <a href="mailto:info@scootshop.co">info@scootshop.co</a>
+      </p>
 
+      <footer class="foot">
+        <strong>SCOOT SHOP</strong> · Estado y seguimiento del pedido · <a href="/">scootshop.co</a>
+      </footer>
     </div>
   </main>
 
   <script>
     (function(){
       const p = new URLSearchParams(location.search);
-      const orderId = p.get('order') || '';
-      const orderStatus = p.get('status') || '';
-      const productName = p.get('name') || '';
-      const st = p.get('st') || p.get('payment_status') || '';
-      const amt = p.get('amt') || p.get('mc_gross') || p.get('amount') || '';
-      const cc  = p.get('cc')  || p.get('mc_currency') || p.get('currency') || '';
+      const orderId = p.get('order') || p.get('tx') || '';
+      const orderToken = p.get('token') || p.get('t') || '';
+      const orderStatus = p.get('status') || p.get('st') || p.get('payment_status') || '';
+      const productName = p.get('name') || p.get('item_name') || '';
+      const amountText = p.get('amt') || p.get('mc_gross') || p.get('amount') || '';
+      const currencyCode = (p.get('cc') || p.get('mc_currency') || p.get('currency') || 'EUR').toUpperCase();
+      const queryEmail = p.get('email') || p.get('payer_email') || '';
+      const previewActive = p.get('preview_active') === '1';
+      const PREVIEW_ORDERS_KEY = 'ss_preview_orders_v1';
+      const LOCAL_DEV_ORDERS_KEY = 'ss_local_dev_orders_account_v1';
 
-      const hint = document.getElementById('orderHint');
-      const lead = document.querySelector('.lead');
+      const lead = document.getElementById('heroLead');
+      const heroTitle = document.getElementById('heroTitle');
+      const orderEyebrow = document.getElementById('orderEyebrow');
       const statusPill = document.getElementById('statusPill');
+      const microNote = document.getElementById('microNote');
+      const miniSummary = document.getElementById('miniSummary');
+      const heroThumbStack = document.getElementById('heroThumbStack');
+      const heroAmount = document.getElementById('heroAmount');
+      const heroUpdatedAt = document.getElementById('heroUpdatedAt');
+      const mailStepText = document.getElementById('mailStepText');
+      const nextStepText = document.getElementById('nextStepText');
+      const supportText = document.getElementById('supportText');
+      const orderDetailSection = document.getElementById('orderDetailSection');
+      const orderDetailBody = document.getElementById('orderDetailBody');
+      const stepShipping = document.getElementById('stepShipping');
+      const stepPayment = document.getElementById('stepPayment');
+      const stepConfirmation = document.getElementById('stepConfirmation');
+      const primaryOrderCta = document.getElementById('primaryOrderCta');
 
-      if(statusPill && orderStatus){
-        statusPill.innerHTML = '<span class="status-dot"></span>' + orderStatus.replace(/_/g, ' ');
+      function stepCheckSvg(){
+        return '<svg class="ck-step-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
       }
 
-      if(lead && orderId){
-        let leadText = 'Tu pago se ha confirmado correctamente.';
-        if(productName) leadText += ' Producto: ' + productName + '.';
-        leadText += ' Referencia de pago: ' + orderId + '.';
-        lead.textContent = leadText;
+      function setStepState(stepEl, state, stepNumber){
+        if (!stepEl) return;
+        const num = stepEl.querySelector('.ck-step-num');
+        stepEl.classList.remove('ck-step--done', 'ck-step--active');
+        if (state === 'done') {
+          stepEl.classList.add('ck-step--done');
+          if (num) num.innerHTML = stepCheckSvg();
+          return;
+        }
+        if (state === 'active') {
+          stepEl.classList.add('ck-step--active');
+        }
+        if (num) num.textContent = String(stepNumber);
       }
 
-      if(!hint) return;
-      const parts = [];
-      if(orderId) parts.push('Pedido ' + orderId);
-      if(orderStatus) parts.push(orderStatus.replace(/_/g, ' '));
-      if(st) parts.push(st);
-      if(amt) parts.push(`${amt}${cc ? ' ' + cc : ''}`);
-      if(parts.length) hint.textContent = parts.join(' · ');
+      function applyCheckoutSteps(status){
+        if (normalizeStatus(status) === 'pending_payment') {
+          setStepState(stepShipping, 'done', 1);
+          setStepState(stepPayment, 'active', 2);
+          setStepState(stepConfirmation, 'pending', 3);
+          return;
+        }
+        setStepState(stepShipping, 'done', 1);
+        setStepState(stepPayment, 'done', 2);
+        setStepState(stepConfirmation, 'done', 3);
+      }
+
+      function esc(value){
+        return String(value == null ? '' : value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function normalizeStatus(value){
+        const raw = String(value || '').trim().toLowerCase();
+        if (raw === 'paid' || raw === 'approved' || raw === 'complete' || raw === 'completed' || raw === 'pagado') return 'paid';
+        if (raw === 'pending' || raw === 'pending_payment') return 'pending_payment';
+        if (raw === 'processing' || raw === 'preparing') return 'processing';
+        if (raw === 'shipped' || raw === 'shipping') return 'shipped';
+        if (raw === 'delivered') return 'delivered';
+        if (raw === 'cancelled' || raw === 'canceled' || raw === 'failed' || raw === 'denied') return 'cancelled';
+        return raw || 'pending_payment';
+      }
+
+      function isLocalRuntime(){
+        const host = String(location.hostname || '').toLowerCase();
+        return host === 'localhost' || host === '127.0.0.1' || host === '::1';
+      }
+
+      function statusLabel(status){
+        if (status === 'pending_payment') return '⏳ Pendiente pago';
+        if (status === 'paid') return '✅ Pagado';
+        if (status === 'processing') return '📦 Preparando';
+        if (status === 'shipped') return '🚚 Enviado';
+        if (status === 'delivered') return '🏠 Entregado';
+        if (status === 'cancelled') return '❌ Revisa el pago';
+        return '📦 Pedido recibido';
+      }
+
+      function stageIndex(status){
+        if (status === 'pending_payment') return 0;
+        if (status === 'paid') return 1;
+        if (status === 'processing') return 2;
+        if (status === 'shipped') return 3;
+        if (status === 'delivered') return 4;
+        return 0;
+      }
+
+      function paymentMethodLabel(value){
+        const m = String(value || '').trim().toLowerCase();
+        if (!m) return 'No especificado';
+        if (m === 'paypal') return 'PayPal';
+        if (m === 'card') return 'Tarjeta';
+        if (m === 'klarna') return 'Klarna';
+        if (m === 'bizum') return 'Bizum';
+        if (m === 'transfer' || m === 'bank_transfer') return 'Transferencia';
+        if (m === 'manual') return 'Manual';
+        return m.charAt(0).toUpperCase() + m.slice(1);
+      }
+
+      function formatMoney(value, currency){
+        const n = Number(value || 0);
+        if (!isFinite(n)) return '—';
+        try {
+          return new Intl.NumberFormat('es-ES', {
+            style: 'currency',
+            currency: String(currency || 'EUR').toUpperCase(),
+          }).format(n);
+        } catch (_) {
+          return n.toFixed(2) + ' ' + String(currency || 'EUR').toUpperCase();
+        }
+      }
+
+      function formatDateTime(value){
+        if (!value) return '—';
+        const d = new Date(value);
+        if (isNaN(d.getTime())) return String(value);
+        return d.toLocaleString('es-ES', {
+          day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+      }
+
+      function heroCopy(status, tracking, orderNumber){
+        const normalized = normalizeStatus(status);
+        if (normalized === 'pending_payment') {
+          return {
+            eyebrow: 'Estado del pedido',
+            title: 'Pedido ' + orderNumber,
+            lead: 'El pedido está creado, pero el pago todavía no se ha confirmado. Puedes retomarlo sin generar un pedido nuevo.',
+            note: 'Usa el mismo número de pedido para volver al pago cuando quieras.'
+          };
+        }
+        if (normalized === 'paid') {
+          return {
+            eyebrow: 'Estado del pedido',
+            title: 'Pedido ' + orderNumber,
+            lead: 'El pago ya está confirmado y el pedido ha quedado registrado para preparación.',
+            note: 'El equipo revisará el pedido antes de pasar a preparación.'
+          };
+        }
+        if (normalized === 'processing') {
+          return {
+            eyebrow: 'Estado del pedido',
+            title: 'Pedido ' + orderNumber,
+            lead: 'El pedido ya está en preparación. Aquí verás el siguiente avance en cuanto salga a envío.',
+            note: 'Todavía no hay tracking definitivo asignado.'
+          };
+        }
+        if (normalized === 'shipped') {
+          return {
+            eyebrow: 'Estado del pedido',
+            title: 'Pedido ' + orderNumber,
+            lead: 'El pedido ha salido y esta pantalla seguirá actualizándose con el seguimiento.',
+            note: tracking ? ('Tracking activo: ' + tracking + '.') : 'El tracking se está sincronizando.'
+          };
+        }
+        if (normalized === 'delivered') {
+          return {
+            eyebrow: 'Estado del pedido',
+            title: 'Pedido ' + orderNumber,
+            lead: 'La entrega figura como completada. Si necesitas ayuda postventa, puedes usar los canales de soporte de abajo.',
+            note: tracking ? ('Último tracking: ' + tracking + '.') : 'Entrega confirmada por la transportista.'
+          };
+        }
+        if (normalized === 'cancelled') {
+          return {
+            eyebrow: 'Estado del pedido',
+            title: 'Pedido ' + orderNumber,
+            lead: 'El pedido necesita revisión. Comprueba el método de pago o contacta con soporte para resolverlo.',
+            note: 'Si el pago no terminó bien, no intentes repetirlo sin revisar el pedido primero.'
+          };
+        }
+        return {
+          eyebrow: 'Estado del pedido',
+          title: 'Pedido ' + orderNumber,
+          lead: 'Consulta aquí el estado real del pedido, el pago y los siguientes pasos sin salir de esta página.',
+          note: 'Aquí verás cualquier cambio importante del pedido.'
+        };
+      }
+
+      function renderTracking(status){
+        const s = normalizeStatus(status);
+        const idx = stageIndex(s);
+        const progress = Math.round((idx / 4) * 100);
+        const isDelivered = idx >= 4 ? ' is-delivered' : '';
+        return [
+          '<div class="order-tracking">',
+          '  <div class="tracking-status">' + esc(statusLabel(s)) + '</div>',
+          '  <div class="track-line' + isDelivered + '" style="--progress:' + esc(progress + '%') + ';">',
+          '    <i aria-hidden="true"></i>',
+          '    <div class="tracking-icons">',
+          '      <span title="Pendiente pago">⏳</span>',
+          '      <span title="Pagado">✅</span>',
+          '      <span title="Preparando">📦</span>',
+          '      <span title="Enviado">🚚</span>',
+          '      <span title="Entregado">🏠</span>',
+          '    </div>',
+          '  </div>',
+          '</div>'
+        ].join('');
+      }
+
+      function normalizeItems(order){
+        const input = Array.isArray(order && order.order_items) ? order.order_items : [];
+        if (input.length) return input;
+        const fallbackName = String(order && (order.name || productName) || '').trim();
+        if (!fallbackName) return [];
+        return [{
+          name: fallbackName,
+          qty: 1,
+          image: String(order && order.product_image_url || '').trim(),
+          color_label: String(order && (order.product_color_label || order.product_color) || '').trim(),
+        }];
+      }
+
+      function renderItems(order){
+        const items = normalizeItems(order);
+        if (!items.length) return '<p class="detail-note">No hay productos disponibles para este pedido.</p>';
+        return '<div class="order-products"><div class="order-product-list-shell order-summary order-summary--checkout"><div class="order-summary__product-list">' + items.map(function(item){
+          const img = String(item.image || '').trim();
+          const qty = Math.max(1, Number(item.qty || 1));
+          const colorLabel = String(item.color_label || item.color || '').trim();
+          const sku = String(item.sku || '').trim();
+          const itemCurrency = String(item.currency || order.currency || currencyCode || 'EUR').toUpperCase();
+          const rawUnitPrice = Number(item.unit_price || item.price || item.amount || item.total_amount || 0);
+          const rawLineTotal = Number(item.line_total || item.total || item.total_amount || (rawUnitPrice > 0 ? rawUnitPrice * qty : 0));
+          const fallbackSingleTotal = items.length === 1 ? Number(order.total_amount || order.amount || amountText || 0) : 0;
+          const lineTotalValue = rawLineTotal > 0 ? rawLineTotal : fallbackSingleTotal;
+          const lineTotalText = lineTotalValue > 0 ? formatMoney(lineTotalValue, itemCurrency) : '—';
+          return [
+            '<article class="order-summary__product order-summary__product--line">',
+            '  <div class="order-summary__product-main">',
+            img ? ('<img class="order-summary__product-image" src="' + esc(img) + '" alt="Producto ' + esc(item.name || 'SCOOT SHOP') + '">') : '<img class="order-summary__product-image" src="/img/0-removebg-preview.webp?v=20260605-2" alt="Producto SCOOT SHOP">',
+            '  <div class="order-summary__product-info">',
+            '    <span class="order-summary__product-title">' + esc(item.name || 'Producto') + '</span>',
+            sku ? ('    <span class="order-summary__product-meta order-summary__product-meta--ref">Ref: ' + esc(sku) + '</span>') : '',
+            '    <span class="order-summary__product-meta order-summary__product-meta--color">Color: ' + esc(colorLabel || 'No especificado') + '</span>',
+            '</div>',
+            '  </div>',
+            '  <div class="order-summary__product-side">',
+            '    <strong class="order-summary__product-line-total">' + esc(lineTotalText) + '</strong>',
+            '    <span class="order-summary__product-meta order-summary__product-meta--qty">Cant: ' + esc(qty) + '</span>',
+            '  </div>',
+            '</article>'
+          ].join('');
+        }).join('') + '</div></div></div>';
+      }
+
+      function buildAddress(ship){
+        return [ship.address, ship.address2, ship.city, ship.province, ship.postal, ship.country].filter(Boolean).join(', ');
+      }
+
+      function renderHeroThumbs(items){
+        const list = Array.isArray(items) ? items.filter(function(item){
+          return item && String(item.image || '').trim();
+        }) : [];
+        if (!list.length) return '';
+        const visible = list.slice(0, 3);
+        const extra = list.length - visible.length;
+        return visible.map(function(item, index){
+          const src = String(item.image || '').trim();
+          if (!src) return '';
+          if (index === 2 && extra > 0) {
+            return '<span class="order-summary__hero-thumb order-summary__hero-thumb--more">+' + esc(extra) + '</span>';
+          }
+          return '<img class="order-summary__hero-thumb" src="' + esc(src) + '" alt="Producto ' + esc(item.name || 'SCOOT SHOP') + '">';
+        }).join('');
+      }
+
+      function saveResumeSessionPayload(payload){
+        try {
+          if (payload.shipping && typeof payload.shipping === 'object') {
+            sessionStorage.setItem('ss_checkout_shipping', JSON.stringify(payload.shipping));
+          }
+          if (Array.isArray(payload.cartItems)) {
+            sessionStorage.setItem('ss_checkout_cart_snapshot', JSON.stringify(payload.cartItems));
+          }
+        } catch (_) {
+          /* ignore */
+        }
+      }
+
+      function buildPreviewResumeUrl(order){
+        const params = new URLSearchParams();
+        params.set('resume', '1');
+        params.set('checkout', '1');
+        params.set('order', String(order.id || orderId || ''));
+        params.set('sku', String(order.sku || ''));
+        params.set('name', String(order.name || productName || 'Pedido SCOOT SHOP'));
+        params.set('price', String(order.total_amount || order.amount || amountText || '0.00'));
+        params.set('currency', String(order.currency || currencyCode || 'EUR').toUpperCase());
+        if (order.product_url) params.set('url', String(order.product_url));
+        if (order.product_image_url) params.set('image', String(order.product_image_url));
+        if (order.product_color) params.set('color', String(order.product_color));
+        if (order.product_color_label) params.set('colorLabel', String(order.product_color_label));
+        if (Array.isArray(order.order_items) && order.order_items.length > 1) {
+          params.set('cart', '1');
+        }
+        return '/pago?' + params.toString();
+      }
+
+      async function resumePendingPayment(order){
+        if (!order || !order.id) return;
+
+        if (previewActive) {
+          window.location.href = buildPreviewResumeUrl(order);
+          return;
+        }
+
+        const response = await fetch('/api/orders/resume-payment', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId: String(order.id), token: orderToken })
+        });
+
+        let data = null;
+        try {
+          data = await response.json();
+        } catch (_) {
+          data = null;
+        }
+
+        if (!response.ok || !data || !data.ok || !data.paymentUrl) {
+          throw new Error((data && data.error) ? data.error : 'resume_payment_failed');
+        }
+
+        saveResumeSessionPayload(data);
+        window.location.href = String(data.paymentUrl);
+      }
+
+      function renderDetail(order){
+        if(!orderDetailSection || !orderDetailBody || !order){ return; }
+        const ship = (order.shipping && typeof order.shipping === 'object') ? order.shipping : {};
+        const status = normalizeStatus(order.status || orderStatus);
+        const isPendingPayment = status === 'pending_payment';
+        const tracking = String(order.tracking || '').trim();
+        const fullName = String(order.customer_name || ship.name || order.payer_name || '').trim() || 'No disponible';
+        const email = String(order.customer_email || ship.email || order.payer_email || queryEmail || '').trim() || 'No disponible';
+        const phone = String(ship.phone || '').trim() || 'No disponible';
+        const address = buildAddress(ship) || 'No disponible';
+        const orderNumber = String(order.id || orderId || '—').trim();
+        const amount = formatMoney(order.total_amount || order.amount || amountText, order.currency || currencyCode);
+        const method = paymentMethodLabel(order.payment_method);
+        const updatedAt = formatDateTime(order.updated_at || order.created_at);
+        const hero = heroCopy(status, tracking, orderNumber);
+        const items = normalizeItems(order);
+        const firstItem = items[0] || null;
+        const itemCount = items.reduce(function(total, item){
+          return total + Math.max(1, Number(item && item.qty || 1));
+        }, 0);
+        const summaryText = items.length > 1
+          ? (String(itemCount) + ' artículos')
+          : (((firstItem && firstItem.name) ? firstItem.name : 'Pedido SCOOT SHOP') + ' · Ref. ' + orderNumber);
+        const summaryMeta = items.length > 1 ? ('Ref. ' + orderNumber) : hero.eyebrow;
+        const resumeAction = isPendingPayment
+          ? '<div class="order-detail-actions"><button type="button" class="order-cta order-cta--primary" id="resumePaymentBtn">Volver al pago</button></div>'
+          : '';
+
+        orderDetailSection.hidden = false;
+        applyCheckoutSteps(status);
+        orderDetailBody.innerHTML = [
+          '<div class="order-detail-shell">',
+          '  <div class="order-detail-top">',
+          '    <div class="detail-pill"><span class="detail-note"><strong>Referencia:</strong> ' + esc(orderNumber) + '</span></div>',
+          '    ' + renderTracking(status),
+          tracking ? ('    <p class="detail-note"><strong>Número de seguimiento:</strong> ' + esc(tracking) + '</p>') : '    <p class="detail-note"><strong>Número de seguimiento:</strong> Pendiente de asignación.</p>',
+          '  </div>',
+          '  <div class="order-kpis">',
+          '    <div class="order-kpi"><span class="k">Número de pedido</span><span class="v">' + esc(orderNumber) + '</span></div>',
+          '    <div class="order-kpi"><span class="k">Importe</span><span class="v">' + esc(amount) + '</span></div>',
+          '    <div class="order-kpi"><span class="k">Método de pago</span><span class="v">' + esc(method) + '</span></div>',
+          '    <div class="order-kpi"><span class="k">Última actualización</span><span class="v">' + esc(updatedAt) + '</span></div>',
+          '    <div class="order-kpi"><span class="k">Nombre completo</span><span class="v">' + esc(fullName) + '</span></div>',
+          '    <div class="order-kpi"><span class="k">Teléfono</span><span class="v">' + esc(phone) + '</span></div>',
+          '    <div class="order-kpi is-wide"><span class="k">Correo</span><span class="v">' + esc(email) + '</span></div>',
+          '    <div class="order-kpi is-wide"><span class="k">Dirección de envío</span><span class="v">' + esc(address) + '</span></div>',
+          '  </div>',
+          '  <div class="order-product-block">',
+          '    <p class="detail-note"><strong>Productos del pedido</strong></p>',
+          '    ' + renderItems(order),
+          '  </div>',
+          '  ' + resumeAction,
+          '</div>'
+        ].join('');
+
+        const resumeBtn = document.getElementById('resumePaymentBtn');
+        if (resumeBtn) {
+          resumeBtn.addEventListener('click', function(){
+            resumeBtn.disabled = true;
+            resumeBtn.textContent = 'Abriendo pago...';
+            resumePendingPayment(order).catch(function(){
+              resumeBtn.disabled = false;
+              resumeBtn.textContent = 'Volver al pago';
+            });
+          });
+        }
+
+        if (statusPill) {
+          statusPill.textContent = statusLabel(status);
+          statusPill.className = 'status-pill';
+          if (status === 'pending_payment' || status === 'cancelled') {
+            statusPill.classList.add('status-pill--warn');
+          } else if (status === 'processing' || status === 'shipped') {
+            statusPill.classList.add('status-pill--neutral');
+          }
+        }
+        if (orderEyebrow) orderEyebrow.textContent = summaryMeta;
+        if (heroTitle) heroTitle.textContent = hero.title;
+        if (lead) lead.textContent = hero.lead;
+        if (microNote) microNote.textContent = hero.note;
+        if (miniSummary) miniSummary.textContent = summaryText;
+        if (heroThumbStack) {
+          const thumbsMarkup = renderHeroThumbs(items);
+          heroThumbStack.className = 'order-summary__hero-thumbs' + (items.length > 1 ? ' order-summary__hero-thumbs--stack' : '');
+          heroThumbStack.innerHTML = thumbsMarkup;
+          heroThumbStack.hidden = !thumbsMarkup;
+        }
+        if (heroAmount) heroAmount.textContent = amount;
+        if (heroUpdatedAt) heroUpdatedAt.textContent = updatedAt;
+        if (mailStepText) {
+          mailStepText.textContent = isPendingPayment
+            ? 'Pulsa en Volver al pago para completar el pedido sin cambiar el número.'
+            : (email !== 'No disponible' ? ('Revisa ' + email + ' para ver las actualizaciones del pedido.') : 'Revisa tu correo para ver la confirmación del pedido.');
+        }
+        if (nextStepText) {
+          nextStepText.textContent = isPendingPayment
+            ? 'Cuando el pago se confirme, actualizaremos el estado automáticamente en esta misma pantalla.'
+            : (tracking ? 'Tu pedido ya tiene seguimiento activo y seguirá actualizándose en esta pantalla.' : 'Prepararemos tu pedido y activaremos tracking en cuanto salga a reparto.');
+        }
+        if (supportText) supportText.textContent = 'Si necesitas ayuda, te atendemos por WhatsApp o email.';
+      }
+
+      function renderExpiredOrder(){
+        if (!orderDetailSection || !orderDetailBody) return;
+
+        orderDetailSection.hidden = false;
+        applyCheckoutSteps('pending_payment');
+
+        orderDetailBody.innerHTML = [
+          '<div class="order-detail-shell">',
+          '  <div class="order-empty-state">',
+          '    <strong>Pedido caducado</strong>',
+          '    <p>Este pedido ha caducado. Por favor, crea otro pedido para continuar.</p>',
+          '  </div>',
+          '</div>'
+        ].join('');
+
+        if (statusPill) {
+          statusPill.textContent = '⚠️ Pedido caducado';
+          statusPill.className = 'status-pill status-pill--warn';
+        }
+        if (orderEyebrow) orderEyebrow.textContent = 'Pedido no disponible';
+        if (heroTitle) heroTitle.textContent = 'Pedido caducado';
+        if (lead) lead.textContent = 'Este pedido ya no está disponible para retomar el pago.';
+        if (microNote) microNote.textContent = 'Crea un nuevo pedido para continuar el proceso de compra.';
+        if (miniSummary) miniSummary.textContent = 'Sin datos de pedido';
+        if (heroThumbStack) {
+          heroThumbStack.innerHTML = '';
+          heroThumbStack.hidden = true;
+        }
+        if (heroAmount) heroAmount.textContent = '—';
+        if (heroUpdatedAt) heroUpdatedAt.textContent = '—';
+        if (mailStepText) mailStepText.textContent = 'Este pedido ya no puede recuperarse.';
+        if (nextStepText) nextStepText.textContent = 'Crea un pedido nuevo para continuar con el pago.';
+        if (supportText) supportText.textContent = 'Si necesitas ayuda, te atendemos por WhatsApp o email.';
+        if (primaryOrderCta) {
+          primaryOrderCta.textContent = 'Crear nuevo pedido';
+          primaryOrderCta.href = '/checkout/?cart=1';
+        }
+      }
+
+      function buildPreviewOrder(){
+        if (!previewActive || !orderId) return null;
+        try {
+          const raw = sessionStorage.getItem(PREVIEW_ORDERS_KEY);
+          if (!raw) return null;
+          const list = JSON.parse(raw);
+          if (!Array.isArray(list)) return null;
+          const item = list.find(function(x){ return String(x && x.id || '') === String(orderId); });
+          if (!item) return null;
+          return {
+            id: String(item.id || orderId),
+            name: String(item.product || item.name || 'Pedido de prueba'),
+            status: String(item.status || 'processing'),
+            amount: String(item.total_amount || item.amount || amountText || '0.00'),
+            currency: String(item.currency || currencyCode || 'EUR'),
+            payment_method: String(item.payment_method || 'manual'),
+            tracking: String(item.tracking || ''),
+            customer_name: String(item.customer || 'Cliente preview'),
+            customer_email: String(item.email || queryEmail || 'cliente@scootshop.co'),
+            product_image_url: String(item.product_image_url || ''),
+            product_color: String(item.product_color || ''),
+            product_color_label: String(item.product_color_label || item.product_color || ''),
+            order_items: [{
+              sku: String(item.sku || ''),
+              name: String(item.product || item.name || 'Pedido de prueba'),
+              qty: 1,
+              image: String(item.product_image_url || ''),
+              color: String(item.product_color || ''),
+              color_label: String(item.product_color_label || item.product_color || ''),
+            }],
+            shipping: {
+              name: String(item.ship_name || item.customer || ''),
+              email: String(item.ship_email || item.email || ''),
+              phone: String(item.ship_phone || ''),
+              address: String(item.ship_address || ''),
+              address2: String(item.ship_address2 || ''),
+              city: String(item.ship_city || ''),
+              province: String(item.ship_province || ''),
+              postal: String(item.ship_postal || ''),
+              country: String(item.ship_country || ''),
+            },
+            updated_at: String(item.updated_at || item.created_at || ''),
+            created_at: String(item.created_at || ''),
+          };
+        } catch (_) {
+          return null;
+        }
+      }
+
+      function buildLocalDevOrder(){
+        if (!isLocalRuntime() || !orderId) return null;
+        try {
+          const raw = localStorage.getItem(LOCAL_DEV_ORDERS_KEY);
+          if (!raw) return null;
+          const list = JSON.parse(raw);
+          if (!Array.isArray(list)) return null;
+          const item = list.find(function(x){ return String(x && x.id || '') === String(orderId); });
+          if (!item) return null;
+          const localItems = Array.isArray(item.order_items) && item.order_items.length
+            ? item.order_items.map(function(entry){
+                return {
+                  sku: String(entry && entry.sku || ''),
+                  name: String(entry && (entry.name || entry.product) || 'Pedido local'),
+                  qty: Math.max(1, Number(entry && entry.qty || 1)),
+                  image: String(entry && (entry.image || entry.product_image_url) || ''),
+                  color: String(entry && (entry.color || entry.product_color) || ''),
+                  color_label: String(entry && (entry.color_label || entry.product_color_label || entry.color || entry.product_color) || ''),
+                  unit_price: Number(entry && (entry.unit_price || entry.price || entry.amount) || 0),
+                  line_total: Number(entry && (entry.line_total || entry.total || entry.total_amount) || 0),
+                };
+              })
+            : [{
+                sku: String(item.sku || ''),
+                name: String(item.product || item.name || 'Pedido local'),
+                qty: 1,
+                image: String(item.product_image_url || ''),
+                color: String(item.product_color || ''),
+                color_label: String(item.product_color_label || item.product_color || ''),
+              }];
+          return {
+            id: String(item.id || orderId),
+            sku: String(item.sku || ''),
+            name: String(item.product || item.name || 'Pedido local'),
+            status: String(item.status || 'pending_payment'),
+            amount: String(item.total_amount || item.amount || amountText || '0.00'),
+            total_amount: String(item.total_amount || item.amount || amountText || '0.00'),
+            currency: String(item.currency || currencyCode || 'EUR'),
+            payment_method: String(item.payment_method || 'manual'),
+            tracking: String(item.tracking || ''),
+            customer_name: String(item.customer_name || 'Cliente local'),
+            customer_email: String(item.email || queryEmail || 'prueba.local@scootshop.co'),
+            product_image_url: String(item.product_image_url || ''),
+            product_color: String(item.product_color || ''),
+            product_color_label: String(item.product_color_label || item.product_color || ''),
+            order_items: localItems,
+            shipping: {
+              name: String(item.ship_name || item.customer_name || ''),
+              email: String(item.ship_email || item.email || ''),
+              phone: String(item.ship_phone || ''),
+              address: String(item.ship_address || ''),
+              address2: String(item.ship_address2 || ''),
+              city: String(item.ship_city || ''),
+              province: String(item.ship_province || ''),
+              postal: String(item.ship_postal || ''),
+              country: String(item.ship_country || ''),
+            },
+            updated_at: String(item.updated_at || item.created_at || ''),
+            created_at: String(item.created_at || ''),
+          };
+        } catch (_) {
+          return null;
+        }
+      }
+
+      function buildQueryFallback(){
+        if (!orderId) return null;
+        return {
+          id: orderId,
+          name: productName || 'Pedido SCOOT SHOP',
+          status: normalizeStatus(orderStatus),
+          amount: amountText || '0.00',
+          currency: currencyCode || 'EUR',
+          payment_method: '',
+          tracking: '',
+          customer_name: '',
+          customer_email: queryEmail,
+          order_items: [{ name: productName || 'Producto', qty: 1, image: '', color_label: '' }],
+          shipping: { name: '', email: queryEmail, phone: '', address: '', address2: '', city: '', province: '', postal: '', country: '' },
+          created_at: '',
+          updated_at: '',
+        };
+      }
+
+      async function loadOrderDetail(){
+        if(!orderId){
+          renderExpiredOrder();
+          return;
+        }
+
+        const localOrder = buildLocalDevOrder();
+        if (localOrder) {
+          renderDetail(localOrder);
+          return;
+        }
+
+        let apiError = '';
+        try {
+          const detailParams = new URLSearchParams({
+            route: 'account_order_detail',
+            id: orderId,
+          });
+          if (orderToken) {
+            detailParams.set('token', orderToken);
+          }
+          const res = await fetch('/api/index.php?' + detailParams.toString(), { credentials: 'same-origin' });
+          let data = null;
+          try {
+            data = await res.json();
+          } catch (_) {
+            data = null;
+          }
+          if (res.ok && data && data.ok && data.order) {
+            renderDetail(data.order);
+            return;
+          }
+          apiError = String((data && data.error) ? data.error : (res.status === 404 ? 'not_found' : ''));
+        } catch (_) {
+          apiError = 'request_failed';
+        }
+
+        const previewOrder = buildPreviewOrder();
+        if (previewOrder) {
+          renderDetail(previewOrder);
+          return;
+        }
+
+        if (previewActive || isLocalRuntime()) {
+          const fallback = buildQueryFallback();
+          if (fallback) {
+            renderDetail(fallback);
+            return;
+          }
+        }
+
+        if (apiError === 'not_found' || apiError === 'forbidden' || apiError === 'not_logged_in' || apiError === 'request_failed') {
+          renderExpiredOrder();
+          return;
+        }
+
+        renderExpiredOrder();
+      }
+
+      if(lead && productName){
+        lead.textContent = 'Consulta aquí el estado de ' + productName + ', el pago y los siguientes pasos sin salir de esta página.';
+      }
+      if(supportText){
+        supportText.textContent = 'Si necesitas ayuda con este pedido, te atendemos por WhatsApp o email.';
+      }
+
+      loadOrderDetail();
     })();
   </script>
+  <script src="/js/global-assets.js?v=20260605-2"></script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

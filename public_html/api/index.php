@@ -44,7 +44,6 @@ function load_env_file(string $path): void {
 
     putenv($key . '=' . $value);
     $_ENV[$key] = $value;
-    $_SERVER[$key] = $value;
   }
 }
 
@@ -52,16 +51,6 @@ load_env_file(__DIR__ . '/../.env');
 load_env_file(__DIR__ . '/../.env.local');
 load_env_file(__DIR__ . '/../env');
 load_env_file(__DIR__ . '/../env.local');
-
-// Local compatibility: some PHP setups do not have mbstring enabled.
-if (!function_exists('mb_substr')) {
-  function mb_substr(string $string, int $start, ?int $length = null, ?string $encoding = null): string {
-    unset($encoding);
-    return $length === null
-      ? substr($string, $start)
-      : substr($string, $start, $length);
-  }
-}
 
 // ---------------- CONFIG (edita esto) ----------------
 $CFG = [
@@ -76,6 +65,10 @@ $CFG = [
 
   // Client ID de Google Sign-In (FASE 3A auth)
   'google_client_id' => getenv('GOOGLE_CLIENT_ID') ?: '',
+
+  // Seguridad: endpoint auth_dev_login deshabilitado por defecto.
+  // Solo habilitar en entorno local cuando sea estrictamente necesario.
+  'allow_dev_login' => strtolower(trim((string)(getenv('ALLOW_DEV_LOGIN') ?: 'false'))) === 'true',
 
   // Proxy del backend de PayPal para evitar problemas CORS en previews/local
   'paypal_proxy_base' => getenv('PAYPAL_PROXY_BASE') ?: 'https://paypal-webhook-six.vercel.app/api/paypal',
@@ -114,11 +107,6 @@ $CFG = [
   // Con false: todas las rutas de descuento devuelven 503 feature_disabled
   // y NO se tocan tablas ni columnas de BD.
   'discounts_enabled' => strtolower(trim((string)(getenv('DISCOUNTS_ENABLED') ?: 'false'))) === 'true',
-
-  // Entorno y flags de seguridad (A1/A2)
-  'app_env' => strtolower(trim((string)(getenv('APP_ENV') ?: 'production'))),
-  'allow_dev_auth' => strtolower(trim((string)(getenv('ALLOW_DEV_AUTH') ?: 'false'))) === 'true',
-  'allow_preview_mode' => strtolower(trim((string)(getenv('ALLOW_PREVIEW_MODE') ?: 'false'))) === 'true',
 ];
 
 // helpers derivados
@@ -133,11 +121,6 @@ $CFG['paypal_verify'] = ($CFG['paypal_env'] === 'sandbox')
 $CFG['notify_url'] = rtrim($CFG['public_base'], '/') . '/api/paypal/ipn';
 
 // ---------------- UTIL ----------------
-// Cabeceras de seguridad globales
-header('X-Content-Type-Options: nosniff');
-header('X-Frame-Options: DENY');
-header('Referrer-Policy: strict-origin-when-cross-origin');
-
 function json_out(array $data, int $code = 200): void {
   http_response_code($code);
   header('Content-Type: application/json; charset=utf-8');
@@ -175,6 +158,20 @@ function pdo_conn(array $CFG): PDO {
 }
 
 function ensure_schema(PDO $pdo): void {
+  // Fast path 1: already ran in this PHP process (covers multiple calls per request).
+  static $done = false;
+  if ($done) return;
+
+  // Fast path 2: schema was verified on this exact file version (invalidates on deploy).
+  // Flag file is keyed to DB + filemtime(__FILE__), so it auto-expires after each deploy.
+  $dbId  = substr(md5((string)(getenv('DB_HOST') ?: '') . ':' . (string)(getenv('DB_NAME') ?: '')), 0, 12);
+  $fKey  = substr(md5($dbId . ':' . (string)(@filemtime(__FILE__) ?: 0)), 0, 16);
+  $flag  = rtrim((string)sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'ss_schema_' . $fKey . '.ok';
+  if (@file_exists($flag)) {
+    $done = true;
+    return;
+  }
+
   $pdo->exec("\n    CREATE TABLE IF NOT EXISTS users (\n      id BIGINT AUTO_INCREMENT PRIMARY KEY,\n      google_sub VARCHAR(191) NOT NULL,\n      email VARCHAR(190) NOT NULL,\n      name VARCHAR(190) NULL,\n      picture VARCHAR(255) NULL,\n      locale VARCHAR(16) NULL,\n      last_login_at DATETIME NULL,\n      created_at DATETIME NOT NULL,\n      updated_at DATETIME NOT NULL,\n      UNIQUE KEY uq_users_google_sub (google_sub),\n      UNIQUE KEY uq_users_email (email),\n      INDEX idx_users_last_login (last_login_at)\n    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;\n  ");
 
   // orders
@@ -313,6 +310,10 @@ function ensure_schema(PDO $pdo): void {
   $pdo->exec("\n    CREATE TABLE IF NOT EXISTS order_history (\n      id BIGINT AUTO_INCREMENT PRIMARY KEY,\n      order_id VARCHAR(64) NOT NULL,\n      field_name VARCHAR(64) NOT NULL,\n      old_value TEXT NULL,\n      new_value TEXT NULL,\n      changed_by VARCHAR(64) NULL,\n      created_at DATETIME NOT NULL,\n      INDEX idx_order_history_order (order_id),\n      INDEX idx_order_history_created (created_at)\n    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;\n  ");
 
   $pdo->exec("\n    CREATE TABLE IF NOT EXISTS order_notes (\n      id BIGINT AUTO_INCREMENT PRIMARY KEY,\n      order_id VARCHAR(64) NOT NULL,\n      note TEXT NOT NULL,\n      changed_by VARCHAR(64) NULL,\n      created_at DATETIME NOT NULL,\n      INDEX idx_order_notes_order (order_id),\n      INDEX idx_order_notes_created (created_at)\n    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;\n  ");
+
+  // Schema verified — write flag so next requests skip this block.
+  $done = true;
+  @file_put_contents($flag, '1');
 }
 
 function customer_session_start(): void {
@@ -321,11 +322,14 @@ function customer_session_start(): void {
   }
 
   $isHttps = request_is_https();
+  $sessionTtl = 60 * 60 * 24 * 30;
   $cookieParams = session_get_cookie_params();
   $cookieDomain = customer_session_cookie_domain();
   @ini_set('session.use_strict_mode', '1');
+  @ini_set('session.gc_maxlifetime', (string)$sessionTtl);
+  @ini_set('session.cookie_lifetime', (string)$sessionTtl);
   session_set_cookie_params([
-    'lifetime' => 0,
+    'lifetime' => $sessionTtl,
     'path' => $cookieParams['path'] ?: '/',
     'domain' => $cookieDomain !== '' ? $cookieDomain : ($cookieParams['domain'] ?: ''),
     'secure' => $isHttps,
@@ -365,25 +369,6 @@ function is_local_request(): bool {
     || in_array($host, ['localhost', '127.0.0.1', '::1'], true);
 }
 
-function is_development_environment(array $CFG): bool {
-  $env = strtolower(trim((string)($CFG['app_env'] ?? 'production')));
-  return in_array($env, ['local', 'development', 'dev', 'test'], true);
-}
-
-function can_use_dev_auth(array $CFG): bool {
-  if (empty($CFG['allow_dev_auth'])) return false;
-  if (!is_development_environment($CFG)) return false;
-  if (!is_local_request()) return false;
-  return true;
-}
-
-function can_use_preview_mode(array $CFG): bool {
-  if (empty($CFG['allow_preview_mode'])) return false;
-  if (!is_development_environment($CFG)) return false;
-  if (!is_local_request()) return false;
-  return true;
-}
-
 function request_is_https(): bool {
   $https = strtolower(trim((string)($_SERVER['HTTPS'] ?? '')));
   $scheme = strtolower(trim((string)($_SERVER['REQUEST_SCHEME'] ?? '')));
@@ -407,6 +392,224 @@ function request_host_without_port(): string {
   $host = strtolower($host);
   if ($host === '') return '';
   return preg_replace('/:\\d+$/', '', $host) ?: '';
+}
+
+function request_origin_host(): string {
+  $origin = trim((string)($_SERVER['HTTP_ORIGIN'] ?? ''));
+  if ($origin !== '') {
+    $parsed = parse_url($origin);
+    $host = strtolower(trim((string)($parsed['host'] ?? '')));
+    if ($host !== '') return $host;
+  }
+
+  $referer = trim((string)($_SERVER['HTTP_REFERER'] ?? ''));
+  if ($referer !== '') {
+    $parsed = parse_url($referer);
+    $host = strtolower(trim((string)($parsed['host'] ?? '')));
+    if ($host !== '') return $host;
+  }
+
+  return '';
+}
+
+function require_same_origin_post(array $CFG): void {
+  $requestHost = request_host_without_port();
+  $publicHost = strtolower(trim((string)(parse_url((string)($CFG['public_base'] ?? ''), PHP_URL_HOST) ?? '')));
+  $originHost = request_origin_host();
+
+  $allowed = [];
+  if ($requestHost !== '') $allowed[] = $requestHost;
+  if ($publicHost !== '' && !in_array($publicHost, $allowed, true)) $allowed[] = $publicHost;
+
+  if ($originHost === '' || !in_array($originHost, $allowed, true)) {
+    json_out(['ok' => false, 'error' => 'csrf_origin_invalid'], 403);
+  }
+}
+
+function client_ip_for_rate_limit(): string {
+  $direct = trim((string)($_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['HTTP_X_REAL_IP'] ?? ''));
+  if ($direct !== '' && filter_var($direct, FILTER_VALIDATE_IP)) {
+    return $direct;
+  }
+
+  $xff = trim((string)($_SERVER['HTTP_X_FORWARDED_FOR'] ?? ''));
+  if ($xff !== '') {
+    $parts = explode(',', $xff);
+    foreach ($parts as $part) {
+      $candidate = trim($part);
+      if ($candidate !== '' && filter_var($candidate, FILTER_VALIDATE_IP)) {
+        return $candidate;
+      }
+    }
+  }
+
+  $remote = trim((string)($_SERVER['REMOTE_ADDR'] ?? ''));
+  if ($remote !== '' && filter_var($remote, FILTER_VALIDATE_IP)) {
+    return $remote;
+  }
+  return '0.0.0.0';
+}
+
+function rate_limit_storage_dir(): string {
+  $preferred = __DIR__ . '/../tmp/ratelimit';
+  if ((is_dir($preferred) || @mkdir($preferred, 0775, true)) && is_writable($preferred)) {
+    return $preferred;
+  }
+
+  $fallback = rtrim((string)sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'scootshop_ratelimit';
+  if ((is_dir($fallback) || @mkdir($fallback, 0775, true)) && is_writable($fallback)) {
+    return $fallback;
+  }
+
+  return '';
+}
+
+function rate_limit_take(string $key, int $maxAttempts, int $windowSeconds): array {
+  if ($maxAttempts <= 0 || $windowSeconds <= 0) {
+    return ['allowed' => true, 'remaining' => 0, 'limit' => 0, 'retry_after' => 0];
+  }
+
+  $storeDir = rate_limit_storage_dir();
+  if ($storeDir === '') {
+    return ['allowed' => true, 'remaining' => $maxAttempts, 'limit' => $maxAttempts, 'retry_after' => 0];
+  }
+
+  $now = time();
+  $bucket = hash('sha256', $key);
+  $path = $storeDir . DIRECTORY_SEPARATOR . $bucket . '.json';
+  $fp = @fopen($path, 'c+');
+  if ($fp === false) {
+    return ['allowed' => true, 'remaining' => $maxAttempts, 'limit' => $maxAttempts, 'retry_after' => 0];
+  }
+
+  try {
+    if (!flock($fp, LOCK_EX)) {
+      return ['allowed' => true, 'remaining' => $maxAttempts, 'limit' => $maxAttempts, 'retry_after' => 0];
+    }
+
+    $raw = stream_get_contents($fp);
+    $data = json_decode((string)$raw, true);
+    if (!is_array($data)) {
+      $data = [];
+    }
+
+    $count = (int)($data['count'] ?? 0);
+    $resetAt = (int)($data['reset_at'] ?? 0);
+    if ($resetAt <= 0 || $resetAt <= $now) {
+      $count = 0;
+      $resetAt = $now + $windowSeconds;
+    }
+
+    if ($count >= $maxAttempts) {
+      $retryAfter = max(1, $resetAt - $now);
+      rewind($fp);
+      ftruncate($fp, 0);
+      fwrite($fp, json_encode(['count' => $count, 'reset_at' => $resetAt], JSON_UNESCAPED_SLASHES));
+      fflush($fp);
+      return ['allowed' => false, 'remaining' => 0, 'limit' => $maxAttempts, 'retry_after' => $retryAfter];
+    }
+
+    $count++;
+    $remaining = max(0, $maxAttempts - $count);
+
+    rewind($fp);
+    ftruncate($fp, 0);
+    fwrite($fp, json_encode(['count' => $count, 'reset_at' => $resetAt], JSON_UNESCAPED_SLASHES));
+    fflush($fp);
+
+    return ['allowed' => true, 'remaining' => $remaining, 'limit' => $maxAttempts, 'retry_after' => 0];
+  } finally {
+    @flock($fp, LOCK_UN);
+    @fclose($fp);
+  }
+}
+
+function rate_limit_context_for_route(string $route): string {
+  $body = get_json_body();
+  switch ($route) {
+    case 'auth_dev_login':
+      return strtolower(trim((string)($body['email'] ?? '')));
+    case 'stripe_checkout':
+    case 'manual_order_create':
+      return strtolower(trim((string)($body['shipping']['email'] ?? ''))) . '|' . trim((string)($body['sku'] ?? ''));
+    case 'orders_resume_payment':
+      return trim((string)($body['orderId'] ?? $_GET['order'] ?? ''));
+    case 'orders_create':
+      return trim((string)($body['sku'] ?? ''));
+    case 'paypal_create_order':
+      return trim((string)($body['orderId'] ?? $body['intent'] ?? ''));
+    case 'paypal_capture_order':
+      return trim((string)($body['orderID'] ?? $body['orderId'] ?? ''));
+    case 'discount_validate':
+      return trim((string)($body['sku'] ?? '')) . '|' . strtoupper(trim((string)($body['code'] ?? '')));
+    case 'order_pricing_preview':
+      return trim((string)($body['sku'] ?? '')) . '|' . strtoupper(trim((string)($body['discount_code'] ?? '')));
+    default:
+      return '';
+  }
+}
+
+function enforce_route_rate_limit(array $CFG, string $route): void {
+  $method = strtoupper(trim((string)($_SERVER['REQUEST_METHOD'] ?? 'GET')));
+  if ($method !== 'POST') {
+    return;
+  }
+
+  $profiles = [
+    'auth_google_login' => ['max' => 12, 'window' => 300],
+    'auth_dev_login' => ['max' => 5, 'window' => 300],
+    'auth_logout' => ['max' => 60, 'window' => 60],
+    'stripe_checkout' => ['max' => 20, 'window' => 300],
+    'paypal_create_order' => ['max' => 30, 'window' => 300],
+    'paypal_capture_order' => ['max' => 30, 'window' => 300],
+    'manual_order_create' => ['max' => 20, 'window' => 300],
+    'orders_resume_payment' => ['max' => 30, 'window' => 300],
+    'orders_create' => ['max' => 20, 'window' => 300],
+    'discount_validate' => ['max' => 60, 'window' => 60],
+    'order_pricing_preview' => ['max' => 60, 'window' => 60],
+    'admin_customer_link_orders' => ['max' => 40, 'window' => 300],
+    'admin_order_notes' => ['max' => 40, 'window' => 300],
+    'admin_order_delete' => ['max' => 20, 'window' => 300],
+    'admin_orders_bulk_delete' => ['max' => 12, 'window' => 300],
+    'admin_product_stock' => ['max' => 60, 'window' => 300],
+    'admin_product_price' => ['max' => 60, 'window' => 300],
+    'admin_product_create' => ['max' => 20, 'window' => 300],
+    'admin_product_autofill_url' => ['max' => 30, 'window' => 300],
+    'admin_product_upload_images' => ['max' => 20, 'window' => 300],
+    'admin_product_delete' => ['max' => 20, 'window' => 300],
+    'admin_resend_paid_email' => ['max' => 20, 'window' => 300],
+    'admin_discount_list'    => ['max' => 40, 'window' => 300],
+    'admin_discount_detail'  => ['max' => 40, 'window' => 300],
+    'admin_discount_catalog' => ['max' => 30, 'window' => 300],
+    'admin_discount_create'  => ['max' => 20, 'window' => 300],
+    'admin_discount_update'  => ['max' => 20, 'window' => 300],
+    'admin_discount_toggle'  => ['max' => 30, 'window' => 300],
+    'admin_discount_delete'  => ['max' => 20, 'window' => 300],
+  ];
+
+  if (!isset($profiles[$route])) {
+    return;
+  }
+
+  $profile = $profiles[$route];
+  $ip = client_ip_for_rate_limit();
+  $context = rate_limit_context_for_route($route);
+  $key = 'v1|' . $route . '|' . $ip . '|' . $context;
+
+  $limit = rate_limit_take($key, (int)$profile['max'], (int)$profile['window']);
+  header('X-RateLimit-Limit: ' . (int)$limit['limit']);
+  header('X-RateLimit-Remaining: ' . (int)$limit['remaining']);
+
+  if (!$limit['allowed']) {
+    $retryAfter = max(1, (int)$limit['retry_after']);
+    header('Retry-After: ' . $retryAfter);
+    json_out([
+      'ok' => false,
+      'error' => 'rate_limit_exceeded',
+      'message' => 'Demasiadas solicitudes. Intentalo de nuevo en unos segundos.',
+      'retry_after' => $retryAfter,
+    ], 429);
+  }
 }
 
 function customer_session_cookie_domain(): string {
@@ -1417,6 +1620,7 @@ function create_static_product_page(array $product, string $publicBase): array {
     . "      </nav>\n"
     . "      <div class=\"page-title\">\n"
     . "        <div class=\"title-left\"><h1>{$nameE}</h1><div class=\"subtitle\">{$seriesLabelE}</div></div>\n"
+    . "        <div class=\"badge-min\"><i class=\"fa-solid fa-bolt\" aria-hidden=\"true\"></i> {$brandE}</div>\n"
     . "      </div>\n"
     . "      <div class=\"layout\">\n"
     . "        <section class=\"gallery\">\n"
@@ -1906,6 +2110,55 @@ function email_html_escape(string $value): string {
   return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
+function email_money_eur(float $value): string {
+  return number_format($value, 2, '.', '') . ' €';
+}
+
+function email_append_query_params(string $url, array $params): string {
+  $url = trim($url);
+  if ($url === '') return $url;
+  $parts = parse_url($url);
+  if ($parts === false) return $url;
+
+  $query = [];
+  if (!empty($parts['query'])) {
+    parse_str((string)$parts['query'], $query);
+  }
+  foreach ($params as $k => $v) {
+    if ($v === null || $v === '') continue;
+    $query[(string)$k] = (string)$v;
+  }
+
+  $rebuilt = '';
+  if (!empty($parts['scheme'])) {
+    $rebuilt .= $parts['scheme'] . '://';
+  }
+  if (!empty($parts['user'])) {
+    $rebuilt .= $parts['user'];
+    if (!empty($parts['pass'])) {
+      $rebuilt .= ':' . $parts['pass'];
+    }
+    $rebuilt .= '@';
+  }
+  if (!empty($parts['host'])) {
+    $rebuilt .= $parts['host'];
+  }
+  if (!empty($parts['port'])) {
+    $rebuilt .= ':' . $parts['port'];
+  }
+  $rebuilt .= (string)($parts['path'] ?? '');
+
+  $queryString = http_build_query($query);
+  if ($queryString !== '') {
+    $rebuilt .= '?' . $queryString;
+  }
+  if (!empty($parts['fragment'])) {
+    $rebuilt .= '#' . $parts['fragment'];
+  }
+
+  return $rebuilt;
+}
+
 function build_order_status_email_html(array $CFG, string $orderId, string $title, string $statusLabel, array $paragraphs, array $context = []): string {
   $customerName = trim((string)($context['customerName'] ?? ($context['payerName'] ?? '')));
   $productName = trim((string)($context['productName'] ?? ''));
@@ -1925,8 +2178,8 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
   $line = '#e5eaf1';
   $accent = '#b91e1e';
   $accentSoft = '#f9e8ea';
-  $segment = '<div style="width:48px;height:3px;border-radius:999px;background:' . $accent . ';"></div>';
-  $miniSegment = '<div style="width:34px;height:2px;border-radius:999px;background:' . $accent . ';"></div>';
+  $segment = '<div style="width:40px;height:3px;border-radius:999px;background:' . $accent . ';"></div>';
+  $miniSegment = '<div style="width:40px;height:3px;border-radius:999px;background:' . $accent . ';"></div>';
 
   if ($productImageUrl !== '') {
     $productImageUrl = absolute_url($CFG['public_base'], $productImageUrl);
@@ -1953,17 +2206,111 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
     $productName = order_items_display_name($orderItems, 'Pedido SCOOT SHOP');
   }
 
-  $resumeOrderUrl = absolute_url($CFG['public_base'], '/pedido/?order=' . rawurlencode($orderId));
-  $ctaUrl = $orderUrl !== '' ? $orderUrl : $siteUrl;
-  $ctaLabel = $orderUrl !== '' ? 'Ver producto' : 'Ir a SCOOT SHOP';
-  if ($status === 'pending_payment') {
-    $ctaUrl = $resumeOrderUrl;
-    $ctaLabel = 'Volver al pedido';
+  $orderAccessToken = trim((string)($context['orderToken'] ?? $context['token'] ?? ''));
+  if ($orderAccessToken === '' && $orderId !== '') {
+    try {
+      $stToken = get_pdo($CFG)->prepare("SELECT token FROM orders WHERE id = :id LIMIT 1");
+      $stToken->execute([':id' => $orderId]);
+      $tokenRow = $stToken->fetch();
+      $orderAccessToken = trim((string)($tokenRow['token'] ?? ''));
+    } catch (Throwable $_) {
+      $orderAccessToken = '';
+    }
   }
-  $preheader = 'Tu pedido ' . $orderId . ' ahora está ' . $statusLabel . '.';
-  if (!empty($paragraphs)) {
-    $preheader .= ' ' . $paragraphs[0];
+
+  $resumeQuery = ['order' => $orderId];
+  if ($orderAccessToken !== '') {
+    $resumeQuery['token'] = $orderAccessToken;
   }
+  $resumeOrderUrl = absolute_url($CFG['public_base'], '/pedido/?' . http_build_query($resumeQuery));
+  $ctaUrl = $resumeOrderUrl;
+  $ctaLabel = 'Ver pedido';
+  $statusPreheader = [
+    'pending_payment' => 'Tu pedido sigue activo. Entra para completarlo cuando quieras.',
+    'paid' => 'Pago confirmado. Te avisaremos cuando el pedido avance al siguiente paso.',
+    'preparing' => 'Tu pedido ya esta en preparacion. Te avisaremos cuando se envie.',
+    'shipped' => 'Tu pedido ya fue enviado. Revisa el estado y seguimiento cuando quieras.',
+    'delivered' => 'Tu pedido figura como entregado. Si necesitas ayuda, estamos disponibles.',
+    'canceled' => 'Tu pedido fue cancelado. Podemos ayudarte a tramitar uno nuevo.',
+    'refunded' => 'Reembolso procesado. El abono puede reflejarse en los proximos dias.',
+    'dispute' => 'Tu pedido esta en revision. Te contactaremos si necesitamos mas datos.',
+    'payment_failed' => 'No se pudo confirmar el pago. Retoma el pedido para completarlo.',
+    'error' => 'Hubo una incidencia con el pago. Retoma el pedido para completarlo.',
+  ];
+  $preheader = trim((string)($context['preheader'] ?? ''));
+  if ($preheader === '') {
+    $preheader = $statusPreheader[$status] ?? ('Tu pedido ' . $orderId . ' ahora esta ' . $statusLabel . '.');
+  }
+
+  $subtotal = null;
+  $shipping = null;
+  $total = null;
+
+  $subtotalRaw = $context['subtotal_amount'] ?? $context['subtotalAmount'] ?? null;
+  if ($subtotalRaw !== null && $subtotalRaw !== '') {
+    $subtotal = (float)$subtotalRaw;
+  }
+  $shippingRaw = $context['shipping_amount'] ?? $context['shippingAmount'] ?? null;
+  if ($shippingRaw !== null && $shippingRaw !== '') {
+    $shipping = (float)$shippingRaw;
+  }
+  $totalRaw = $context['total_amount'] ?? $context['totalAmount'] ?? $context['amount'] ?? null;
+  if ($totalRaw !== null && $totalRaw !== '') {
+    $total = (float)$totalRaw;
+  }
+
+  if ($subtotal === null && !empty($orderItems)) {
+    $subtotalCalc = 0.0;
+    foreach ($orderItems as $item) {
+      $itemPrice = (float)($item['price'] ?? 0);
+      $itemQty = max(1, (int)($item['qty'] ?? 1));
+      if ($itemPrice > 0) {
+        $subtotalCalc += $itemPrice * $itemQty;
+      }
+    }
+    if ($subtotalCalc > 0) {
+      $subtotal = $subtotalCalc;
+    }
+  }
+
+  if ($shipping === null) {
+    $shipping = 0.0;
+  }
+  if ($total === null) {
+    if ($subtotal !== null) {
+      $total = $subtotal + $shipping;
+    } else {
+      $total = 0.0;
+    }
+  }
+
+  $showAmountSummary = ($subtotal !== null && $subtotal > 0) || $total > 0;
+  $subtotalLabel = $subtotal !== null ? email_money_eur($subtotal) : '---';
+  $shippingLabel = ($shipping <= 0.0001) ? 'Gratis' : email_money_eur($shipping);
+  $totalLabel = $total > 0 ? email_money_eur($total) : ($subtotal !== null ? email_money_eur($subtotal) : '---');
+
+  $trackingParams = [
+    'utm_source' => 'transactional_email',
+    'utm_medium' => 'email',
+    'utm_campaign' => 'order_status',
+    'utm_content' => 'cta_ver_pedido',
+    'utm_term' => $status !== '' ? $status : 'status_unknown',
+    'order' => $orderId,
+  ];
+  $ctaUrl = email_append_query_params($ctaUrl, $trackingParams);
+
+  $supportUrl = trim((string)($context['supportUrl'] ?? $context['supportWhatsappUrl'] ?? ''));
+  if ($supportUrl === '') {
+    $waText = rawurlencode('Hola SCOOT SHOP, necesito ayuda con mi pedido ' . $orderId);
+    $supportUrl = 'https://wa.me/34612654818?text=' . $waText;
+  }
+  $supportUrl = email_append_query_params($supportUrl, [
+    'utm_source' => 'transactional_email',
+    'utm_medium' => 'email',
+    'utm_campaign' => 'order_status',
+    'utm_content' => 'secondary_support',
+    'order' => $orderId,
+  ]);
 
   $pillBg = $accentSoft;
   $pillBorder = '#f0cfd4';
@@ -2005,7 +2352,7 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
 
   $paragraphHtml = '';
   foreach ($paragraphs as $paragraph) {
-    $paragraphHtml .= '<p style="margin:0 0 14px 0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.72;color:' . $ink . ';">' . nl2br(email_html_escape($paragraph)) . '</p>';
+    $paragraphHtml .= '<p class="copy" style="margin:0 0 12px 0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.72;color:' . $ink . ';">' . nl2br(email_html_escape($paragraph)) . '</p>';
   }
 
   $detailRows = '';
@@ -2014,8 +2361,8 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
   foreach ($details as $label => $value) {
     $detailIndex++;
     $detailRows .= '<tr><td style="padding:0 0 10px 0;">'
-      . '<p style="margin:0 0 4px 0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;line-height:1.4;color:' . $muted . ';text-transform:uppercase;letter-spacing:.08em;">' . email_html_escape($label) . '</p>'
-      . '<p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;line-height:1.6;color:' . $ink . ';">' . email_html_escape($value) . '</p>'
+      . '<p class="detail-key" style="margin:0 0 4px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;line-height:1.4;color:' . $muted . ';text-transform:uppercase;letter-spacing:.08em;">' . email_html_escape($label) . '</p>'
+      . '<p class="detail-val" style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;line-height:1.55;color:' . $ink . ';">' . email_html_escape($value) . '</p>'
       . '</td></tr>';
     if ($detailIndex < $detailCount) {
       $detailRows .= '<tr><td style="padding:0 0 10px 0;"><div style="width:28px;height:1px;background:' . $line . ';"></div></td></tr>';
@@ -2024,51 +2371,76 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
 
   $productSectionHtml = '';
   if (!empty($orderItems)) {
+    $orderItemsCount = count($orderItems);
     $itemsHtml = '';
     foreach ($orderItems as $item) {
       $itemName = trim((string)($item['name'] ?? $item['sku'] ?? 'Producto SCOOT SHOP'));
       $itemSku = trim((string)($item['sku'] ?? ''));
       $itemQty = max(1, (int)($item['qty'] ?? 1));
       $itemImage = trim((string)($item['image'] ?? ''));
-      $itemUrl = trim((string)($item['url'] ?? ''));
       $itemColorLabel = trim((string)($item['color_label'] ?? ''));
+      $itemLineTotalLabel = '';
+      $itemPrice = trim((string)($item['price'] ?? ''));
+      if ($itemPrice !== '') {
+        $itemPriceNumber = (float)$itemPrice;
+        if (is_finite($itemPriceNumber) && $itemPriceNumber > 0) {
+          $itemLineTotalLabel = number_format($itemPriceNumber * $itemQty, 2, '.', '') . ' €';
+        }
+      }
+      if ($itemLineTotalLabel === '' && $orderItemsCount === 1) {
+        $singleItemFallback = ($total > 0) ? $total : (($subtotal !== null && $subtotal > 0) ? $subtotal : 0.0);
+        if ($singleItemFallback > 0) {
+          $itemLineTotalLabel = number_format($singleItemFallback, 2, '.', '') . ' €';
+        }
+      }
 
       $itemsHtml .= '<tr><td style="padding:0 0 10px 0;">'
-        . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width:100%;border:1px solid ' . $line . ';border-radius:14px;">'
+        . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width:100%;border:0;border-radius:22px;background:linear-gradient(180deg, rgba(255,255,255,.998) 0%, rgba(252,253,255,.996) 100%);box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 18px 44px rgba(15,23,42,.08),0 6px 18px rgba(15,23,42,.04);">'
         . '<tr>';
 
       if ($itemImage !== '') {
-        $itemsHtml .= '<td width="84" style="width:84px;padding:10px 8px 10px 10px;vertical-align:top;">'
-          . '<img src="' . email_html_escape($itemImage) . '" alt="' . email_html_escape($itemName) . '" width="64" style="display:block;width:64px;height:auto;border:0;">'
+        $itemsHtml .= '<td width="72" style="width:72px;padding:12px 0 12px 12px;vertical-align:middle;">'
+          . '<img src="' . email_html_escape($itemImage) . '" alt="' . email_html_escape($itemName) . '" width="56" style="display:block;width:56px;height:56px;border:0;border-radius:16px;object-fit:contain;background:radial-gradient(circle at 30% 20%, #ffffff 0%, #f4f7fb 100%);padding:4px;box-shadow:0 10px 24px rgba(15,23,42,.07);">'
+          . '</td>';
+      } else {
+        $itemsHtml .= '<td width="72" style="width:72px;padding:12px 0 12px 12px;vertical-align:middle;">'
+          . '<div style="width:56px;height:56px;border-radius:16px;background:radial-gradient(circle at 30% 20%, #ffffff 0%, #f4f7fb 100%);box-shadow:0 10px 24px rgba(15,23,42,.07);"></div>'
           . '</td>';
       }
 
-      $itemsHtml .= '<td style="padding:10px 10px 10px 0;vertical-align:top;">'
-        . '<p style="margin:0 0 3px 0;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;line-height:1.35;color:' . $ink . ';">' . email_html_escape($itemName) . '</p>'
-        . '<p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.5;color:' . $muted . ';">Cantidad: ' . $itemQty;
+      $itemsHtml .= '<td style="padding:12px 10px 12px 0;vertical-align:middle;">'
+        . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width:100%;">'
+        . '<tr>'
+        . '<td style="padding:0;vertical-align:top;">'
+        . '<p style="display:inline-block;margin:0 0 4px 0;padding:4px 10px;border-radius:10px;background:#1f2937;color:#ffffff !important;-webkit-text-fill-color:#ffffff !important;font-family:\'Plus Jakarta Sans\',Arial,Helvetica,sans-serif;font-size:14px;font-weight:800;line-height:1.22;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' . email_html_escape($itemName) . '</p>';
       if ($itemSku !== '') {
-        $itemsHtml .= ' · SKU: ' . email_html_escape($itemSku);
-      }
-      if ($itemColorLabel !== '') {
-        $itemsHtml .= ' · Color: ' . email_html_escape($itemColorLabel);
-      }
-      $itemsHtml .= '</p>';
-      if ($itemUrl !== '') {
-        $itemLinkLabel = 'Ver producto';
-        if ($status === 'pending_payment') {
-          $itemUrl = $resumeOrderUrl;
-          $itemLinkLabel = 'Volver al pedido';
-        }
-        $itemsHtml .= '<p style="margin:6px 0 0 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.4;">'
-          . '<a href="' . email_html_escape($itemUrl) . '" style="color:' . $ink . ';text-decoration:underline;">' . email_html_escape($itemLinkLabel) . '</a>'
+        $itemsHtml .= '<p style="margin:0 0 2px 0;">'
+          . '<span style="display:inline-block;padding:4px 9px;border-radius:999px;background:rgba(17,19,21,.045);font-family:\'Plus Jakarta Sans\',Arial,Helvetica,sans-serif;font-size:11.52px;font-weight:800;line-height:1.2;color:#6b7280 !important;letter-spacing:0;text-transform:none;">Ref: ' . email_html_escape($itemSku) . '</span>'
           . '</p>';
       }
-      $itemsHtml .= '</td></tr></table>'
+      if ($itemColorLabel !== '') {
+        $itemsHtml .= '<p style="margin:0 0 1px 0;">'
+          . '<span style="display:inline-block;padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.82);box-shadow:0 8px 18px rgba(15,23,42,.06);font-family:\'Plus Jakarta Sans\',Arial,Helvetica,sans-serif;font-size:11.52px;font-weight:800;line-height:1.2;color:#667085 !important;letter-spacing:.06em;text-transform:uppercase;">Color: ' . email_html_escape($itemColorLabel) . '</span>'
+          . '</p>';
+      }
+      $itemsHtml .= '<p style="margin:0;font-family:\'Plus Jakarta Sans\',Arial,Helvetica,sans-serif;font-size:11.52px;font-weight:800;line-height:1.2;color:#6b7280 !important;display:none;">Precio: ' . email_html_escape(number_format((float)$itemPrice, 2, '.', '')) . ' €</p>';
+      $itemsHtml .= '</td>'
+        . '<td width="100" align="right" style="width:100px;padding:0;vertical-align:top;">';
+      if ($itemLineTotalLabel !== '') {
+        $itemsHtml .= '<p style="display:inline-block;margin:0 0 8px 0;padding:4px 10px;border-radius:10px;background:#111315;color:#ffffff !important;-webkit-text-fill-color:#ffffff !important;font-family:\'Plus Jakarta Sans\',Arial,Helvetica,sans-serif;font-size:17px;font-weight:900;line-height:1.2;letter-spacing:-.02em;white-space:nowrap;text-align:right;">' . email_html_escape($itemLineTotalLabel) . '</p>';
+      }
+      $itemsHtml .= '<p style="margin:0;">'
+        . '<span style="display:inline-block;padding:4px 9px;border-radius:999px;background:rgba(17,19,21,.08);font-family:\'Plus Jakarta Sans\',Arial,Helvetica,sans-serif;font-size:11.52px;font-weight:900;line-height:1.2;color:#374151 !important;">Cant: ' . $itemQty . '</span>'
+        . '</p>';
+      $itemsHtml .= '</td>'
+        . '</tr>';
+      $itemsHtml .= '</table>'
+        . '</td></tr></table>'
         . '</td></tr>';
     }
 
-    $productSectionHtml = '<tr><td style="padding:2px 28px 18px 28px;">'
-      . '<p style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;line-height:1.4;color:' . $muted . ';text-transform:uppercase;letter-spacing:.14em;">Productos del pedido</p>'
+    $productSectionHtml = '<tr><td class="pad-x" style="padding:2px 28px 18px 28px;">'
+      . '<p class="section-kicker" style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;line-height:1.35;color:' . $muted . ';text-transform:uppercase;letter-spacing:.12em;">Productos del pedido</p>'
       . '<div style="margin:0 0 10px 0;">' . $miniSegment . '</div>'
       . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width:100%;">'
       . $itemsHtml
@@ -2076,59 +2448,108 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
       . '</td></tr>';
   }
 
-  $messageSectionHtml = '';
+  $messagePanelInnerHtml = '';
   if ($customMessage !== '') {
-    $messageSectionHtml = '<tr><td style="padding:0 28px 18px 28px;">'
-      . '<p style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;line-height:1.4;color:' . $muted . ';text-transform:uppercase;letter-spacing:.14em;">Mensaje adicional</p>'
+    $messagePanelInnerHtml = '<p class="section-kicker" style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;line-height:1.35;color:' . $muted . ';text-transform:uppercase;letter-spacing:.12em;">Mensaje adicional</p>'
       . '<div style="margin:0 0 10px 0;">' . $miniSegment . '</div>'
-      . '<p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.72;color:' . $ink . ';">' . nl2br(email_html_escape($customMessage)) . '</p>'
+      . '<p class="copy" style="margin:0 0 10px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.7;color:' . $ink . ';">' . nl2br(email_html_escape($customMessage)) . '</p>';
+  }
+
+  $amountSummaryHtml = '';
+  if ($showAmountSummary) {
+    $summaryLineColor = '#d6dee9';
+    $summaryLabelColor = '#4b5563';
+    $summaryValueColor = '#0f172a';
+    $summaryTotalColor = '#0b1220';
+    $amountSummaryHtml = '<tr><td class="pad-x" style="padding:0 28px 18px 28px;">'
+      . '<p class="section-kicker" style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;line-height:1.35;color:' . $muted . ';text-transform:uppercase;letter-spacing:.12em;">Resumen economico</p>'
+      . '<div style="margin:0 0 10px 0;">' . $miniSegment . '</div>'
+      . '<table role="presentation" class="amount-box" width="100%" cellspacing="0" cellpadding="0" style="width:100%;border:1px solid ' . $summaryLineColor . ';border-radius:14px;background:#f8fbff;">'
+      . '<tr><td class="amount-label" style="padding:10px 12px;border-bottom:1px solid ' . $summaryLineColor . ';font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;line-height:1.4;color:' . $summaryLabelColor . ' !important;-webkit-text-fill-color:' . $summaryLabelColor . ' !important;">Subtotal</td><td class="amount-value" align="right" style="padding:10px 12px;border-bottom:1px solid ' . $summaryLineColor . ';font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:800;line-height:1.4;color:' . $summaryValueColor . ' !important;-webkit-text-fill-color:' . $summaryValueColor . ' !important;"><span style="color:' . $summaryValueColor . ' !important;-webkit-text-fill-color:' . $summaryValueColor . ' !important;">' . email_html_escape($subtotalLabel) . '</span></td></tr>'
+      . '<tr><td class="amount-label" style="padding:10px 12px;border-bottom:1px solid ' . $summaryLineColor . ';font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;line-height:1.4;color:' . $summaryLabelColor . ' !important;-webkit-text-fill-color:' . $summaryLabelColor . ' !important;">Envio</td><td class="amount-value" align="right" style="padding:10px 12px;border-bottom:1px solid ' . $summaryLineColor . ';font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:800;line-height:1.4;color:' . $summaryValueColor . ' !important;-webkit-text-fill-color:' . $summaryValueColor . ' !important;"><span style="color:' . $summaryValueColor . ' !important;-webkit-text-fill-color:' . $summaryValueColor . ' !important;">' . email_html_escape($shippingLabel) . '</span></td></tr>'
+      . '<tr><td class="amount-total-label" style="padding:10px 12px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:800;line-height:1.4;color:' . $summaryTotalColor . ' !important;-webkit-text-fill-color:' . $summaryTotalColor . ' !important;">Total</td><td class="amount-total-value" align="right" style="padding:10px 12px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:900;line-height:1.35;color:' . $summaryTotalColor . ' !important;-webkit-text-fill-color:' . $summaryTotalColor . ' !important;"><span style="color:' . $summaryTotalColor . ' !important;-webkit-text-fill-color:' . $summaryTotalColor . ' !important;">' . email_html_escape($totalLabel) . '</span></td></tr>'
+      . '</table>'
       . '</td></tr>';
   }
 
-  $greeting = $customerName !== '' ? 'Hola ' . email_html_escape($customerName) . ',' : 'Hola,';
+  $actionHintInnerHtml = '';
 
-  return '<!DOCTYPE html>'
-    . '<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>'
-    . '<body style="margin:0;padding:0;background:' . $bg . ';">'
-    . '<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">' . email_html_escape($preheader) . '</div>'
-    . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width:100%;background:' . $bg . ';padding:22px 12px;">'
-    . '<tr><td align="center">'
-    . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width:100%;max-width:680px;background:' . $surface . ';border:1px solid ' . $line . ';border-radius:28px;overflow:hidden;">'
-    . '<tr><td style="background:linear-gradient(40deg,#dedede,#ffffff,#ffffff,#ffffff);padding:24px 28px 16px 28px;text-align:center;">'
-    . '<a href="' . email_html_escape($siteUrl) . '" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:inline-block;">'
-    . '<img src="' . email_html_escape($logoUrl) . '" alt="SCOOT SHOP" width="140" style="display:block;margin:0 auto;width:140px;height:auto;border:0;font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:700;color:#111315;">'
-    . '</a>'
-    . '</td></tr>'
-    . '<tr><td style="padding:0;"><div style="width:100%;height:3px;background:' . $accent . ';"></div></td></tr>'
-    . '<tr><td style="padding:18px 28px 18px 28px;">'
-    . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width:100%;">'
-    . '<tr><td style="padding-top:0;">'
-    . '<p style="margin:0 0 14px 0;"><span style="display:inline-block;background:' . $pillBg . ';color:' . $pillColor . ';border:1px solid ' . $pillBorder . ';border-radius:999px;padding:8px 14px;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;line-height:1.2;text-transform:uppercase;letter-spacing:.08em;">' . email_html_escape($statusLabel) . '</span></p>'
-    . '<h1 style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:28px;font-weight:700;line-height:1.08;color:' . $ink . ';">' . email_html_escape($title) . '</h1>'
-    . '<p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.68;color:' . $muted . ';">Pedido ' . email_html_escape($orderId) . '</p>'
-    . '<div style="padding-top:14px;">' . $segment . '</div>'
-    . '</td></tr>'
-    . '</table>'
-    . '</td></tr>'
-    . '<tr><td style="padding:6px 28px 0 28px;">'
-    . '<p style="margin:0 0 14px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.72;color:' . $ink . ';">' . $greeting . '</p>'
-    . $paragraphHtml
-    . '</td></tr>'
-    . $productSectionHtml
-    . '<tr><td style="padding:0 28px 18px 28px;">'
-    . '<p style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;line-height:1.4;color:' . $muted . ';text-transform:uppercase;letter-spacing:.14em;">Detalle del estado</p>'
+  $detailsPanelHtml = '<table role="presentation" class="details-panel" width="100%" cellspacing="0" cellpadding="0" style="width:100%;border:0;background:transparent;">'
+    . '<tr><td style="padding:0;">'
+    . '<p class="section-kicker" style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;line-height:1.35;color:' . $muted . ';text-transform:uppercase;letter-spacing:.12em;">Detalle del estado</p>'
     . '<div style="margin:0 0 10px 0;">' . $miniSegment . '</div>'
     . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width:100%;">'
     . $detailRows
     . '</table>'
     . '</td></tr>'
-    . $messageSectionHtml
-    . '<tr><td align="left" style="padding:0 28px 14px 28px;">'
-    . '<a href="' . email_html_escape($ctaUrl) . '" style="display:inline-block;background:#111315;border-radius:999px;padding:13px 24px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;line-height:1.2;color:#ffffff;text-decoration:none;">' . email_html_escape($ctaLabel) . '</a>'
+    . '</table>';
+
+  $actionsPanelHtml = '<table role="presentation" class="actions-panel" width="100%" cellspacing="0" cellpadding="0" style="width:100%;border:0;background:transparent;">'
+    . '<tr><td style="padding:0;">'
+    . $messagePanelInnerHtml
+    . $actionHintInnerHtml
+    . '<table role="presentation" class="stack-cta" cellspacing="0" cellpadding="0" style="margin-top:6px;border-collapse:separate;border-spacing:10px 0;">'
+    . '<tr>'
+    . '<td style="padding:0;vertical-align:middle;white-space:nowrap;">'
+    . '<a href="' . email_html_escape($ctaUrl) . '" style="display:inline-block;white-space:nowrap;min-height:46px;line-height:46px;padding:0 20px;border:1px solid #ff7d67;border-radius:999px;background-color:#ff6b57;background:#ff6b57;background-image:linear-gradient(180deg,#ff8a73 0%,#ff5b43 100%);font-family:\'Plus Jakarta Sans\',Arial,Helvetica,sans-serif;font-size:12.9px;font-weight:900;letter-spacing:.03em;text-transform:uppercase;color:#111111 !important;-webkit-text-fill-color:#111111 !important;text-decoration:none !important;text-align:center;">'
+    . '<span style="color:#111111 !important;-webkit-text-fill-color:#111111 !important;text-decoration:none !important;display:inline-block;-webkit-text-stroke:0.45px rgba(255,255,255,.28);text-shadow:0 1px 0 rgba(255,255,255,.34),0 0 1px rgba(0,0,0,.35);">' . email_html_escape($ctaLabel) . '</span>'
+    . '</a>'
+    . '</td>'
+    . '<td style="padding:0;vertical-align:middle;white-space:nowrap;">'
+    . '<a href="' . email_html_escape($supportUrl) . '" style="display:inline-block;white-space:nowrap;min-height:46px;line-height:46px;padding:0 16px;border:1px solid #4b5563;border-radius:999px;background-color:#1f2937;background:#1f2937;font-family:\'Plus Jakarta Sans\',Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;letter-spacing:.01em;color:#ffffff !important;-webkit-text-fill-color:#ffffff !important;text-decoration:none !important;text-align:center;">'
+    . '<span style="color:#ffffff !important;-webkit-text-fill-color:#ffffff !important;text-decoration:none !important;display:inline-block;">Soporte WhatsApp</span>'
+    . '</a>'
+    . '</td>'
+    . '</tr>'
+    . '</table>'
     . '</td></tr>'
-    . '<tr><td style="padding:0 28px 26px 28px;">'
-    . '<p style="margin:0 0 10px 0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.72;color:' . $ink . ';">Gracias por confiar en SCOOT SHOP.</p>'
-    . '<p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.75;color:' . $muted . ';">Si necesitas ayuda, puedes responder directamente a este correo o visitar <a href="' . email_html_escape($siteUrl) . '" style="color:' . $ink . ';text-decoration:underline;">' . email_html_escape($siteUrl) . '</a>.</p>'
+    . '</table>';
+
+  $postSummaryTwoColsHtml = '<tr><td class="pad-x" style="padding:0 28px 14px 28px;">'
+    . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width:100%;">'
+    . '<tr>'
+    . '<td class="stack-col stack-pad" width="50%" style="width:50%;padding:0;vertical-align:top;">' . $detailsPanelHtml . '</td>'
+    . '<td class="stack-gap" width="16" style="width:16px;padding:0;font-size:0;line-height:0;">&nbsp;</td>'
+    . '<td class="stack-col" width="50%" style="width:50%;padding:0;vertical-align:top;">' . $actionsPanelHtml . '</td>'
+    . '</tr>'
+    . '</table>'
+    . '</td></tr>';
+
+  $greeting = $customerName !== '' ? 'Hola ' . email_html_escape($customerName) . ',' : 'Hola,';
+
+  return '<!DOCTYPE html>'
+    . '<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><style>body{-webkit-text-size-adjust:100% !important;-ms-text-size-adjust:100% !important;}a[x-apple-data-detectors]{color:inherit !important;text-decoration:none !important;}@media screen and (max-width:760px){.mail-wrap{padding:10px 4px !important;}.mail-card{border-radius:20px !important;}.hero-pad{padding:18px 16px 12px 16px !important;}.pad-x{padding-left:16px !important;padding-right:16px !important;}.title{font-size:30px !important;line-height:1.1 !important;}.lead{font-size:16px !important;line-height:1.6 !important;}.copy{font-size:16px !important;line-height:1.62 !important;}.small{font-size:16px !important;line-height:1.64 !important;}.section-kicker{font-size:13px !important;line-height:1.35 !important;letter-spacing:.12em !important;}.detail-key{font-size:13px !important;line-height:1.38 !important;}.detail-val{font-size:16px !important;line-height:1.55 !important;}.stack-col{display:block !important;width:100% !important;padding-left:0 !important;padding-right:0 !important;}.stack-gap{display:none !important;width:0 !important;}.stack-pad{padding-right:0 !important;padding-left:0 !important;padding-bottom:12px !important;}.details-panel,.actions-panel{border-radius:0 !important;}.details-panel td,.actions-panel td{padding:0 !important;}.stack-cta{width:auto !important;border-spacing:8px 0 !important;}.stack-cta td{display:inline-block !important;width:auto !important;padding:0 !important;vertical-align:middle !important;}.stack-cta a{display:inline-block !important;width:auto !important;min-height:46px !important;line-height:46px !important;padding:0 16px !important;font-size:13.5px !important;text-align:center !important;}.amount-box td{padding:12px 14px !important;}.amount-label{font-size:15px !important;color:#4b5563 !important;-webkit-text-fill-color:#4b5563 !important;}.amount-value{font-size:16px !important;color:#0f172a !important;-webkit-text-fill-color:#0f172a !important;}.amount-total-label{font-size:16px !important;color:#0b1220 !important;-webkit-text-fill-color:#0b1220 !important;}.amount-total-value{font-size:18px !important;color:#0b1220 !important;-webkit-text-fill-color:#0b1220 !important;}}</style></head>'
+    . '<body style="margin:0;padding:0;background:' . $bg . ';">'
+    . '<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">' . email_html_escape($preheader) . '</div>'
+    . '<table role="presentation" class="mail-wrap" width="100%" cellspacing="0" cellpadding="0" style="width:100%;background:' . $bg . ';padding:22px 12px;">'
+    . '<tr><td align="center">'
+    . '<table role="presentation" class="mail-card" width="100%" cellspacing="0" cellpadding="0" style="width:100%;max-width:680px;background:' . $surface . ';border:1px solid ' . $line . ';border-radius:28px;overflow:hidden;">'
+    . '<tr><td class="hero-pad" style="background:linear-gradient(40deg,#fafafa,#ffffff,#ffffff,#ffffff);padding:24px 28px 16px 28px;text-align:center;">'
+    . '<a href="' . email_html_escape($siteUrl) . '" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:inline-block;">'
+    . '<img src="' . email_html_escape($logoUrl) . '" alt="SCOOT SHOP" width="140" style="display:block;margin:0 auto;width:140px;height:auto;border:0;font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:700;color:#111315;">'
+    . '</a>'
+    . '</td></tr>'
+    . '<tr><td style="padding:0;"><div style="width:100%;height:3px;background:' . $accent . ';"></div></td></tr>'
+    . '<tr><td class="pad-x" style="padding:18px 28px 18px 28px;">'
+    . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width:100%;">'
+    . '<tr><td style="padding-top:0;">'
+    . '<p style="margin:0 0 14px 0;"><span style="display:inline-block;background:' . $pillBg . ';color:' . $pillColor . ';border:1px solid ' . $pillBorder . ';border-radius:999px;padding:8px 14px;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;line-height:1.2;text-transform:uppercase;letter-spacing:.08em;">' . email_html_escape($statusLabel) . '</span></p>'
+    . '<h1 class="title" style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:28px;font-weight:700;line-height:1.08;color:' . $ink . ';">' . email_html_escape($title) . '</h1>'
+    . '<p class="lead" style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.68;color:' . $muted . ';">Pedido ' . email_html_escape($orderId) . '</p>'
+    . '<div style="padding-top:14px;">' . $segment . '</div>'
+    . '</td></tr>'
+    . '</table>'
+    . '</td></tr>'
+    . '<tr><td class="pad-x" style="padding:6px 28px 0 28px;">'
+    . '<p class="copy" style="margin:0 0 14px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.72;color:' . $ink . ';">' . $greeting . '</p>'
+    . $paragraphHtml
+    . '</td></tr>'
+    . $productSectionHtml
+    . $amountSummaryHtml
+    . $postSummaryTwoColsHtml
+    . '<tr><td class="pad-x" style="padding:0 28px 26px 28px;">'
+    . '<p class="copy" style="margin:0 0 10px 0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.72;color:' . $ink . ';">Gracias por confiar en SCOOT SHOP.</p>'
+    . '<p class="small" style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.75;color:' . $muted . ';">Si necesitas ayuda, puedes responder directamente a este correo o visitar <a href="' . email_html_escape($siteUrl) . '" style="color:' . $ink . ';text-decoration:underline;">' . email_html_escape($siteUrl) . '</a>.</p>'
     . '</td></tr>'
     . '</table>'
     . '</td></tr>'
@@ -2219,6 +2640,21 @@ function build_order_status_email_content(array $CFG, string $orderId, string $s
       break;
   }
 
+  $preheaderByStatus = [
+    'pending_payment' => 'Tu pedido sigue activo. Entra para completarlo cuando quieras.',
+    'paid' => 'Pago confirmado. Te avisaremos cuando el pedido avance al siguiente paso.',
+    'preparing' => 'Tu pedido ya esta en preparacion. Te avisaremos cuando se envie.',
+    'shipped' => 'Tu pedido ya fue enviado. Revisa el estado y seguimiento cuando quieras.',
+    'delivered' => 'Tu pedido figura como entregado. Si necesitas ayuda, estamos disponibles.',
+    'canceled' => 'Tu pedido fue cancelado. Podemos ayudarte a tramitar uno nuevo.',
+    'refunded' => 'Reembolso procesado. El abono puede reflejarse en los proximos dias.',
+    'dispute' => 'Tu pedido esta en revision. Te contactaremos si necesitamos mas datos.',
+    'payment_failed' => 'No se pudo confirmar el pago. Retoma el pedido para completarlo.',
+    'error' => 'Hubo una incidencia con el pago. Retoma el pedido para completarlo.',
+  ];
+
+  $preheader = trim((string)($context['preheader'] ?? ($preheaderByStatus[$status] ?? '')));
+
   $body = $greeting;
   foreach ($paragraphs as $paragraph) {
     $body .= $paragraph . "\n\n";
@@ -2229,6 +2665,9 @@ function build_order_status_email_content(array $CFG, string $orderId, string $s
   $body .= "Gracias,\nSCOOT SHOP\n";
 
   $context['orderStatus'] = $status;
+  if ($preheader !== '') {
+    $context['preheader'] = $preheader;
+  }
 
   return [
     'event' => order_status_event($status),
@@ -3435,6 +3874,7 @@ function resolve_order_pricing(array $input): array {
 
 // ---------------- ROUTER ----------------
 $route = $_GET['route'] ?? '';
+enforce_route_rate_limit($CFG, (string)$route);
 
 // Lazy DB connection — only connect when a route needs it
 $pdo = null;
@@ -3469,8 +3909,6 @@ switch ($route) {
       'googleConfigured' => $CFG['google_client_id'] !== '',
       'googleClientId' => $CFG['google_client_id'],
       'accountEnabled' => $CFG['google_client_id'] !== '',
-      'previewEnabled' => can_use_preview_mode($CFG),
-      'devAuthEnabled' => can_use_dev_auth($CFG),
     ]);
     break;
   }
@@ -3490,8 +3928,16 @@ switch ($route) {
       json_out(['ok' => false, 'error' => 'method_not_allowed'], 405);
     }
 
-    if (!can_use_dev_auth($CFG)) {
-      json_out(['ok' => false, 'error' => 'forbidden_dev_auth_disabled'], 403);
+    require_same_origin_post($CFG);
+
+    if (empty($CFG['allow_dev_login'])) {
+      json_out(['ok' => false, 'error' => 'dev_login_disabled'], 403);
+    }
+
+    $isLocal = is_local_request();
+
+    if (!$isLocal) {
+      json_out(['ok' => false, 'error' => 'forbidden_non_local'], 403);
     }
 
     $b = get_json_body();
@@ -3548,6 +3994,8 @@ switch ($route) {
     if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
       json_out(['ok' => false, 'error' => 'method_not_allowed'], 405);
     }
+
+    require_same_origin_post($CFG);
 
     if ($CFG['google_client_id'] === '') {
       json_out(['ok' => false, 'error' => 'google_not_configured'], 503);
@@ -3613,6 +4061,8 @@ switch ($route) {
     if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
       json_out(['ok' => false, 'error' => 'method_not_allowed'], 405);
     }
+
+    require_same_origin_post($CFG);
 
     customer_logout();
     json_out(['ok' => true]);
@@ -3705,7 +4155,9 @@ switch ($route) {
 
   case 'account_order_detail': {
     $user = customer_current_user();
-    if (empty($user['id'])) {
+    $orderToken = trim((string)($_GET['token'] ?? $_GET['t'] ?? ''));
+    $hasUserSession = !empty($user['id']);
+    if (!$hasUserSession && $orderToken === '') {
       json_out(['ok' => false, 'error' => 'not_logged_in'], 401);
     }
 
@@ -3715,7 +4167,7 @@ switch ($route) {
     }
 
     $pdo = get_pdo($CFG);
-    $st = $pdo->prepare("SELECT id, sku, name, status, user_id, ship_name, ship_email, payer_name, payer_email, amount, currency, payment_method, tracking, message, product_url, product_image_url, product_color, product_color_label, cart_items_json, discount_code, discount_type, discount_value, discount_amount, subtotal_amount, total_amount, payment_fee_amount, shipping_amount, updated_at, created_at, ship_phone, ship_address, ship_address2, ship_city, ship_province, ship_postal, ship_country, ship_notes FROM orders WHERE id = :id LIMIT 1");
+    $st = $pdo->prepare("SELECT id, token, sku, name, status, user_id, ship_name, ship_email, payer_name, payer_email, amount, currency, payment_method, tracking, message, product_url, product_image_url, product_color, product_color_label, cart_items_json, discount_code, discount_type, discount_value, discount_amount, subtotal_amount, total_amount, payment_fee_amount, shipping_amount, updated_at, created_at, ship_phone, ship_address, ship_address2, ship_city, ship_province, ship_postal, ship_country, ship_notes FROM orders WHERE id = :id LIMIT 1");
     $st->execute([':id' => $orderId]);
     $order = $st->fetch();
 
@@ -3723,13 +4175,16 @@ switch ($route) {
       json_out(['ok' => false, 'error' => 'not_found'], 404);
     }
 
-    $sessionEmail = strtolower(trim((string)($user['email'] ?? '')));
-    $orderEmail = strtolower(trim((string)($order['ship_email'] ?? ($order['payer_email'] ?? ''))));
-    $matchesUser = (int)($order['user_id'] ?? 0) === (int)($user['id'] ?? 0);
-    $matchesEmail = $sessionEmail !== '' && $orderEmail !== '' && $sessionEmail === $orderEmail;
+    $tokenMatches = $orderToken !== '' && hash_equals((string)($order['token'] ?? ''), $orderToken);
+    if (!$tokenMatches) {
+      $sessionEmail = strtolower(trim((string)($user['email'] ?? '')));
+      $orderEmail = strtolower(trim((string)($order['ship_email'] ?? ($order['payer_email'] ?? ''))));
+      $matchesUser = (int)($order['user_id'] ?? 0) === (int)($user['id'] ?? 0);
+      $matchesEmail = $sessionEmail !== '' && $orderEmail !== '' && $sessionEmail === $orderEmail;
 
-    if (!$matchesUser && !$matchesEmail) {
-      json_out(['ok' => false, 'error' => 'forbidden'], 403);
+      if (!$matchesUser && !$matchesEmail) {
+        json_out(['ok' => false, 'error' => 'forbidden'], 403);
+      }
     }
 
     $customerName = trim((string)($order['ship_name'] ?? ''));
@@ -3742,7 +4197,7 @@ switch ($route) {
 
     json_out([
       'ok' => true,
-      'user' => customer_session_payload($user),
+      'user' => $hasUserSession ? customer_session_payload($user) : null,
       'order' => [
         'id' => $order['id'],
         'sku' => $order['sku'] ?? '',
@@ -3851,6 +4306,8 @@ switch ($route) {
     if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
       json_out(['ok' => false, 'error' => 'method_not_allowed'], 405);
     }
+
+    require_same_origin_post($CFG);
 
     if ($CFG['stripe_secret_key'] === '' || $CFG['stripe_publishable_key'] === '') {
       json_out(['ok' => false, 'error' => 'stripe_not_configured'], 503);
@@ -4225,6 +4682,8 @@ switch ($route) {
     if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
       json_out(['ok' => false, 'error' => 'method_not_allowed'], 405);
     }
+
+    require_same_origin_post($CFG);
 
     $b = get_json_body();
 
@@ -4621,19 +5080,23 @@ switch ($route) {
       json_out(['ok' => false, 'error' => 'method_not_allowed'], 405);
     }
 
+    require_same_origin_post($CFG);
+
     $user = customer_current_user();
-    if (empty($user['id'])) {
+    $b = get_json_body();
+    $orderId = trim((string)($b['orderId'] ?? $_GET['order'] ?? ''));
+    $orderToken = trim((string)($b['token'] ?? $_GET['token'] ?? $_GET['t'] ?? ''));
+    $hasUserSession = !empty($user['id']);
+    if (!$hasUserSession && $orderToken === '') {
       json_out(['ok' => false, 'error' => 'not_logged_in'], 401);
     }
 
-    $b = get_json_body();
-    $orderId = trim((string)($b['orderId'] ?? $_GET['order'] ?? ''));
     if ($orderId === '') {
       json_out(['ok' => false, 'error' => 'missing_id'], 400);
     }
 
     $pdo = get_pdo($CFG);
-    $st = $pdo->prepare("SELECT id, sku, name, status, user_id, ship_name, ship_email, payer_email, amount, currency, payment_method, product_url, product_image_url, product_color, product_color_label, cart_items_json, discount_code, subtotal_amount, total_amount, shipping_amount, ship_phone, ship_address, ship_address2, ship_city, ship_province, ship_postal, ship_country, ship_notes FROM orders WHERE id = :id LIMIT 1");
+    $st = $pdo->prepare("SELECT id, token, sku, name, status, user_id, ship_name, ship_email, payer_email, amount, currency, payment_method, product_url, product_image_url, product_color, product_color_label, cart_items_json, discount_code, subtotal_amount, total_amount, shipping_amount, ship_phone, ship_address, ship_address2, ship_city, ship_province, ship_postal, ship_country, ship_notes FROM orders WHERE id = :id LIMIT 1");
     $st->execute([':id' => $orderId]);
     $order = $st->fetch();
 
@@ -4641,12 +5104,15 @@ switch ($route) {
       json_out(['ok' => false, 'error' => 'not_found'], 404);
     }
 
-    $sessionEmail = strtolower(trim((string)($user['email'] ?? '')));
-    $orderEmail = strtolower(trim((string)($order['ship_email'] ?? ($order['payer_email'] ?? ''))));
-    $matchesUser = (int)($order['user_id'] ?? 0) === (int)($user['id'] ?? 0);
-    $matchesEmail = $sessionEmail !== '' && $orderEmail !== '' && $sessionEmail === $orderEmail;
-    if (!$matchesUser && !$matchesEmail) {
-      json_out(['ok' => false, 'error' => 'forbidden'], 403);
+    $tokenMatches = $orderToken !== '' && hash_equals((string)($order['token'] ?? ''), $orderToken);
+    if (!$tokenMatches) {
+      $sessionEmail = strtolower(trim((string)($user['email'] ?? '')));
+      $orderEmail = strtolower(trim((string)($order['ship_email'] ?? ($order['payer_email'] ?? ''))));
+      $matchesUser = (int)($order['user_id'] ?? 0) === (int)($user['id'] ?? 0);
+      $matchesEmail = $sessionEmail !== '' && $orderEmail !== '' && $sessionEmail === $orderEmail;
+      if (!$matchesUser && !$matchesEmail) {
+        json_out(['ok' => false, 'error' => 'forbidden'], 403);
+      }
     }
 
     if ((string)($order['status'] ?? '') !== 'pending_payment') {
@@ -4680,19 +5146,9 @@ switch ($route) {
       'discount' => trim((string)($order['discount_code'] ?? '')),
     ];
 
-    if (!empty($orderItems)) {
+    if (count($orderItems) > 1) {
       $query['cart'] = '1';
     }
-
-    $methodForUrl = strtolower(trim((string)($order['payment_method'] ?? 'card')));
-    if ($methodForUrl === 'transfer') {
-      $methodForUrl = 'bank';
-    }
-    if (!in_array($methodForUrl, ['card', 'klarna', 'paypal', 'bizum', 'bank'], true)) {
-      $methodForUrl = 'card';
-    }
-    $query['method'] = $methodForUrl;
-    $query['existingOrderId'] = (string)$order['id'];
 
     $paymentUrl = '/pago?' . http_build_query(array_filter($query, static function ($v) {
       return $v !== null && $v !== '';
@@ -4702,13 +5158,7 @@ switch ($route) {
       'ok' => true,
       'orderId' => (string)$order['id'],
       'status' => 'pending_payment',
-      'paymentMethod' => $methodForUrl,
       'paymentUrl' => $paymentUrl,
-      'pricing' => [
-        'subtotal_amount' => (string)($order['subtotal_amount'] ?? ''),
-        'shipping_amount' => (string)($order['shipping_amount'] ?? ''),
-        'total_amount' => (string)($order['total_amount'] ?? ($order['amount'] ?? '')),
-      ],
       'shipping' => [
         'fullName' => (string)($order['ship_name'] ?? ''),
         'email' => (string)($order['ship_email'] ?? ''),
@@ -4946,6 +5396,11 @@ switch ($route) {
             'orderUrl' => trim((string)($order['product_url'] ?? '')),
             'productImageUrl' => ($newImageUrl !== null && $newImageUrl !== '') ? $newImageUrl : trim((string)($order['product_image_url'] ?? '')),
             'orderItems' => build_order_items_from_order_row($order),
+            'subtotal_amount' => (string)($order['subtotal_amount'] ?? ''),
+            'shipping_amount' => (string)($order['shipping_amount'] ?? ''),
+            'total_amount' => (string)($order['total_amount'] ?? ''),
+            'amount' => (string)($order['amount'] ?? ''),
+            'currency' => (string)($order['currency'] ?? 'EUR'),
             'source' => 'admin',
             'triggerSource' => $triggerSource,
             'manualResend' => $forceEmail,
@@ -5608,6 +6063,11 @@ switch ($route) {
       'orderUrl' => (string)($order['product_url'] ?? ''),
       'productImageUrl' => (string)($order['product_image_url'] ?? ''),
       'orderItems' => build_order_items_from_order_row($order),
+      'subtotal_amount' => (string)($order['subtotal_amount'] ?? ''),
+      'shipping_amount' => (string)($order['shipping_amount'] ?? ''),
+      'total_amount' => (string)($order['total_amount'] ?? ''),
+      'amount' => (string)($order['amount'] ?? ''),
+      'currency' => (string)($order['currency'] ?? 'EUR'),
       'manualResend' => true,
     ]);
 
@@ -6104,7 +6564,8 @@ switch ($route) {
       return $n;
     };
     $formatPrice = static function (float $n): string {
-      return number_format($n, 2, ',', '.') . ' €';
+      $isInteger = abs($n - round($n)) < 0.0000001;
+      return number_format($n, $isInteger ? 0 : 2, ',', '.') . ' €';
     };
     $escapeReplacement = static function (string $v): string {
       return str_replace(['\\', '$'], ['\\\\', '\\$'], $v);
@@ -6983,66 +7444,147 @@ switch ($route) {
 
     $b = get_json_body();
 
-    $sku              = trim((string)($b['sku'] ?? ''));
-    $currency         = strtoupper(trim((string)($b['currency'] ?? 'EUR')));
-    $paymentMethod    = trim((string)($b['payment_method'] ?? ''));
-    $discountCode     = strtoupper(trim((string)($b['discount_code'] ?? '')));
-    $customerEmail    = strtolower(trim((string)($b['customer_email'] ?? '')));
-    $frontendBaseAmt  = trim((string)($b['frontend_base_amount'] ?? ''));
-    $category         = trim((string)($b['category'] ?? ''));
-    $shippingAmount   = trim((string)($b['shipping_amount'] ?? '0.00'));
-    $cartItems        = is_array($b['cart_items'] ?? null) ? $b['cart_items'] : [];
+    $sku           = trim((string)($b['sku'] ?? ''));
+    $currency      = strtoupper(trim((string)($b['currency'] ?? 'EUR')));
+    $paymentMethod = trim((string)($b['payment_method'] ?? ''));
+    $discountCode  = strtoupper(trim((string)($b['discount_code'] ?? '')));
+    $customerEmail = strtolower(trim((string)($b['customer_email'] ?? '')));
+    $category      = trim((string)($b['category'] ?? ''));
 
-    if ($sku === '' && empty($cartItems)) {
-      json_out(['ok' => false, 'error' => 'INVALID_REQUEST', 'detail' => 'missing_sku'], 400);
+    if ($sku === '')    json_out(['ok'=>false,'error'=>'INVALID_REQUEST','detail'=>'missing_sku'], 400);
+    if ($currency !== 'EUR') json_out(['ok'=>false,'error'=>'INVALID_REQUEST','detail'=>'CURRENCY_NOT_SUPPORTED'], 400);
+    if (!isset(BACKEND_PAYMENT_FEES[$paymentMethod])) {
+      json_out(['ok'=>false,'error'=>'INVALID_REQUEST','detail'=>'invalid_payment_method'], 400);
     }
 
-    $pricing = resolve_order_pricing([
-      'sku' => $sku,
-      'currency' => $currency,
-      'payment_method' => $paymentMethod,
-      'discount_code' => $discountCode,
-      'customer_email' => $customerEmail,
-      'frontend_base_amount' => $frontendBaseAmt,
-      'category' => $category,
-      'shipping_amount' => $shippingAmount,
-      'cart_items' => $cartItems,
-    ]);
+    // ── Precio desde catálogo (fuente de verdad) ─────────────────────────────
+    $productsFile = __DIR__ . '/../data/products.js';
+    $catalogEntry = lookup_product_price_by_sku($sku, $productsFile);
 
-    if (!$pricing['ok']) {
+    if ($catalogEntry === null) {
+      json_out(['ok'=>false,'error'=>'INVALID_REQUEST','detail'=>'sku_not_found_in_catalog'], 400);
+    }
+
+    $backendBaseAmt = $catalogEntry['price'];
+
+    // ── Sin código: breakdown base ────────────────────────────────────────────
+    if ($discountCode === '') {
+      $breakdown = calc_discount_engine($backendBaseAmt, null, null, $paymentMethod);
       json_out([
-        'ok' => false,
-        'error' => 'pricing_resolution_failed',
-        'detail' => implode(',', array_values(array_unique($pricing['errors'] ?? []))),
-      ], 400);
+        'ok'              => true,
+        'discount_valid'  => null,
+        'discount_code'   => null,
+        'discount_id'     => null,
+        'discount_type'   => null,
+        'discount_value'  => null,
+        'currency'        => 'EUR',
+        'breakdown'       => $breakdown,
+        'pricing_source'  => 'backend_discount_engine',
+        'pricing_version' => 'v1-discounts',
+      ]);
     }
+
+    // ── Con código: validar y calcular ────────────────────────────────────────
+    $localPdo = get_pdo($CFG);
+    $schemaOk = ensure_discount_schema_safe($localPdo);
+    if (!$schemaOk) {
+      json_out(['ok'=>false,'error'=>'schema_not_ready'], 503);
+    }
+
+    $now = date('Y-m-d H:i:s');
+    $stmt = $localPdo->prepare(
+      "SELECT * FROM discount_codes
+       WHERE code_normalized = :code AND deleted_at IS NULL AND active = 1
+       LIMIT 1"
+    );
+    $stmt->execute([':code' => $discountCode]);
+    $dc = $stmt->fetch();
+
+    if (!$dc || $dc['ends_at'] < $now) {
+      // Código inválido/caducado: devolver breakdown sin descuento
+      $breakdown = calc_discount_engine($backendBaseAmt, null, null, $paymentMethod);
+      json_out([
+        'ok'              => true,
+        'discount_valid'  => false,
+        'discount_code'   => $discountCode,
+        'discount_id'     => null,
+        'discount_type'   => null,
+        'discount_value'  => null,
+        'currency'        => 'EUR',
+        'breakdown'       => $breakdown,
+        'pricing_source'  => 'backend_discount_engine',
+        'pricing_version' => 'v1-discounts',
+      ]);
+    }
+
+    // Verificar starts_at
+    if ($dc['starts_at'] !== null && $dc['starts_at'] > $now) {
+      $breakdown = calc_discount_engine($backendBaseAmt, null, null, $paymentMethod);
+      json_out([
+        'ok'              => true,
+        'discount_valid'  => false,
+        'discount_code'   => $discountCode,
+        'discount_id'     => null,
+        'discount_type'   => null,
+        'discount_value'  => null,
+        'currency'        => 'EUR',
+        'breakdown'       => $breakdown,
+        'pricing_source'  => 'backend_discount_engine',
+        'pricing_version' => 'v1-discounts',
+      ]);
+    }
+
+    // Target check
+    if ($dc['applies_to'] !== 'all') {
+      $targetType  = ($dc['applies_to'] === 'selected_products') ? 'sku' : 'category';
+      $targetValue = ($dc['applies_to'] === 'selected_products') ? $sku : $category;
+      $eligible    = false;
+
+      if ($targetValue !== '') {
+        $stT = $localPdo->prepare(
+          "SELECT id FROM discount_code_targets
+           WHERE discount_code_id = :did AND target_type = :ttype AND target_value = :tvalue
+           LIMIT 1"
+        );
+        $stT->execute([':did' => $dc['id'], ':ttype' => $targetType, ':tvalue' => $targetValue]);
+        $eligible = (bool)$stT->fetch();
+      }
+
+      if (!$eligible) {
+        $breakdown = calc_discount_engine($backendBaseAmt, null, null, $paymentMethod);
+        json_out([
+          'ok'              => true,
+          'discount_valid'  => false,
+          'discount_code'   => $discountCode,
+          'discount_id'     => null,
+          'discount_type'   => null,
+          'discount_value'  => null,
+          'currency'        => 'EUR',
+          'breakdown'       => $breakdown,
+          'pricing_source'  => 'backend_discount_engine',
+          'pricing_version' => 'v1-discounts',
+        ]);
+      }
+    }
+
+    $breakdown = calc_discount_engine(
+      $backendBaseAmt,
+      $dc['discount_type'],
+      (string)$dc['discount_value'],
+      $paymentMethod
+    );
 
     json_out([
-      'ok' => true,
-      'discount_valid' => $pricing['discount_valid'],
-      'discount_code' => $pricing['discount_code'],
-      'discount_id' => $pricing['discount_id'],
-      'discount_type' => $pricing['discount_type'],
-      'discount_value' => $pricing['discount_value'],
-      'currency' => $currency,
-      'subtotal_amount' => $pricing['subtotal_amount'],
-      'discount_amount' => $pricing['discount_amount'],
-      'amount_after_discount' => number_format(max(0.0, (float)$pricing['subtotal_amount'] - (float)$pricing['discount_amount']), 2, '.', ''),
-      'payment_fee_amount' => $pricing['payment_fee_amount'],
-      'shipping_amount' => $pricing['shipping_amount'],
-      'total_amount' => $pricing['total_amount'],
-      'breakdown' => [
-        'subtotal_amount' => $pricing['subtotal_amount'],
-        'discount_amount' => $pricing['discount_amount'],
-        'amount_after_discount' => number_format(max(0.0, (float)$pricing['subtotal_amount'] - (float)$pricing['discount_amount']), 2, '.', ''),
-        'payment_fee_amount' => $pricing['payment_fee_amount'],
-        'shipping_amount' => $pricing['shipping_amount'],
-        'total_amount' => $pricing['total_amount'],
-      ],
-      'price_discrepancy' => $pricing['price_discrepancy'],
-      'warnings' => $pricing['warnings'],
-      'pricing_source' => $pricing['pricing_source'],
-      'pricing_version' => $pricing['pricing_version'],
+      'ok'              => true,
+      'discount_valid'  => true,
+      'discount_code'   => $dc['code'],
+      'discount_id'     => (int)$dc['id'],
+      'discount_type'   => $dc['discount_type'],
+      'discount_value'  => $dc['discount_value'],
+      'currency'        => $dc['currency'],
+      'breakdown'       => $breakdown,
+      'pricing_source'  => 'backend_discount_engine',
+      'pricing_version' => 'v1-discounts',
     ]);
     break;
   }
@@ -7184,6 +7726,401 @@ switch ($route) {
     $dc['targets'] = $stTargets->fetchAll();
 
     json_out(['ok' => true, 'item' => $dc]);
+    break;
+  }
+
+  /**
+   * admin_discount_catalog — GET
+   * Devuelve lista de productos y categorías para el selector del modal de descuentos.
+   * Requiere X-Admin-Key.
+   */
+  case 'admin_discount_catalog': {
+    $key = header_get('x-admin-key');
+    if ($CFG['admin_key'] === '' || !hash_equals($CFG['admin_key'], $key)) {
+      json_out(['ok'=>false,'error'=>'unauthorized'], 401);
+    }
+
+    $productsFile = __DIR__ . '/../data/products.js';
+    $products = [];
+    $categoryKeys = [];
+
+    if (is_file($productsFile)) {
+      $js = file_get_contents($productsFile);
+      if (is_string($js) && $js !== '') {
+        if (preg_match_all('/\{\s*\n\s*id:\s*[\'"]([^\'"]+)[\'"].*?sku:\s*[\'"]([^\'"]+)[\'"].*?name:\s*[\'"]([^\'"]+)[\'"].*?categoryKey:\s*[\'"]([^\'"]+)[\'"].*?priceText:\s*[\'"]([^\'"]*)[\'"].*?stock:\s*[\'"]([^\'"]+)[\'"]/s', $js, $matches, PREG_SET_ORDER)) {
+          foreach ($matches as $m) {
+            $catKey = (string)$m[4];
+            $products[] = [
+              'sku'         => (string)$m[2],
+              'name'        => (string)$m[3],
+              'categoryKey' => $catKey,
+              'priceText'   => (string)$m[5],
+              'stock'       => (string)$m[6],
+            ];
+            if ($catKey !== '' && !in_array($catKey, $categoryKeys, true)) {
+              $categoryKeys[] = $catKey;
+            }
+          }
+        }
+      }
+    }
+
+    // Category label map (same keys as products.js)
+    $catLabels = [
+      'electric-scooters'    => 'Patinetes eléctricos',
+      'electric-skates'      => 'Patines eléctricos',
+      'electric-motorcycles' => 'Motos eléctricas',
+      'electric-bikes'       => 'Bicicletas eléctricas',
+      'accessories'          => 'Accesorios',
+      'spare-parts'          => 'Repuestos',
+    ];
+
+    $categories = array_map(function($k) use ($catLabels) {
+      return ['key' => $k, 'label' => $catLabels[$k] ?? $k];
+    }, $categoryKeys);
+
+    json_out(['ok'=>true,'products'=>$products,'categories'=>$categories]);
+    break;
+  }
+
+  /**
+   * admin_discount_create — POST
+   * Crea un nuevo código de descuento. Requiere X-Admin-Key.
+   */
+  case 'admin_discount_create': {
+    $key = header_get('x-admin-key');
+    if ($CFG['admin_key'] === '' || !hash_equals($CFG['admin_key'], $key)) {
+      json_out(['ok'=>false,'error'=>'unauthorized'], 401);
+    }
+    if (!$CFG['discounts_enabled']) {
+      json_out(['ok' => false, 'error' => 'feature_disabled'], 503);
+    }
+    $body = json_decode(file_get_contents('php://input'), true) ?? [];
+
+    $code        = strtoupper(trim((string)($body['code'] ?? '')));
+    $name        = trim((string)($body['name'] ?? ''));
+    $description = trim((string)($body['description'] ?? ''));
+    $dtype       = (string)($body['discount_type'] ?? 'percent');
+    $dvalue      = $body['discount_value'] ?? null;
+    $currency    = strtoupper(trim((string)($body['currency'] ?? 'EUR')));
+    $active      = isset($body['active']) ? (bool)$body['active'] : true;
+    $starts_at   = ($body['starts_at'] ?? null) ?: null;
+    $ends_at     = ($body['ends_at'] ?? null) ?: null;
+    $max_red     = isset($body['max_redemptions']) && $body['max_redemptions'] !== null ? (int)$body['max_redemptions'] : null;
+    $max_per_em  = isset($body['max_redemptions_per_email']) && $body['max_redemptions_per_email'] !== null ? (int)$body['max_redemptions_per_email'] : null;
+    $min_order   = isset($body['min_order_amount']) && $body['min_order_amount'] !== null ? (float)$body['min_order_amount'] : null;
+    $applies_to  = (string)($body['applies_to'] ?? 'all');
+    $stackable   = isset($body['stackable']) ? (bool)$body['stackable'] : false;
+    $targets     = isset($body['target_values']) && is_array($body['target_values']) ? $body['target_values'] : [];
+
+    // Validate
+    $errors = [];
+    if ($code === '') $errors[] = 'code_required';
+    if (!preg_match('/^[A-Z0-9_\-]{3,64}$/', $code)) $errors[] = 'code_format_invalid';
+    if ($name === '') $errors[] = 'name_required';
+    if (!in_array($dtype, ['percent','amount'], true)) $errors[] = 'discount_type_invalid';
+    $dvalueF = is_numeric($dvalue) ? (float)$dvalue : null;
+    if ($dvalueF === null) $errors[] = 'discount_value_invalid';
+    if ($dtype === 'percent' && $dvalueF !== null && ($dvalueF < 0.01 || $dvalueF > 100)) $errors[] = 'percent_out_of_range';
+    if ($dtype === 'amount' && $dvalueF !== null && $dvalueF <= 0) $errors[] = 'amount_must_be_positive';
+    if (!preg_match('/^[A-Z]{3}$/', $currency)) $errors[] = 'currency_invalid';
+    if (!in_array($applies_to, ['all','selected_products','selected_categories'], true)) $errors[] = 'applies_to_invalid';
+    if ($applies_to !== 'all' && count($targets) === 0) $errors[] = 'targets_required';
+
+    if ($errors) {
+      json_out(['ok'=>false,'error'=>'INVALID_REQUEST','detail'=>implode(', ',$errors)], 400);
+    }
+
+    $localPdo = get_pdo($CFG);
+    ensure_discount_schema_safe($localPdo);
+
+    // Check duplicate code
+    $stChk = $localPdo->prepare("SELECT id FROM discount_codes WHERE code_normalized = :cn LIMIT 1");
+    $stChk->execute([':cn' => $code]);
+    if ($stChk->fetchColumn() !== false) {
+      json_out(['ok'=>false,'error'=>'CONFLICT','detail'=>'code_already_exists'], 409);
+    }
+
+    $localPdo->beginTransaction();
+    try {
+      $target_type = $applies_to === 'selected_products' ? 'sku'
+                   : ($applies_to === 'selected_categories' ? 'category' : null);
+
+      $ins = $localPdo->prepare("
+        INSERT INTO discount_codes
+          (code, code_normalized, name, description, discount_type, discount_value,
+           currency, active, starts_at, ends_at, max_redemptions,
+           max_redemptions_per_email, min_order_amount, applies_to, stackable)
+        VALUES
+          (:code, :cn, :name, :desc, :dtype, :dval,
+           :cur, :active, :starts, :ends, :maxr,
+           :maxpe, :mino, :applt, :stack)
+      ");
+      $ins->execute([
+        ':code'  => $code,
+        ':cn'    => $code,
+        ':name'  => $name,
+        ':desc'  => $description !== '' ? $description : null,
+        ':dtype' => $dtype,
+        ':dval'  => $dvalueF,
+        ':cur'   => $currency,
+        ':active'=> $active ? 1 : 0,
+        ':starts'=> $starts_at,
+        ':ends'  => $ends_at,
+        ':maxr'  => $max_red,
+        ':maxpe' => $max_per_em,
+        ':mino'  => $min_order,
+        ':applt' => $applies_to,
+        ':stack' => $stackable ? 1 : 0,
+      ]);
+      $newId = (int)$localPdo->lastInsertId();
+
+      if ($target_type && count($targets) > 0) {
+        $insTgt = $localPdo->prepare("
+          INSERT IGNORE INTO discount_code_targets (discount_code_id, target_type, target_value)
+          VALUES (:did, :ttype, :tval)
+        ");
+        foreach ($targets as $tv) {
+          $tv = trim((string)$tv);
+          if ($tv === '') continue;
+          $insTgt->execute([':did'=>$newId,':ttype'=>$target_type,':tval'=>$tv]);
+        }
+      }
+
+      $localPdo->commit();
+    } catch (Throwable $e) {
+      $localPdo->rollBack();
+      error_log('[admin_discount_create] ' . $e->getMessage());
+      json_out(['ok'=>false,'error'=>'db_error','detail'=>$e->getMessage()], 500);
+    }
+
+    json_out(['ok'=>true,'id'=>$newId]);
+    break;
+  }
+
+  /**
+   * admin_discount_update — POST
+   * Actualiza un código de descuento existente. Requiere X-Admin-Key.
+   */
+  case 'admin_discount_update': {
+    $key = header_get('x-admin-key');
+    if ($CFG['admin_key'] === '' || !hash_equals($CFG['admin_key'], $key)) {
+      json_out(['ok'=>false,'error'=>'unauthorized'], 401);
+    }
+    if (!$CFG['discounts_enabled']) {
+      json_out(['ok' => false, 'error' => 'feature_disabled'], 503);
+    }
+
+    $id = (int)($_GET['id'] ?? 0);
+    if ($id <= 0) json_out(['ok'=>false,'error'=>'INVALID_REQUEST','detail'=>'missing_id'], 400);
+
+    $body = json_decode(file_get_contents('php://input'), true) ?? [];
+
+    $code        = strtoupper(trim((string)($body['code'] ?? '')));
+    $name        = trim((string)($body['name'] ?? ''));
+    $description = trim((string)($body['description'] ?? ''));
+    $dtype       = (string)($body['discount_type'] ?? 'percent');
+    $dvalue      = $body['discount_value'] ?? null;
+    $currency    = strtoupper(trim((string)($body['currency'] ?? 'EUR')));
+    $active      = isset($body['active']) ? (bool)$body['active'] : true;
+    $starts_at   = ($body['starts_at'] ?? null) ?: null;
+    $ends_at     = ($body['ends_at'] ?? null) ?: null;
+    $max_red     = isset($body['max_redemptions']) && $body['max_redemptions'] !== null ? (int)$body['max_redemptions'] : null;
+    $max_per_em  = isset($body['max_redemptions_per_email']) && $body['max_redemptions_per_email'] !== null ? (int)$body['max_redemptions_per_email'] : null;
+    $min_order   = isset($body['min_order_amount']) && $body['min_order_amount'] !== null ? (float)$body['min_order_amount'] : null;
+    $applies_to  = (string)($body['applies_to'] ?? 'all');
+    $stackable   = isset($body['stackable']) ? (bool)$body['stackable'] : false;
+    $targets     = isset($body['target_values']) && is_array($body['target_values']) ? $body['target_values'] : [];
+
+    $errors = [];
+    if ($code === '') $errors[] = 'code_required';
+    if (!preg_match('/^[A-Z0-9_\-]{3,64}$/', $code)) $errors[] = 'code_format_invalid';
+    if ($name === '') $errors[] = 'name_required';
+    if (!in_array($dtype, ['percent','amount'], true)) $errors[] = 'discount_type_invalid';
+    $dvalueF = is_numeric($dvalue) ? (float)$dvalue : null;
+    if ($dvalueF === null) $errors[] = 'discount_value_invalid';
+    if ($dtype === 'percent' && $dvalueF !== null && ($dvalueF < 0.01 || $dvalueF > 100)) $errors[] = 'percent_out_of_range';
+    if ($dtype === 'amount' && $dvalueF !== null && $dvalueF <= 0) $errors[] = 'amount_must_be_positive';
+    if (!preg_match('/^[A-Z]{3}$/', $currency)) $errors[] = 'currency_invalid';
+    if (!in_array($applies_to, ['all','selected_products','selected_categories'], true)) $errors[] = 'applies_to_invalid';
+    if ($applies_to !== 'all' && count($targets) === 0) $errors[] = 'targets_required';
+
+    if ($errors) {
+      json_out(['ok'=>false,'error'=>'INVALID_REQUEST','detail'=>implode(', ',$errors)], 400);
+    }
+
+    $localPdo = get_pdo($CFG);
+    ensure_discount_schema_safe($localPdo);
+
+    $stExist = $localPdo->prepare("SELECT id FROM discount_codes WHERE id = :id AND deleted_at IS NULL LIMIT 1");
+    $stExist->execute([':id' => $id]);
+    if ($stExist->fetchColumn() === false) {
+      json_out(['ok'=>false,'error'=>'not_found'], 404);
+    }
+
+    // Check code uniqueness (excluding self)
+    $stChk = $localPdo->prepare("SELECT id FROM discount_codes WHERE code_normalized = :cn AND id != :id LIMIT 1");
+    $stChk->execute([':cn' => $code, ':id' => $id]);
+    if ($stChk->fetchColumn() !== false) {
+      json_out(['ok'=>false,'error'=>'CONFLICT','detail'=>'code_already_exists'], 409);
+    }
+
+    $localPdo->beginTransaction();
+    try {
+      $target_type = $applies_to === 'selected_products' ? 'sku'
+                   : ($applies_to === 'selected_categories' ? 'category' : null);
+
+      $upd = $localPdo->prepare("
+        UPDATE discount_codes SET
+          code=:code, code_normalized=:cn, name=:name, description=:desc,
+          discount_type=:dtype, discount_value=:dval, currency=:cur,
+          active=:active, starts_at=:starts, ends_at=:ends,
+          max_redemptions=:maxr, max_redemptions_per_email=:maxpe,
+          min_order_amount=:mino, applies_to=:applt, stackable=:stack
+        WHERE id=:id
+      ");
+      $upd->execute([
+        ':code'  => $code,
+        ':cn'    => $code,
+        ':name'  => $name,
+        ':desc'  => $description !== '' ? $description : null,
+        ':dtype' => $dtype,
+        ':dval'  => $dvalueF,
+        ':cur'   => $currency,
+        ':active'=> $active ? 1 : 0,
+        ':starts'=> $starts_at,
+        ':ends'  => $ends_at,
+        ':maxr'  => $max_red,
+        ':maxpe' => $max_per_em,
+        ':mino'  => $min_order,
+        ':applt' => $applies_to,
+        ':stack' => $stackable ? 1 : 0,
+        ':id'    => $id,
+      ]);
+
+      // Replace targets: delete all, re-insert
+      $delTgt = $localPdo->prepare("DELETE FROM discount_code_targets WHERE discount_code_id = :did");
+      $delTgt->execute([':did' => $id]);
+
+      if ($target_type && count($targets) > 0) {
+        $insTgt = $localPdo->prepare("
+          INSERT IGNORE INTO discount_code_targets (discount_code_id, target_type, target_value)
+          VALUES (:did, :ttype, :tval)
+        ");
+        foreach ($targets as $tv) {
+          $tv = trim((string)$tv);
+          if ($tv === '') continue;
+          $insTgt->execute([':did'=>$id,':ttype'=>$target_type,':tval'=>$tv]);
+        }
+      }
+
+      $localPdo->commit();
+    } catch (Throwable $e) {
+      $localPdo->rollBack();
+      error_log('[admin_discount_update] ' . $e->getMessage());
+      json_out(['ok'=>false,'error'=>'db_error','detail'=>$e->getMessage()], 500);
+    }
+
+    json_out(['ok'=>true,'id'=>$id]);
+    break;
+  }
+
+  /**
+   * admin_discount_toggle — POST
+   * Activa/desactiva un código de descuento. Requiere X-Admin-Key.
+   */
+  case 'admin_discount_toggle': {
+    $key = header_get('x-admin-key');
+    if ($CFG['admin_key'] === '' || !hash_equals($CFG['admin_key'], $key)) {
+      json_out(['ok'=>false,'error'=>'unauthorized'], 401);
+    }
+    if (!$CFG['discounts_enabled']) {
+      json_out(['ok' => false, 'error' => 'feature_disabled'], 503);
+    }
+
+    $body   = json_decode(file_get_contents('php://input'), true) ?? [];
+    $id     = (int)($body['id'] ?? 0);
+    $active = isset($body['active']) ? (bool)$body['active'] : null;
+
+    if ($id <= 0 || $active === null) {
+      json_out(['ok'=>false,'error'=>'INVALID_REQUEST','detail'=>'missing_id_or_active'], 400);
+    }
+
+    $localPdo = get_pdo($CFG);
+    ensure_discount_schema_safe($localPdo);
+
+    $stExist = $localPdo->prepare("SELECT id, deleted_at FROM discount_codes WHERE id = :id LIMIT 1");
+    $stExist->execute([':id' => $id]);
+    $row = $stExist->fetch();
+    if (!$row) json_out(['ok'=>false,'error'=>'not_found'], 404);
+    if ($row['deleted_at'] !== null) {
+      json_out(['ok'=>false,'error'=>'CONFLICT','detail'=>'deleted_discount_cannot_toggle'], 409);
+    }
+
+    $warnings = [];
+    if ($active) {
+      // Check for soft-deleted
+      $stChk = $localPdo->prepare("
+        SELECT active, ends_at, max_redemptions
+        FROM discount_codes WHERE id = :id LIMIT 1
+      ");
+      $stChk->execute([':id' => $id]);
+      $dc = $stChk->fetch();
+      if ($dc['max_redemptions'] === null && ($dc['ends_at'] === null || $dc['ends_at'] === '')) {
+        $warnings[] = 'activando_sin_limite';
+      }
+    }
+
+    $upd = $localPdo->prepare("UPDATE discount_codes SET active = :active WHERE id = :id");
+    $upd->execute([':active' => $active ? 1 : 0, ':id' => $id]);
+
+    json_out(['ok'=>true,'id'=>$id,'active'=>$active,'warnings'=>$warnings]);
+    break;
+  }
+
+  /**
+   * admin_discount_delete — POST
+   * Soft-delete de un código de descuento. Requiere X-Admin-Key.
+   */
+  case 'admin_discount_delete': {
+    $key = header_get('x-admin-key');
+    if ($CFG['admin_key'] === '' || !hash_equals($CFG['admin_key'], $key)) {
+      json_out(['ok'=>false,'error'=>'unauthorized'], 401);
+    }
+    if (!$CFG['discounts_enabled']) {
+      json_out(['ok' => false, 'error' => 'feature_disabled'], 503);
+    }
+
+    $body = json_decode(file_get_contents('php://input'), true) ?? [];
+    $id   = (int)($body['id'] ?? 0);
+    if ($id <= 0) json_out(['ok'=>false,'error'=>'INVALID_REQUEST','detail'=>'missing_id'], 400);
+
+    $localPdo = get_pdo($CFG);
+    ensure_discount_schema_safe($localPdo);
+
+    $stExist = $localPdo->prepare("SELECT id, deleted_at FROM discount_codes WHERE id = :id LIMIT 1");
+    $stExist->execute([':id' => $id]);
+    $row = $stExist->fetch();
+    if (!$row) json_out(['ok'=>false,'error'=>'not_found'], 404);
+    if ($row['deleted_at'] !== null) {
+      json_out(['ok'=>false,'error'=>'CONFLICT','detail'=>'already_deleted'], 409);
+    }
+
+    // Count used redemptions before disabling
+    $stUsed = $localPdo->prepare(
+      "SELECT COUNT(*) FROM discount_redemptions
+       WHERE discount_code_id = :did AND status IN ('reserved','consumed')"
+    );
+    $stUsed->execute([':did' => $id]);
+    $used = (int)$stUsed->fetchColumn();
+
+    $upd = $localPdo->prepare("
+      UPDATE discount_codes SET active = 0, deleted_at = NOW()
+      WHERE id = :id
+    ");
+    $upd->execute([':id' => $id]);
+
+    json_out(['ok'=>true,'id'=>$id,'used_redemptions'=>$used]);
     break;
   }
 

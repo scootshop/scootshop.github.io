@@ -68,11 +68,6 @@
 (function () {
   'use strict';
 
-  function initMobileMenu() {
-    // Legacy menu initialization removed: unified handler in /js/mobile-menu.js will manage menu.
-    return;
-  }
-
   function fallbackMobileMenuHTML() {
     return '' +
       '<div id="mmBackdrop" hidden></div>' +
@@ -103,15 +98,11 @@
   function loadMobileMenuPartial() {
     var slot = document.getElementById('mobile-menu-slot');
     if (!slot) return;
-    // If an improved external handler already runs, skip loading/initializing the legacy partial
-    try { if (window && window.MM_MENU_HANDLED) return; } catch (e) {}
-
     // If the slot was pre-inlined, don't overwrite it
-    try { if (slot.dataset && slot.dataset.inline === 'true') return; } catch (e) {}
+    if (slot.dataset && slot.dataset.inline === 'true') return;
 
-    // If the menu element already exists in the DOM, just ensure it's initialized (if needed)
+    // If the menu is already present, do not duplicate it.
     if (document.getElementById('mobileMenu')) {
-      try { if (typeof initMobileMenu === 'function') initMobileMenu(); } catch (e) {}
       return;
     }
 
@@ -122,11 +113,9 @@
       })
       .then(function (html) {
         slot.innerHTML = html;
-        try { if (!window.MM_MENU_HANDLED) initMobileMenu(); } catch (e) {}
       })
       .catch(function () {
         slot.innerHTML = fallbackMobileMenuHTML();
-        try { if (!window.MM_MENU_HANDLED) initMobileMenu(); } catch (e) {}
       });
   }
 

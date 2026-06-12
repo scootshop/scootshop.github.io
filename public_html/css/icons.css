@@ -1,4 +1,4 @@
-/* icons.css — Font Awesome 6.5.0 subset (17 icons only)
+/* icons.css — Font Awesome 6.5.0 subset
    Replaces the full all.min.css (~63 KB) with only what SCOOT SHOP uses.
    Fonts still loaded from CDN (WOFF2, ~120KB solid + ~80KB brands vs ~300KB+ for all). */
 
@@ -45,7 +45,7 @@
   font-variant: normal;
 }
 
-/* === Solid icons (14) === */
+/* === Solid icons === */
 .fa-house::before          { content: "\f015"; }
 .fa-cart-shopping::before  { content: "\f07a"; }
 .fa-circle-question::before{ content: "\f059"; }
@@ -54,13 +54,25 @@
 .fa-bars::before           { content: "\f0c9"; }
 .fa-xmark::before          { content: "\f00d"; }
 .fa-chevron-down::before   { content: "\f078"; }
+.fa-chevron-right::before  { content: "\f054"; }
+.fa-arrow-left::before     { content: "\f060"; }
+.fa-arrow-right::before    { content: "\f061"; }
 .fa-bolt::before           { content: "\f0e7"; }
 .fa-shield-halved::before  { content: "\f3ed"; }
 .fa-rotate-left::before    { content: "\f2ea"; }
 .fa-screwdriver-wrench::before { content: "\f7d9"; }
 .fa-bag-shopping::before   { content: "\f290"; }
 .fa-bicycle::before        { content: "\f206"; }
+.fa-box-open::before       { content: "\f49e"; }
+.fa-clock::before          { content: "\f017"; }
+.fa-comments::before       { content: "\f086"; }
+.fa-lightbulb::before      { content: "\f0eb"; }
+.fa-lock::before           { content: "\f023"; }
+.fa-mobile-screen-button::before { content: "\f3cd"; }
 .fa-motorcycle::before     { content: "\f21c"; }
+.fa-right-from-bracket::before { content: "\f2f5"; }
+.fa-tags::before           { content: "\f02c"; }
+.fa-truck::before          { content: "\f0d1"; }
 
 /* === Brand icons (3) === */
 .fa-instagram::before      { content: "\f16d"; }

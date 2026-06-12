@@ -1,6 +1,8 @@
 (function () {
   'use strict';
 
+  var BUST_SIGNAL_KEY = 'scootshop_asset_bust';
+
   function fallbackVersion() {
     var meta = document.querySelector('meta[name="asset-version"]');
     var ver = meta && meta.getAttribute('content');
@@ -29,28 +31,12 @@
   }
 
   function updateElements(ver) {
-    document.querySelectorAll('link[href]').forEach(function (node) {
-      var href = node.getAttribute('href');
-      if (!href || href.indexOf('/') !== 0) return;
-      node.setAttribute('href', withVer(href, ver));
-    });
-
-    document.querySelectorAll('img[src], source[src], source[srcset], [data-img]').forEach(function (node) {
-      ['src', 'srcset', 'data-img'].forEach(function (attr) {
-        var value = node.getAttribute && node.getAttribute(attr);
-        if (!value || value.indexOf('/') !== 0) return;
-        if (attr === 'srcset') {
-          var next = value.split(',').map(function (part) {
-            var bits = part.trim().split(/\s+/);
-            if (!bits[0]) return part;
-            bits[0] = withVer(bits[0], ver);
-            return bits.join(' ');
-          }).join(', ');
-          node.setAttribute(attr, next);
-          return;
-        }
-        node.setAttribute(attr, withVer(value, ver));
-      });
+    // Do not mutate src/href that the browser may already be downloading.
+    // This avoids duplicate network transfers on first render.
+    document.querySelectorAll('[data-img]').forEach(function (node) {
+      var value = node.getAttribute && node.getAttribute('data-img');
+      if (!value || value.indexOf('/') !== 0) return;
+      node.setAttribute('data-img', withVer(value, ver));
     });
   }
 
@@ -58,6 +44,26 @@
     window.ASSET_VER = ver;
     updateElements(ver);
   }
+
+  function listenForBustSignal() {
+    if (typeof window.addEventListener !== 'function') return;
+    window.addEventListener('storage', function (event) {
+      if (!event || event.key !== BUST_SIGNAL_KEY || !event.newValue) return;
+      try {
+        var signal = JSON.parse(event.newValue);
+        var next = signal && signal.v ? String(signal.v).trim() : '';
+        var current = String(window.ASSET_VER || fallbackVersion()).trim();
+        if (!next || next === current) return;
+        try { sessionStorage.setItem('scootshop_asset_ver', JSON.stringify({ v: next, ts: Date.now() })); } catch (_) {}
+        var url = new URL(window.location.href);
+        if (url.searchParams.get('__av') === next) return;
+        url.searchParams.set('__av', next);
+        window.location.replace(url.pathname + url.search + url.hash);
+      } catch (_) {}
+    });
+  }
+
+  listenForBustSignal();
 
   if (typeof fetch !== 'function') {
     run(fallbackVersion());

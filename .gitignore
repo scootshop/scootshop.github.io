@@ -1,6 +1,36 @@
-_cleanup_quarantine/
-public_html/.env
-public_html/.env.local
-public_html/tmp/
-public_html/.vscode/
-!public_html/.env.example
+# Secrets & environment
+.env
+.env.*
+*.env
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+
+# Dependencies
+node_modules/
+
+# Python virtual environments
+.venv/
+public_html/.venv/
+
+# Backups
+*.bak
+*.tmp
+*.swp
+
+# Logs
+*.log
+
+# Archives (no subir zips al repo)
+*.zip
+
+# Python compiled files
+__pycache__/
+*.pyc
+*.pyo

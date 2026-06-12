@@ -35,6 +35,28 @@ Resultado esperado:
 - `GATE_B_OK`
 - o `GATE_B_KO`
 
+## Smoke web (sitemap + rutas criticas)
+
+Comando:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/qa/smoke-web.ps1
+```
+
+Opcional (incluye endpoints API):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/qa/smoke-web.ps1 -IncludeApiRoutes
+```
+
+Cubre:
+- Todas las URLs de `sitemap.xml`
+- Rutas criticas del flujo (`/`, `cuenta`, `checkout`, `pago`, `pedido`, `admin`)
+- Assets criticos (`asset-version`, `index-head`, `index.js`, `products.js`)
+
+Resultado esperado:
+- `SMOKE_WEB_OK`
+
 ## QA aislado
 
 Archivos QA movidos a:

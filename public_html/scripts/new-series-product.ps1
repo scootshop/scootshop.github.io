@@ -274,7 +274,7 @@ function Build-ProductPage {
           <div class="subtitle">$SeriesLabelValue | $MotorValue | $BatteryValue | $RangeValue</div>
         </div>
         <div class="badge-min">
-          <i class="fa-solid fa-bolt" aria-hidden="true"></i> $SeriesLabelValue
+          <i class="fa-solid fa-bolt" aria-hidden="true"></i> $BrandValue
         </div>
       </div>
 
