@@ -9,7 +9,7 @@
   <meta name="format-detection" content="telephone=no" />
   <meta name="theme-color" content="#ffffff" />
   <meta name="color-scheme" content="only light" />
-  <meta name="asset-version" content="20260613-4" />
+  <meta name="asset-version" content="20260613-5" />
 
   <link rel="canonical" href="https://scootshop.co/cuenta/" />
   <link rel="icon" href="/favicon.ico?v=20260613-4" sizes="any" />
@@ -31,6 +31,7 @@
   <style>
     html {
       background: #eef2f6;
+      overscroll-behavior-y: none;
     }
     body.account-page {
       margin: 0;
@@ -39,9 +40,10 @@
       background-image: radial-gradient(1200px 500px at 20% -10%, #ffffff 0%, #f3f5f8 40%, #eef2f6 100%);
       color: #0f172a;
       font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+      overscroll-behavior-y: none;
     }
     .account-shell {
-      min-height: 100vh;
+      min-height: 100dvh;
     }
     .account-main {
       padding: 12px 0 64px;
@@ -301,10 +303,11 @@
     }
     .account-login {
       margin-top: 14px;
-      padding: 0;
-      border: 0;
-      background: transparent;
+      padding: 12px 0 0;
       border-radius: 0;
+      background: transparent;
+      border: 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.18);
       position: relative;
       z-index: 1;
       display: grid;
@@ -369,15 +372,14 @@
       width: 100%;
       max-width: 100%;
     }
-    .account-session-shell.is-guest .account-login strong {
-      display: none;
-    }
+    .account-session-shell.is-guest .account-login strong,
     .account-session-shell.is-guest .account-login .account-note {
       display: none;
     }
     .account-session-shell.is-guest #googleLoginButton {
       min-height: 44px;
       margin-top: 0;
+      width: 100%;
     }
     .account-insights {
       margin-top: 14px;
@@ -549,33 +551,6 @@
     .btn-ghost:hover,
     .btn-outline:hover {
       background: rgba(15, 23, 42, 0.03);
-    }
-    .account-login {
-      margin-top: 14px;
-      padding: 12px 0 0;
-      border-radius: 0;
-      background: transparent;
-      border: 0;
-      border-top: 1px solid rgba(255, 255, 255, 0.18);
-      border-bottom: 0;
-      position: relative;
-      z-index: 1;
-    }
-    .account-session-shell.is-guest .account-login {
-      margin-top: 0;
-      padding: 0;
-      border-top: 0;
-      width: 100%;
-      max-width: 100%;
-    }
-    .account-session-shell.is-guest .account-login strong,
-    .account-session-shell.is-guest .account-login .account-note {
-      display: none;
-    }
-    .account-session-shell.is-guest #googleLoginButton {
-      margin-top: 0;
-      width: 100%;
-      min-height: 48px;
     }
     .account-session-shell.is-guest #authMessage {
       display: none;
