@@ -16,6 +16,8 @@
   var ordersRefreshTimer = null;
   var ORDERS_REFRESH_MS = 20000;
   var ordersInteractionUntilTs = 0;
+  var ordersFilter = 'all';
+  var ordersSearch = '';
   var PREVIEW_ACTIVE = false;
   var PREVIEW_ORDERS_KEY = 'ss_preview_orders_v1';
   var LOCAL_DEV_ORDERS_KEY = 'ss_local_dev_orders_account_v1';
@@ -685,12 +687,36 @@
     wrap.innerHTML = '<div class="account-avatar-fallback" aria-hidden="true">' + esc(initials) + '</div>';
   }
 
+  function rerenderOrdersPreservingSearch() {
+    var input = $('ordersSearchInput');
+    var hadFocus = !!(input && document.activeElement === input);
+    var caret = hadFocus ? input.selectionStart : 0;
+    renderOrders();
+    if (hadFocus) {
+      var next = $('ordersSearchInput');
+      if (next) {
+        next.focus();
+        try { next.setSelectionRange(caret, caret); } catch (_) { /* ignore */ }
+      }
+    }
+  }
+
   function renderOrders() {
     var grid = $('ordersGrid');
     if (!grid) return;
 
-    var baseOrders = state.orders.slice(0, 5);
+    var allOrders = Array.isArray(state.orders) ? state.orders : [];
     var canShowOrders = !!state.user || isLocalEmulationActive();
+
+    var searchTerm = String(ordersSearch || '').trim().toLowerCase();
+    var filtered = allOrders.filter(function (order) {
+      var st = String((order && order.status) || '').toLowerCase();
+      if (ordersFilter === 'active' && st === 'delivered') return false;
+      if (ordersFilter === 'delivered' && st !== 'delivered') return false;
+      if (searchTerm && String((order && order.id) || '').toLowerCase().indexOf(searchTerm) === -1) return false;
+      return true;
+    });
+    var baseOrders = filtered.slice(0, 10);
 
     var historyRows = baseOrders.map(function (order) {
       var orderNumber = orderNumberLabel(order);
@@ -734,14 +760,40 @@
 
     var emptyNote = !canShowOrders
       ? '<div class="history-empty">Inicia sesión para ver tus pedidos recientes.</div>'
-      : (baseOrders.length ? '' : '<div class="history-empty">Todavía no hay pedidos recientes en esta cuenta.</div>');
+      : (baseOrders.length ? '' : (allOrders.length
+        ? '<div class="history-empty">No hay pedidos que coincidan con el filtro o la búsqueda.</div>'
+        : '<div class="history-empty">Todavía no hay pedidos recientes en esta cuenta.</div>'));
+
+    function filterBtn(key, label) {
+      return '<button type="button" class="acct-tab' + (ordersFilter === key ? ' is-active' : '') + '" data-filter="' + key + '">' + label + '</button>';
+    }
+
+    var toolsHtml = '';
+    var countLabel = '';
+    if (canShowOrders && allOrders.length) {
+      toolsHtml = [
+        '<div class="acct-tools">',
+        '  <div class="acct-tabs" aria-label="Filtrar pedidos">',
+        filterBtn('all', 'Todos'),
+        filterBtn('active', 'En curso'),
+        filterBtn('delivered', 'Entregados'),
+        '  </div>',
+        '  <input type="search" id="ordersSearchInput" class="acct-search" placeholder="Buscar nº de pedido" value="' + esc(ordersSearch) + '" autocomplete="off" aria-label="Buscar por número de pedido">',
+        '</div>'
+      ].join('');
+      countLabel = filtered.length === allOrders.length
+        ? allOrders.length + (allOrders.length === 1 ? ' pedido' : ' pedidos')
+        : filtered.length + ' de ' + allOrders.length;
+    }
 
     grid.hidden = false;
     grid.innerHTML = [
       '<section class="order-history">',
       '  <div class="order-history-head">',
-      '    <h2>Pedidos recientes</h2>',
+      '    <h2>Pedidos</h2>',
+      countLabel ? '    <span class="acct-orders-count">' + esc(countLabel) + '</span>' : '',
       '  </div>',
+      toolsHtml,
       emptyNote,
       '  <div class="order-history-list">',
       historyRows,
@@ -749,7 +801,23 @@
       '</section>'
     ].join('');
 
-    updateStats(baseOrders.length, canShowOrders ? baseOrders.length : 0, baseOrders.length ? (baseOrders.filter(function (o) { return trackingProgress(o.status || 'processing') >= 55; }).length + ' con tracking') : '—');
+    Array.prototype.forEach.call(grid.querySelectorAll('.acct-tab'), function (btn) {
+      btn.addEventListener('click', function () {
+        ordersFilter = btn.getAttribute('data-filter') || 'all';
+        markOrdersInteraction(4000);
+        renderOrders();
+      });
+    });
+    var searchInput = grid.querySelector('#ordersSearchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', function () {
+        ordersSearch = String(searchInput.value || '');
+        markOrdersInteraction(8000);
+        rerenderOrdersPreservingSearch();
+      });
+    }
+
+    updateStats(allOrders.length, canShowOrders ? allOrders.length : 0, allOrders.length ? (allOrders.filter(function (o) { return trackingProgress(o.status || 'processing') >= 55; }).length + ' con tracking') : '—');
   }
 
   function stopOrdersAutoRefresh() {
@@ -969,7 +1037,11 @@
 
     var run = Promise.resolve().then(function () {
       if (state.user && state.user.__preview) {
-        state.orders = previewReadOrders();
+        var previewOrders = previewReadOrders();
+        if (!previewOrders.length && isLocalRuntime()) {
+          previewOrders = localDevLoadOrSeedOrders(state.user);
+        }
+        state.orders = previewOrders;
         renderOrders();
         return state.orders;
       }
