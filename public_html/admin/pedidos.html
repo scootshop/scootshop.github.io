@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Admin | SCOOT SHOP</title>
   <meta name="robots" content="noindex,nofollow" />
-  <meta name="asset-version" content="20260613-4" />
+  <meta name="asset-version" content="20260620-2" />
   <script src="/js/asset-sync.js?v=20260605-2" defer></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
@@ -41,6 +41,18 @@
     .hdr-bust:hover{background:rgba(245,158,11,.25)}
     .hdr-bust--ultra{background:rgba(239,68,68,.14);border-color:rgba(239,68,68,.34);color:#fecaca}
     .hdr-bust--ultra:hover{background:rgba(239,68,68,.24)}
+    .hdr-cache{position:relative}
+    .hdr-cache>summary{list-style:none}
+    .hdr-cache>summary::-webkit-details-marker{display:none}
+    .hdr-cache-caret{font-size:.6rem;opacity:.85}
+    .hdr-cache[open]>summary .hdr-cache-caret{transform:rotate(180deg)}
+    .hdr-cache-pop{position:absolute;right:0;top:calc(100% + 6px);background:var(--navy);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;min-width:190px;box-shadow:0 12px 28px rgba(0,0,0,.4);z-index:120}
+    .hdr-cache-pop .hdr-bust{width:100%;justify-content:flex-start}
+    .hdr-cache-pop .hdr-bust span{display:inline}
+    .hdr-cache-ver{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.7rem;color:#94a3b8;padding:6px 9px 2px;border-top:1px solid rgba(255,255,255,.08);margin-top:3px}
+    .hdr-cache-ver strong{color:#cbd5e1;font-variant-numeric:tabular-nums;letter-spacing:.2px}
+    .hdr-cache-vbadge{font-size:.62rem;font-weight:700;color:#fcd34d;background:rgba(245,158,11,.16);border:1px solid rgba(245,158,11,.28);border-radius:6px;padding:1px 6px;font-variant-numeric:tabular-nums;letter-spacing:.2px}
+    .hdr-cache-vbadge:empty{display:none}
 
     /* BODY */
     .adm-body{max-width:min(1800px,96vw);margin:0 auto;padding:20px 24px 70px}
@@ -62,6 +74,9 @@
     .kpi--alert .kpi-val{color:var(--yellow-t)}
     .kpi-val{font-size:1.38rem;font-weight:900;letter-spacing:-.03em;line-height:1;margin-bottom:4px}
     .kpi-lbl{font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--subtle)}
+    .kpi-sections{display:flex;flex-direction:column;gap:14px;margin-bottom:18px}
+    .kpi-section-title{font-weight:800;font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px}
+    .kpi-section .kpi-grid{margin-bottom:0}
     .dash-grid{display:grid;grid-template-columns:minmax(320px,1.05fr) minmax(340px,1.35fr);gap:12px;margin-bottom:16px;align-items:start}
     .dash-panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;box-shadow:var(--sh)}
     .dash-panel--series{min-height:100%}
@@ -231,6 +246,10 @@
 
     /* FORM */
     .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:12px}
+    .manage-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:14px;align-items:start;margin-top:14px}
+    .manage-side{display:flex;flex-direction:column;gap:14px;min-width:0}
+    .manage-grid>.card,.manage-side>.card{margin-top:0}
+    @media(max-width:980px){.manage-grid{grid-template-columns:1fr}}
     .fg{display:grid;gap:5px}
     .flbl{font-size:.69rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--subtle)}
     .fc{padding:9px 12px;border:1px solid var(--line);border-radius:var(--r);font-size:.84rem;font-family:inherit;color:var(--ink);transition:border-color .14s,box-shadow .14s;background:#fff;width:100%}
@@ -243,6 +262,10 @@
     /* DANGER */
     .danger-zone{border-color:#fecaca;background:#fff8f8}
     .danger-zone .card-head{color:var(--red-t);border-bottom-color:#fecaca}
+    #bulkPurgePanel>summary::-webkit-details-marker{display:none}
+    #bulkPurgePanel>summary::after{content:'\25B8 Desplegar';margin-left:auto;font-weight:700;font-size:.72rem;color:var(--red-t)}
+    #bulkPurgePanel[open]>summary::after{content:'\25BE Plegar'}
+    #bulkPurgePanel[open]>summary{border-bottom:1px solid #fecaca}
     .purge-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
     .pcb{display:flex;align-items:center;gap:6px;font-size:.82rem;font-weight:700;cursor:pointer}
     .pcb input{width:15px;height:15px;cursor:pointer;accent-color:var(--red)}
@@ -545,12 +568,20 @@
     </div>
     <div class="hdr-mid"></div>
     <div class="hdr-right">
-      <button class="hdr-bust" id="btnBustCache" title="Fuerza recarga de cach&#xe9; en todos los clientes">
-        &#x1F504; <span>Invalidar cach&#xe9;</span>
-      </button>
-      <button class="hdr-bust hdr-bust--ultra" id="btnBustCacheUltra" title="Invalidaci&#xf3;n reforzada con verificaci&#xf3;n p&#xfa;blica">
-        &#x1F525; <span>Ultra borrado</span>
-      </button>
+      <details class="hdr-cache" id="cacheMenu">
+        <summary class="hdr-bust" title="Opciones de invalidaci&#xf3;n de cach&#xe9;">&#x1F504; <span>Cach&#xe9;</span> <span class="hdr-cache-vbadge" id="cacheVerBadge"></span> <span class="hdr-cache-caret">&#x25BE;</span></summary>
+        <div class="hdr-cache-pop">
+          <button class="hdr-bust" id="btnBustCache" title="Fuerza recarga de cach&#xe9; en todos los clientes">
+            &#x1F504; <span>Invalidar cach&#xe9;</span>
+          </button>
+          <button class="hdr-bust hdr-bust--ultra" id="btnBustCacheUltra" title="Invalidaci&#xf3;n reforzada con verificaci&#xf3;n p&#xfa;blica">
+            &#x1F525; <span>Ultra borrado</span>
+          </button>
+          <div class="hdr-cache-ver" id="cacheVer" title="Versi&#xf3;n de assets publicada ahora mismo">
+            <span>assets en vivo</span> <strong id="cacheVerNum">&#x2026;</strong>
+          </div>
+        </div>
+      </details>
       <div class="hdr-pill">
         <span class="dot"></span>
         <span id="dashUser">Admin</span>
@@ -561,7 +592,7 @@
 
   <div class="adm-body">
     <div id="cacheOut" style="margin-bottom:10px" hidden></div>
-    <div id="dashStats" class="kpi-grid" hidden></div>
+    <div id="dashStats" class="kpi-sections" hidden></div>
     <div id="dashExtra" class="dash-grid" hidden></div>
 
     <div class="nav-tabs">
@@ -620,9 +651,6 @@
           <option value="">Todos los riesgos</option>
           <option value="risk">Solo pendientes/riesgo</option>
         </select>
-        <input id="filterSku" class="tb-input" type="text" placeholder="SKU o producto">
-        <input id="filterCity" class="tb-input" type="text" placeholder="Ciudad">
-        <input id="filterProvince" class="tb-input" type="text" placeholder="Provincia">
         <div class="tb-group">
           <span class="tb-label">Desde</span>
           <input id="filterDateFrom" class="tb-input" type="date">
@@ -641,6 +669,7 @@
       </div>
 
       <div id="countLabel" class="count-lbl"></div>
+      <div id="ordersMsg"></div>
 
       <div class="tbl-card">
         <div class="tbl-wrap">
@@ -674,32 +703,32 @@
       </div>
       <div id="ordersLoading" class="msg msg--info" style="text-align:center;margin-top:12px" hidden>Cargando pedidos...</div>
 
-      <!-- SELECTION BAR -->
+      <!-- SELECTION BAR: borra solo los pedidos marcados manualmente con el checkbox -->
       <div id="selBar" class="sel-bar" hidden>
         <span class="sel-count"><span id="selCount">0</span> pedidos seleccionados</span>
         <div class="sel-actions">
           <button class="sel-cancel-btn" id="selClear">Deseleccionar</button>
-          <button class="sel-del" id="selDelete">&#x1F5D1;&#xFE0F; Eliminar seleccionados</button>
+          <button class="sel-del" id="selDelete">&#x1F5D1;&#xFE0F; <span id="selDelLabel">Eliminar pedidos marcados</span> (<span id="selDelCount">0</span>)</button>
         </div>
       </div>
 
-      <!-- DANGER ZONE -->
-      <div class="card danger-zone" style="margin-top:20px">
-        <div class="card-head">&#x26A0;&#xFE0F; Limpiar pedidos en masa</div>
+      <!-- DANGER ZONE: borrado masivo por ESTADO (no por selección manual). Plegada por defecto. -->
+      <details class="card danger-zone" id="bulkPurgePanel" style="margin-top:20px">
+        <summary class="card-head" style="cursor:pointer;list-style:none">&#x26A0;&#xFE0F; Eliminar pedidos por estado (borrado masivo)</summary>
         <div class="card-body">
-          <p style="font-size:.82rem;color:var(--muted);margin-bottom:12px">Eliminar permanentemente todos los pedidos de un estado.</p>
+          <div class="msg msg--warn" style="margin:0 0 12px">&#x26A0;&#xFE0F; <strong>Zona peligrosa.</strong> Esta opci&#xF3;n borra de forma <strong>permanente TODOS</strong> los pedidos cuyo estado marques abajo, junto con su historial. No confundir con &#x201C;Eliminar pedidos marcados&#x201D;, que solo borra los seleccionados manualmente. Selecciona estados con cuidado.</div>
           <div class="purge-row">
-            <label class="pcb"><input type="checkbox" id="purgeCanceled" value="canceled" checked> Cancelados</label>
-            <label class="pcb"><input type="checkbox" id="purgeError" value="error" checked> Error</label>
+            <label class="pcb"><input type="checkbox" id="purgeCanceled" value="canceled"> Cancelados</label>
+            <label class="pcb"><input type="checkbox" id="purgeError" value="error"> Error</label>
             <label class="pcb"><input type="checkbox" id="purgeFailed" value="payment_failed"> Pago fallido</label>
             <label class="pcb"><input type="checkbox" id="purgePending" value="pending_payment"> Pendiente pago</label>
           </div>
           <div style="display:flex;align-items:center;gap:10px">
-            <button class="btn-d" id="btnBulkDelete">&#x1F5D1;&#xFE0F; Eliminar seleccionados</button>
+            <button class="btn-d" id="btnBulkDelete">&#x1F5D1;&#xFE0F; Eliminar pedidos por estado</button>
             <span id="bulkDeleteOut" style="font-size:.82rem;font-weight:700"></span>
           </div>
         </div>
-      </div>
+      </details>
     </div>
 
     <!-- PANEL CLIENTES -->
@@ -853,8 +882,9 @@
   <div class="adm-body">
     <button class="btn-back" id="btnBack">&#x2190; Volver a pedidos</button>
     <div id="detailTopBar" class="det-top"></div>
-    <div id="detail"></div>
+    <div id="detailFlow"></div>
 
+    <div class="manage-grid">
     <div class="card" id="updateCard" style="display:none">
       <div class="card-head">&#x270F;&#xFE0F; Actualizar pedido</div>
       <div class="card-body">
@@ -865,6 +895,7 @@
               <option value="pending_payment">&#x23F3; Pendiente pago</option>
               <option value="paid">&#x2705; Pagado</option>
               <option value="preparing">&#x1F4E6; Preparando</option>
+              <option value="reserved">&#x1F4C5; Reservado</option>
               <option value="shipped">&#x1F69A; Enviado</option>
               <option value="delivered">&#x1F3E0; Entregado</option>
               <option value="canceled">&#x274C; Cancelado</option>
@@ -908,6 +939,7 @@
       </div>
     </div>
 
+    <div class="manage-side">
     <div class="card" id="notesCard" style="display:none">
       <div class="card-head">&#x1F4DD; Notas internas <span style="font-weight:400;font-size:.69rem;color:var(--subtle);text-transform:none;letter-spacing:0;margin-left:auto">Solo admin &#x2014; no se env&#xED;an al cliente</span></div>
       <div class="card-body">
@@ -918,6 +950,23 @@
         </div>
       </div>
     </div>
+
+    <div class="card" id="receiptCard" style="display:none">
+      <div class="card-head">&#x1F9FE; Recibo del cliente (PDF) <span style="font-weight:400;font-size:.69rem;color:var(--subtle);text-transform:none;letter-spacing:0;margin-left:auto">El cliente lo descarga desde su cuenta</span></div>
+      <div class="card-body">
+        <div id="receiptCurrent" style="margin-bottom:10px"></div>
+        <input id="receiptFile" type="file" accept="application/pdf,.pdf" class="fc" style="padding:8px">
+        <div style="display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap">
+          <button class="btn-s" id="btnUploadReceipt" style="padding:8px 14px;font-size:.82rem">&#x2B06;&#xFE0F; Subir PDF</button>
+        </div>
+        <div class="hint">Formato PDF, m&#xE1;ximo 15 MB. Al subir uno nuevo se reemplaza el anterior.</div>
+        <div id="receiptOut"></div>
+      </div>
+    </div>
+    </div><!-- /manage-side -->
+    </div><!-- /manage-grid -->
+
+    <div id="detail"></div>
 
     <div class="card danger-zone" id="deleteCard" style="display:none">
       <div class="card-head">&#x26A0;&#xFE0F; Zona peligrosa</div>
@@ -1199,13 +1248,14 @@
   let currentCustomerId = 0, currentCustomerDetail = null;
   let currentOrderEmailHistory = [];
   let currentOrderCustomerEmail = '';
-  const actionLocks = { save:false, resend:false, notes:false, delete:false, cache:false, ultraCache:false };
+  const actionLocks = { save:false, resend:false, notes:false, receipt:false, delete:false, cache:false, ultraCache:false };
 
   function defaultCustomerMessageForStatus(status){
     switch(String(status || '')){
       case 'pending_payment': return 'Tu pedido está pendiente de pago. Puedes completarlo cuando quieras desde el enlace de pago.';
       case 'paid': return 'Hemos confirmado tu pago correctamente. Tu pedido ya ha sido recibido y pasa a preparación.';
       case 'preparing': return 'Tu pedido está en preparación. Te avisaremos en cuanto salga de almacén.';
+      case 'reserved': return 'Hemos registrado tu reserva. Te contactaremos para confirmar los siguientes pasos.';
       case 'shipped': return 'Tu pedido ya ha sido enviado. Puedes seguirlo con el número de seguimiento cuando esté disponible.';
       case 'delivered': return 'Tu pedido figura como entregado. Esperamos que lo disfrutes.';
       case 'canceled': return 'Tu pedido ha sido cancelado. Si necesitas ayuda, contáctanos y lo revisamos contigo.';
@@ -1725,9 +1775,6 @@
     const payment = normalizeText($('filterPayment').value);
     const shippingState = $('filterShippingState').value;
     const risk = $('filterRisk').value;
-    const skuText = normalizeText($('filterSku').value);
-    const cityText = normalizeText($('filterCity').value);
-    const provText = normalizeText($('filterProvince').value);
     const dateFrom = $('filterDateFrom').value;
     const dateTo = $('filterDateTo').value;
     const amountMinRaw = $('filterAmountMin').value;
@@ -1749,12 +1796,6 @@
       if(shippingState === 'without_tracking' && track) return false;
       if(shippingState === 'paid_without_tracking' && !(o.status === 'paid' && !track)) return false;
       if(risk === 'risk' && !isRiskStatus(o.status)) return false;
-      if(skuText){
-        const skuHay = normalizeText((o.sku||'') + ' ' + (o.product||'') + ' ' + (o.name||'') + ' ' + orderItemsFromOrder(o).map(function(item){ return [item.sku, item.name].join(' '); }).join(' '));
-        if(!skuHay.includes(skuText)) return false;
-      }
-      if(cityText && !normalizeText(o.ship_city||'').includes(cityText)) return false;
-      if(provText && !normalizeText(o.ship_province||'').includes(provText)) return false;
       if(Number.isFinite(amountMin) && amount < amountMin) return false;
       if(Number.isFinite(amountMax) && amount > amountMax) return false;
       if(dateFrom && created){
@@ -1794,9 +1835,6 @@
     $('filterPayment').value = '';
     $('filterShippingState').value = '';
     $('filterRisk').value = '';
-    $('filterSku').value = '';
-    $('filterCity').value = '';
-    $('filterProvince').value = '';
     $('filterDateFrom').value = '';
     $('filterDateTo').value = '';
     $('filterAmountMin').value = '';
@@ -1817,9 +1855,6 @@
       if(st.filterPayment != null) $('filterPayment').value = st.filterPayment;
       if(st.filterShippingState != null) $('filterShippingState').value = st.filterShippingState;
       if(st.filterRisk != null) $('filterRisk').value = st.filterRisk;
-      if(st.filterSku != null) $('filterSku').value = st.filterSku;
-      if(st.filterCity != null) $('filterCity').value = st.filterCity;
-      if(st.filterProvince != null) $('filterProvince').value = st.filterProvince;
       if(st.filterDateFrom != null) $('filterDateFrom').value = st.filterDateFrom;
       if(st.filterDateTo != null) $('filterDateTo').value = st.filterDateTo;
       if(st.filterAmountMin != null) $('filterAmountMin').value = st.filterAmountMin;
@@ -1839,9 +1874,6 @@
         filterPayment: $('filterPayment').value,
         filterShippingState: $('filterShippingState').value,
         filterRisk: $('filterRisk').value,
-        filterSku: $('filterSku').value,
-        filterCity: $('filterCity').value,
-        filterProvince: $('filterProvince').value,
         filterDateFrom: $('filterDateFrom').value,
         filterDateTo: $('filterDateTo').value,
         filterAmountMin: $('filterAmountMin').value,
@@ -2141,7 +2173,7 @@
   ['filterStatus','filterPayment','filterShippingState','filterRisk'].forEach(id=>{
     $(id).addEventListener('change',()=>reloadAndRender(1));
   });
-  ['filterSku','filterCity','filterProvince','filterDateFrom','filterDateTo','filterAmountMin','filterAmountMax'].forEach(id=>{
+  ['filterDateFrom','filterDateTo','filterAmountMin','filterAmountMax'].forEach(id=>{
     $(id).addEventListener('input',()=>reloadAndRender(1));
     $(id).addEventListener('change',()=>reloadAndRender(1));
   });
@@ -2164,7 +2196,7 @@
 
   /* ---- SELECTION ---- */
   function getSelectedIds(){ return [...document.querySelectorAll('.row-cb:checked')].map(cb=>cb.value); }
-  function updateSelectionBar(){ const ids=getSelectedIds(); $('selBar').hidden=ids.length===0; $('selCount').textContent=ids.length; }
+  function updateSelectionBar(){ const ids=getSelectedIds(); $('selBar').hidden=ids.length===0; $('selCount').textContent=ids.length; const sd=$('selDelCount'); if(sd) sd.textContent=ids.length; }
   $('selectAll').addEventListener('change',()=>{ const c=$('selectAll').checked; document.querySelectorAll('.row-cb').forEach(cb=>cb.checked=c); updateSelectionBar(); });
   $('selClear').onclick = ()=>{ $('selectAll').checked=false; document.querySelectorAll('.row-cb').forEach(cb=>cb.checked=false); updateSelectionBar(); };
   $('selDelete').onclick = async ()=>{
@@ -2172,10 +2204,10 @@
     if(!ids.length) return;
     const ok = await showConfirm('\uD83D\uDDD1\uFE0F','Eliminar '+ids.length+' pedidos','Accion irreversible. Solo usar para limpieza operativa, nunca para ocultar pedidos reales. Se eliminan pedido e historial.','Eliminar todo');
     if(!ok) return;
-    $('selDelete').disabled=true; $('selDelete').textContent='Eliminando...';
+    $('selDelete').disabled=true; $('selDelLabel').textContent='Eliminando';
     let deleted=0;
     for(const id of ids){ const res=await apiPost('admin_order_delete',{id}); if(res&&res.ok) deleted++; }
-    $('selDelete').disabled=false; $('selDelete').textContent='\uD83D\uDDD1\uFE0F Eliminar seleccionados';
+    $('selDelete').disabled=false; $('selDelLabel').textContent='Eliminar pedidos marcados';
     $('selBar').hidden=true;
     $('ordersMsg').innerHTML = '<div class="msg '+(deleted===ids.length?'msg--ok':'msg--warn')+'">'+(deleted===ids.length?'✅ ':'⚠ ')+deleted+' de '+ids.length+' pedidos eliminados.</div>';
     setTimeout(()=>$('ordersMsg').innerHTML='',4500);
@@ -2238,8 +2270,10 @@
     $('detail').innerHTML = '<div class="msg msg--info">Cargando pedido...</div>';
     $('updateCard').style.display = 'none';
     $('notesCard').style.display = 'none';
+    $('receiptCard').style.display = 'none';
     $('deleteCard').style.display = 'none';
     $('detailTopBar').innerHTML = '';
+    $('detailFlow').innerHTML = '';
     const data = await apiGet('admin_order_detail&id='+encodeURIComponent(id));
     if(!data||!data.ok||!data.order){ $('detail').innerHTML='<div class="msg msg--err">No se encontr\u00F3 el pedido</div>'; return; }
     currentOrderEmailHistory = Array.isArray(data.emailHistory) ? data.emailHistory : [];
@@ -2259,6 +2293,28 @@
       const cls = i<idx?'done':i===idx?'cur':'';
       return '<div class="sf-step '+cls+'"><div class="sf-dot">'+FLOW_ICO[i]+'</div><div class="sf-lbl">'+FLOW_LBL[i]+'</div></div>';
     }).join('')+'</div>';
+  }
+
+  /* Aviso operativo segun estado: solo informa del siguiente paso, no cambia ni oculta acciones */
+  function statusGuidance(o){
+    const st = String(o && o.status || '');
+    const hasTrack = !!String(o && o.tracking || '').trim();
+    let cls = 'msg--info', text = '';
+    switch(st){
+      case 'pending_payment': cls='msg--warn'; text='Pedido sin pagar. No prepares ni envíes hasta confirmar el cobro.'; break;
+      case 'paid': if(hasTrack){ cls='msg--ok'; text='Pago confirmado y con tracking asignado.'; } else { cls='msg--warn'; text='Pago confirmado. Añade el número de tracking cuando lo envíes.'; } break;
+      case 'preparing': cls='msg--info'; text='En preparación. Recuerda añadir el tracking al despachar el pedido.'; break;
+      case 'reserved': cls='msg--info'; text='Reserva registrada. Pendiente de confirmar o convertir en compra.'; break;
+      case 'shipped': if(hasTrack){ cls='msg--ok'; text='Enviado. El cliente puede seguir el envío con el tracking.'; } else { cls='msg--warn'; text='Marcado como enviado pero sin tracking: el cliente no puede seguirlo.'; } break;
+      case 'delivered': cls='msg--ok'; text='Entregado. Pedido completado.'; break;
+      case 'canceled': cls='msg--info'; text='Pedido cancelado.'; break;
+      case 'refunded': cls='msg--info'; text='Pedido reembolsado.'; break;
+      case 'dispute': cls='msg--warn'; text='Pedido en disputa. Revísalo con prioridad.'; break;
+      case 'payment_failed': cls='msg--warn'; text='Pago fallido. El cliente puede reintentar el cobro.'; break;
+      case 'error': cls='msg--warn'; text='Error de pago. Revisa la incidencia antes de operar.'; break;
+      default: return '';
+    }
+    return '<div class="msg '+cls+'" style="margin:10px 0 0">'+statusIcon(st)+' '+esc(text)+'</div>';
   }
 
   function kv(label, val, cls){ return '<div class="kv'+(cls?' '+cls:'')+'"><span class="lbl">'+esc(label)+'</span><span class="val">'+val+'</span></div>'; }
@@ -2340,16 +2396,12 @@
       +(o.status==='reserved' ? '<span class="badge b-res" style="font-size:.74rem;padding:5px 14px">\uD83D\uDCC5 Reserva</span>' : '')
       +'</div>';
 
-    let html = '';
-    html += renderStatusFlow(o.status);
+    $('detailFlow').innerHTML = renderStatusFlow(o.status) + statusGuidance(o);
 
+    let html = '';
     html += '<div class="qa-bar">';
     html += qaCopy('&#x1F4CB; Copiar resumen', summaryText, 'Resumen copiado', 'qa--b');
     if(o.tracking) html += qaCopy('&#x1F4CB; Copiar tracking', o.tracking, 'Tracking copiado', 'qa--b');
-    if(em) html += qaCopy('&#x1F4E7; Copiar email', em, 'Email copiado');
-    if(phone) html += qaCopy('&#x1F4DE; Copiar telefono', phone, 'Telefono copiado');
-    if(s.address) html += qaCopy('&#x1F3E0; Copiar direccion', s.address, 'Direccion copiada');
-    if(shipAddressInline) html += qaCopy('&#x1F4CD; Copiar direccion completa', shipAddressInline, 'Direccion completa copiada');
     if(hasShipping) html += qaCopy('&#x1F4CB; Copiar datos envio', shippingDataText, 'Datos de envio copiados');
     if(o.payer_email) html += '<a class="qa" href="mailto:'+esc(o.payer_email)+'">&#x1F4E7; Enviar email</a>';
     if(waNr) html += '<a class="qa qa--g" href="https://wa.me/'+esc(waNr)+'?text='+waMsg+'" target="_blank" rel="noopener">&#x1F4AC; WhatsApp</a>';
@@ -2361,12 +2413,10 @@
     html += kv('Nombre', esc(s.name || o.payer_name || '\u2014'));
     html += kv('Email', em ? '<a href="mailto:'+esc(em)+'" style="color:var(--accent)">'+esc(em)+'</a>'+tinyCopy(em,'Email copiado') : '<span class="field-missing">Falta email</span>');
     html += kv('Telefono', phone ? esc(fmted || phone)+tinyCopy(phone,'Telefono copiado') : '<span class="field-missing">Falta telefono</span>');
-    html += kv('ID pedido','<code style="font-size:.77rem;background:#f1f5f9;padding:2px 7px;border-radius:4px">'+esc(o.id)+'</code>');
     html += '</div></div>';
 
     html += '<div class="card" style="margin-top:0"><div class="card-head">&#x1F4CB; Estado operativo</div><div class="card-body">';
     html += kv('Tipo', '<strong>'+(o.status==='reserved'?'Reserva':'Compra')+'</strong>');
-    html += kv('Estado','<span class="badge '+badgeClass(o.status)+'">'+statusIcon(o.status)+' '+esc(statusLabel(o.status))+'</span>');
     if(isAccountOrder) html += kv('Cliente cuenta','<span class="badge badge--account-order">👤 Vinculado a cuenta</span>');
     if(o.tracking) html += kv('Tracking','<span style="color:var(--blue-t);font-weight:700">'+esc(o.tracking)+'</span>'+tinyCopy(o.tracking,'Tracking copiado'));
     html += kv('Creado', formatDate(o.created_at));
@@ -2497,7 +2547,7 @@
 
     const latestEmail = emailHist.length ? emailHist[0] : null;
     const manualResendCount = emailHist.filter(ev=>Number(ev.is_manual_resend)===1).length;
-    html += '<div class="card"><div class="card-head">&#x1F4CA; Resumen emails</div><div class="card-body">';
+    html += '<div class="card"><div class="card-head">&#x1F4E7; Emails <span style="font-weight:400;font-size:.69rem;color:var(--subtle);text-transform:none;letter-spacing:0;margin-left:auto">'+emailHist.length+' evento'+(emailHist.length!==1?'s':'')+'</span></div><div class="card-body">';
     html += '<div class="eh-summary">';
     html += kv('Total eventos', '<strong>'+emailHist.length+'</strong>');
     html += kv('Ultimo destinatario', esc((latestEmail&&latestEmail.recipient_email)||'\u2014'));
@@ -2513,10 +2563,9 @@
       if(manualResendCount>0) html += '<div class="eh-alert eh-alert--warn">Este pedido tiene reenvios manuales ('+manualResendCount+').</div>';
     }
     html += '<div class="eh-alert eh-alert--info">Este cambio puede notificar al cliente.</div>';
-    html += '</div></div></div>';
+    html += '</div>';
 
-    html += '<div class="card"><div class="card-head">&#x1F4E7; Historial de emails <span style="font-weight:400;font-size:.69rem;color:var(--subtle);text-transform:none;letter-spacing:0;margin-left:auto">'+emailHist.length+' evento'+(emailHist.length!==1?'s':'')+'</span></div>';
-    html += '<div class="card-body">';
+    html += '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-weight:800;font-size:.71rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">Historial de eventos</div>';
     if(!emailHist.length){
       html += '<div class="eh-empty">No hay eventos de email registrados para este pedido.</div>';
     } else {
@@ -2548,7 +2597,9 @@
     $('detail').innerHTML = html;
     $('updateCard').style.display = '';
     $('notesCard').style.display = '';
+    $('receiptCard').style.display = '';
     $('deleteCard').style.display = '';
+    renderReceiptState(o.receipt_url || '');
     $('deleteOut').innerHTML = '';
     $('status').value = o.status;
     $('tracking').value = o.tracking || '';
@@ -2688,6 +2739,35 @@
     }
   };
 
+  /* ---- VERSIÓN DE ASSETS EN VIVO + PURGA REFORZADA ---- */
+  // Mantiene los botones de caché asociados al número de versión publicado AHORA.
+  const setCacheVer = (v)=>{
+    const t = v ? String(v) : '—';
+    const a = $('cacheVerNum'); if(a) a.textContent = t;
+    const b = $('cacheVerBadge'); if(b) b.textContent = v ? ('v'+t) : '';
+  };
+  const fetchCacheVer = async ()=>{
+    try{
+      const r = await fetch('/asset-version.json?_t='+Date.now(),{cache:'no-store'});
+      if(r.ok){
+        const txt = await r.text();               // text() evita problemas con el BOM del JSON
+        const mm = txt.match(/"v"\s*:\s*"([^"]+)"/);
+        if(mm){ setCacheVer(mm[1]); return; }
+      }
+    }catch(_){}
+    // Fallback: meta tag de esta misma página
+    try{ const m=document.querySelector('meta[name="asset-version"]'); if(m&&m.content) setCacheVer(m.content); }catch(_){}
+  };
+  // Purga reforzada del propio navegador admin: Cache Storage API + service workers
+  // + clave de versión en sesión. Complementa el bust de servidor (LiteSpeed/OPcache).
+  const hardPurgeClient = async ()=>{
+    try{ if(window.caches&&caches.keys){ const ks=await caches.keys(); await Promise.all(ks.map(k=>caches.delete(k))); } }catch(_){}
+    try{ if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations){ const rs=await navigator.serviceWorker.getRegistrations(); await Promise.all(rs.map(r=>r.unregister())); } }catch(_){}
+    try{ sessionStorage.removeItem('scootshop_asset_ver'); }catch(_){}
+  };
+  fetchCacheVer();
+  (function(){ const m=$('cacheMenu'); if(m) m.addEventListener('toggle',()=>{ if(m.open) fetchCacheVer(); }); })();
+
   /* ---- BUST CACHE ---- */
   $('btnBustCache').onclick = async ()=>{
     if(actionLocks.cache) return;
@@ -2704,6 +2784,8 @@
             sessionStorage.removeItem('scootshop_asset_ver');
             localStorage.setItem('scootshop_asset_bust', JSON.stringify({ v: String(res.version || ''), ts: Date.now(), stamp: String(res.stamp || ''), scope: 'sitewide' }));
           } catch (_) {}
+          setCacheVer(res.version);
+          await hardPurgeClient();
           const stats = res.stats || {};
           const sitemap = res.sitemap || {};
           const manifest = res.manifest || {};
@@ -2749,6 +2831,8 @@
             sessionStorage.removeItem('scootshop_asset_ver');
             localStorage.setItem('scootshop_asset_bust', JSON.stringify({ v: String(res.version || ''), ts: Date.now(), stamp: String(res.stamp || ''), scope: 'sitewide-ultra' }));
           } catch (_) {}
+          setCacheVer(res.version);
+          await hardPurgeClient();
           const verification = res.verification || {};
           const assetCheck = verification.asset_version || {};
           const cacheCheck = verification.cache_manifest || {};
@@ -2778,6 +2862,10 @@
       actionLocks.ultraCache = false;
     }
   };
+
+  /* Cerrar el menu de cache al elegir una accion o al hacer clic fuera */
+  document.querySelectorAll('#cacheMenu .hdr-cache-pop button').forEach(b=>b.addEventListener('click',()=>{ const m=$('cacheMenu'); if(m) m.open=false; }));
+  document.addEventListener('click',(e)=>{ const m=$('cacheMenu'); if(m&&m.open&&!m.contains(e.target)) m.open=false; });
 
   /* ---- PRODUCTS ---- */
   const catLabels = {'electric-scooters':'Patinetes','electric-bikes':'Bicicletas','electric-motorcycles':'Motos','accessories':'Accesorios'};
@@ -3940,24 +4028,29 @@
     const fmtInt = n=>Number(n||0).toLocaleString('es-ES');
     const dayLabel = d=>{ try{ return new Date(String(d)+'T00:00:00').toLocaleDateString('es-ES',{day:'2-digit',month:'short'}); }catch(_){ return String(d||''); } };
     const bs = data.byStatus||{};
-    let html = '';
-    html += '<div class="kpi"><div class="kpi-val">'+esc(String(data.totalOrders||0))+'</div><div class="kpi-lbl">Pedidos totales</div></div>';
-    html += '<div class="kpi"><div class="kpi-val">'+esc(fmtInt(data.pendingOrders||0))+'</div><div class="kpi-lbl">Pendientes / riesgo</div></div>';
-    html += '<div class="kpi"><div class="kpi-val">'+esc(fmtInt(data.paidOrders||0))+'</div><div class="kpi-lbl">Pagados</div></div>';
-    html += '<div class="kpi"><div class="kpi-val">'+esc(fmtInt(data.canceledOrders||0))+'</div><div class="kpi-lbl">Cancelados + reembolso</div></div>';
-    html += '<div class="kpi kpi--rev"><div class="kpi-val">'+esc(fmt(data.totalRevenue))+'</div><div class="kpi-lbl">Ingresos totales</div></div>';
-    html += '<div class="kpi"><div class="kpi-val">'+esc(fmt(data.todayRevenue||0))+'</div><div class="kpi-lbl">Ventas hoy</div></div>';
-    html += '<div class="kpi kpi--rev"><div class="kpi-val">'+esc(fmt(data.weekRevenue))+'</div><div class="kpi-lbl">Esta semana</div></div>';
-    html += '<div class="kpi"><div class="kpi-val">'+esc(fmt(data.avgTicket||0))+'</div><div class="kpi-lbl">Ticket medio</div></div>';
-    html += '<div class="kpi"><div class="kpi-val">'+esc(String(data.todayOrders||0))+'</div><div class="kpi-lbl">Pedidos hoy</div></div>';
-    html += '<div class="kpi"><div class="kpi-val">'+esc(String(data.weekOrders||0))+'</div><div class="kpi-lbl">&#xDA;ltimos 7 d&#xED;as</div></div>';
-    if((data.reservations||0)>0) html += '<div class="kpi"><div class="kpi-val">'+esc(fmtInt(data.reservations||0))+'</div><div class="kpi-lbl">Reservas</div></div>';
-    if(data.paidWithoutTracking>0) html += '<div class="kpi kpi--alert" id="dashAlertNoTrack"><div class="kpi-val">&#x26A0;&#xFE0F; '+esc(String(data.paidWithoutTracking))+'</div><div class="kpi-lbl">Pagados sin tracking</div></div>';
+    const kpiTile = (val,label,cls,id)=>'<div class="kpi'+(cls?' '+cls:'')+'"'+(id?' id="'+id+'"':'')+'><div class="kpi-val">'+val+'</div><div class="kpi-lbl">'+label+'</div></div>';
+
+    let ingresos = '';
+    ingresos += kpiTile(esc(fmt(data.totalRevenue)), 'Ingresos totales', 'kpi--rev');
+    ingresos += kpiTile(esc(fmt(data.weekRevenue)), 'Esta semana', 'kpi--rev');
+    ingresos += kpiTile(esc(fmt(data.todayRevenue||0)), 'Ventas hoy');
+    ingresos += kpiTile(esc(fmt(data.avgTicket||0)), 'Ticket medio');
+
+    let pedidos = '';
+    pedidos += kpiTile(esc(String(data.totalOrders||0)), 'Pedidos totales');
+    pedidos += kpiTile(esc(String(data.todayOrders||0)), 'Pedidos hoy');
+    pedidos += kpiTile(esc(String(data.weekOrders||0)), '\u00DAltimos 7 d\u00EDas');
+
+    let estado = '';
+    estado += kpiTile(esc(fmtInt(data.pendingOrders||0)), 'Pendientes / riesgo');
     const sKeys = ['paid','preparing','reserved','shipped','pending_payment','canceled'];
     const sIco = {paid:'\u2705',preparing:'\uD83D\uDCE6',reserved:'\uD83D\uDCC5',shipped:'\uD83D\uDE9A',pending_payment:'\u23F3',canceled:'\u274C'};
-    const sLbl = {paid:'Pagados',preparing:'Preparando',reserved:'Reservas',shipped:'Enviados',pending_payment:'Pendientes',canceled:'Cancelados'};
-    sKeys.forEach(s=>{ if(bs[s]) html+='<div class="kpi"><div class="kpi-val">'+esc(String(bs[s]))+'</div><div class="kpi-lbl">'+sIco[s]+' '+esc(sLbl[s]||s)+'</div></div>'; });
-    $('dashStats').innerHTML = html;
+    const sLbl = {paid:'Pagados',preparing:'Preparando',reserved:'Reservas',shipped:'Enviados',pending_payment:'Pago pendiente',canceled:'Cancelados'};
+    sKeys.forEach(s=>{ if(bs[s]) estado += kpiTile(esc(String(bs[s])), sIco[s]+' '+esc(sLbl[s]||s)); });
+    if(data.paidWithoutTracking>0) estado += kpiTile('\u26A0\uFE0F '+esc(String(data.paidWithoutTracking)), 'Pagados sin tracking', 'kpi--alert', 'dashAlertNoTrack');
+
+    const section = (title,inner)=> inner ? '<div class="kpi-section"><div class="kpi-section-title">'+title+'</div><div class="kpi-grid">'+inner+'</div></div>' : '';
+    $('dashStats').innerHTML = section('Ingresos', ingresos) + section('Pedidos', pedidos) + section('Por estado', estado);
     $('dashStats').hidden = false;
 
     const top = Array.isArray(data.topProducts) ? data.topProducts : [];
@@ -4158,6 +4251,60 @@
   };
   $('adminNotes').addEventListener('keydown', e=>{ if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();$('btnSaveNotes').click();} });
 
+  /* ---- RECEIPT (PDF) ---- */
+  function renderReceiptState(url){
+    url = String(url||'').trim();
+    const host = $('receiptCurrent');
+    if(!host) return;
+    if(url){
+      host.innerHTML = '<div class="msg msg--ok" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'
+        + '<span>&#x1F4CE; Recibo subido</span>'
+        + '<a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer" style="font-weight:700;color:var(--blue-t)">Ver PDF</a>'
+        + '<button class="btn-s" id="btnDeleteReceipt" style="padding:5px 10px;font-size:.78rem;margin-left:auto">Quitar</button>'
+        + '</div>';
+      const del = $('btnDeleteReceipt');
+      if(del) del.onclick = deleteReceipt;
+    } else {
+      host.innerHTML = '<div class="msg msg--info">Sin recibo. Sube un PDF para que el cliente pueda descargarlo desde su cuenta.</div>';
+    }
+  }
+  async function uploadReceipt(){
+    if(!adminKey||!currentOrderId||actionLocks.receipt) return;
+    const input = $('receiptFile');
+    const f = input && input.files && input.files[0];
+    if(!f){ $('receiptOut').innerHTML='<div class="msg msg--warn">Selecciona un archivo PDF primero.</div>'; return; }
+    if((f.type && f.type!=='application/pdf') && !/\.pdf$/i.test(f.name)){ $('receiptOut').innerHTML='<div class="msg msg--err">El archivo debe ser un PDF.</div>'; return; }
+    if(f.size > 15*1024*1024){ $('receiptOut').innerHTML='<div class="msg msg--err">El PDF supera los 15 MB.</div>'; return; }
+    actionLocks.receipt = true;
+    $('receiptOut').innerHTML = '<div class="msg msg--info">Subiendo recibo...</div>';
+    try {
+      await runWithButtonBusy($('btnUploadReceipt'),'Subiendo...', async ()=>{
+        const fd = new FormData();
+        fd.append('receipt', f);
+        const r = await fetch('/api/?route=admin_order_receipt_upload&id='+encodeURIComponent(currentOrderId)+'&_t='+Date.now(),{method:'POST',headers:{'X-Admin-Key':adminKey},body:fd,cache:'no-store'});
+        const res = await r.json().catch(()=>null);
+        if(res&&res.ok){
+          $('receiptOut').innerHTML='<div class="msg msg--ok">✅ Recibo subido</div>';
+          if(input) input.value='';
+          loadOrderDetail(currentOrderId);
+        } else {
+          $('receiptOut').innerHTML='<div class="msg msg--err">Error al subir'+(res&&res.error?': '+esc(res.error):'')+'</div>';
+        }
+      });
+    } finally {
+      actionLocks.receipt = false;
+    }
+  }
+  async function deleteReceipt(){
+    if(!adminKey||!currentOrderId) return;
+    const ok = await showConfirm('🗑️','Quitar recibo','Se eliminará el PDF del recibo de este pedido. El cliente dejará de verlo en su cuenta.','Quitar','pri');
+    if(!ok) return;
+    const res = await apiPost('admin_order_receipt_delete',{id:currentOrderId});
+    if(res&&res.ok){ loadOrderDetail(currentOrderId); }
+    else { $('receiptOut').innerHTML='<div class="msg msg--err">No se pudo quitar el recibo</div>'; }
+  }
+  $('btnUploadReceipt').onclick = uploadReceipt;
+
   /* ---- DELETE ORDER ---- */
   $('btnDeleteOrder').onclick = async ()=>{
     if(!adminKey||!currentOrderId) return;
@@ -4183,7 +4330,7 @@
     $('btnBulkDelete').disabled=true; $('btnBulkDelete').textContent='Eliminando...';
     $('bulkDeleteOut').innerHTML = '';
     const res = await apiPost('admin_orders_bulk_delete',{statuses});
-    $('btnBulkDelete').disabled=false; $('btnBulkDelete').textContent='\uD83D\uDDD1\uFE0F Eliminar seleccionados';
+    $('btnBulkDelete').disabled=false; $('btnBulkDelete').textContent='\uD83D\uDDD1\uFE0F Eliminar pedidos por estado';
     if(res&&res.ok){ $('bulkDeleteOut').innerHTML='<span style="color:var(--green-t)">\u2705 '+(res.deleted||0)+' pedidos eliminados</span>'; reloadAndRender(1); loadDashboard(); setTimeout(()=>$('bulkDeleteOut').innerHTML='',5000); }
     else { $('bulkDeleteOut').innerHTML='<span style="color:var(--red-t)">Error al eliminar</span>'; setTimeout(()=>$('bulkDeleteOut').innerHTML='',4000); }
   };
@@ -4192,6 +4339,52 @@
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

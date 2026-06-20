@@ -235,6 +235,7 @@ function ensure_schema(PDO $pdo): void {
     'total_amount' => "DECIMAL(10,2) NULL",
     'payment_fee_amount' => "DECIMAL(10,2) NULL",
     'shipping_amount' => "DECIMAL(10,2) NULL",
+    'receipt_url' => "VARCHAR(255) NULL",
     'admin_notes' => "TEXT NULL",
     'created_at' => "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP",
     'updated_at' => "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP",
@@ -265,6 +266,7 @@ function ensure_schema(PDO $pdo): void {
     'google_sub' => "VARCHAR(191) NOT NULL",
     'email' => "VARCHAR(190) NOT NULL",
     'name' => "VARCHAR(190) NULL",
+    'phone' => "VARCHAR(32) NULL",
     'picture' => "VARCHAR(255) NULL",
     'locale' => "VARCHAR(16) NULL",
     'last_login_at' => "DATETIME NULL",
@@ -276,6 +278,27 @@ function ensure_schema(PDO $pdo): void {
     if (isset($existingUserColumns[$name])) continue;
     $pdo->exec("ALTER TABLE users ADD COLUMN `{$name}` {$ddl}");
   }
+
+  // Libreta de direcciones del cliente (panel de cuenta).
+  $pdo->exec("
+    CREATE TABLE IF NOT EXISTS customer_addresses (
+      id BIGINT AUTO_INCREMENT PRIMARY KEY,
+      user_id BIGINT NOT NULL,
+      label VARCHAR(80) NULL,
+      name VARCHAR(190) NULL,
+      phone VARCHAR(32) NULL,
+      address VARCHAR(255) NULL,
+      address2 VARCHAR(255) NULL,
+      city VARCHAR(100) NULL,
+      province VARCHAR(100) NULL,
+      postal VARCHAR(16) NULL,
+      country VARCHAR(60) NULL,
+      is_default TINYINT(1) NOT NULL DEFAULT 0,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      INDEX idx_addr_user (user_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  ");
 
   $existingOrderIndexes = [];
   foreach ($pdo->query("SHOW INDEX FROM orders") as $idx) {
@@ -351,6 +374,7 @@ function customer_session_payload(array $user): array {
     'id' => (int)($user['id'] ?? 0),
     'name' => trim((string)($user['name'] ?? '')),
     'email' => strtolower(trim((string)($user['email'] ?? ''))),
+    'phone' => trim((string)($user['phone'] ?? '')),
     'picture' => trim((string)($user['picture'] ?? '')),
     'locale' => trim((string)($user['locale'] ?? '')),
     'google_sub' => trim((string)($user['google_sub'] ?? '')),
@@ -567,8 +591,14 @@ function enforce_route_rate_limit(array $CFG, string $route): void {
     'orders_create' => ['max' => 20, 'window' => 300],
     'discount_validate' => ['max' => 60, 'window' => 60],
     'order_pricing_preview' => ['max' => 60, 'window' => 60],
+    'account_profile' => ['max' => 80, 'window' => 300],
+    'account_profile_update' => ['max' => 30, 'window' => 300],
+    'account_address_save' => ['max' => 40, 'window' => 300],
+    'account_address_delete' => ['max' => 40, 'window' => 300],
     'admin_customer_link_orders' => ['max' => 40, 'window' => 300],
     'admin_order_notes' => ['max' => 40, 'window' => 300],
+    'admin_order_receipt_upload' => ['max' => 30, 'window' => 300],
+    'admin_order_receipt_delete' => ['max' => 30, 'window' => 300],
     'admin_order_delete' => ['max' => 20, 'window' => 300],
     'admin_orders_bulk_delete' => ['max' => 12, 'window' => 300],
     'admin_product_stock' => ['max' => 60, 'window' => 300],
@@ -1935,6 +1965,104 @@ function stripe_session_context_urls(array $session, string $publicBase): array 
   ];
 }
 
+// Recupera un pedido pagado cuya fila ya no existe en la BD (p.ej. fue borrado siendo
+// pending_payment por una limpieza antes de que Stripe confirmara el cobro). Reconstruye
+// la fila con el MISMO id y un token nuevo a partir de los datos de la sesión de Stripe
+// (importe, SKU, contacto y dirección de envío guardados en la metadata). No-op si ya existe.
+function reconstruct_missing_stripe_order(PDO $pdo, array $CFG, array $session): void {
+  $orderId = stripe_session_order_id($session);
+  if ($orderId === '') {
+    return;
+  }
+
+  $chk = $pdo->prepare("SELECT id FROM orders WHERE id = :id LIMIT 1");
+  $chk->execute([':id' => $orderId]);
+  if ($chk->fetch()) {
+    return; // El pedido existe: nada que reconstruir.
+  }
+
+  $meta = is_array($session['metadata'] ?? null) ? $session['metadata'] : [];
+  $cust = is_array($session['customer_details'] ?? null) ? $session['customer_details'] : [];
+
+  $email = stripe_session_customer_email($session);
+  $shipName = trim((string)($meta['ship_name'] ?? ''));
+  $name = $shipName !== '' ? $shipName : stripe_session_customer_name($session);
+  $phone = trim((string)($cust['phone'] ?? ''));
+
+  $currency = strtoupper((string)($session['currency'] ?? 'EUR'));
+  $amount = round(((int)($session['amount_total'] ?? 0)) / 100, 2);
+  $sku = trim((string)($meta['sku'] ?? ''));
+
+  $productName = '';
+  $li = $session['line_items']['data'][0] ?? null;
+  if (is_array($li)) {
+    $productName = trim((string)($li['description'] ?? ''));
+  }
+  if ($productName === '') {
+    $productName = $sku !== '' ? $sku : 'Pedido Scoot Shop';
+  }
+
+  $shipAddress = trim((string)($meta['ship_address'] ?? ''));
+  $shipCityRaw = trim((string)($meta['ship_city'] ?? '')); // formato "28001 Madrid"
+  $shipProvince = trim((string)($meta['ship_province'] ?? ''));
+  $shipCountry = trim((string)($meta['ship_country'] ?? ''));
+  $shipNotes = trim((string)($meta['ship_notes'] ?? ''));
+
+  // Separa el código postal del principio de "28001 Madrid".
+  $shipPostal = '';
+  $shipCity = $shipCityRaw;
+  if (preg_match('/^\s*([0-9]{4,5})\s+(.+)$/', $shipCityRaw, $m)) {
+    $shipPostal = $m[1];
+    $shipCity = trim($m[2]);
+  }
+
+  $txnId = stripe_session_payment_intent_id($session);
+  if ($txnId === '') {
+    $txnId = trim((string)($session['id'] ?? ''));
+  }
+
+  $now = date('Y-m-d H:i:s');
+  $token = new_token();
+
+  $st = $pdo->prepare("
+    INSERT INTO orders (id, token, sku, name, amount, currency, status, payment_method,
+      payer_email, payer_name, txn_id,
+      subtotal_amount, total_amount,
+      ship_name, ship_email, ship_phone, ship_address, ship_city, ship_province, ship_postal, ship_country, ship_notes,
+      message, created_at, updated_at)
+    VALUES (:id, :token, :sku, :name, :amount, :currency, 'pending_payment', 'card',
+      :payer_email, :payer_name, :txn_id,
+      :subtotal, :total,
+      :ship_name, :ship_email, :ship_phone, :ship_address, :ship_city, :ship_province, :ship_postal, :ship_country, :ship_notes,
+      :message, :created_at, :updated_at)
+  ");
+  $st->execute([
+    ':id' => $orderId,
+    ':token' => $token,
+    ':sku' => $sku,
+    ':name' => $productName,
+    ':amount' => $amount,
+    ':currency' => $currency,
+    ':payer_email' => $email !== '' ? $email : null,
+    ':payer_name' => $name !== '' ? $name : null,
+    ':txn_id' => $txnId !== '' ? $txnId : null,
+    ':subtotal' => $amount,
+    ':total' => $amount,
+    ':ship_name' => $name !== '' ? $name : null,
+    ':ship_email' => $email !== '' ? $email : null,
+    ':ship_phone' => $phone !== '' ? $phone : null,
+    ':ship_address' => $shipAddress !== '' ? $shipAddress : null,
+    ':ship_city' => $shipCity !== '' ? $shipCity : null,
+    ':ship_province' => $shipProvince !== '' ? $shipProvince : null,
+    ':ship_postal' => $shipPostal !== '' ? $shipPostal : null,
+    ':ship_country' => $shipCountry !== '' ? $shipCountry : null,
+    ':ship_notes' => $shipNotes !== '' ? $shipNotes : null,
+    ':message' => 'Pedido reconstruido automáticamente tras confirmación de pago en Stripe.',
+    ':created_at' => $now,
+    ':updated_at' => $now,
+  ]);
+}
+
 function reconcile_paid_stripe_session(PDO $pdo, array $CFG, array $session): void {
   $orderId = stripe_session_order_id($session);
   if ($orderId === '') {
@@ -1961,6 +2089,14 @@ function reconcile_paid_stripe_session(PDO $pdo, array $CFG, array $session): vo
   $productSku = (string)($existingOrder['sku'] ?? ($session['metadata']['sku'] ?? ''));
 
   if (stripe_session_is_paid($session)) {
+    // Si la fila del pedido fue borrada (limpieza de pendientes) pero el pago es real,
+    // la reconstruimos con el mismo id antes de marcarla como pagada.
+    try {
+      reconstruct_missing_stripe_order($pdo, $CFG, $session);
+    } catch (Throwable $e) {
+      // No-fatal: si falla la reconstrucción, el reconcile/UPDATE simplemente no afectará filas.
+    }
+
     reconcile_paid_stripe_order($pdo, $CFG, [
       'orderId' => $orderId,
       'payerEmail' => $resolvedEmail,
@@ -4076,7 +4212,7 @@ switch ($route) {
     }
 
     $pdo = get_pdo($CFG);
-    $st = $pdo->prepare("SELECT id, sku, name, status, user_id, ship_name, ship_email, payer_name, payer_email, amount, currency, payment_method, tracking, product_url, product_image_url, product_color, product_color_label, cart_items_json, discount_code, discount_type, discount_value, discount_amount, subtotal_amount, total_amount, payment_fee_amount, shipping_amount, updated_at, created_at FROM orders WHERE user_id = :user_id ORDER BY created_at DESC LIMIT 50");
+    $st = $pdo->prepare("SELECT id, sku, name, status, user_id, ship_name, ship_email, payer_name, payer_email, amount, currency, payment_method, tracking, product_url, product_image_url, product_color, product_color_label, cart_items_json, discount_code, discount_type, discount_value, discount_amount, subtotal_amount, total_amount, payment_fee_amount, shipping_amount, receipt_url, updated_at, created_at FROM orders WHERE user_id = :user_id ORDER BY created_at DESC LIMIT 50");
     $st->execute([':user_id' => (int)$user['id']]);
     $rows = $st->fetchAll();
 
@@ -4137,6 +4273,7 @@ switch ($route) {
         'product_image_url' => $r['product_image_url'] ?? '',
         'product_color' => $r['product_color'] ?? '',
         'product_color_label' => $r['product_color_label'] ?? '',
+        'receipt_url' => $r['receipt_url'] ?? '',
         'items_count' => $itemsCount,
         'cart_items' => $cartItems,
         'updated_at' => $r['updated_at'] ?? '',
@@ -4150,6 +4287,156 @@ switch ($route) {
       'orders' => $orders,
       'total' => count($orders),
     ]);
+    break;
+  }
+
+  case 'account_profile': {
+    $user = customer_current_user();
+    if (empty($user['id'])) {
+      json_out(['ok' => false, 'error' => 'not_logged_in'], 401);
+    }
+    $pdo = get_pdo($CFG);
+    $st = $pdo->prepare("SELECT id, name, email, phone, picture FROM users WHERE id = :id LIMIT 1");
+    $st->execute([':id' => (int)$user['id']]);
+    $row = $st->fetch() ?: [];
+
+    $sta = $pdo->prepare("SELECT id, label, name, phone, address, address2, city, province, postal, country, is_default FROM customer_addresses WHERE user_id = :uid ORDER BY is_default DESC, updated_at DESC, id DESC");
+    $sta->execute([':uid' => (int)$user['id']]);
+    $addresses = [];
+    foreach ($sta->fetchAll() as $a) {
+      $addresses[] = [
+        'id' => (int)$a['id'],
+        'label' => (string)($a['label'] ?? ''),
+        'name' => (string)($a['name'] ?? ''),
+        'phone' => (string)($a['phone'] ?? ''),
+        'address' => (string)($a['address'] ?? ''),
+        'address2' => (string)($a['address2'] ?? ''),
+        'city' => (string)($a['city'] ?? ''),
+        'province' => (string)($a['province'] ?? ''),
+        'postal' => (string)($a['postal'] ?? ''),
+        'country' => (string)($a['country'] ?? ''),
+        'is_default' => ((int)($a['is_default'] ?? 0)) === 1,
+      ];
+    }
+
+    json_out([
+      'ok' => true,
+      'profile' => [
+        'id' => (int)($row['id'] ?? $user['id']),
+        'name' => (string)($row['name'] ?? ($user['name'] ?? '')),
+        'email' => (string)($row['email'] ?? ($user['email'] ?? '')),
+        'phone' => (string)($row['phone'] ?? ''),
+        'picture' => (string)($row['picture'] ?? ''),
+      ],
+      'addresses' => $addresses,
+    ]);
+    break;
+  }
+
+  case 'account_profile_update': {
+    $user = customer_current_user();
+    if (empty($user['id'])) {
+      json_out(['ok' => false, 'error' => 'not_logged_in'], 401);
+    }
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+      json_out(['ok' => false, 'error' => 'method_not_allowed'], 405);
+    }
+    $b = get_json_body();
+    $name = substr(trim((string)($b['name'] ?? '')), 0, 190);
+    $phone = substr(trim((string)($b['phone'] ?? '')), 0, 32);
+
+    $pdo = get_pdo($CFG);
+    $st = $pdo->prepare("UPDATE users SET name = :name, phone = :phone, updated_at = :now WHERE id = :id");
+    $st->execute([
+      ':name' => $name !== '' ? $name : null,
+      ':phone' => $phone !== '' ? $phone : null,
+      ':now' => date('Y-m-d H:i:s'),
+      ':id' => (int)$user['id'],
+    ]);
+
+    customer_session_start();
+    if (isset($_SESSION['customer_user']) && is_array($_SESSION['customer_user'])) {
+      $_SESSION['customer_user']['name'] = $name;
+      $_SESSION['customer_user']['phone'] = $phone;
+    }
+
+    json_out(['ok' => true, 'profile' => ['name' => $name, 'phone' => $phone]]);
+    break;
+  }
+
+  case 'account_address_save': {
+    $user = customer_current_user();
+    if (empty($user['id'])) {
+      json_out(['ok' => false, 'error' => 'not_logged_in'], 401);
+    }
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+      json_out(['ok' => false, 'error' => 'method_not_allowed'], 405);
+    }
+    $uid = (int)$user['id'];
+    $b = get_json_body();
+
+    $fields = [
+      ':label' => substr(trim((string)($b['label'] ?? '')), 0, 80),
+      ':name' => substr(trim((string)($b['name'] ?? '')), 0, 190),
+      ':phone' => substr(trim((string)($b['phone'] ?? '')), 0, 32),
+      ':address' => substr(trim((string)($b['address'] ?? '')), 0, 255),
+      ':address2' => substr(trim((string)($b['address2'] ?? '')), 0, 255),
+      ':city' => substr(trim((string)($b['city'] ?? '')), 0, 100),
+      ':province' => substr(trim((string)($b['province'] ?? '')), 0, 100),
+      ':postal' => substr(trim((string)($b['postal'] ?? '')), 0, 16),
+      ':country' => substr(trim((string)($b['country'] ?? '')), 0, 60),
+    ];
+    $isDefault = !empty($b['is_default']) ? 1 : 0;
+    $addrId = (int)($b['id'] ?? 0);
+
+    if ($fields[':address'] === '' || ($fields[':city'] === '' && $fields[':postal'] === '')) {
+      json_out(['ok' => false, 'error' => 'incomplete_address'], 400);
+    }
+
+    $pdo = get_pdo($CFG);
+    $now = date('Y-m-d H:i:s');
+
+    if ($addrId > 0) {
+      $chk = $pdo->prepare("SELECT id FROM customer_addresses WHERE id = :id AND user_id = :uid LIMIT 1");
+      $chk->execute([':id' => $addrId, ':uid' => $uid]);
+      if (!$chk->fetch()) {
+        json_out(['ok' => false, 'error' => 'not_found'], 404);
+      }
+      $st = $pdo->prepare("UPDATE customer_addresses SET label=:label, name=:name, phone=:phone, address=:address, address2=:address2, city=:city, province=:province, postal=:postal, country=:country, is_default=:isdef, updated_at=:now WHERE id=:id AND user_id=:uid");
+      $st->execute(array_merge($fields, [':isdef' => $isDefault, ':now' => $now, ':id' => $addrId, ':uid' => $uid]));
+    } else {
+      $st = $pdo->prepare("INSERT INTO customer_addresses (user_id, label, name, phone, address, address2, city, province, postal, country, is_default) VALUES (:uid, :label, :name, :phone, :address, :address2, :city, :province, :postal, :country, :isdef)");
+      $st->execute(array_merge($fields, [':uid' => $uid, ':isdef' => $isDefault]));
+      $addrId = (int)$pdo->lastInsertId();
+    }
+
+    if ($isDefault === 1) {
+      $unset = $pdo->prepare("UPDATE customer_addresses SET is_default = 0 WHERE user_id = :uid AND id <> :id");
+      $unset->execute([':uid' => $uid, ':id' => $addrId]);
+    }
+
+    json_out(['ok' => true, 'id' => $addrId]);
+    break;
+  }
+
+  case 'account_address_delete': {
+    $user = customer_current_user();
+    if (empty($user['id'])) {
+      json_out(['ok' => false, 'error' => 'not_logged_in'], 401);
+    }
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+      json_out(['ok' => false, 'error' => 'method_not_allowed'], 405);
+    }
+    $b = get_json_body();
+    $addrId = (int)($b['id'] ?? 0);
+    if ($addrId <= 0) json_out(['ok' => false, 'error' => 'missing_id'], 400);
+
+    $pdo = get_pdo($CFG);
+    $st = $pdo->prepare("DELETE FROM customer_addresses WHERE id = :id AND user_id = :uid");
+    $st->execute([':id' => $addrId, ':uid' => (int)$user['id']]);
+    if ($st->rowCount() === 0) json_out(['ok' => false, 'error' => 'not_found'], 404);
+
+    json_out(['ok' => true]);
     break;
   }
 
@@ -4167,7 +4454,7 @@ switch ($route) {
     }
 
     $pdo = get_pdo($CFG);
-    $st = $pdo->prepare("SELECT id, token, sku, name, status, user_id, ship_name, ship_email, payer_name, payer_email, amount, currency, payment_method, tracking, message, product_url, product_image_url, product_color, product_color_label, cart_items_json, discount_code, discount_type, discount_value, discount_amount, subtotal_amount, total_amount, payment_fee_amount, shipping_amount, updated_at, created_at, ship_phone, ship_address, ship_address2, ship_city, ship_province, ship_postal, ship_country, ship_notes FROM orders WHERE id = :id LIMIT 1");
+    $st = $pdo->prepare("SELECT id, token, sku, name, status, user_id, ship_name, ship_email, payer_name, payer_email, amount, currency, payment_method, tracking, message, product_url, product_image_url, product_color, product_color_label, cart_items_json, discount_code, discount_type, discount_value, discount_amount, subtotal_amount, total_amount, payment_fee_amount, shipping_amount, receipt_url, updated_at, created_at, ship_phone, ship_address, ship_address2, ship_city, ship_province, ship_postal, ship_country, ship_notes FROM orders WHERE id = :id LIMIT 1");
     $st->execute([':id' => $orderId]);
     $order = $st->fetch();
 
@@ -4225,6 +4512,7 @@ switch ($route) {
         'product_image_url' => $order['product_image_url'] ?? '',
         'product_color' => $order['product_color'] ?? '',
         'product_color_label' => $order['product_color_label'] ?? '',
+        'receipt_url' => $order['receipt_url'] ?? '',
         'order_items' => build_order_items_from_order_row($order),
         'shipping' => [
           'name' => $order['ship_name'] ?? '',
@@ -4548,6 +4836,11 @@ switch ($route) {
       }
       if (strpos($returnBase, 'session_id=') === false) {
         $returnBase .= $returnGlue . 'session_id={CHECKOUT_SESSION_ID}';
+        $returnGlue = '&';
+      }
+      // Token de acceso al pedido: permite que un invitado vea su pedido pagado en /pedido.
+      if ($token !== '' && strpos($returnBase, 't=') === false) {
+        $returnBase .= (strpos($returnBase, '?') === false ? '?' : '&') . 't=' . rawurlencode($token);
       }
 
       $payload = [
@@ -4934,12 +5227,26 @@ switch ($route) {
         reconcile_paid_stripe_session(get_pdo($CFG), $CFG, $session);
       }
 
+      $ssOrderId = stripe_session_order_id($session);
+      $ssToken = '';
+      if ($ssOrderId !== '') {
+        try {
+          $tk = get_pdo($CFG)->prepare("SELECT token FROM orders WHERE id = :id LIMIT 1");
+          $tk->execute([':id' => $ssOrderId]);
+          $tkRow = $tk->fetch();
+          $ssToken = $tkRow ? (string)($tkRow['token'] ?? '') : '';
+        } catch (Throwable $e) {
+          $ssToken = '';
+        }
+      }
+
       json_out([
         'ok' => true,
         'id' => (string)$session['id'],
         'status' => (string)($session['status'] ?? ''),
         'payment_status' => (string)($session['payment_status'] ?? ''),
-        'orderId' => stripe_session_order_id($session),
+        'orderId' => $ssOrderId,
+        'token' => $ssToken,
       ]);
     } catch (Throwable $e) {
       error_log('stripe_session_status_failed: ' . $e->getMessage());
@@ -5960,6 +6267,7 @@ switch ($route) {
         'cart_items' => build_order_items_from_order_row($o),
         'product_color'=>$o['product_color'] ?? '',
         'product_color_label'=>$o['product_color_label'] ?? '',
+        'receipt_url'=>$o['receipt_url'] ?? '',
         'admin_notes'=>$o['admin_notes'] ?? '',
         'created_at'=>$o['created_at'] ?? '',
         'updated_at'=>$o['updated_at'] ?? '',
@@ -6245,6 +6553,114 @@ switch ($route) {
     $st->execute([':notes' => $notes !== '' ? $notes : null, ':now' => date('Y-m-d H:i:s'), ':id' => $id]);
 
     if ($st->rowCount() === 0) json_out(['ok'=>false,'error'=>'not_found'], 404);
+
+    json_out(['ok'=>true]);
+    break;
+  }
+
+  case 'admin_order_receipt_upload': {
+    $key = header_get('x-admin-key');
+    if ($CFG['admin_key'] === '' || !hash_equals($CFG['admin_key'], $key)) json_out(['ok'=>false,'error'=>'unauthorized'], 401);
+
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') json_out(['ok'=>false,'error'=>'method_not_allowed'], 405);
+
+    $id = trim((string)($_GET['id'] ?? $_POST['id'] ?? ''));
+    if ($id === '') json_out(['ok'=>false,'error'=>'missing_id'], 400);
+
+    if (empty($_FILES['receipt']) || !is_array($_FILES['receipt'])) json_out(['ok'=>false,'error'=>'no_file'], 400);
+    $file = $_FILES['receipt'];
+    if (is_array($file['name'])) json_out(['ok'=>false,'error'=>'single_file_only'], 400);
+    if ((int)($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) json_out(['ok'=>false,'error'=>'upload_error'], 400);
+
+    $maxSize = 15 * 1024 * 1024; // 15 MB
+    $size = (int)($file['size'] ?? 0);
+    if ($size <= 0 || $size > $maxSize) json_out(['ok'=>false,'error'=>'invalid_size'], 400);
+
+    $tmp = (string)($file['tmp_name'] ?? '');
+    if (!is_uploaded_file($tmp)) json_out(['ok'=>false,'error'=>'invalid_upload'], 400);
+
+    // Validar que es realmente un PDF: firma %PDF + (si está disponible) mime.
+    $fh = @fopen($tmp, 'rb');
+    $magic = $fh ? (string)fread($fh, 5) : '';
+    if ($fh) fclose($fh);
+    $mime = '';
+    if (function_exists('finfo_open')) {
+      $finfo = finfo_open(FILEINFO_MIME_TYPE);
+      if ($finfo) { $mime = (string)finfo_file($finfo, $tmp); finfo_close($finfo); }
+    }
+    $looksPdf = (strncmp($magic, '%PDF', 4) === 0);
+    $mimeOk = ($mime === '' || $mime === 'application/pdf' || $mime === 'application/octet-stream');
+    if (!$looksPdf || !$mimeOk) json_out(['ok'=>false,'error'=>'not_a_pdf'], 400);
+
+    $pdo = get_pdo($CFG);
+    $stCheck = $pdo->prepare("SELECT receipt_url FROM orders WHERE id = :id LIMIT 1");
+    $stCheck->execute([':id' => $id]);
+    $existing = $stCheck->fetch();
+    if (!$existing) json_out(['ok'=>false,'error'=>'not_found'], 404);
+
+    $docRoot = realpath(__DIR__ . '/..');
+    if ($docRoot === false) json_out(['ok'=>false,'error'=>'docroot_error'], 500);
+    $destDir = $docRoot . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'receipts';
+    if (!is_dir($destDir) && !mkdir($destDir, 0755, true)) json_out(['ok'=>false,'error'=>'mkdir_failed'], 500);
+
+    // Nombre no adivinable para que la URL no se pueda enumerar.
+    $safeId = trim((string)preg_replace('/[^A-Za-z0-9_-]+/', '-', $id), '-');
+    if ($safeId === '') $safeId = 'order';
+    $destName = $safeId . '_' . bin2hex(random_bytes(8)) . '.pdf';
+    $destPath = $destDir . DIRECTORY_SEPARATOR . $destName;
+    $webPath = '/uploads/receipts/' . $destName;
+
+    if (!move_uploaded_file($tmp, $destPath)) json_out(['ok'=>false,'error'=>'move_failed'], 500);
+    @chmod($destPath, 0644);
+
+    // Borrar el recibo anterior si vivía dentro de la carpeta de recibos.
+    $oldUrl = trim((string)($existing['receipt_url'] ?? ''));
+    if ($oldUrl !== '' && strpos($oldUrl, '/uploads/receipts/') === 0) {
+      $oldReal = realpath($docRoot . str_replace('/', DIRECTORY_SEPARATOR, $oldUrl));
+      if ($oldReal !== false && strpos($oldReal, realpath($destDir)) === 0 && is_file($oldReal)) {
+        @unlink($oldReal);
+      }
+    }
+
+    $stUpd = $pdo->prepare("UPDATE orders SET receipt_url = :url, updated_at = :now WHERE id = :id");
+    $stUpd->execute([':url' => $webPath, ':now' => date('Y-m-d H:i:s'), ':id' => $id]);
+
+    try { log_admin_activity($pdo, $id, 'admin_order_receipt_upload', '', $destName, true, 'ok'); } catch (Throwable $e) { /* logging best-effort */ }
+
+    json_out(['ok'=>true, 'receipt_url'=>$webPath]);
+    break;
+  }
+
+  case 'admin_order_receipt_delete': {
+    $key = header_get('x-admin-key');
+    if ($CFG['admin_key'] === '' || !hash_equals($CFG['admin_key'], $key)) json_out(['ok'=>false,'error'=>'unauthorized'], 401);
+
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') json_out(['ok'=>false,'error'=>'method_not_allowed'], 405);
+
+    $b = get_json_body();
+    $id = trim((string)($_GET['id'] ?? $b['id'] ?? ''));
+    if ($id === '') json_out(['ok'=>false,'error'=>'missing_id'], 400);
+
+    $pdo = get_pdo($CFG);
+    $stCheck = $pdo->prepare("SELECT receipt_url FROM orders WHERE id = :id LIMIT 1");
+    $stCheck->execute([':id' => $id]);
+    $existing = $stCheck->fetch();
+    if (!$existing) json_out(['ok'=>false,'error'=>'not_found'], 404);
+
+    $docRoot = realpath(__DIR__ . '/..');
+    $oldUrl = trim((string)($existing['receipt_url'] ?? ''));
+    if ($docRoot !== false && $oldUrl !== '' && strpos($oldUrl, '/uploads/receipts/') === 0) {
+      $base = realpath($docRoot . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'receipts');
+      $oldReal = realpath($docRoot . str_replace('/', DIRECTORY_SEPARATOR, $oldUrl));
+      if ($oldReal !== false && $base !== false && strpos($oldReal, $base) === 0 && is_file($oldReal)) {
+        @unlink($oldReal);
+      }
+    }
+
+    $stUpd = $pdo->prepare("UPDATE orders SET receipt_url = NULL, updated_at = :now WHERE id = :id");
+    $stUpd->execute([':now' => date('Y-m-d H:i:s'), ':id' => $id]);
+
+    try { log_admin_activity($pdo, $id, 'admin_order_receipt_delete', $oldUrl, '', true, 'ok'); } catch (Throwable $e) { /* logging best-effort */ }
 
     json_out(['ok'=>true]);
     break;

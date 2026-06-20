@@ -34,3 +34,13 @@ public_html/.venv/
 __pycache__/
 *.pyc
 *.pyo
+
+# Runtime generado en servidor (rate limit, etc.) — no versionar
+public_html/tmp/
+
+# Tooling local de agentes / Claude
+public_html/.agents/
+public_html/skills-lock.json
+
+# Backup local de imágenes (fuera del sitio desplegable)
+m41-armored-dual-img-backup/
