@@ -65,6 +65,41 @@
     }
   }
 
+  /* Prefetch en segundo plano de las imágenes completas (data-img) durante el
+     tiempo de inactividad. Las miniaturas usan una versión pequeña (img/thumbs/),
+     así que al pulsar una miniatura la versión completa debe estar ya cacheada
+     para que el cambio sea instantáneo. No bloquea la carga inicial. */
+  function prefetchFullGalleryImages() {
+    var ver = window.ASSET_VER || '1';
+    var thumbs = gallery.querySelectorAll('.thumb[data-img]');
+    var sources = [];
+    var seen = {};
+    for (var i = 0; i < thumbs.length; i++) {
+      var src = thumbs[i].getAttribute('data-img');
+      if (!src || seen[src]) continue;
+      seen[src] = true;
+      sources.push(src.indexOf('?') === -1 ? src + '?v=' + ver : src);
+    }
+    if (!sources.length) return;
+
+    var index = 0;
+    function loadNext() {
+      if (index >= sources.length) return;
+      var img = new Image();
+      img.decoding = 'async';
+      img.onload = img.onerror = function () { schedule(); };
+      img.src = sources[index++];
+    }
+    function schedule() {
+      if (window.requestIdleCallback) {
+        window.requestIdleCallback(loadNext, { timeout: 1500 });
+      } else {
+        window.setTimeout(loadNext, 200);
+      }
+    }
+    schedule();
+  }
+
   function updateCheckoutLinksColorParams(colorKey, colorLabel, variantImage) {
     var btnMain = panel.querySelector('.btn-main');
     var stickyBtn = document.querySelector('.sticky-buy-btn');
@@ -125,6 +160,14 @@
   }
 
   tuneGalleryThumbPriority();
+
+  if (window.addEventListener) {
+    if (document.readyState === 'complete') {
+      prefetchFullGalleryImages();
+    } else {
+      window.addEventListener('load', prefetchFullGalleryImages, { once: true });
+    }
+  }
 
   function normalizeText(value) {
     var text = String(value || '').toLowerCase();
@@ -371,6 +414,82 @@
     descEl.textContent = [intro, factsSentence, interestingDetail].filter(Boolean).join(' ');
   })();
 
+  /* ─────────────────────────────────────────────────────────────
+     SINCRONIZACIÓN DE METADATOS (fuente única = ficha técnica visible)
+     Regenera el additionalProperty del JSON-LD y las descripciones
+     og/twitter a partir de la ficha técnica visible (.spec-row). Así,
+     al editar la ficha, los metadatos estructurados y sociales se
+     actualizan solos y nunca se desincronizan. La versión estática del
+     HTML sigue siendo el respaldo que leen los rastreadores sin JS.
+     ───────────────────────────────────────────────────────────── */
+  (function syncMetadataFromSpecs() {
+    try {
+      var specData = collectSpecData();
+      if (!specData.pairs.length) return;
+
+      // Etiquetas que no son "propiedades técnicas" del producto
+      var skip = { modelo: 1, serie: 1, estado: 1, precio: 1, homologacion: 1, garantia: 1 };
+
+      var titleEl = document.querySelector('.page-title h1, .title-left h1');
+      var productName = titleEl ? String(titleEl.textContent || '').trim() : '';
+      var fullText = normalizeText(specData.pairs.map(function (p) { return p.label + ' ' + p.value; }).join(' '));
+      var isDgt = fullText.indexOf('dgt') !== -1 || fullText.indexOf('homologado') !== -1;
+
+      // 1) JSON-LD: regenerar additionalProperty del nodo Product
+      var ldNodes = document.querySelectorAll('script[type="application/ld+json"]');
+      for (var n = 0; n < ldNodes.length; n++) {
+        var data;
+        try { data = JSON.parse(ldNodes[n].textContent || '{}'); } catch (_) { continue; }
+
+        var graph = Array.isArray(data['@graph']) ? data['@graph'] : [data];
+        var changed = false;
+
+        for (var g = 0; g < graph.length; g++) {
+          var node = graph[g];
+          var type = node && node['@type'];
+          var isProduct = type === 'Product' || (Array.isArray(type) && type.indexOf('Product') !== -1);
+          if (!isProduct) continue;
+
+          var props = [];
+          for (var i = 0; i < specData.pairs.length; i++) {
+            if (skip[specData.pairs[i].key]) continue;
+            props.push({ '@type': 'PropertyValue', name: specData.pairs[i].label, value: specData.pairs[i].value });
+          }
+          if (props.length) { node.additionalProperty = props; changed = true; }
+        }
+
+        if (changed) ldNodes[n].textContent = JSON.stringify(data['@graph'] ? data : graph[0], null, 2);
+      }
+
+      // 2) og/twitter: regenerar descripción desde specs clave
+      var motor = findSpecValue(specData, ['motor', 'potencia']);
+      var battery = findSpecValue(specData, ['bateria']);
+      var speed = findSpecValue(specData, ['velocidad']);
+      var autonomy = findSpecValue(specData, ['autonomia']);
+      var brakes = findSpecValue(specData, ['frenos']);
+      var wheels = findSpecValue(specData, ['ruedas']);
+
+      var bits = [];
+      if (motor) bits.push('motor ' + motor);
+      if (battery) bits.push('batería ' + battery);
+      if (speed) bits.push('velocidad máxima ' + speed);
+      if (autonomy) bits.push('autonomía ' + autonomy);
+      if (brakes) bits.push('frenos ' + brakes);
+      if (wheels) bits.push('ruedas ' + wheels);
+
+      if (productName && bits.length >= 2) {
+        var lead = productName + (isDgt ? ' homologado por la DGT' : '') + ', con ';
+        var description = lead + joinNatural(bits) + '.';
+        var setMeta = function (selector, value) {
+          var el = document.head && document.head.querySelector(selector);
+          if (el) el.setAttribute('content', value);
+        };
+        setMeta('meta[property="og:description"]', description);
+        setMeta('meta[name="twitter:description"]', description);
+      }
+    } catch (_) { /* ante cualquier fallo, se conservan los metadatos estáticos */ }
+  })();
+
   function toIndexList(variant, total) {
     var indexes = [];
     var source = null;
@@ -601,7 +720,8 @@
       panel.style.setProperty('--series-accent-mix', String(resolved.mix ? 1 : 0));
     }
 
-    function renderGalleryForVariant(variant) {
+    function renderGalleryForVariant(variant, options) {
+      var allowThumbScroll = !options || options.scrollThumb !== false;
       var indexes = toIndexList(variant, originalItems.length);
       var selectedItems = indexes.length
         ? indexes.map(function (index) { return originalItems[index - 1]; }).filter(Boolean)
@@ -629,7 +749,7 @@
         thumbButton.classList.toggle('active', isActive);
       }
 
-      if (activeThumb && activeThumb.scrollIntoView) {
+      if (allowThumbScroll && activeThumb && activeThumb.scrollIntoView) {
         activeThumb.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
       }
     }
@@ -709,7 +829,7 @@
 
     var defaultVariant = variants.find(function (variant) { return variant.default === true || variant.defaultColor === true; }) || variants[0];
     if (defaultVariant) {
-      renderGalleryForVariant(defaultVariant);
+      renderGalleryForVariant(defaultVariant, { scrollThumb: false });
       updateCheckoutUrlWithColor(defaultVariant);
       gallery.dataset.activeColor = defaultVariant.key || defaultVariant.label || 'default';
     }
@@ -927,6 +1047,29 @@
       createColorVariantSelector(product);
     }
     ensureDefaultColorFromDom();
+  })();
+
+  /* ============================
+     BADGE DGT AUTOMÁTICO
+     Regla: si el producto está certificado por la DGT en el catálogo
+     (products.js → dgtCertified:true, lo mismo que pinta el icono en la
+     home), el badge aparece también en la ficha. Fuente única = catálogo.
+     Idempotente: no duplica si el HTML ya trae el badge estático.
+     ============================ */
+  (function ensureDgtBadge() {
+    var product = getCurrentProduct();
+    if (!product || product.dgtCertified !== true) return;
+
+    var priceRow = panel.querySelector('.price-row');
+    if (!priceRow || priceRow.querySelector('.dgt-badge')) return;
+
+    var img = document.createElement('img');
+    img.className = 'dgt-badge';
+    img.src = withVersion('/img/dgtchapa.svg');
+    img.alt = 'Logo DGT';
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    priceRow.appendChild(img);
   })();
 
 

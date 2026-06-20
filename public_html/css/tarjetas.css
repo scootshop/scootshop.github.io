@@ -318,6 +318,18 @@ main{ padding-block:22px 32px; }
   pointer-events:none;
 }
 
+/* Agrupa precio actual + precio anterior + badge de descuento con separación
+   uniforme. Sin esta regla, .price-values es un <span> inline y los elementos
+   se apeñuzcan a la izquierda (más notorio cuando el badge DGT empuja a la
+   derecha con margin-left:auto). Regla general para paneles y tarjetas. */
+.price-values{
+  display:flex;
+  align-items:flex-end;
+  gap:12px;
+  flex-wrap:wrap;
+  min-width:0;
+}
+
 .price-now{
   font-size:38px;
   font-weight:1000;

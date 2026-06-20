@@ -34,6 +34,20 @@
     return v || '1';
   };
 
+  // Auto-actualización al restaurar desde bfcache: si la versión publicada cambió
+  // respecto a la que tiene esta página (congelada), recargamos para traer el código
+  // nuevo. Evita quedarse con JS/HTML viejo tras un despliegue al volver atrás.
+  window.addEventListener('pageshow', (e) => {
+    if (!e || !e.persisted) return;
+    fetch('/asset-version.json?t=' + Date.now(), { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((d) => {
+        const latest = d && d.v ? String(d.v).trim() : '';
+        if (latest && latest !== fallbackVersion()) location.reload();
+      })
+      .catch(() => {});
+  });
+
   const withVer = (url, ver) => {
     if (!url) return url;
     if (/^(https?:)?\/\//i.test(url)) return url;
@@ -65,10 +79,13 @@
   };
 
   const appendDeferredScript = (src, ver) => {
-    const url = withVer(src, ver);
-    if (document.querySelector('script[src="' + url + '"]')) return;
+    // Dedupe por ruta base (ignorando ?v): si la página ya incluye este script
+    // de forma estática con otra versión (p. ej. cart-runtime.js en el home), no
+    // lo cargamos otra vez — provocaba doble registro del handler de "Añadir".
+    if (document.querySelector('script[src="' + src + '"]') ||
+        document.querySelector('script[src^="' + src + '?"]')) return;
     const script = document.createElement('script');
-    script.src = url;
+    script.src = withVer(src, ver);
     script.defer = true;
     document.head.appendChild(script);
   };

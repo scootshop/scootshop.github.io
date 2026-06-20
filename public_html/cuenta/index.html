@@ -2,674 +2,591 @@
 <html lang="es-ES">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
   <title>Mi cuenta | SCOOT SHOP</title>
   <meta name="description" content="Accede a tu cuenta SCOOT SHOP con Google, revisa tus pedidos y gestiona tu perfil de cliente." />
   <meta name="robots" content="noindex,nofollow,max-image-preview:large" />
   <meta name="format-detection" content="telephone=no" />
   <meta name="theme-color" content="#ffffff" />
   <meta name="color-scheme" content="only light" />
-  <meta name="asset-version" content="20260613-5" />
+  <meta name="asset-version" content="20260620-2" />
 
   <link rel="canonical" href="https://scootshop.co/cuenta/" />
-  <link rel="icon" href="/favicon.ico?v=20260613-4" sizes="any" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=20260613-4" />
-  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png?v=20260613-4" />
-  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png?v=20260613-4" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=20260613-4" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=20260613-4" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=20260613-4" />
-  <link rel="manifest" href="/site.webmanifest?v=20260613-4" />
+  <link rel="icon" href="/favicon.ico?v=20260620-2" sizes="any" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=20260620-2" />
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png?v=20260620-2" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png?v=20260620-2" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=20260620-2" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=20260620-2" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=20260620-2" />
+  <link rel="manifest" href="/site.webmanifest?v=20260620-2" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" />
-  <link rel="stylesheet" href="/css/icons.css?v=20260613-4" />
-  <link rel="stylesheet" href="/css/main.css?v=20260613-4" />
-  <link rel="stylesheet" href="/css/partials.mobile-menu.css?v=20260613-4" />
+  <link rel="stylesheet" href="/css/icons.css?v=20260620-2" />
+  <link rel="stylesheet" href="/css/main.css?v=20260620-2" />
+  <link rel="stylesheet" href="/css/partials.mobile-menu.css?v=20260620-2" />
+  <link rel="stylesheet" href="/css/address-fields.css?v=20260620-2" />
 
   <style>
-    html {
-      background: #eef2f6;
-      overscroll-behavior-y: none;
-    }
+    /* ─── ENTORNO DE SCROLL IDÉNTICO AL RESTO DE PÁGINAS ──────────
+       NO se tocan height / overflow / overscroll / scroll-behavior:
+       se heredan de main.css igual que en index, productos, etc.
+       (html,body{height:100%}, html{overflow-x:hidden; scroll-behavior:smooth}).
+       Cualquier override aquí hacía que el header fixed saltara al
+       colapsar la barra de direcciones del móvil. Solo color/fuente. */
+    html { background: #f0f2f5; }
     body.account-page {
-      margin: 0;
-      min-height: 100dvh;
-      background-color: #eef2f6;
-      background-image: radial-gradient(1200px 500px at 20% -10%, #ffffff 0%, #f3f5f8 40%, #eef2f6 100%);
+      background: #f0f2f5;
       color: #0f172a;
       font-family: "Plus Jakarta Sans", system-ui, sans-serif;
-      overscroll-behavior-y: none;
     }
-    .account-shell {
-      min-height: 100dvh;
-    }
-    .account-main {
-      padding: 12px 0 64px;
-    }
-    .account-hero {
+
+    /* ─── LAYOUT (dashboard 2 columnas en desktop) ─────────────── */
+    .acct-page {
+      width: min(1160px, calc(100% - 40px));
+      margin-inline: auto;
+      padding: 16px 0 80px;
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 18px;
-      align-items: stretch;
-      margin-top: 4px;
+      grid-template-columns: clamp(420px, 40%, 560px) minmax(0, 1fr);
+      align-items: start;
+      gap: 16px;
+      overflow-x: hidden;
     }
-    .account-card,
-    .account-panel,
-    .account-order {
-      background: #ffffff;
-      border: 1px solid #e5e7eb;
-      border-left: 0;
-      box-shadow: none;
+    .acct-sidebar { display: grid; gap: 14px; align-content: start; }
+    .acct-main { min-width: 0; }
+
+    /* Móvil/tablet (≤1024px): una sola columna centrada; orden cuenta → pedidos → perfil → direcciones → ayuda */
+    @media (max-width: 1024px) {
+      .acct-page {
+        width: min(680px, calc(100% - 40px));
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 14px;
+      }
+      .acct-sidebar { display: contents; }
+      #accountSessionShell { order: 1; }
+      .acct-main { order: 2; }
     }
-    .account-card {
-      order: 1;
-      border-radius: 14px;
-      padding: 18px 18px 16px;
-      border-top: 1px solid #e5e7eb;
-      border-bottom: 1px solid #e5e7eb;
-    }
-    .account-kicker {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 5px 10px;
-      border-radius: 999px;
-      background: #f8fafc;
-      color: #475569;
-      font-size: .68rem;
-      font-weight: 700;
-      letter-spacing: .07em;
-      text-transform: uppercase;
-    }
-    .account-title {
-      margin: 14px 0 10px;
-      font-family: "Plus Jakarta Sans", system-ui, sans-serif;
-      font-size: clamp(1.6rem, 2.6vw, 2.1rem);
-      line-height: 1.12;
-      letter-spacing: -.02em;
-    }
-    .account-session-state {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0;
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid #2563eb;
-      background: #eff6ff;
-      color: #1d4ed8;
-      font-size: .72rem;
-      font-weight: 800;
-      letter-spacing: .05em;
-      text-transform: uppercase;
-      margin-top: 10px;
-      position: relative;
-      z-index: 1;
-    }
-    .account-session-state::before {
-      content: none;
-    }
-    .account-session-state--guest { color: #1d4ed8; background: #eff6ff; border-color: #2563eb; }
-    .account-session-state--logged-in { color: #0f766e; background: #ecfeff; border-color: #14b8a6; }
-    .account-session-state--expired { color: #9a3412; background: #fff7ed; border-color: #fdba74; }
-    .account-lead {
-      margin: 0;
-      color: #475569;
-      font-size: .98rem;
-      line-height: 1.55;
-      max-width: 56ch;
-    }
-    .account-points {
-      margin: 18px 0 0;
-      padding: 0;
-      list-style: none;
-      display: grid;
-      gap: 8px;
-    }
-    .account-points li {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-      color: #334155;
-      font-weight: 500;
-      font-size: .94rem;
-    }
-    .account-points i {
-      margin-top: 2px;
-      color: #0f172a;
-    }
-    .account-stats {
-      margin-top: 16px;
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 9px;
-      border-top: 1px solid #eef2f7;
-      border-bottom: 1px solid #eef2f7;
-      padding: 10px 0;
-    }
-    .account-stat {
-      padding: 12px 12px;
-      border-radius: 10px;
-      background: #fafbfc;
-      border: 1px solid #edf1f5;
-      border-right: 1px solid #edf1f5;
-    }
-    .account-stat:last-child {
-      border-right: 1px solid #edf1f5;
-    }
-    .account-stat span {
-      display: block;
-      font-size: .66rem;
-      font-weight: 700;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      color: #64748b;
-      margin-bottom: 5px;
-    }
-    .account-stat strong {
-      display: block;
-      font-size: .98rem;
-      color: #0f172a;
-      line-height: 1.2;
-      word-break: break-word;
-    }
-    .account-panel {
-      order: 0;
-      background: transparent;
-      border: 0;
-      border-radius: 0;
-      padding: 0;
-      width: 100%;
-      max-width: none;
-      align-self: start;
-      position: relative;
-      top: 0;
-    }
-    .account-session-shell {
-      position: relative;
-      overflow: hidden;
-      background: #ffffff;
-      border: 0;
-      border-radius: 22px;
-      padding: 20px;
-      min-height: 0;
-      box-shadow:
-        0 1px 0 rgba(255,255,255,.92) inset,
-        0 18px 44px rgba(15,23,42,.08),
-        0 6px 18px rgba(15,23,42,.04);
-      color: #0f172a;
-    }
-    .account-session-shell.is-guest .account-session-state {
-      color: #1d4ed8;
-      background: #eff6ff;
-      border-color: #2564eb00;
-    }
-    .account-session-shell.is-guest .account-meta strong {
-      font-size: 1.12rem;
-    }
-    .account-session-shell.is-guest #accountStatusRow {
-      display: none !important;
-    }
-    .account-session-shell.is-logged #accountStatusRow {
-      display: flex;
-    }
-    .account-session-shell::before {
-      content: none;
-    }
-    .account-session-shell::after {
-      content: none;
-    }
-    .account-panel h2 {
-      margin: 0;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 0;
-      border: 0;
-      background: transparent;
-      font-size: clamp(1.2rem, 2.5vw, 1.52rem);
-      letter-spacing: -.03em;
-      text-transform: none;
-      color: #0f172a;
-      font-weight: 800;
-      line-height: 1.15;
-      position: relative;
-      z-index: 1;
-      padding-right: 0;
-    }
-    .account-session-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 14px;
-      position: relative;
-      z-index: 1;
-    }
-    .account-panel h2::before {
-      content: none;
-    }
-    .account-session-shell .account-session-state {
-      position: static;
-      margin: 0;
-    }
-    .account-session-shell .account-session-state::before {
-      display: none;
-    }
-    .orders-title {
-      margin: 0 0 8px;
-      font-size: 1.05rem;
-      letter-spacing: -.02em;
-      text-transform: none;
-      color: #0f172a;
-    }
-    .account-panel p,
-    .account-note,
-    .account-empty {
-      color: #64748b;
-      line-height: 1.55;
-    }
-    .account-status {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 0;
-      border-radius: 0;
-      background: transparent;
-      color: #0f172a;
-      border: 0;
-      margin-bottom: 12px;
-      position: relative;
-      z-index: 1;
-    }
-    .account-status-row {
-      width: 100%;
+
+    /* ─── TARJETA AYUDA / SOPORTE ──────────────────────────────── */
+    .acct-help-card { display: grid; gap: 4px; }
+    .acct-help-link {
       display: flex;
       align-items: center;
       gap: 12px;
-      margin-top: 2px;
-    }
-    #accountAvatarWrap {
-      width: 52px;
-      height: 52px;
-      display: grid;
-      place-items: center;
-      flex: 0 0 auto;
-    }
-    .account-status-row .account-meta {
-      min-width: 0;
-    }
-    .account-login {
-      margin-top: 14px;
-      padding: 12px 0 0;
-      border-radius: 0;
-      background: transparent;
-      border: 0;
-      border-top: 1px solid rgba(255, 255, 255, 0.18);
-      position: relative;
-      z-index: 1;
-      display: grid;
-      gap: 10px;
-    }
-    .account-avatar {
-      width: 52px;
-      height: 52px;
-      border-radius: 999px;
-      object-fit: cover;
-      background: #ffffff;
-      border: 1px solid #d8e1ea;
-      box-shadow: 0 8px 18px rgba(15,23,42,.06);
-      flex-shrink: 0;
-    }
-    .account-avatar-fallback {
-      width: 52px;
-      height: 52px;
-      border-radius: 999px;
-      display: grid;
-      place-items: center;
-      background: #f8fafc;
-      border: 1px solid #d8e1ea;
-      font-size: 1.08rem;
-      font-weight: 800;
-      color: #334155;
-      box-shadow: 0 8px 18px rgba(15,23,42,.06);
-      flex-shrink: 0;
-    }
-    .account-meta strong {
-      display: block;
-      font-size: 1.24rem;
-      line-height: 1.1;
-      margin-bottom: 5px;
-      color: #111827;
-    }
-    .account-meta span {
-      display: block;
-      color: #6b7280;
-      font-size: .92rem;
-      line-height: 1.4;
-    }
-    .account-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 14px;
-    }
-    #accountLoggedInBox {
-      margin-top: 12px;
-    }
-    #accountLoggedInBox .account-note {
-      display: none;
-    }
-    #accountLoggedInBox .account-actions {
-      margin-top: 0;
-    }
-    .account-session-shell.is-guest .account-login {
-      margin-top: 0;
-      padding: 0;
-      border: 0;
-      width: 100%;
-      max-width: 100%;
-    }
-    .account-session-shell.is-guest .account-login strong,
-    .account-session-shell.is-guest .account-login .account-note {
-      display: none;
-    }
-    .account-session-shell.is-guest #googleLoginButton {
-      min-height: 44px;
-      margin-top: 0;
-      width: 100%;
-    }
-    .account-insights {
-      margin-top: 14px;
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px;
-    }
-    .session-metric {
-      position: relative;
-      overflow: hidden;
-      background: linear-gradient(180deg, rgba(255,255,255,.99) 0%, rgba(248,251,254,.97) 100%);
-      border: 1px solid rgba(15,23,42,.06);
-      border-radius: 16px;
-      padding: 10px 11px;
-      min-height: 84px;
-      display: grid;
-      align-content: start;
-      gap: 6px;
-      box-shadow:
-        0 1px 0 rgba(255,255,255,.92) inset,
-        0 10px 24px rgba(15,23,42,.07),
-        0 3px 9px rgba(15,23,42,.03);
-      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-    }
-    .session-metric::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background: linear-gradient(90deg, rgba(15,23,42,.22), rgba(15,23,42,.06));
-      opacity: .65;
-      border-radius: 999px;
-    }
-    .session-metric-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-    .session-metric:hover {
-      border-color: rgba(15,23,42,.11);
-      transform: translateY(-1px);
-      box-shadow:
-        0 1px 0 rgba(255,255,255,.96) inset,
-        0 14px 30px rgba(15,23,42,.1),
-        0 5px 12px rgba(15,23,42,.05);
-    }
-    .session-metric-label {
-      font-size: .66rem;
-      font-weight: 900;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      color: #67768c;
-      line-height: 1.1;
-    }
-    .session-metric-icon {
-      width: 24px;
-      height: 24px;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: #eef3f8;
-      color: #334155;
-      font-size: .76rem;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
-      flex: 0 0 auto;
-    }
-    .session-metric-icon svg {
-      width: 13px;
-      height: 13px;
-      display: block;
-    }
-    .session-metric strong {
-      font-size: 1.08rem;
-      font-weight: 800;
-      letter-spacing: -.01em;
-      color: #0f172a;
-      line-height: 1.2;
-    }
-    .session-metric small {
-      font-size: .72rem;
-      color: #6b7280;
-      line-height: 1.25;
-    }
-    .session-metric--cta {
+      padding: 10px 8px;
+      border-radius: 12px;
       text-decoration: none;
       color: inherit;
-      background: #ffffff;
-      border-color: rgba(15,23,42,.06);
-      box-shadow:
-        0 1px 0 rgba(255,255,255,.92) inset,
-        0 10px 24px rgba(15,23,42,.07),
-        0 3px 9px rgba(15,23,42,.03);
+      transition: background .14s ease;
     }
-    .session-metric--orders::before {
-      background: linear-gradient(90deg, rgba(37,99,235,.45), rgba(37,99,235,.12));
-    }
-    .session-metric--tracking::before {
-      background: linear-gradient(90deg, rgba(255, 119, 0, 0.5), rgba(255, 119, 0, 0.5));
-    }
-    .session-metric--orders .session-metric-icon {
-      background: #eaf2ff;
-      color: #1d4ed8;
-    }
-    .session-metric--tracking .session-metric-icon {
-      background: #f8f4ed;
-      color: #654b16;
-    }
-    .session-metric--cta .session-metric-icon {
-      background: #eef3f8;
-      color: #334155;
-    }
-    .session-metric--cta strong {
+    .acct-help-link:hover { background: #f8fafc; }
+    .acct-help-ico {
+      flex-shrink: 0;
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      background: #f1f5f9;
       color: #0f172a;
-    }
-    .session-metric--cta small {
-      color: #6b7280;
-    }
-    .session-metric--cta:hover,
-    .session-metric--cta:focus-visible {
-      border-color: rgba(15,23,42,.11);
-      box-shadow:
-        0 1px 0 rgba(255,255,255,.96) inset,
-        0 14px 30px rgba(15,23,42,.1),
-        0 5px 12px rgba(15,23,42,.05);
-      outline: none;
-    }
-    #logoutBtn {
-      background: #0f172a;
-      border-color: #0f172a;
-      color: #ffffff;
-    }
-    #logoutBtn:hover,
-    #logoutBtn:active {
-      background: #1f2937;
-      border-color: #1f2937;
-      color: #ffffff;
-    }
-    .btn-accent,
-    .btn-ghost,
-    .btn-outline {
-      appearance: none;
-      border: 1px solid transparent;
-      border-bottom: 1px solid transparent;
-      border-radius: 999px;
-      padding: 10px 14px;
-      font: inherit;
-      font-weight: 700;
-      font-size: .9rem;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background .14s ease, color .14s ease, border-color .14s ease;
-    }
-    .btn-accent {
-      background: #d10000;
-      color: #ffffff;
-      border-color: #d10000;
-    }
-    .btn-ghost,
-    .btn-outline {
-      background: #ffffff;
-      border-color: #d1d5db;
-      color: #0f172a;
-    }
-    .btn-accent:hover,
-    .btn-ghost:hover,
-    .btn-outline:hover {
-      background: rgba(15, 23, 42, 0.03);
-    }
-    .account-session-shell.is-guest #authMessage {
-      display: none;
-    }
-    #googleLoginButton {
-      min-height: 44px;
-      margin-top: 10px;
-      width: 100%;
-      visibility: hidden;
-    }
-    #googleLoginButton[data-gsi-ready="1"] {
-      visibility: visible;
-    }
-    .account-note {
-      margin-top: 10px;
-      font-size: .88rem;
-      padding: 0;
-      border: 0;
-      background: transparent;
-      box-shadow: none;
-      color: #475569;
-    }
-    .account-session-shell .account-note,
-    .account-session-shell .account-login strong {
-      color: #4b5563;
-    }
-    .account-session-shell .btn-accent {
-      background: #0f172a;
-      color: #ffffff;
-      border-color: #0f172a;
-    }
-    .account-session-shell .btn-ghost,
-    .account-session-shell .btn-outline {
-      background: #ffffff;
-      border-color: #d1d5db;
-      color: #111827;
-    }
-    .account-note--error {
-      color: #b91c1c;
-    }
-    .account-note--success {
-      color: #166534;
-    }
-    .orders-section {
-      margin-top: 12px;
       display: grid;
-      gap: 14px;
-      border-top: 0;
-      padding-top: 0;
+      place-items: center;
+      font-size: 1rem;
     }
-    .orders-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: end;
-      gap: 10px;
-      flex-wrap: wrap;
-      padding: 0 4px;
+    .acct-help-ico--wa { background: #dcfce7; color: #16a34a; }
+    .acct-help-text { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+    .acct-help-text strong { font-size: .9rem; font-weight: 800; color: #0f172a; }
+    .acct-help-text small { font-size: .76rem; color: #94a3b8; }
+
+    /* En escritorio, la tarjeta de ayuda iguala la altura del panel «Mi cuenta». */
+    @media (min-width: 1025px) {
+      .acct-main[data-active="help"] { align-self: stretch; }
+      .acct-main[data-active="help"] .acct-panel[data-panel="help"],
+      .acct-main[data-active="help"] .acct-help-card { height: 100%; }
     }
-    .orders-header p {
-      margin: 4px 0 0;
-      color: #64748b;
+
+    /* ─── PERFIL + DIRECCIONES ─────────────────────────────────── */
+    .acct-link-btn {
+      border: 0; background: none; padding: 6px 8px; font: inherit;
+      font-size: .84rem; font-weight: 800; color: #1d4ed8; cursor: pointer; border-radius: 8px;
     }
-    .orders-grid {
-      display: grid;
-      gap: 14px;
+    .acct-link-btn:hover { background: #eff6ff; }
+
+    /* Los campos (.field/.form-grid) usan css/address-fields.css — mismo estilo que el checkout */
+    .acct-form { display: grid; gap: 2px; }
+    .acct-form-actions { display: flex; align-items: center; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+    .acct-form-note { font-size: .82rem; font-weight: 700; }
+    .acct-form-note--ok { color: #16a34a; }
+    .acct-form-note--err { color: #dc2626; }
+    .acct-check { display: flex; align-items: center; gap: 8px; font-size: .85rem; font-weight: 700; color: #475569; cursor: pointer; }
+    .acct-check input { width: 16px; height: 16px; }
+
+    .acct-address { border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px 14px; display: grid; gap: 4px; }
+    .acct-address + .acct-address { margin-top: 10px; }
+    .acct-address.is-default { border-color: #14b8a6; background: #f0fdfa; }
+    .acct-address-top { display: flex; align-items: center; gap: 8px; }
+    .acct-address-label { font-weight: 800; color: #0f172a; font-size: .92rem; }
+    .acct-default-badge {
+      font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em;
+      color: #0f766e; background: #ccfbf1; border-radius: 999px; padding: 2px 8px;
     }
+    .acct-address-text { font-size: .84rem; color: #475569; line-height: 1.4; }
+    .acct-address-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+    .acct-addr-action {
+      border: 0; background: none; padding: 5px 8px; border-radius: 8px; font: inherit;
+      font-size: .78rem; font-weight: 800; cursor: pointer; color: #475569;
+    }
+    .acct-addr-action:hover { background: #f1f5f9; color: #0f172a; }
+    .acct-addr-action--danger { color: #dc2626; }
+    .acct-addr-action--danger:hover { background: #fef2f2; }
+    .acct-empty-note { font-size: .85rem; color: #94a3b8; padding: 6px 0; }
+
+    /* ─── TARJETA BASE ────────────────────────────────────────── */
+    .acct-card {
+      --acct-pad: 22px;
+      background: #fff;
+      border-radius: 22px;
+      padding: var(--acct-pad);
+      box-shadow: 0 1px 3px rgba(15,23,42,.06), 0 4px 16px rgba(15,23,42,.07);
+    }
+
+    /* ─── CABECERA DE TARJETA · consistente con el checkout ───────
+       Título Russo One (var --sport) en mayúsculas + línea a sangre,
+       igual que .section-heading del checkout. */
+    .acct-cardhead,
+    .acct-head,
     .order-history-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 12px;
-      padding: 0 2px 10px;
-      border-bottom: 1px solid #e7edf4;
+      gap: 10px;
+      margin: calc(-1 * var(--acct-pad)) calc(-1 * var(--acct-pad)) 16px;
+      padding: 16px var(--acct-pad) 12px;
+      border-bottom: 1px solid rgba(17,19,21,.06);
     }
-    .order-history-head h2,
-    .tracking-head h2 {
+    .acct-cardhead__title,
+    .acct-head h2,
+    .order-history-head h2 {
       margin: 0;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 0;
-      border: 0;
-      background: transparent;
-      font-size: clamp(1.2rem, 2.5vw, 1.52rem);
-      letter-spacing: -.03em;
-      color: #0f172a;
-      font-weight: 800;
-      line-height: 1.15;
+      gap: 9px;
+      font-family: var(--sport);
+      font-weight: 700;
+      font-size: .95rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--ink);
+      line-height: 1.1;
     }
-    .order-history-head h2::before,
-    .tracking-head h2::before {
-      content: "";
-      width: 9px;
-      height: 9px;
-      border-radius: 999px;
-      background: #0f172a;
-      opacity: .7;
-      font-family: "Font Awesome 6 Free";
-      flex-shrink: 0;
+    .acct-cardhead__title i,
+    .order-history-head h2 i {
+      font-size: .92em;
+      color: var(--ink);
     }
-    .history-go {
-      width: 44px;
-      height: 44px;
-      border-radius: 999px;
-      border: 1px solid #e5e7eb;
-      background: #f8fafc;
-      color: #0f172a;
+
+    /* Badge estado — clases originales que asigna account.js */
+    .account-session-state {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.05rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      border: 1px solid #2563eb;
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+    .account-session-state--guest   { color: #1d4ed8; background: #eff6ff; border-color: #2563eb; }
+    .account-session-state--logged-in { color: #0f766e; background: #ecfeff; border-color: #14b8a6; }
+    .account-session-state--expired { color: #9a3412; background: #fff7ed; border-color: #fdba74; }
+
+    /* Cerrar sesión integrado en la cabecera (sustituye al badge ACTIVA cuando la
+       sesión está activa). Oculto por defecto; account.js marca .is-logged. */
+    .acct-head-logout {
+      display: none;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 13px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.24);
+      background: rgba(255,255,255,.10);
+      color: #fff;
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      line-height: 1;
+      cursor: pointer;
+      transition: background .16s ease, border-color .16s ease;
+    }
+    .acct-head-logout i { font-size: .9em; color: #fff; }
+    .acct-head-logout:hover { background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.38); }
+    .acct-head-logout:active { background: rgba(255,255,255,.14); }
+    /* En sesión activa: mostrar "SALIR" y ocultar el badge ACTIVA. */
+    .acct-card.is-logged .acct-head .acct-head-logout { display: inline-flex; }
+    .acct-card.is-logged .acct-head .account-session-state { display: none; }
+
+    /* ─── SKELETON ────────────────────────────────────────────── */
+    .acct-skel-wrap { display: grid; gap: 10px; padding: 2px 0; }
+    .acct-skel {
+      height: 10px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #e2e8f0 25%, #f8fafc 50%, #e2e8f0 75%);
+      background-size: 200% 100%;
+      animation: acct-shimmer 1.4s linear infinite;
+    }
+    .acct-skel-lg { height: 14px; width: 65%; }
+    .acct-skel-md { width: 50%; }
+    .acct-skel-sm { width: 32%; }
+    @keyframes acct-shimmer {
+      0%   { background-position:  200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ─── FILA USUARIO ────────────────────────────────────────── */
+    .acct-user-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    #accountAvatarWrap { flex-shrink: 0; }
+    .account-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #e2e8f0;
+      display: block;
+    }
+    .account-avatar-fallback {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #1e293b;
+      color: #f8fafc;
+      display: grid;
+      place-items: center;
+      font-size: 1.15rem;
       font-weight: 800;
     }
-    .order-history-list {
+    .acct-user-name {
+      margin: 0 0 4px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+    .acct-user-email {
+      margin: 0;
+      font-size: .85rem;
+      color: #64748b;
+    }
+
+    /* ─── MÉTRICAS ────────────────────────────────────────────── */
+    .acct-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    /* Pestañas (tiles): chip de icono + contador + nombre, con estado activo oscuro */
+    .acct-tab-tile {
+      appearance: none;
+      font: inherit;
+      cursor: pointer;
+      text-align: left;
       display: grid;
       gap: 12px;
+      align-content: start;
+      padding: 13px 13px 14px;
+      border: 1px solid #e6e9ef;
+      border-radius: 16px;
+      background: #fff;
+      color: #0f172a;
+      transition: border-color .15s ease, background .15s ease, box-shadow .18s ease, transform .15s ease;
     }
+    .acct-tab-tile:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 8px 20px rgba(15,23,42,.07);
+      transform: translateY(-1px);
+    }
+    .acct-tab-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      min-height: 34px;
+    }
+    .acct-tab-ico {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+      background: #f1f5f9;
+      color: #0f172a;
+      font-size: .95rem;
+    }
+    .acct-tab-count {
+      min-width: 22px;
+      height: 22px;
+      padding: 0 7px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #eef2f7;
+      color: #0f172a;
+      font-size: .72rem;
+      font-weight: 800;
+    }
+    .acct-tab-name {
+      font-weight: 800;
+      font-size: .92rem;
+      letter-spacing: -.01em;
+      line-height: 1.1;
+    }
+    .acct-tab-tile.is-active {
+      background: #0f172a;
+      border-color: #0f172a;
+      color: #fff;
+      box-shadow: 0 12px 28px rgba(15,23,42,.22);
+    }
+    .acct-tab-tile.is-active .acct-tab-ico { background: rgba(255,255,255,.14); color: #fff; }
+    .acct-tab-tile.is-active .acct-tab-count { background: rgba(255,255,255,.16); color: #fff; }
+    .acct-tab-tile.is-active .acct-tab-name { color: #fff; }
+
+    /* Paneles conmutables del lado principal */
+    .acct-panel { display: grid; gap: 16px; }
+
+    /* ─── LOGIN BOX ───────────────────────────────────────────── */
+    .acct-login-box {
+      display: grid;
+      gap: 10px;
+      padding-top: 4px;
+    }
+    .acct-login-hint {
+      margin: 0;
+      font-size: .9rem;
+      color: #64748b;
+      line-height: 1.5;
+    }
+    #googleLoginButton {
+      width: 100%;
+      min-height: 48px;
+      visibility: hidden;
+    }
+    #googleLoginButton[data-gsi-ready="1"] { visibility: visible; }
+    #authMessage {
+      font-size: .85rem;
+      color: #64748b;
+    }
+    #authMessage:empty { display: none; }
+    .account-note--error   { color: #dc2626; }
+    .account-note--success { color: #16a34a; }
+
+    /* Mismo lenguaje de botones que el carrito (Finalizar compra / Seguir comprando) */
+    .acct-btn {
+      appearance: none;
+      min-height: 46px;
+      border: 0;
+      border-radius: 999px;
+      padding: 0 18px;
+      font: inherit;
+      font-size: .79rem;
+      font-weight: 800;
+      letter-spacing: .03em;
+      text-transform: uppercase;
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #fff;
+      color: #0f172a;
+      box-shadow:
+        0 -1px 3px rgba(15,23,42,.045),
+        0 1px 0 rgba(255,255,255,.94) inset,
+        0 14px 30px rgba(15,23,42,.09);
+      transition: background .16s ease, box-shadow .16s ease, transform .16s ease, color .16s ease;
+    }
+    .acct-btn:hover {
+      background: #f8fafc;
+      box-shadow:
+        0 -1px 4px rgba(15,23,42,.055),
+        0 1px 0 rgba(255,255,255,.97) inset,
+        0 18px 34px rgba(15,23,42,.11);
+      transform: translateY(-1px);
+    }
+    .acct-btn:active { transform: translateY(0); }
+    /* Primario = "Finalizar compra" */
+    .acct-btn--dark {
+      border: 1px solid #6b6c6c;
+      background: linear-gradient(180deg, #373737 0%, #111111 100%);
+      color: #fff;
+      box-shadow: none;
+    }
+    .acct-btn--dark:hover {
+      background: linear-gradient(180deg, #373737 0%, #111111 100%);
+      border-color: #6b6c6c;
+      color: #fff;
+      box-shadow: none;
+      transform: none;
+    }
+    .acct-btn--dark:active { transform: none; }
+
+    /* ─── ESTADO LOGUEADO · CABECERA HERO ─────────────────────
+       account.js añade .is-logged a #accountSessionShell. Convierte
+       la cabecera + fila de usuario en un banner oscuro a sangre, con
+       avatar destacado y badge ACTIVA integrado; métricas y logout
+       quedan sobre el fondo blanco de la tarjeta. */
+    .acct-card.is-logged {
+      padding: 0;
+      overflow: hidden;
+    }
+    /* Banner oscuro continuo: cabecera + fila de usuario */
+    .acct-card.is-logged .acct-head,
+    .acct-card.is-logged .acct-user-row {
+      margin: 0;
+      background: #1f2124;
+    }
+    .acct-card.is-logged .acct-head {
+      padding: 20px 22px 0;
+      border-bottom: 0;
+    }
+    .acct-card.is-logged .acct-head h2 {
+      color: #f8fafc;
+      font-size: .8rem;
+      font-weight: 800;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      opacity: .68;
+    }
+    /* Badge ACTIVA sobre fondo oscuro */
+    .acct-card.is-logged .account-session-state--logged-in {
+      background: rgba(16,185,129,.16);
+      color: #6ee7b7;
+      border: none;
+      box-shadow: none;
+    }
+    /* Fila de usuario dentro del hero */
+    .acct-card.is-logged .acct-user-row {
+      padding: 14px 22px 22px;
+      align-items: center;
+    }
+    .acct-card.is-logged .account-avatar,
+    .acct-card.is-logged .account-avatar-fallback {
+      width: 60px;
+      height: 60px;
+      box-shadow: 0 8px 22px rgba(0,0,0,.35);
+    }
+    .acct-card.is-logged .account-avatar {
+      border-color: rgba(255,255,255,.28);
+    }
+    .acct-card.is-logged .account-avatar-fallback {
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      color: #fff;
+      border: 2px solid rgba(255,255,255,.28);
+    }
+    .acct-card.is-logged .acct-user-name {
+      color: #fff;
+      font-size: 1.18rem;
+    }
+    .acct-card.is-logged .acct-user-email {
+      color: rgba(226,232,240,.72);
+    }
+    /* Contenido bajo el hero (fondo claro de la tarjeta) */
+    .acct-card.is-logged .acct-metrics {
+      margin: 0;
+      padding: 18px 22px 0;
+    }
+    .acct-card.is-logged #accountLoggedInBox {
+      padding: 16px 22px 22px;
+    }
+    .acct-card.is-logged #accountLoggedInCopy {
+      color: #64748b;
+    }
+
+    /* ─── SECCIÓN PEDIDOS (generada por JS) ───────────────────── */
+    .order-history {}
+
+    .acct-orders-count {
+      font-size: .8rem;
+      font-weight: 700;
+      color: #94a3b8;
+      white-space: nowrap;
+    }
+
+    /* Filtros y buscador */
+    .acct-tools {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .acct-tabs {
+      display: flex;
+      gap: 4px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .acct-tab {
+      border: 0;
+      background: none;
+      padding: 8px 12px 10px;
+      font: inherit;
+      font-size: .88rem;
+      font-weight: 700;
+      color: #94a3b8;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color .15s ease, border-color .15s ease;
+      white-space: nowrap;
+    }
+    .acct-tab.is-active {
+      color: #0f172a;
+      border-bottom-color: #0f172a;
+    }
+    .acct-search {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      background: #f8fafc;
+      padding: 11px 16px;
+      font: inherit;
+      /* 16px mínimo: evita auto-zoom de iOS Safari al enfocar el input */
+      font-size: 16px;
+      color: #0f172a;
+      outline: none;
+      transition: border-color .15s ease, background .15s ease;
+    }
+    .acct-search::placeholder { color: #94a3b8; }
+    .acct-search:focus { background: #fff; border-color: #64748b; }
+
+    /* Lista pedidos */
+    .order-history-list { display: grid; gap: 12px; }
+
+    .order-history-link {
+      display: block;
+      color: inherit;
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .order-history-link:focus-visible { outline: none; }
+
     .order-history-item {
-      background: linear-gradient(180deg, rgba(255,255,255,.99) 0%, rgba(247,250,253,.97) 100%);
+      position: relative;
+      background: linear-gradient(180deg, #ffffff 0%, #f7f7f8 100%);
       border: 0;
       border-radius: 20px;
       padding: 12px;
@@ -680,85 +597,176 @@
         0 1px 0 rgba(255,255,255,.9) inset,
         0 18px 44px rgba(15,23,42,.08),
         0 6px 18px rgba(15,23,42,.04);
-      transform: translate3d(0, 0, 0);
-      transition: transform .34s cubic-bezier(.22, 1, .36, 1), box-shadow .32s ease-out;
-      will-change: transform, box-shadow;
-      backface-visibility: hidden;
+      transition: box-shadow .22s ease-out;
     }
-    .order-history-link {
-      display: block;
-      color: inherit;
-      text-decoration: none;
-      -webkit-tap-highlight-color: transparent;
+    /* Pedido entregado: borde verde */
+    .order-history-item.is-delivered {
+      border: 2px solid #16a34a;
     }
-    .order-history-link:focus-visible .order-history-item {
-      box-shadow:
-        0 1px 0 rgba(255,255,255,.94) inset,
-        0 22px 48px rgba(15,23,42,.10),
-        0 9px 22px rgba(15,23,42,.05);
-      transform: translate3d(0, -2px, 0);
+    /* Al abrir el menú, elevar la tarjeta sobre las siguientes */
+    .order-history-item.is-menu-open {
+      z-index: 20;
     }
+
     @media (hover: hover) and (pointer: fine) {
-      .order-history-link:hover .order-history-item {
+      .order-history-item:hover {
         box-shadow:
           0 1px 0 rgba(255,255,255,.94) inset,
           0 22px 48px rgba(15,23,42,.10),
           0 9px 22px rgba(15,23,42,.05);
-        transform: translate3d(0, -2px, 0);
       }
     }
-    .order-history-link:focus-visible {
-      outline: none;
+
+    /* ─── MENÚ DE 3 PUNTOS POR PEDIDO (recibo · tracking) ──────── */
+    .order-menu {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: 4;
     }
-    .history-actions {
+    .order-menu-btn {
+      position: relative;
+      appearance: none;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      color: #94a3b8;
+      font-size: 1rem;
+      transition: background .14s ease, color .14s ease;
+    }
+    .order-menu-btn:hover,
+    .order-menu.is-open .order-menu-btn {
+      background: #eef2f7;
+      color: #0f172a;
+    }
+    /* 3 puntos verticales dibujados con CSS (siempre derechos) */
+    .order-menu-dots,
+    .order-menu-dots::before,
+    .order-menu-dots::after {
+      width: 3.5px;
+      height: 3.5px;
+      border-radius: 50%;
+      background: currentColor;
+      display: block;
+    }
+    .order-menu-dots { position: relative; }
+    .order-menu-dots::before,
+    .order-menu-dots::after {
+      content: "";
+      position: absolute;
+      left: 0;
+    }
+    .order-menu-dots::before { top: -5px; }
+    .order-menu-dots::after  { top: 5px; }
+    /* Recibo nuevo sin abrir: los 3 puntos se transforman en un "!" rojo */
+    .order-menu-bang {
+      display: none;
+      font-weight: 900;
+      font-size: 1.1rem;
+      line-height: 1;
+      color: #ef4444;
+    }
+    .order-menu.has-new .order-menu-dots { display: none; }
+    .order-menu.has-new .order-menu-bang {
+      display: block;
+      transform-origin: center;
+      animation: order-bang-pulse 2.2s ease-in-out infinite;
+    }
+    .order-menu.has-new .order-menu-btn { color: #ef4444; }
+    @keyframes order-bang-pulse {
+      0%, 60%, 100% { transform: translateY(0) scale(1); }
+      70%           { transform: translateY(-2px) scale(1.18); }
+      80%           { transform: translateY(0) scale(1); }
+      88%           { transform: translateY(-1px) scale(1.08); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .order-menu.has-new .order-menu-bang { animation: none; }
+    }
+    .order-menu-pop {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      min-width: 212px;
+      background: #fff;
+      border-radius: 14px;
+      padding: 6px;
+      display: grid;
+      gap: 2px;
+      z-index: 30;
+      box-shadow:
+        0 -1px 3px rgba(15,23,42,.05),
+        0 14px 34px rgba(15,23,42,.18);
+    }
+    .order-menu-item {
       display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      padding-top: 2px;
-    }
-    .history-action-link,
-    .history-action-resume {
-      border-radius: 999px;
-      border: 1px solid #d9dee7;
-      background: #f8fafc;
+      align-items: center;
+      gap: 9px;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 9px 11px;
+      border: 0;
+      border-radius: 9px;
+      background: transparent;
+      cursor: pointer;
+      font: inherit;
+      font-size: .85rem;
+      font-weight: 700;
       color: #0f172a;
       text-decoration: none;
-      font-weight: 700;
-      font-size: .84rem;
+      text-align: left;
+      transition: background .12s ease;
+    }
+    .order-menu-item i { width: 16px; text-align: center; color: #64748b; font-size: .9em; flex-shrink: 0; }
+    .order-menu-item:hover { background: #f1f5f9; }
+    .order-menu-item-label { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; white-space: nowrap; }
+    .order-menu-item-label small {
+      font-size: .69rem;
+      font-weight: 600;
+      color: #b4bdc8;
+      margin-top: 1px;
+    }
+    .order-menu-item.is-disabled {
+      color: #9aa6b2;
+      cursor: default;
+      pointer-events: none;
+    }
+    .order-menu-item.is-disabled i { color: #b4bdc8; }
+    /* "!" estático en la opción nueva (recibo) cuando hay alerta */
+    .order-menu-item-bang {
+      margin-left: auto;
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fee2e2;
+      color: #ef4444;
+      font-weight: 900;
+      font-size: .8rem;
       line-height: 1;
-      padding: 9px 14px;
-      cursor: pointer;
-      transition: border-color .18s ease, background-color .18s ease, color .18s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
-    .history-action-link:hover,
-    .history-action-link:focus-visible,
-    .history-action-resume:hover,
-    .history-action-resume:focus-visible {
-      border-color: #cbd5e1;
-      background: #ffffff;
-      outline: none;
+
+    @media (max-width: 480px) {
     }
-    .history-action-resume {
-      border-color: #0f172a;
-      background: #0f172a;
-      color: #ffffff;
-    }
-    .history-action-resume:hover,
-    .history-action-resume:focus-visible {
-      border-color: #1f2937;
-      background: #1f2937;
-    }
-    .history-action-resume:disabled {
-      opacity: .68;
-      cursor: wait;
-    }
+
+    /* Fila superior del pedido (hueco a la derecha para el menú) */
     .history-top {
       display: grid;
       grid-template-columns: 66px 1fr auto;
       align-items: center;
       gap: 12px;
       overflow: visible;
+      padding-right: 34px;
     }
+
+    /* Avatar del pedido */
     .history-avatar {
       width: 56px;
       height: 56px;
@@ -774,18 +782,11 @@
       isolation: isolate;
     }
     .history-avatar--product {
-
-      background: #ffffff;
-      box-shadow: 0px 0px 9px #e5e5e5;
-      background-color: #ffffff !important;
-      background-image: none !important;
-      border: 1px solid #d8e1ea00;
+      background: #fff;
+      box-shadow: 0 0 9px #e5e5e5;
+      border: 1px solid rgba(216,225,234,0);
     }
-    .history-avatar-img {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
+    .history-avatar-img { width: 100%; height: 100%; display: block; }
     .history-avatar-img--single {
       object-fit: contain;
       object-position: center 58%;
@@ -794,8 +795,9 @@
       filter: saturate(1.04) contrast(1.02);
     }
     .history-avatar--collage {
-      border: 1px solid #d8e1ea;
-      background: #ffffff;
+      background: #fff;
+      box-shadow: 0 0 9px #e5e5e5;
+      border: 1px solid rgba(216,225,234,0);
       padding: 0;
       overflow: visible;
       place-items: stretch;
@@ -804,8 +806,8 @@
       position: absolute;
       inset: 0;
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      grid-template-rows: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(2,minmax(0,1fr));
+      grid-template-rows: repeat(2,minmax(0,1fr));
       gap: 1px;
       line-height: 0;
       min-height: 0;
@@ -838,13 +840,13 @@
       justify-content: center;
       padding: 0 7px;
       background: #0f172a;
-      color: #ffffff;
-      border: 2px solid #ffffff;
+      color: #fff;
+      border: 2px solid #fff;
       font-size: .68rem;
       line-height: 1;
       font-weight: 800;
       letter-spacing: .01em;
-      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.28);
+      box-shadow: 0 4px 10px rgba(15,23,42,.28);
       z-index: 6;
       pointer-events: none;
     }
@@ -854,6 +856,9 @@
       font-size: .95rem;
       letter-spacing: .02em;
     }
+
+    /* Texto del pedido */
+    .history-main { min-width: 0; }
     .history-main strong {
       display: block;
       font-size: .98rem;
@@ -878,6 +883,8 @@
       align-self: start;
       justify-self: end;
     }
+
+    /* Tracking inline */
     .tracking-inline {
       display: grid;
       gap: 8px;
@@ -909,6 +916,10 @@
       width: var(--progress, 40%);
       background: linear-gradient(90deg, #d946ef, #7c3aed);
       border-radius: 999px;
+      display: block;
+    }
+    .track-line.is-delivered > i {
+      background: linear-gradient(90deg, #22c55e, #16a34a);
     }
     .tracking-icons {
       position: absolute;
@@ -927,430 +938,236 @@
       width: var(--icon-size);
       height: var(--icon-size);
       border-radius: 999px;
-      background: #ffffff;
+      background: #fff;
       color: #111827;
       border: 3px solid #f8fafc;
       display: grid;
       place-items: center;
       font-size: .9rem;
       opacity: 1;
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.30);
+      box-shadow: 0 2px 6px rgba(15,23,42,.30);
       transition: opacity .16s ease, transform .16s ease;
     }
-    .tracking-icons span.is-on {
-      opacity: 1;
-    }
-    .track-line.is-delivered > i {
-      background: linear-gradient(90deg, #22c55e, #16a34a);
-    }
+    .tracking-icons span.is-on { opacity: 1; }
+
+    /* Estado vacío */
     .history-empty {
-      margin: 8px 0 2px;
-      color: #6b7280;
-      font-size: .92rem;
-    }
-    .history-card {
-      background: #ffffff;
-      border: 1px solid #e5e7eb;
-      border-radius: 28px;
-      padding: 10px 0;
-    }
-    .history-row {
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      align-items: center;
-      gap: 14px;
-      padding: 14px 16px;
-    }
-    .history-row + .history-row {
-      border-top: 1px solid #edf1f5;
-    }
-    .tracking-empty {
-      margin: 8px 0 2px;
-      color: #6b7280;
-      font-size: .92rem;
-    }
-    .account-order {
-      border-radius: 10px;
-      padding: 14px;
-      display: grid;
-      gap: 10px;
-      border-top: 1px solid #e5e7eb;
-      border-bottom: 1px solid #e5e7eb;
-    }
-    .order-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 14px;
-      flex-wrap: wrap;
-      align-items: start;
-    }
-    .order-title {
-      margin: 0;
-      font-size: 1.02rem;
-      letter-spacing: -.02em;
-    }
-    .order-sub {
-      margin: 4px 0 0;
-      color: #64748b;
-      font-size: .9rem;
-    }
-    .order-badges {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: flex-end;
-    }
-    .badge {
-      padding: 5px 9px;
-      border-radius: 999px;
-      font-size: .68rem;
-      font-weight: 700;
-      letter-spacing: .04em;
-      text-transform: uppercase;
-      background: #f1f5f9;
-      color: #0f172a;
-    }
-    .badge--paid { color: #166534; background: #ecfdf3; }
-    .badge--pending { color: #92400e; background: #fffbeb; }
-    .badge--error { color: #991b1b; background: #fef2f2; }
-    .badge--account { color: #0f172a; background: #f1f5f9; }
-    .order-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px;
-    }
-    .order-field {
-      padding: 10px 12px;
-      border-radius: 10px;
-      background: #fafbfc;
-      border: 1px solid #edf1f5;
-      border-right: 1px solid #edf1f5;
-    }
-    .order-field:last-child {
-      border-right: 1px solid #edf1f5;
-    }
-    .order-field span {
-      display: block;
-      font-size: .72rem;
-      font-weight: 800;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: #64748b;
-      margin-bottom: 5px;
-    }
-    .order-field strong {
-      display: block;
-      font-size: .95rem;
-      color: #0f172a;
-      word-break: break-word;
-    }
-    .order-timeline {
-      display: grid;
-      gap: 10px;
-      margin-top: 2px;
-    }
-    .timeline-step {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-      padding: 9px 10px;
-      border-radius: 10px;
-      background: #fafbfc;
-      border: 1px solid #edf1f5;
-      border-bottom: 1px solid #edf1f5;
-    }
-    .timeline-step .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      background: #cbd5e1;
-      margin-top: 5px;
-      flex-shrink: 0;
-    }
-    .timeline-step.is-done .dot { background: #16a34a; }
-    .timeline-step.is-active .dot { background: #b91c1c; }
-    .timeline-step strong {
-      display: block;
-      font-size: .76rem;
-      font-weight: 800;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      color: #475569;
-      margin-bottom: 3px;
-    }
-    .timeline-step span {
-      display: block;
-      font-size: .88rem;
-      color: #334155;
-      line-height: 1.45;
-    }
-    .order-note {
-      padding: 10px 12px;
-      border-radius: 10px;
-      background: #fafbfc;
-      border: 1px solid #edf1f5;
-      border-top: 1px solid #edf1f5;
-      color: #334155;
-      font-size: .88rem;
-      line-height: 1.5;
-    }
-    .account-empty {
-      padding: 16px;
-      border-radius: 10px;
-      border: 1px dashed #d1d5db;
-      border-top: 1px dashed #d1d5db;
-      border-bottom: 1px dashed #d1d5db;
-      background: #ffffff;
       text-align: center;
-    }
-    .loading-state {
-      display: grid;
-      gap: 10px;
-      padding: 6px 0 12px;
-      border-radius: 0;
-      background: transparent;
-      border: 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-      position: relative;
-      z-index: 1;
-    }
-    .account-panel .loading-state,
-    .account-panel .account-status {
-      border-left: 0 !important;
-      border-right: 0 !important;
-      border-radius: 0 !important;
-      box-shadow: none !important;
-      background: transparent !important;
-    }
-    .skeleton {
-      height: 10px;
-      border-radius: 999px;
-      background: linear-gradient(90deg, rgba(148,163,184,.22), rgba(226,232,240,.45), rgba(148,163,184,.22));
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite linear;
-    }
-    .skeleton.wide { width: 72%; height: 12px; }
-    .skeleton.mid { width: 56%; }
-    .skeleton.small { width: 34%; }
-    #accountStatus[hidden],
-    #accountStatusLoading[hidden],
-    #accountLoginBox[hidden],
-    #accountLoggedInBox[hidden] {
-      display: none !important;
-    }
-    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-    @media (max-width: 980px) {
-      .account-hero { grid-template-columns: 1fr; }
-      .account-panel { position: relative; top: 0; max-width: 100%; }
-      .account-panel { order: 0; }
-      .account-stats { grid-template-columns: 1fr; }
-      .order-grid { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 640px) {
-      .account-main { padding-top: 8px; }
-      .account-card,
-      .account-order { border-radius: 10px; padding: 12px; }
-      .account-session-shell { border-radius: 16px; padding: 14px; min-height: 0; }
-      .account-panel h2 {
-        gap: 7px;
-        padding: 0;
-        font-size: 1.08rem;
-      }
-      .orders-section { margin-top: 14px; }
-      .order-history-head { margin-bottom: 10px; }
-      .order-history-head h2,
-      .tracking-head h2 {
-        gap: 7px;
-        padding: 0;
-        font-size: 1.08rem;
-      }
-      .account-insights { gap: 7px; }
-      .session-metric { min-height: 78px; padding: 9px 8px; }
-      .session-metric strong { font-size: .96rem; }
-      .session-metric small { font-size: .69rem; }
-      .session-metric-icon { width: 22px; height: 22px; font-size: .7rem; }
-      .orders-header { align-items: flex-start; }
-      .history-top {
-        grid-template-columns: 62px 1fr auto;
-      }
-      .history-date {
-        grid-column: 3;
-        grid-row: 1;
-        padding-left: 0;
-        margin-top: 0;
-      }
-      .history-actions {
-        gap: 8px;
-      }
-      .tracking-icons {
-        --icon-size: 26px;
-      }
-      .tracking-icons span {
-        font-size: .82rem;
-      }
-      .tracking-inline {
-        --timeline-icon-size: 25px;
-      }
+      padding: 28px 16px;
+      color: #94a3b8;
+      font-size: .9rem;
+      font-weight: 500;
     }
 
-    /* Zona de pedidos: contador, pestañas de filtro y buscador */
-    .acct-orders-count {
-      font-size: .82rem;
-      color: #94a3b8;
-      font-weight: 700;
+    /* ─── UTILIDADES ─────────────────────────────────────────── */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
       white-space: nowrap;
     }
-    .acct-tools {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-bottom: 14px;
-      padding: 0 2px;
-    }
-    .acct-tabs {
-      display: inline-flex;
-      gap: 22px;
-    }
-    .acct-tab {
-      border: 0;
-      background: none;
-      padding: 6px 0;
-      font-family: inherit;
-      font-size: .92rem;
-      font-weight: 700;
-      color: #94a3b8;
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      transition: color .18s ease, border-color .18s ease;
-    }
-    .acct-tab.is-active {
-      color: #0f172a;
-      border-bottom-color: #0f172a;
-    }
-    .acct-search {
-      width: 100%;
-      box-sizing: border-box;
-      border: 0;
-      border-radius: 12px;
-      background: #e9eef4;
-      padding: 12px 16px;
-      font-family: inherit;
-      font-size: .9rem;
-      color: #0f172a;
-      outline: none;
-    }
-    .acct-search::placeholder { color: #94a3b8; }
-    .acct-search:focus {
-      background: #ffffff;
-      box-shadow: 0 0 0 1.5px rgba(15,23,42,.18);
+    [hidden] { display: none !important; }
+
+    /* ─── RESPONSIVE ─────────────────────────────────────────── */
+    @media (max-width: 480px) {
+      .acct-card { --acct-pad: 14px; border-radius: 16px; }
+      .acct-card.is-logged { padding: 0; }
+      .acct-card.is-logged .acct-head { padding: 16px 16px 0; }
+      .acct-card.is-logged .acct-user-row { padding: 12px 16px 18px; }
+      .acct-card.is-logged .acct-metrics { padding: 14px 16px 0; }
+      .acct-card.is-logged #accountLoggedInBox { padding: 14px 16px 18px; }
+      .acct-metrics { gap: 6px; }
+      .acct-tab-tile { padding: 11px 10px; gap: 9px; }
+      .acct-tab-ico { width: 30px; height: 30px; }
+      .acct-tab-name { font-size: .82rem; }
+      .history-top { grid-template-columns: 62px 1fr auto; }
+      .history-date { grid-column: 3; grid-row: 1; padding-left: 0; margin-top: 0; }
+      .tracking-icons { --icon-size: 26px; }
+      .tracking-icons span { font-size: .82rem; }
+      .tracking-inline { --timeline-icon-size: 25px; }
     }
   </style>
 
-  <script src="/js/global-assets.js?v=20260531-3" defer></script>
-  <script src="/js/account.js?v=20260613-4" defer></script>
+  <!-- Catálogo de productos: necesario para el menú compartido (desktop + móvil),
+       igual que en el resto de páginas. Sin esto el menú "Productos" se construye
+       sin datos. -->
+  <script src="/data/products.js?v=20260620-2" defer></script>
+  <script src="/js/global-assets.js?v=20260613-14" defer></script>
+  <script src="/js/address-fields.js?v=20260620-2" defer></script>
+  <script src="/js/account.js?v=20260620-2" defer></script>
 </head>
 <body class="account-page">
-  <div class="account-shell">
-    <div id="site-header-slot"></div>
-    <div id="mobile-menu-slot"></div>
+  <div id="site-header-slot"></div>
+  <div id="mobile-menu-slot"></div>
 
-    <main class="account-main">
-      <h1 class="sr-only">Mi cuenta de SCOOT SHOP</h1>
-      <section class="container">
-        <div class="account-hero">
+  <main>
+    <h1 class="sr-only">Mi cuenta de SCOOT SHOP</h1>
+    <div class="acct-page">
 
-          <aside class="account-panel">
-            <div class="account-session-shell" id="accountSessionShell">
-              <div class="account-session-head">
-                <h2>Estado de sesión</h2>
-                <div id="accountSessionState" class="account-session-state">Comprando como invitado</div>
-              </div>
-              <div id="accountStatusLoading" class="loading-state" aria-hidden="true">
-                <div class="skeleton wide"></div>
-                <div class="skeleton"></div>
-                <div class="skeleton mid"></div>
-                <div class="skeleton small"></div>
-              </div>
-              <div id="accountStatus" hidden>
-                <div id="accountStatusRow" class="account-status-row" hidden>
-                  <div id="accountAvatarWrap" aria-hidden="true">
-                    <div class="account-avatar-fallback" aria-hidden="true">U</div>
-                  </div>
-                  <div class="account-meta">
-                    <strong id="accountUserName">Sesión lista</strong>
-                    <span id="accountUserEmail">Inicia sesión para vincular pedidos</span>
-                  </div>
-                </div>
-                <div id="accountLoginBox" class="account-login" hidden>
-                  <strong>Acceder con Google</strong>
-                  <p class="account-note">Solo para vincular tus pedidos.</p>
-                  <div id="googleLoginButton"></div>
-                  <div id="authMessage" class="account-note"></div>
-                </div>
-                <div class="account-insights" id="accountInsights" aria-label="Resumen de cuenta">
-                  <article class="session-metric session-metric--orders" aria-live="polite">
-                    <div class="session-metric-head">
-                      <span class="session-metric-label">Pedidos</span>
-                      <span class="session-metric-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M3 8.5L12 13L21 8.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                          <path d="M12 13V21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                          <path d="M20.5 8.8V16.5C20.5 17.3 20.05 18.03 19.34 18.38L13.34 21.38C12.49 21.81 11.51 21.81 10.66 21.38L4.66 18.38C3.95 18.03 3.5 17.3 3.5 16.5V8.8C3.5 8 3.95 7.27 4.66 6.92L10.66 3.92C11.51 3.49 12.49 3.49 13.34 3.92L19.34 6.92C20.05 7.27 20.5 8 20.5 8.8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-                        </svg>
-                      </span>
-                    </div>
-                    <strong id="accountQuickOrders">0</strong>
-                    <small>Total vinculados</small>
-                  </article>
-                  <article class="session-metric session-metric--tracking" aria-live="polite">
-                    <div class="session-metric-head">
-                      <span class="session-metric-label">Trackings</span>
-                      <span class="session-metric-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <circle cx="6" cy="6" r="2.2" stroke="currentColor" stroke-width="1.8"/>
-                          <circle cx="18" cy="18" r="2.2" stroke="currentColor" stroke-width="1.8"/>
-                          <path d="M8.3 6H11.4C14.2 6 16.5 8.3 16.5 11.1V12.9C16.5 15.7 14.2 18 11.4 18H8.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                      </span>
-                    </div>
-                    <strong id="accountQuickTrackings">0</strong>
-                    <small>Con seguimiento</small>
-                  </article>
-                  <a class="session-metric session-metric--cta" href="https://wa.me/34666318747?text=Hola%20SCOOT%20SHOP%2C%20necesito%20soporte%20con%20mi%20pedido" target="_blank" rel="noopener noreferrer" aria-label="Abrir soporte por WhatsApp">
-                    <div class="session-metric-head">
-                      <span class="session-metric-label">Soporte</span>
-                      <span class="session-metric-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M4.5 12.3C4.5 8.16 7.86 4.8 12 4.8C16.14 4.8 19.5 8.16 19.5 12.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                          <rect x="4" y="11" width="3.6" height="6.2" rx="1.4" stroke="currentColor" stroke-width="1.8"/>
-                          <rect x="16.4" y="11" width="3.6" height="6.2" rx="1.4" stroke="currentColor" stroke-width="1.8"/>
-                          <path d="M16.4 18.1C15.8 19.6 14.3 20.7 12.5 20.7H11.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                        </svg>
-                      </span>
-                    </div>
-                    <strong id="accountQuickSupport">WhatsApp</strong>
-                    <small>Abrir chat ahora</small>
-                  </a>
-                </div>
-                <div id="accountLoggedInBox" hidden>
-                  <p class="account-note" id="accountLoggedInCopy"></p>
-                  <div class="account-actions">
-                    <button class="btn-ghost" id="logoutBtn" type="button"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i> Cerrar sesión</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </aside>
+      <aside class="acct-sidebar">
+
+      <!-- ── TARJETA DE SESIÓN ─────────────────────────────── -->
+      <div class="acct-card" id="accountSessionShell">
+        <div class="acct-head">
+          <h2>Mi cuenta</h2>
+          <span id="accountSessionState" class="account-session-state account-session-state--guest">Invitado</span>
+          <!-- Cerrar sesión: solo visible cuando la cuenta está activa (.is-logged);
+               sustituye al badge "ACTIVA" en la cabecera del hero. -->
+          <button class="acct-head-logout" id="logoutBtn" type="button" aria-label="Cerrar sesión">
+            <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+            Salir
+          </button>
         </div>
 
-        <section class="orders-section">
-          <div id="ordersGrid" class="orders-grid"></div>
-        </section>
-      </section>
-    </main>
-  </div>
+        <!-- Esqueleto de carga -->
+        <div id="accountStatusLoading" class="acct-skel-wrap" aria-hidden="true">
+          <div class="acct-skel acct-skel-lg"></div>
+          <div class="acct-skel acct-skel-md"></div>
+          <div class="acct-skel acct-skel-sm"></div>
+        </div>
+
+        <!-- Contenido real -->
+        <div id="accountStatus" hidden>
+
+          <!-- Fila usuario (solo cuando está logueado) -->
+          <div id="accountStatusRow" class="acct-user-row" hidden>
+            <div id="accountAvatarWrap">
+              <div class="account-avatar-fallback" aria-hidden="true">U</div>
+            </div>
+            <div>
+              <p class="acct-user-name" id="accountUserName">Sesión lista</p>
+              <p class="acct-user-email" id="accountUserEmail">Inicia sesión para vincular pedidos</p>
+            </div>
+          </div>
+
+          <!-- Pestañas: cada tile muestra su panel -->
+          <div class="acct-metrics" id="accountInsights" role="tablist" aria-label="Secciones de la cuenta">
+            <button type="button" class="acct-tab-tile is-active" data-tab="orders" aria-selected="true">
+              <span class="acct-tab-top">
+                <span class="acct-tab-ico"><i class="fa-solid fa-box" aria-hidden="true"></i></span>
+                <span class="acct-tab-count" id="accountQuickOrders">0</span>
+              </span>
+              <span class="acct-tab-name">Pedidos</span>
+            </button>
+            <button type="button" class="acct-tab-tile" data-tab="addresses" aria-selected="false">
+              <span class="acct-tab-top">
+                <span class="acct-tab-ico"><i class="fa-solid fa-location-dot" aria-hidden="true"></i></span>
+                <span class="acct-tab-count" id="accountQuickAddresses">0</span>
+              </span>
+              <span class="acct-tab-name">Direcciones</span>
+            </button>
+            <button type="button" class="acct-tab-tile" data-tab="help" aria-selected="false">
+              <span class="acct-tab-top">
+                <span class="acct-tab-ico"><i class="fa-solid fa-circle-question" aria-hidden="true"></i></span>
+              </span>
+              <span class="acct-tab-name">Ayuda</span>
+            </button>
+          </div>
+
+          <!-- Caja de login (invitado) -->
+          <div id="accountLoginBox" class="acct-login-box" hidden>
+            <p class="acct-login-hint">Inicia sesión con Google para ver tus pedidos.</p>
+            <div id="googleLoginButton"></div>
+            <div id="authMessage" class="account-note" role="status"></div>
+          </div>
+
+          <!-- Acciones (logueado) — el botón de cerrar sesión se movió a la cabecera (.acct-head) -->
+          <div id="accountLoggedInBox" hidden>
+            <p class="acct-user-email" id="accountLoggedInCopy"></p>
+          </div>
+
+        </div>
+      </div>
+
+      </aside>
+
+      <!-- ── COLUMNA PRINCIPAL: PANELES CONMUTABLES POR PESTAÑA ── -->
+      <div class="acct-main">
+
+        <!-- Panel · Pedidos -->
+        <div class="acct-panel" data-panel="orders">
+          <div class="acct-card">
+            <div id="ordersGrid"></div>
+          </div>
+        </div>
+
+        <!-- Panel · Mis datos + Direcciones -->
+        <div class="acct-panel" data-panel="addresses" hidden>
+          <p class="acct-empty-note" id="addressesGuestNote" hidden>Inicia sesión para gestionar tus datos y direcciones.</p>
+          <div class="acct-card acct-extra-card" id="accountProfileCard" hidden></div>
+          <div class="acct-card acct-extra-card" id="accountAddressCard" hidden></div>
+        </div>
+
+        <!-- Panel · Ayuda -->
+        <div class="acct-panel" data-panel="help" hidden>
+          <div class="acct-card acct-help-card">
+            <div class="acct-cardhead"><h2 class="acct-cardhead__title">¿Necesitas ayuda?<i class="fa-solid fa-circle-question" aria-hidden="true"></i></h2></div>
+            <a class="acct-help-link" href="https://wa.me/34666318747?text=Hola%20SCOOT%20SHOP%2C%20necesito%20ayuda%20con%20mi%20pedido" target="_blank" rel="noopener noreferrer">
+              <span class="acct-help-ico acct-help-ico--wa"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i></span>
+              <span class="acct-help-text"><strong>Soporte por WhatsApp</strong><small>Respuesta rápida</small></span>
+            </a>
+            <a class="acct-help-link" href="/legal/envios-devoluciones">
+              <span class="acct-help-ico"><i class="fa-solid fa-truck" aria-hidden="true"></i></span>
+              <span class="acct-help-text"><strong>Envíos y devoluciones</strong><small>Plazos y condiciones</small></span>
+            </a>
+            <a class="acct-help-link" href="/#faq">
+              <span class="acct-help-ico"><i class="fa-solid fa-circle-question" aria-hidden="true"></i></span>
+              <span class="acct-help-text"><strong>Preguntas frecuentes</strong><small>Dudas comunes</small></span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1682,9 +1682,13 @@
         ui.loading.hidden = !keepVisible;
       }
 
-      function buildStripeDoneUrl(orderId){
+      function buildStripeDoneUrl(orderId, token){
         var doneUrl = '/pedido/?order=' + encodeURIComponent(orderId || '');
         doneUrl += '&status=' + encodeURIComponent('paid');
+        // Token de acceso al pedido: imprescindible para que un invitado (sin sesión)
+        // pueda ver su pedido recién pagado. Sin él, /pedido muestra "caducado".
+        var t = safeText(token) || safeText(getParam('t')) || safeText(getParam('token'));
+        if (t) doneUrl += '&t=' + encodeURIComponent(t);
         doneUrl += '&method=' + encodeURIComponent('stripe');
         doneUrl += '&name=' + encodeURIComponent(name || 'Producto SCOOT SHOP');
         doneUrl += '&amount=' + encodeURIComponent(priceNum ? priceNum.toFixed(2) : '');
@@ -1727,7 +1731,7 @@
               // Clear session order on successful payment
               removeStorageValue(SESSION_ORDER_KEY);
               try { sessionStorage.removeItem('ss_checkout_shipping'); } catch(e){}
-              location.href = buildStripeDoneUrl(data.orderId || orderId);
+              location.href = buildStripeDoneUrl(data.orderId || orderId, data.token);
               return true;
             }
 

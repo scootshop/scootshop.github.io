@@ -178,7 +178,7 @@
       productType: 'electric-scooter',
       catalogType: 'vehicle',
       categoryKey: 'electric-scooters',
-      priceText: '530 €',
+      priceText: '535 €',
       compareAtPriceText: '620 €',
       stock: 'in_stock',
       paypalId: 'M41TANKULTIMATE1K',
@@ -294,7 +294,7 @@
       productType: 'electric-scooter',
       catalogType: 'vehicle',
       categoryKey: 'electric-scooters',
-      priceText: '765 €',
+      priceText: '785 €',
       compareAtPriceText: '899 €',
       stock: 'in_stock',
       paypalId: 'M41ARMOREDDUAL',
@@ -353,12 +353,12 @@
         { src: '/patinetes/ecoxtrem/m41-armored-dual/img/15.webp', alt: 'Ecoxtrem M41 Armored Dual vista 15' },
         { src: '/patinetes/ecoxtrem/m41-armored-dual/img/16.webp', alt: 'Ecoxtrem M41 Armored Dual vista 16' },
         { src: '/patinetes/ecoxtrem/m41-armored-dual/img/17.webp', alt: 'Ecoxtrem M41 Armored Dual vista 17' },
-        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/18.jpg', alt: 'Ecoxtrem M41 Armored Dual vista 18' },
+        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/18.webp', alt: 'Ecoxtrem M41 Armored Dual vista 18' },
         { src: '/patinetes/ecoxtrem/m41-armored-dual/img/19.webp', alt: 'Ecoxtrem M41 Armored Dual vista 19' },
         { src: '/patinetes/ecoxtrem/m41-armored-dual/img/20.webp', alt: 'Ecoxtrem M41 Armored Dual vista 20' },
         { src: '/patinetes/ecoxtrem/m41-armored-dual/img/21.webp', alt: 'Ecoxtrem M41 Armored Dual vista 21' },
         { src: '/patinetes/ecoxtrem/m41-armored-dual/img/22.webp', alt: 'Ecoxtrem M41 Armored Dual vista 22' },
-        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/DSC00442%20copia.jpg', alt: 'Ecoxtrem M41 Armored Dual vista adicional' }
+        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/23.webp', alt: 'Ecoxtrem M41 Armored Dual vista 23' }
       ]
     },
     {

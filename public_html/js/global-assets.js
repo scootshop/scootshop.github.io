@@ -1,6 +1,25 @@
 (function () {
   "use strict";
 
+  // En todas las páginas (no solo el home): desactivar la restauración de scroll
+  // nativa del navegador. Sin esto, las fichas hacían su propia restauración —que
+  // con scroll-behavior:smooth se ve ANIMADA y a veces deja la página en una
+  // posición previa (p. ej. abajo)— al volver/entrar en iOS WebKit. Con 'manual',
+  // las fichas abren arriba; el bfcache sigue restaurando el atrás/adelante real.
+  try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch (e) {}
+
+  // En fichas de producto: abrir SIEMPRE arriba. Al re-entrar desde el bfcache
+  // (volver/adelante en iOS WebKit) el navegador las restauraba en una posición
+  // previa (p. ej. los botones de compra); forzamos el tope solo en ese caso
+  // (pageshow persistido), sin arrancar al usuario que ya está leyendo.
+  try {
+    window.addEventListener('pageshow', function (e) {
+      if (e && e.persisted && isProductDetailPath()) {
+        try { window.scrollTo(0, 0); } catch (_) {}
+      }
+    });
+  } catch (e) {}
+
   function enforceLightColorScheme() {
     if (!document || !document.head || !document.documentElement) return;
 
@@ -34,6 +53,19 @@
     var ver = meta && meta.getAttribute('content');
     return ver ? String(ver).trim() : '1';
   }
+
+  // Auto-actualización al restaurar desde bfcache: si la versión publicada cambió
+  // respecto a la que tiene esta página congelada, recargar para traer el código nuevo.
+  window.addEventListener('pageshow', function (e) {
+    if (!e || !e.persisted) return;
+    fetch('/asset-version.json?t=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        var latest = d && d.v ? String(d.v).trim() : '';
+        if (latest && latest !== fallbackVersion()) location.reload();
+      })
+      .catch(function () {});
+  });
 
   function addVersionToUrl(url, ver) {
     if (!url) return '';
@@ -146,14 +178,38 @@
     });
   }
 
+  // Pinta cabecera y menú móvil desde la caché de sesión lo antes posible (antes de
+  // que cargue el runtime) para que en visitas repetidas aparezcan al instante, sin
+  // el parpadeo de la barra vacía. El runtime los rehidrata después (menús, carrito).
+  function primeCachedPartials(ver) {
+    try {
+      var v = ver || fallbackVersion();
+      var slots = [
+        ['site-header-slot', '/partials/site-header.html'],
+        ['mobile-menu-slot', '/partials/mobile-menu.html']
+      ];
+      for (var i = 0; i < slots.length; i++) {
+        var slot = document.getElementById(slots[i][0]);
+        if (!slot || slot.children.length) continue;
+        var html = sessionStorage.getItem('__ss_partial_v1:' + v + ':' + slots[i][1]);
+        if (html) slot.innerHTML = html;
+      }
+    } catch (_) {}
+  }
+
   function loadRuntime(ver) {
     window.ASSET_VER = ver;
+    primeCachedPartials(ver);
     var path = String((window.location && window.location.pathname) || '').toLowerCase();
     var isAccountPage = path === '/cuenta' || path === '/cuenta/';
 
     if (!document.querySelector('script[data-cart-runtime="true"]')) {
       var cartScript = document.createElement('script');
-      cartScript.src = '/js/cart-runtime.js?v=' + encodeURIComponent(ver);
+      // cart-runtime.js se sirve como inmutable; este sufijo de revisión fuerza
+      // la recarga tras un fix del runtime sin esperar a un bump global de versión
+      // (global-assets.js es no-store, así que el nuevo sufijo llega al instante).
+      var cartRuntimeRev = '20260616-4';
+      cartScript.src = '/js/cart-runtime.js?v=' + encodeURIComponent(ver) + '&r=' + cartRuntimeRev;
       cartScript.async = false;
       cartScript.dataset.cartRuntime = 'true';
       document.head.appendChild(cartScript);

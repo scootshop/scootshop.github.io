@@ -134,6 +134,13 @@
       '</div>';
 
     host.dataset.productsHref = fallbackHref;
+
+    // El HTML del menú se acaba de regenerar (trigger/panel nuevos). Liberamos el
+    // flag de enlace para que initDesktopProductsMenu vuelva a enlazar los nuevos
+    // elementos; de lo contrario, un menú reconstruido tras cargar el catálogo
+    // (p. ej. en /cuenta, que no incluye products.js de forma estática) quedaría
+    // sin handlers y el desplegable "Productos" no abriría.
+    delete host.dataset.bound;
   }
 
   function buildMobileProductsMenu(root) {

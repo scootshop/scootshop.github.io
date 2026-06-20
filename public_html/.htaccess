@@ -53,10 +53,11 @@ AddDefaultCharset UTF-8
 
 # Cache-Control headers
 <IfModule mod_headers.c>
-  # HTML: no cachear
+  # HTML: revalidar siempre, pero SIN no-store para permitir el bfcache (volver
+  # atrás/adelante restaura la página y su posición de scroll al instante, sin
+  # recargar). no-cache + must-revalidate garantiza contenido fresco en cargas reales.
   <FilesMatch "\.(html|htm)$">
-    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
-    Header set Pragma "no-cache"
+    Header set Cache-Control "no-cache, must-revalidate, max-age=0"
     Header set Expires "0"
   </FilesMatch>
 

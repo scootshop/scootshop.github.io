@@ -1375,7 +1375,24 @@ html,body{ height:100%; }
 html{
   overflow-x:hidden;
   overscroll-behavior-x:none;
-  scroll-behavior:smooth;
+  /* Sin scroll-behavior:smooth global: hacía que la restauración de scroll (al
+     volver) se viera ANIMADA, sobre todo en iOS. Los scrolls deliberados que deben
+     ser suaves usan behavior:'smooth' explícito en JS; el resto queda instantáneo. */
+  /* Desactiva el scroll anchoring del navegador. Al restaurar la posición de la
+     home (ss_scrollY) la maquetación superior aún no es definitiva (hero, fuentes);
+     cuando se estabiliza, el anchoring sumaba ese delta a scrollY y se guardaba,
+     provocando una deriva acumulativa hacia abajo al entrar/salir de una ficha.
+     Sin anchoring, scrollY se mantiene en el valor restaurado y cae en su sitio. */
+  overflow-anchor:none;
+}
+
+/* Transiciones suaves entre páginas (View Transitions cross-document). Mejora
+   progresiva: los navegadores sin soporte la ignoran. Se anula con reduced-motion. */
+@view-transition { navigation: auto; }
+@media (prefers-reduced-motion: reduce){
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*){ animation: none !important; }
 }
 html, body, button, input, select, textarea{ color-scheme: only light !important; }
 
@@ -1386,6 +1403,8 @@ body{
   color:var(--ink);
   line-height:1.55;
   padding-top: calc(var(--header-h) + var(--sat));
+  /* Por si en algún navegador el scroller efectivo fuese el body (no el html). */
+  overflow-anchor:none;
 }
 
 main{
@@ -2570,7 +2589,7 @@ nav.menu a[aria-current="page"]{
   font-weight:800;
   font-size:.79rem;
   letter-spacing:.03em;
-  text-transform:none;
+  text-transform:uppercase;
   box-shadow:
     0 -1px 3px rgba(15,23,42,.045),
     0 1px 0 rgba(255,255,255,.94) inset,
@@ -2580,7 +2599,7 @@ nav.menu a[aria-current="page"]{
 .card:not(.order-summary) .btn-cart i{ display:none; }
 
 .card:not(.order-summary) .btn-cart::before{
-  content:none;
+  content:'';
   width:16px;
   height:16px;
   flex:0 0 16px;
@@ -2602,7 +2621,6 @@ nav.menu a[aria-current="page"]{
 
 .card:not(.order-summary) .btn-cart.is-added{
   color:#15803d;
-  box-shadow:inset 0 0 0 1px rgba(21,128,61,.28), 0 8px 18px rgba(21,128,61,.12);
 }
 
 /* =========================

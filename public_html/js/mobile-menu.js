@@ -13,7 +13,7 @@
     body.style.top = '-' + mmLockedScrollY + 'px';
   }
 
-  function unlockBackgroundScroll() {
+  function unlockBackgroundScroll(scrollTarget) {
     var body = document.body;
     if (!body || !body.classList.contains('mm-lock-scroll')) return;
     var docEl = document.documentElement;
@@ -21,7 +21,22 @@
     body.classList.remove('mm-lock-scroll');
     body.style.top = '';
     if (docEl) docEl.style.scrollBehavior = 'auto';
+
+    // Restaura el flujo normal en la posición en la que se abrió el menú.
     if (win) win.scrollTo(0, mmLockedScrollY || 0);
+
+    // Si el cierre proviene de pulsar un enlace ancla interno, saltamos a esa
+    // sección (instantáneo, sin animación) en lugar de quedarnos donde se abrió
+    // el menú. Se calcula DESPUÉS de restaurar el flujo para que el rect sea
+    // válido, y se descuenta la cabecera fija para no ocultar el título.
+    if (scrollTarget && win && typeof scrollTarget.getBoundingClientRect === 'function') {
+      var header = document.getElementById('siteHeader');
+      var headerOffset = header ? header.offsetHeight : 0;
+      var top = scrollTarget.getBoundingClientRect().top + (win.scrollY || win.pageYOffset || 0) - headerOffset;
+      if (top < 0) top = 0;
+      win.scrollTo(0, top);
+    }
+
     if (docEl) docEl.style.scrollBehavior = prevScrollBehavior;
     mmLockedScrollY = 0;
   }
@@ -43,7 +58,7 @@
     return true;
   }
 
-  function closeMenu() {
+  function closeMenu(scrollTarget) {
     var burger = document.getElementById('burger');
     var backdrop = document.getElementById('mmBackdrop');
     var panel = document.getElementById('mobileMenu');
@@ -52,7 +67,7 @@
 
     backdrop.classList.remove('active');
     panel.classList.remove('active');
-    unlockBackgroundScroll();
+    unlockBackgroundScroll(scrollTarget);
     burger.setAttribute('aria-expanded', 'false');
 
     // Reset drill-down
@@ -127,6 +142,21 @@
   function isMenuOpen() {
     var panel = document.getElementById('mobileMenu');
     return panel && panel.classList.contains('active');
+  }
+
+  // Resuelve el destino de un enlace ancla SOLO si apunta a una sección de la
+  // página actual (p. ej. /#ubicacion, #legal). Devuelve el elemento o null para
+  // enlaces a otras páginas/dominios, que deben navegar de forma nativa.
+  function resolveInPageTarget(href) {
+    if (!href) return null;
+    var hashIndex = href.indexOf('#');
+    if (hashIndex < 0) return null;
+    var id = href.slice(hashIndex + 1);
+    if (!id) return null;
+    var path = href.slice(0, hashIndex);
+    if (path && !/^\/?$/.test(path) && path !== window.location.pathname) return null;
+    try { return document.getElementById(decodeURIComponent(id)); }
+    catch (_) { return document.getElementById(id); }
   }
 
   // Focus trap
@@ -207,7 +237,11 @@
       // Close on any navigation link click
       var link = e.target.closest('.mm-panel a[href]');
       if (link && isMenuOpen()) {
-        setTimeout(function() { closeMenu(); }, 120);
+        // Para anclas internas de la página actual, el scroll-lock impide el salto
+        // nativo (el body está fixed). Pasamos el destino a closeMenu para saltar
+        // a la sección al cerrar; el resto de enlaces navegan de forma nativa.
+        var inPageTarget = resolveInPageTarget(link.getAttribute('href'));
+        setTimeout(function() { closeMenu(inPageTarget); }, 120);
       }
     }, true);
 

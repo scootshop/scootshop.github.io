@@ -8,21 +8,21 @@
   <meta name="description" content="Completa tus datos de envío antes del pago seguro en SCOOT SHOP." />
   <meta name="robots" content="noindex,nofollow" />
   <meta name="theme-color" content="#ffffff" />
-  <meta name="asset-version" content="20260613-4" />
+  <meta name="asset-version" content="20260620-2" />
 
   <link rel="canonical" href="https://scootshop.co/checkout" />
-  <link rel="icon" href="/favicon.ico?v=20260613-4" sizes="any" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=20260613-4" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=20260613-4" />
-  <link rel="manifest" href="/site.webmanifest?v=20260613-4" />
+  <link rel="icon" href="/favicon.ico?v=20260620-2" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=20260620-2" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=20260620-2" />
+  <link rel="manifest" href="/site.webmanifest?v=20260620-2" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" /></noscript>
-  <link rel="stylesheet" href="/css/icons.css?v=20260613-4" />
-  <link rel="stylesheet" href="/css/main.css?v=20260613-4" />
+  <link rel="stylesheet" href="/css/icons.css?v=20260620-2" />
+  <link rel="stylesheet" href="/css/main.css?v=20260620-2" />
   <script src="/js/asset-sync.js?v=20260605-2" defer></script>
   <script src="/js/global-assets.js?v=20260605-2" defer></script>
 
@@ -451,6 +451,15 @@
     .field textarea::placeholder{
       color:#b8c0cc;
       font-weight:500;
+    }
+    /* Correo bloqueado con sesión iniciada (gris, no editable, como en /cuenta) */
+    .field input.is-locked,
+    .field input.is-locked:focus{
+      color:#9aa3af;
+      -webkit-text-fill-color:#9aa3af;
+      cursor:not-allowed;
+      border-bottom-width:1.5px;
+      border-bottom-color:rgba(17,19,21,.14);
     }
     .field.field--valid input,
     .field.field--valid select{
@@ -2078,6 +2087,85 @@
       prefillForm(loadSavedShipping());
       syncPlaceholders();
 
+      // ── Fase 2: autocompletar desde la dirección guardada del cliente ──
+      // Regla: si hay una dirección PREDETERMINADA, se aplica SIEMPRE al cargar
+      // (aunque el navegador/localStorage hayan pre-rellenado campos — esto es lo
+      // que fallaba en móvil). Sin predeterminada, solo se rellena si está vacío.
+      (function prefillFromAccount(){
+        fetch('/api/index.php?route=account_profile', { credentials: 'same-origin', cache: 'no-store' })
+          .then(function(r){ return r.ok ? r.json() : null; })
+          .then(function(data){
+            if (!data || !data.ok) return;
+            var addrs = Array.isArray(data.addresses) ? data.addresses : [];
+            var profile = data.profile || {};
+
+            // Sesión iniciada: el correo viene de la cuenta Google → bloqueado (gris, no editable).
+            var emailEl = document.getElementById('email');
+            if (emailEl && profile.email) {
+              emailEl.value = profile.email;
+              emailEl.readOnly = true;
+              emailEl.setAttribute('aria-readonly', 'true');
+              emailEl.classList.add('is-locked');
+              emailEl.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+
+            var def = null;
+            for (var i = 0; i < addrs.length; i++) { if (addrs[i].is_default) { def = addrs[i]; break; } }
+            var hasDefault = !!def;
+            if (!def && addrs.length) def = addrs[0];
+
+            // Sin predeterminada: respetar lo ya rellenado (no pisar).
+            if (!hasDefault) {
+              var existing = loadSavedShipping();
+              if (existing && (existing.addressLine1 || existing.fullName)) return;
+              var fn = document.getElementById('fullName');
+              var al = document.getElementById('addressLine1');
+              if ((fn && fn.value.trim()) || (al && al.value.trim())) return;
+            }
+
+            var mapped = {
+              fullName: (def && def.name) || profile.name || '',
+              email: profile.email || '',
+              phone: (def && def.phone) || profile.phone || '',
+              addressLine1: def ? def.address : '',
+              addressLine2: def ? def.address2 : '',
+              postalCode: def ? def.postal : '',
+              city: def ? def.city : '',
+              province: def ? def.province : '',
+              country: (def && def.country) || ''
+            };
+            if (!mapped.fullName && !mapped.email && !mapped.addressLine1) return;
+
+            if (mapped.country && countryField) {
+              var ok = Array.prototype.some.call(countryField.options, function(o){ return o.value === mapped.country; });
+              if (!ok) mapped.country = '';
+            }
+
+            function apply(){
+              // Override limpio del campo opcional para no dejar restos de pre-rellenado.
+              if (hasDefault) { var a2 = document.getElementById('addressLine2'); if (a2 && !mapped.addressLine2) a2.value = ''; }
+              prefillForm(mapped);
+              ['fullName','email','phone','phonePrefix'].forEach(function(id){
+                var el = document.getElementById(id);
+                if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
+              });
+            }
+
+            apply();
+
+            // Móvil: el autofill del navegador puede dispararse tras la carga y pisar
+            // la predeterminada. La re-aplicamos una vez (salvo que estés escribiendo).
+            if (hasDefault) {
+              setTimeout(function(){
+                var act = document.activeElement;
+                if (act && /^(INPUT|SELECT|TEXTAREA)$/.test(act.tagName)) return;
+                apply();
+              }, 450);
+            }
+          })
+          .catch(function(){ /* invitado o error: sin autocompletar */ });
+      })();
+
       // Live contact details in summary
       function syncSummaryMeta(group, row, valueEl, prefix, value, placeholder){
         if (!group || !row || !valueEl) return;
@@ -2418,6 +2506,52 @@
   </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

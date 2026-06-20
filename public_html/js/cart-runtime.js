@@ -1,6 +1,13 @@
 (function () {
   'use strict';
 
+  // Guarda anti-doble-carga: si el runtime ya se inicializó (p. ej. la página
+  // trae el script de forma estática y un bootstrap lo reinyecta con otra
+  // versión), no volvemos a registrar el handler de "Añadir" — evitaba añadir
+  // x2 por click y dejar el texto "Añadido" pegado.
+  if (window.__ssCartRuntimeInit) return;
+  window.__ssCartRuntimeInit = true;
+
   var CART_KEY = 'ss_cart_v1';
   var MAX_QTY_PER_ITEM = 20;
   var drawerReady = false;
@@ -13,7 +20,35 @@
   var checkoutBtn = null;
   var continueBtn = null;
   var uiAudioCtx = null;
-  var uiAudioLastAt = 0;
+  var uiAudioLastAt = -1; // sentinela: el primer tono nunca debe caer en el throttle
+
+  function emitUiTone(kind) {
+    if (!uiAudioCtx || uiAudioCtx.state !== 'running') return;
+
+    var now = uiAudioCtx.currentTime;
+    if (now - uiAudioLastAt < 0.04) return;
+    uiAudioLastAt = now;
+
+    var oscillator = uiAudioCtx.createOscillator();
+    var gain = uiAudioCtx.createGain();
+    var isInc = kind === 'inc';
+    var startFreq = isInc ? 760 : 640;
+    var endFreq = isInc ? 980 : 900;
+    var duration = isInc ? 0.075 : 0.1;
+
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(startFreq, now);
+    oscillator.frequency.exponentialRampToValueAtTime(endFreq, now + duration);
+
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.09, now + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+    oscillator.connect(gain);
+    gain.connect(uiAudioCtx.destination);
+    oscillator.start(now);
+    oscillator.stop(now + duration + 0.01);
+  }
 
   function playUiSound(kind) {
     try {
@@ -21,33 +56,19 @@
       if (!AudioCtx) return;
       if (!uiAudioCtx) uiAudioCtx = new AudioCtx();
 
+      // El contexto arranca suspendido por la política de autoplay: resume() es
+      // asíncrono, así que emitimos el tono cuando ya está "running" (si no,
+      // el primer click se programaba en t=0 y no sonaba hasta el segundo).
       if (uiAudioCtx.state === 'suspended' && typeof uiAudioCtx.resume === 'function') {
-        uiAudioCtx.resume();
+        var resumed;
+        try { resumed = uiAudioCtx.resume(); } catch (_) { resumed = null; }
+        if (resumed && typeof resumed.then === 'function') {
+          resumed.then(function () { emitUiTone(kind); }).catch(function () {});
+          return;
+        }
       }
 
-      var now = uiAudioCtx.currentTime;
-      if (now - uiAudioLastAt < 0.04) return;
-      uiAudioLastAt = now;
-
-      var oscillator = uiAudioCtx.createOscillator();
-      var gain = uiAudioCtx.createGain();
-      var isInc = kind === 'inc';
-      var startFreq = isInc ? 760 : 640;
-      var endFreq = isInc ? 980 : 900;
-      var duration = isInc ? 0.075 : 0.1;
-
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(startFreq, now);
-      oscillator.frequency.exponentialRampToValueAtTime(endFreq, now + duration);
-
-      gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.exponentialRampToValueAtTime(0.045, now + 0.012);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-
-      oscillator.connect(gain);
-      gain.connect(uiAudioCtx.destination);
-      oscillator.start(now);
-      oscillator.stop(now + duration + 0.01);
+      emitUiTone(kind);
     } catch (_) {
       /* ignore */
     }
@@ -163,6 +184,23 @@
       };
     } catch (_) {
       return null;
+    }
+  }
+
+  // Imagen correcta para el carrito en una ficha de producto: la PRIMERA imagen
+  // del color seleccionado (o la predeterminada si no hay color). La fuente de
+  // verdad es el enlace de compra, cuyo parametro ?image= mantiene
+  // product-enhancements apuntando a esa imagen (getVariantPrimaryImage). Nunca
+  // usamos la imagen que se este viendo en la galeria, que cambia al navegar las
+  // miniaturas.
+  function readSelectedVariantImage() {
+    try {
+      var buyButton = document.querySelector('.btn-main[href], .sticky-buy-btn[href]');
+      if (!buyButton) return '';
+      var parsed = new URL(buyButton.getAttribute('href'), window.location.origin);
+      return safeText(parsed.searchParams.get('image') || '');
+    } catch (_) {
+      return '';
     }
   }
 
@@ -604,13 +642,13 @@
         item.key = compactKey([(item.sku || item.url || item.name), (item.color || '')].join('|'));
       }
 
-      // On product detail, persist the currently visible hero image (selected variant).
-      var currentMainImage = document.querySelector('#mainImage');
-      var currentMainImageSrc = currentMainImage
-        ? safeText(currentMainImage.getAttribute('src') || currentMainImage.getAttribute('data-src') || '')
-        : '';
-      if (currentMainImageSrc) {
-        item.image = currentMainImageSrc;
+      // La imagen del carrito debe ser la PRIMERA del color seleccionado (o la
+      // predeterminada si no hay color), nunca la imagen que se este viendo en la
+      // galeria en ese momento (antes se cogia de #mainImage, lo que guardaba la
+      // ultima miniatura abierta).
+      var variantFirstImage = readSelectedVariantImage();
+      if (variantFirstImage) {
+        item.image = variantFirstImage;
       }
 
       var added = add(item, sanitizeQty(trigger.getAttribute('data-qty') || 1));

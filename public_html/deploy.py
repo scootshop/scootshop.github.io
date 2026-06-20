@@ -14,11 +14,27 @@ from __future__ import annotations
 import argparse
 import os
 import posixpath
+import socket
 import subprocess
 import sys
-from ftplib import FTP
+import time
+from ftplib import FTP, error_temp, error_proto
 from pathlib import Path
-from typing import Iterable, List, Set
+from typing import Callable, Iterable, List, Optional, Set
+
+
+# Errores que indican una caida de conexion recuperable (Hostinger corta el FTP
+# a mitad de lote). En esos casos reconectamos y reintentamos el archivo.
+TRANSIENT_ERRORS = (
+    ConnectionResetError,
+    ConnectionAbortedError,
+    BrokenPipeError,
+    EOFError,
+    TimeoutError,
+    socket.timeout,
+    error_temp,
+    error_proto,
+)
 
 
 DEFAULT_EXCLUDES = (
@@ -93,7 +109,9 @@ def git_changed_files() -> List[str]:
 
 
 def is_excluded(path: str) -> bool:
-    norm = path.strip().lstrip("./")
+    norm = path.strip()
+    if norm.startswith("./"):
+        norm = norm[2:]
     if not norm:
         return True
     for ex in DEFAULT_EXCLUDES:
@@ -108,7 +126,9 @@ def sanitize_files(candidates: Iterable[str]) -> List[str]:
     seen: Set[str] = set()
     final: List[str] = []
     for c in candidates:
-        norm = c.strip().replace("\\", "/").lstrip("./")
+        norm = c.strip().replace("\\", "/")
+        if norm.startswith("./"):
+            norm = norm[2:]
         if not norm or norm in seen:
             continue
         if is_excluded(norm):
@@ -134,11 +154,20 @@ def ensure_remote_dir(ftp: FTP, remote_dir: str) -> None:
             pass
 
 
+def connect_ftp(host: str, port: int, user: str, password: str) -> FTP:
+    ftp = FTP()
+    ftp.connect(host, port, timeout=45)
+    ftp.login(user, password)
+    return ftp
+
+
 def upload_files(
-    ftp: FTP,
+    ftp: Optional[FTP],
     files: List[str],
     remote_base: str,
     dry_run: bool,
+    connect: Optional[Callable[[], FTP]] = None,
+    max_retries: int = 5,
 ) -> None:
     for rel in files:
         remote_path = posixpath.join(remote_base, rel).replace("\\", "/")
@@ -146,10 +175,32 @@ def upload_files(
         if dry_run:
             print(f"[DRY-RUN] {rel} -> {remote_path}")
             continue
-        ensure_remote_dir(ftp, remote_dir)
-        with open(rel, "rb") as fh:
-            ftp.storbinary(f"STOR {remote_path}", fh)
-        print(f"[OK] {rel} -> {remote_path}")
+
+        attempt = 0
+        while True:
+            attempt += 1
+            try:
+                ensure_remote_dir(ftp, remote_dir)
+                with open(rel, "rb") as fh:
+                    ftp.storbinary(f"STOR {remote_path}", fh)
+                print(f"[OK] {rel} -> {remote_path}")
+                break
+            except TRANSIENT_ERRORS as exc:
+                if connect is None or attempt > max_retries:
+                    raise
+                wait = min(2 ** attempt, 15)
+                print(
+                    f"[RETRY {attempt}/{max_retries}] {rel}: {type(exc).__name__} -> "
+                    f"reconectando en {wait}s...",
+                    file=sys.stderr,
+                )
+                try:
+                    if ftp is not None:
+                        ftp.close()
+                except Exception:
+                    pass
+                time.sleep(wait)
+                ftp = connect()
 
 
 def main() -> int:
@@ -212,11 +263,12 @@ def main() -> int:
         print("DRY-RUN OK")
         return 0
 
-    ftp = FTP()
-    ftp.connect(args.host, args.port, timeout=45)
-    ftp.login(ftp_user, ftp_password)
+    def connect() -> FTP:
+        return connect_ftp(args.host, args.port, ftp_user, ftp_password)
+
+    ftp = connect()
     try:
-        upload_files(ftp, files, args.remote_base, dry_run=False)
+        upload_files(ftp, files, args.remote_base, dry_run=False, connect=connect)
     finally:
         try:
             ftp.quit()

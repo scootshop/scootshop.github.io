@@ -21,7 +21,7 @@
   <meta name="twitter:image" content="https://scootshop.co/img/0-removebg-preview.webp" />
   <meta name="robots" content="noindex,nofollow" />
   <title>Estado del pedido | SCOOT SHOP</title>
-  <meta name="asset-version" content="20260613-4" />
+  <meta name="asset-version" content="20260620-2" />
 
   <!-- Fuente (non-blocking) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,8 +29,8 @@
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" /></noscript>
-  <link rel="stylesheet" href="/css/icons.css?v=20260613-4" />
-  <link rel="stylesheet" href="/css/main.css?v=20260613-4" />
+  <link rel="stylesheet" href="/css/icons.css?v=20260620-2" />
+  <link rel="stylesheet" href="/css/main.css?v=20260620-2" />
   <script src="/js/asset-sync.js?v=20260605-2" defer></script>
 
   <style>
@@ -694,6 +694,38 @@
       transform:translateY(-1px);
       box-shadow:0 8px 24px rgba(15,23,42,.06);
     }
+    /* Botón "Descargar recibo": mismo estilo que en /cuenta (sin borde, sombra suave) */
+    .order-receipt-cta{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      min-height:46px;
+      padding:0 18px;
+      border:0;
+      border-radius:999px;
+      background:#fff;
+      color:var(--ink);
+      font-weight:800;
+      font-size:.82rem;
+      text-decoration:none;
+      cursor:pointer;
+      white-space:nowrap;
+      box-shadow:
+        0 -1px 3px rgba(15,23,42,.045),
+        0 1px 0 rgba(255,255,255,.94) inset,
+        0 14px 30px rgba(15,23,42,.09);
+      transition:background .16s ease, box-shadow .16s ease, transform .16s ease;
+    }
+    .order-receipt-cta:hover{
+      background:#f8fafc;
+      box-shadow:
+        0 -1px 4px rgba(15,23,42,.055),
+        0 1px 0 rgba(255,255,255,.97) inset,
+        0 18px 34px rgba(15,23,42,.11);
+      transform:translateY(-1px);
+    }
+    .order-receipt-cta:active{ transform:translateY(0); }
 
     /* -- Footer -- */
     .foot{
@@ -890,6 +922,7 @@
       display:grid;
     }
     .order-detail-actions .order-cta,
+    .order-detail-actions .order-receipt-cta,
     .actions .order-cta{
       width:100%;
     }
@@ -980,9 +1013,11 @@
         padding-right:12px;
       }
       .order-kpis{
-        grid-template-columns:1fr;
+        grid-template-columns:repeat(2,minmax(0,1fr));
         gap:10px;
       }
+      .order-kpi{grid-column:1 / -1}
+      .order-kpi.is-pair{grid-column:span 1}
       .order-product-list-shell .order-summary__product-line-total{
         min-width:0;
         font-size:1rem;
@@ -1111,7 +1146,7 @@
       const queryEmail = p.get('email') || p.get('payer_email') || '';
       const previewActive = p.get('preview_active') === '1';
       const PREVIEW_ORDERS_KEY = 'ss_preview_orders_v1';
-      const LOCAL_DEV_ORDERS_KEY = 'ss_local_dev_orders_account_v1';
+      const LOCAL_DEV_ORDERS_KEY = 'ss_local_dev_orders_account_v3';
 
       const lead = document.getElementById('heroLead');
       const heroTitle = document.getElementById('heroTitle');
@@ -1352,7 +1387,7 @@
           return [
             '<article class="order-summary__product order-summary__product--line">',
             '  <div class="order-summary__product-main">',
-            img ? ('<img class="order-summary__product-image" src="' + esc(img) + '" alt="Producto ' + esc(item.name || 'SCOOT SHOP') + '">') : '<img class="order-summary__product-image" src="/img/0-removebg-preview.webp?v=20260613-4" alt="Producto SCOOT SHOP">',
+            img ? ('<img class="order-summary__product-image" src="' + esc(img) + '" alt="Producto ' + esc(item.name || 'SCOOT SHOP') + '">') : '<img class="order-summary__product-image" src="/img/0-removebg-preview.webp?v=20260620-2" alt="Producto SCOOT SHOP">',
             '  <div class="order-summary__product-info">',
             '    <span class="order-summary__product-title">' + esc(item.name || 'Producto') + '</span>',
             sku ? ('    <span class="order-summary__product-meta order-summary__product-meta--ref">Ref: ' + esc(sku) + '</span>') : '',
@@ -1455,7 +1490,7 @@
 
       function renderDetail(order){
         if(!orderDetailSection || !orderDetailBody || !order){ return; }
-        const renderKey = JSON.stringify([order.status, order.tracking, order.updated_at, order.total_amount || order.amount, Array.isArray(order.order_items) ? order.order_items.length : 0]);
+        const renderKey = JSON.stringify([order.status, order.tracking, order.updated_at, order.total_amount || order.amount, order.receipt_url || '', Array.isArray(order.order_items) ? order.order_items.length : 0]);
         if (renderKey === lastRenderKey) return;
         lastRenderKey = renderKey;
         const ship = (order.shipping && typeof order.shipping === 'object') ? order.shipping : {};
@@ -1480,8 +1515,17 @@
           ? (String(itemCount) + ' artículos')
           : (((firstItem && firstItem.name) ? firstItem.name : 'Pedido SCOOT SHOP') + ' · Ref. ' + orderNumber);
         const summaryMeta = items.length > 1 ? ('Ref. ' + orderNumber) : hero.eyebrow;
-        const resumeAction = isPendingPayment
-          ? '<div class="order-detail-actions"><button type="button" class="order-cta order-cta--primary" id="resumePaymentBtn">Volver al pago</button></div>'
+        const receiptUrl = String(order.receipt_url || '').trim();
+        const receiptFileName = 'recibo-' + orderNumber.replace(/[^A-Za-z0-9_-]+/g, '-') + '.pdf';
+        const actionButtons = [];
+        if (isPendingPayment) {
+          actionButtons.push('<button type="button" class="order-cta order-cta--primary" id="resumePaymentBtn">Volver al pago</button>');
+        }
+        if (receiptUrl) {
+          actionButtons.push('<a class="order-receipt-cta" href="' + esc(receiptUrl) + '" target="_blank" rel="noopener noreferrer" download="' + esc(receiptFileName) + '"><i class="fa-solid fa-receipt" aria-hidden="true"></i> Descargar recibo</a>');
+        }
+        const resumeAction = actionButtons.length
+          ? ('<div class="order-detail-actions">' + actionButtons.join('') + '</div>')
           : '';
 
         orderDetailSection.hidden = false;
@@ -1495,8 +1539,8 @@
           '  </div>',
           '  <div class="order-kpis">',
           '    <div class="order-kpi"><span class="k">Número de pedido</span><span class="v">' + esc(orderNumber) + '</span></div>',
-          '    <div class="order-kpi"><span class="k">Importe</span><span class="v">' + esc(amount) + '</span></div>',
-          method ? ('    <div class="order-kpi"><span class="k">Método de pago</span><span class="v">' + esc(method) + '</span></div>') : '',
+          method ? ('    <div class="order-kpi is-pair"><span class="k">Método de pago</span><span class="v">' + esc(method) + '</span></div>') : '',
+          '    <div class="order-kpi is-pair"><span class="k">Importe</span><span class="v">' + esc(amount) + '</span></div>',
           '    <div class="order-kpi"><span class="k">Última actualización</span><span class="v">' + esc(updatedAt) + '</span></div>',
           fullName ? ('    <div class="order-kpi"><span class="k">Nombre completo</span><span class="v">' + esc(fullName) + '</span></div>') : '',
           phone ? ('    <div class="order-kpi"><span class="k">Teléfono</span><span class="v">' + esc(phone) + '</span></div>') : '',
@@ -1597,6 +1641,51 @@
         }
       }
 
+      // ¿El usuario llega de completar un pago? (status=paid o vuelta de Stripe)
+      function isPaidReturn(){
+        var s = String(orderStatus || '').toLowerCase();
+        if (s === 'paid' || s === 'processing' || s === 'preparing' || s === 'shipped' || s === 'delivered') return true;
+        return !!(p.get('session_id') || '');
+      }
+
+      // Confirmación tranquilizadora tras pagar, aun si el detalle no carga.
+      // El cliente NUNCA debe ver "caducado" justo después de pagar.
+      function renderPaidConfirmation(){
+        if (!orderDetailSection || !orderDetailBody) return;
+        orderDetailSection.hidden = false;
+        applyCheckoutSteps('paid');
+
+        var ref = orderId || '';
+        var amount = amountText ? formatMoney(amountText, currencyCode) : '';
+
+        orderDetailBody.innerHTML = [
+          '<div class="order-detail-shell">',
+          '  <div class="order-detail-top">',
+          (ref ? ('    <div class="detail-pill"><span class="detail-note"><strong>Referencia:</strong> ' + esc(ref) + '</span></div>') : ''),
+          '    <p class="detail-note"><strong>✅ Pago recibido.</strong> Hemos confirmado tu pago correctamente.</p>',
+          '  </div>',
+          '  <div class="order-empty-state">',
+          '    <strong>¡Gracias por tu compra!</strong>',
+          '    <p>Tu pago se ha completado y tu pedido está confirmado. En unos minutos recibirás un correo con los detalles y el seguimiento (revisa también spam). No necesitas hacer nada más.</p>',
+          '  </div>',
+          '</div>'
+        ].join('');
+
+        if (statusPill) { statusPill.textContent = '✅ Pago confirmado'; statusPill.className = 'status-pill'; }
+        if (orderEyebrow) orderEyebrow.textContent = 'Pago completado';
+        if (heroTitle) heroTitle.textContent = 'Pago confirmado';
+        if (lead) lead.textContent = 'Hemos recibido tu pago. Tu pedido está confirmado y te enviaremos los detalles por correo.';
+        if (microNote) microNote.textContent = ref ? ('Pedido ' + ref) : '';
+        if (miniSummary) miniSummary.textContent = ref ? ('Pedido ' + ref) : 'Pago confirmado';
+        if (heroAmount) heroAmount.textContent = amount || '—';
+        if (heroUpdatedAt) heroUpdatedAt.textContent = '—';
+        if (mailStepText) mailStepText.textContent = 'Te enviaremos la confirmación y el seguimiento por correo.';
+        if (nextStepText) nextStepText.textContent = 'Prepararemos tu pedido en breve.';
+        if (supportText) supportText.textContent = 'Si necesitas ayuda, te atendemos por WhatsApp o email.';
+        if (heroThumbStack) { heroThumbStack.innerHTML = ''; heroThumbStack.hidden = true; }
+        if (primaryOrderCta) { primaryOrderCta.textContent = 'Volver al inicio'; primaryOrderCta.href = '/'; }
+      }
+
       function buildPreviewOrder(){
         if (!previewActive || !orderId) return null;
         try {
@@ -1691,6 +1780,7 @@
             product_image_url: String(item.product_image_url || ''),
             product_color: String(item.product_color || ''),
             product_color_label: String(item.product_color_label || item.product_color || ''),
+            receipt_url: String(item.receipt_url || ''),
             order_items: localItems,
             shipping: {
               name: String(item.ship_name || item.customer_name || ''),
@@ -1784,8 +1874,10 @@
           }
         }
 
-        if (apiError === 'not_found' || apiError === 'forbidden' || apiError === 'not_logged_in' || apiError === 'request_failed') {
-          renderExpiredOrder();
+        // Acaba de pagar: nunca mostrar "caducado". Confirmar el pago aunque el
+        // detalle no haya podido cargar (el correo llegará con todos los datos).
+        if (isPaidReturn()) {
+          renderPaidConfirmation();
           return;
         }
 
@@ -1827,6 +1919,52 @@
   <script src="/js/global-assets.js?v=20260605-2"></script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

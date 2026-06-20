@@ -125,6 +125,16 @@
       + 8;
   };
 
+  // Posición sticky del rail de series = alto de la cabecera fija + tira de
+  // categorías. Se fija lo antes posible (en boot, antes del primer paint) para que
+  // el rail no aparezca en una posición y luego salte a la correcta al volver/recargar.
+  const setRailStickyTop = () => {
+    const header = document.getElementById('siteHeader');
+    const strip = document.querySelector('.home-category-strip');
+    const top = (header ? header.offsetHeight : 72) + (strip ? strip.offsetHeight : 0);
+    document.documentElement.style.setProperty('--rail-sticky-top', top + 'px');
+  };
+
   const getCategorySectionElement = (categoryKey) => {
     const normalized = normalizeHomeCategoryKey(categoryKey);
     return document.getElementById(getHomeCategorySectionId(normalized));
@@ -515,7 +525,6 @@
   let homeCategoryObserver = null;
   let homeCategoryScrollBound = false;
   let homeCategoryScrollTick = 0;
-  let homeCategoryScrollAnimFrame = 0;
   let homeCategoryPendingKey = '';
   let homeCategoryPendingDeadline = 0;
 
@@ -527,15 +536,6 @@
     } catch (_) {
       return 'smooth';
     }
-  };
-
-  const scrollToYQuick = (top) => {
-    const target = Math.max(0, Math.round(top));
-    if (homeCategoryScrollAnimFrame) {
-      window.cancelAnimationFrame(homeCategoryScrollAnimFrame);
-      homeCategoryScrollAnimFrame = 0;
-    }
-    window.scrollTo(0, target);
   };
 
   const clearHomeCategoryPending = () => {
@@ -639,16 +639,11 @@
     const rail = document.querySelector('[data-home-series-rail]');
     if (!rail) return;
 
-    // Sync sticky top position: header + category strip height
-    const syncRailTop = () => {
-      const header = document.getElementById('siteHeader');
-      const strip = document.querySelector('.home-category-strip');
-      const top = (header ? header.offsetHeight : 72) + (strip ? strip.offsetHeight : 0);
-      document.documentElement.style.setProperty('--rail-sticky-top', top + 'px');
-    };
-    syncRailTop();
+    // Sync sticky top position: header + category strip height (función de módulo,
+    // ya ejecutada temprano en boot; aquí solo reaseguramos y enlazamos el resize).
+    setRailStickyTop();
     if (!seriesRailResizeBound) {
-      window.addEventListener('resize', syncRailTop, { passive: true });
+      window.addEventListener('resize', setRailStickyTop, { passive: true });
       seriesRailResizeBound = true;
     }
 
@@ -1720,19 +1715,106 @@
   };
 
   const boot = () => {
+    // index.js es el bootstrap de la HOME. También se carga en las fichas de
+    // producto, pero SOLO para exponer SCOOTSHOP_HOME_CARD_API (las tarjetas de
+    // "También te puede interesar"), que ya se define a nivel de módulo. En las
+    // fichas, la cabecera, el footer, los menús y el resto de la UI común los
+    // inicializa global-assets-app.js, así que correr boot() ahí sería redundante
+    // (y era lo que restauraba el scroll de la home provocando el salto). Fuera de
+    // la home no hay nada que arrancar: el marcador estático [data-hero-carousel]
+    // solo existe en index.html.
+    if (!document.querySelector('[data-hero-carousel]')) return;
+
     // Disable browser's scroll restoration — we handle it ourselves after render
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
     initHomeCategoryNav();
     renderHomeCatalog(activeHomeCategoryKey);
+    // Fija la posición sticky del rail antes del primer paint para que no salte.
+    setRailStickyTop();
 
-    // Restore scroll position instantly after catalog render (before paint)
-    const savedY = sessionStorage.getItem('ss_scrollY');
-    const isBack = !!savedY;
-    if (isBack) {
-      window.scrollTo(0, parseInt(savedY, 10));
-      sessionStorage.removeItem('ss_scrollY');
+    // Salto de scroll instantáneo (sin animación) respetando la cabecera fija. El
+    // <html> ya no usa scroll-behavior:smooth global, pero forzamos behavior:'instant'
+    // para que el reposicionado al restaurar nunca se anime (defensivo, clave en iOS).
+    const jumpInstant = (targetY) => {
+      const y = Math.max(0, targetY);
+      // behavior:'instant' fuerza salto sin animación aunque hubiera scroll-behavior
+      // smooth (clave en iOS, donde alternar el estilo no siempre lo suprimía).
+      try { window.scrollTo({ top: y, left: 0, behavior: 'instant' }); }
+      catch (_) { window.scrollTo(0, y); }
+    };
+
+    // ¿Llegamos con un ancla? (p. ej. /#ubicacion al pulsar el menú desde /cuenta)
+    let hashTarget = null;
+    const rawHash = (window.location.hash || '').slice(1);
+    if (rawHash) {
+      let hashId = rawHash;
+      try { hashId = decodeURIComponent(rawHash); } catch (_) {}
+      hashTarget = document.getElementById(hashId);
     }
+
+    const savedY = sessionStorage.getItem('ss_scrollY');
+    let isBack = false;
+
+    if (hashTarget) {
+      // El ancla tiene PRIORIDAD sobre la restauración: si no, al cargar la home
+      // con #ubicacion la restauración de ss_scrollY nos dejaría en otra posición
+      // (y el scroll nativo cae mal porque el catálogo lo pinta JS). Se calcula tras
+      // renderizar el catálogo, descontando la cabecera fija, y de forma instantánea.
+      sessionStorage.removeItem('ss_scrollY');
+      const header = document.getElementById('siteHeader');
+      const headerOffset = header ? header.offsetHeight : 0;
+      jumpInstant(hashTarget.getBoundingClientRect().top + window.scrollY - headerOffset);
+    } else if (savedY) {
+      // Volver a la home: restaurar la posición previa de forma instantánea
+      // (p. ej. seguías en serie IX).
+      isBack = true;
+      const targetY = parseInt(savedY, 10) || 0;
+      jumpInstant(targetY);
+      sessionStorage.removeItem('ss_scrollY');
+
+      // Reaseguro agnóstico del navegador: en móvil (iOS Safari no soporta
+      // overflow-anchor; la barra de direcciones y las fuentes recolocan la
+      // maquetación) la posición puede desviarse justo tras restaurar. Re-aplicamos
+      // durante unos frames y tras cargar las fuentes, deteniéndonos en cuanto el
+      // usuario hace scroll para no secuestrar su interacción.
+      let userMoved = false;
+      const onUserMove = function () { userMoved = true; };
+      window.addEventListener('wheel', onUserMove, { passive: true, once: true });
+      window.addEventListener('touchmove', onUserMove, { passive: true, once: true });
+      window.addEventListener('keydown', onUserMove, { once: true });
+      let frame = 0;
+      const reassert = function () {
+        if (userMoved) return;
+        if (Math.abs(window.scrollY - targetY) > 1) jumpInstant(targetY);
+        if (++frame < 10) requestAnimationFrame(reassert);
+      };
+      requestAnimationFrame(reassert);
+      if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {
+        document.fonts.ready.then(function () {
+          if (!userMoved && Math.abs(window.scrollY - targetY) > 1) jumpInstant(targetY);
+        }).catch(function () {});
+      }
+    }
+
+    // Revelamos el contenido (oculto por el inline de <head>) SOLO cuando la
+    // maquetación está estable (fuentes cargadas). Clave en móvil: iOS WebKit no
+    // tiene scroll anchoring, así que el reflow de fuentes tras restaurar movía el
+    // contenido bajo el scroll fijo y se veía el salto. Al revelar ya estabilizado,
+    // aparece directamente en su sitio. Failsafe por tiempo (además del del <head>).
+    (function revealWhenStable() {
+      var de = document.documentElement;
+      if (!de.classList.contains('ss-restoring')) return;
+      var done = false;
+      var reveal = function () { if (done) return; done = true; de.classList.remove('ss-restoring'); };
+      var afterPaint = function () { requestAnimationFrame(function () { requestAnimationFrame(reveal); }); };
+      if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {
+        document.fonts.ready.then(afterPaint).catch(reveal);
+      } else {
+        afterPaint();
+      }
+      setTimeout(reveal, 600);
+    })();
 
     // Save scroll position before leaving the page
     window.addEventListener('pagehide', () => {
@@ -1838,4 +1920,35 @@
       // noop
     }
   });
+})();
+
+/* Prerender de páginas de contenido al pasar el ratón / tocar un enlace
+   (Speculation Rules, Chrome) → navegación hacia adelante casi instantánea.
+   Mejora progresiva: los navegadores sin soporte lo ignoran. Se excluyen
+   pago/cuenta/admin/api para no ejecutar páginas sensibles por adelantado. */
+(() => {
+  try {
+    if (document.getElementById('ss-speculationrules')) return;
+    if (!(window.HTMLScriptElement && HTMLScriptElement.supports && HTMLScriptElement.supports('speculationrules'))) return;
+    const rules = {
+      prerender: [{
+        where: { and: [
+          { href_matches: '/*' },
+          { not: { href_matches: '/checkout*' } },
+          { not: { href_matches: '/pago*' } },
+          { not: { href_matches: '/cuenta*' } },
+          { not: { href_matches: '/admin*' } },
+          { not: { href_matches: '/api*' } },
+          { not: { selector_matches: '[rel~="nofollow"]' } },
+          { not: { selector_matches: '[target="_blank"]' } }
+        ] },
+        eagerness: 'moderate'
+      }]
+    };
+    const s = document.createElement('script');
+    s.type = 'speculationrules';
+    s.id = 'ss-speculationrules';
+    s.textContent = JSON.stringify(rules);
+    (document.head || document.documentElement).appendChild(s);
+  } catch (_) {}
 })();
