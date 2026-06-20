@@ -106,8 +106,15 @@ RewriteRule (^|/)env$ - [F,L,NC]
 # Bloquea config.php (solo index.php debe ser accesible en /api)
 RewriteRule ^api/config\.php$ - [F,L,NC]
 
-# Bloquea archivos de desarrollo local (server.ps1, server.py, router.php)
-RewriteRule ^(server\.ps1|server\.py|router\.php)$ - [F,L,NC]
+# Bloquea archivos de desarrollo local (server.ps1, server.py, router.php, deploy.py)
+RewriteRule ^(server\.ps1|server\.py|router\.php|deploy\.py)$ - [F,L,NC]
+
+# SEGURIDAD: deniega CUALQUIER archivo de código/dev/config/backup en todo el sitio.
+# Cubre deploy.py, scripts/*.ps1, *.py, dumps .sql, logs, backups, docs .md, archivos comprimidos…
+# NO incluye .php (api/index.php debe ejecutarse) ni .json (asset-version.json es público).
+<FilesMatch "(?i)\.(py|ps1|psm1|sh|bash|zsh|sql|sqlite|db|bak|old|orig|save|swp|tmp|log|ini|cfg|conf|yml|yaml|toml|lock|md|zip|tar|gz|tgz|bz2|7z|rar)$">
+  Require all denied
+</FilesMatch>
 
 # (Opcional) Fuerza HTTPS
 RewriteCond %{HTTPS} !=on
