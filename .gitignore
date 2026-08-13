@@ -47,3 +47,8 @@ m41-armored-dual-img-backup/
 
 # Collages del carrito generados en runtime (miniatura de Stripe)
 public_html/img/cart-collage/
+
+# Cuarentena: copias de seguridad de limpiezas anteriores. NO forman parte del sitio
+# y algunos de esos scripts llevan credenciales a fuego (por eso salieron de aquí).
+_cleanup_quarantine/
+m41-armored-dual-img-backup/
