@@ -9,25 +9,25 @@
   <meta name="format-detection" content="telephone=no" />
   <meta name="theme-color" content="#ffffff" />
   <meta name="color-scheme" content="only light" />
-  <meta name="asset-version" content="20260620-2" />
+  <meta name="asset-version" content="20260813-9" />
 
   <link rel="canonical" href="https://scootshop.co/cuenta/" />
-  <link rel="icon" href="/favicon.ico?v=20260620-2" sizes="any" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=20260620-2" />
-  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png?v=20260620-2" />
-  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png?v=20260620-2" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=20260620-2" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=20260620-2" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=20260620-2" />
-  <link rel="manifest" href="/site.webmanifest?v=20260620-2" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest?v=20260813-9" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" />
-  <link rel="stylesheet" href="/css/icons.css?v=20260620-2" />
-  <link rel="stylesheet" href="/css/main.css?v=20260620-2" />
-  <link rel="stylesheet" href="/css/partials.mobile-menu.css?v=20260620-2" />
-  <link rel="stylesheet" href="/css/address-fields.css?v=20260620-2" />
+  <link rel="stylesheet" href="/css/icons.css?v=20260813-9" />
+  <link rel="stylesheet" href="/css/main.css?v=20260813-9" />
+  <link rel="stylesheet" href="/css/partials.mobile-menu.css?v=20260813-9" />
+  <link rel="stylesheet" href="/css/address-fields.css?v=20260813-9" />
 
   <style>
     /* ─── ENTORNO DE SCROLL IDÉNTICO AL RESTO DE PÁGINAS ──────────
@@ -69,10 +69,25 @@
       .acct-sidebar { display: contents; }
       #accountSessionShell { order: 1; }
       .acct-main { order: 2; }
+
+      /* Se probó anclar aquí la franja de cuenta (position:sticky) y se
+         descartó: con sesión se comía 148px fijos que, sumados a los 73px del
+         header, dejaban solo el 74 % de la pantalla para la lista de pedidos.
+         Los tres botones son navegación de sección —se pulsan una vez— y los
+         pedidos por cliente son pocos, así que el coste permanente no
+         compensaba. Si algún día las listas se alargan, la versión que sí
+         valdría es anclar SOLO los botones (67px), lo que exige sacarlos de
+         .acct-card: un sticky no puede salirse de su contenedor.
+         OJO si se retoma: `overflow-x:hidden` en .acct-page calcula
+         overflow-y:auto y la convierte en contenedor de scroll, y ahí el
+         sticky no llega a activarse nunca. Hay que usar `overflow-x:clip`. */
     }
 
     /* ─── TARJETA AYUDA / SOPORTE ──────────────────────────────── */
-    .acct-help-card { display: grid; gap: 4px; }
+    /* align-content:start evita que el grid estire las filas cuando la
+       tarjeta recibe height:100% en escritorio; así el borde inferior de
+       la cabecera «¿Necesitas ayuda?» queda a la misma altura que «Pedidos». */
+    .acct-help-card { display: grid; gap: 4px; align-content: start; }
     .acct-help-link {
       display: flex;
       align-items: center;
@@ -113,6 +128,18 @@
       font-size: .84rem; font-weight: 800; color: #1d4ed8; cursor: pointer; border-radius: 8px;
     }
     .acct-link-btn:hover { background: #eff6ff; }
+    .acct-link-btn[disabled] { color: #94a3b8; cursor: not-allowed; }
+    .acct-link-btn[disabled]:hover { background: none; }
+
+    /* Contador "X/5" de direcciones guardadas.
+       El margen negativo evita que el botón estire la cabecera: la línea inferior
+       queda a la misma altura que en "Mis datos" sin recortar el área táctil. */
+    .acct-cardhead__aside { display: flex; align-items: center; gap: 6px; margin: -8px 0; }
+    .acct-count {
+      font-size: .74rem; font-weight: 800; color: #64748b;
+      background: #f1f5f9; border-radius: 999px; padding: 3px 9px;
+    }
+    .acct-count.is-full { color: #b91c1c; background: #fee2e2; }
 
     /* Los campos (.field/.form-grid) usan css/address-fields.css — mismo estilo que el checkout */
     .acct-form { display: grid; gap: 2px; }
@@ -123,14 +150,17 @@
     .acct-check { display: flex; align-items: center; gap: 8px; font-size: .85rem; font-weight: 700; color: #475569; cursor: pointer; }
     .acct-check input { width: 16px; height: 16px; }
 
-    .acct-address { border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px 14px; display: grid; gap: 4px; }
+    .acct-address { border: 1px solid #e2e8f000; border-radius: 14px; padding: 12px 14px; display: grid; gap: 4px; background-color: #fbfbfb; }
     .acct-address + .acct-address { margin-top: 10px; }
-    .acct-address.is-default { border-color: #14b8a6; background: #f0fdfa; }
+    /* Predeterminada: sin borde y con un neutro un punto más oscuro que el resto.
+       El distintivo lo da la píldora negra, igual que el selector de direcciones
+       del checkout (.addr-picker__badge). */
+    .acct-address.is-default { border-color: transparent; background: #f1f3f5; }
     .acct-address-top { display: flex; align-items: center; gap: 8px; }
     .acct-address-label { font-weight: 800; color: #0f172a; font-size: .92rem; }
     .acct-default-badge {
       font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em;
-      color: #0f766e; background: #ccfbf1; border-radius: 999px; padding: 2px 8px;
+      color: #fff; background: #111315; border-radius: 999px; padding: 3px 9px;
     }
     .acct-address-text { font-size: .84rem; color: #475569; line-height: 1.4; }
     .acct-address-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
@@ -163,8 +193,15 @@
       justify-content: space-between;
       gap: 10px;
       margin: calc(-1 * var(--acct-pad)) calc(-1 * var(--acct-pad)) 16px;
-      padding: 16px var(--acct-pad) 12px;
+      /* Mismo aire que el checkout y /pago (.section-heading / .card--methods .head):
+         18px arriba y 20px en escritorio, 12px abajo. */
+      padding: 18px var(--acct-pad) 12px;
       border-bottom: 1px solid rgba(17,19,21,.06);
+    }
+    @media (min-width: 1201px) {
+      .acct-cardhead,
+      .acct-head,
+      .order-history-head { padding-top: 20px; }
     }
     .acct-cardhead__title,
     .acct-head h2,
@@ -180,10 +217,14 @@
       text-transform: uppercase;
       color: var(--ink);
       line-height: 1.1;
+      /* Misma altura de línea que .section-heading del checkout (25,8px), donde el
+         icono SVG de 20px engorda la caja de texto. Sin esto la cabecera de /cuenta
+         quedaba 9px más baja aunque el padding fuese idéntico. */
+      min-height: 25.8px;
     }
     .acct-cardhead__title i,
     .order-history-head h2 i {
-      font-size: .92em;
+      font-size: 1.2em;
       color: var(--ink);
     }
 
@@ -204,30 +245,28 @@
     }
     .account-session-state--guest   { color: #1d4ed8; background: #eff6ff; border-color: #2563eb; }
     .account-session-state--logged-in { color: #0f766e; background: #ecfeff; border-color: #14b8a6; }
-    .account-session-state--expired { color: #9a3412; background: #fff7ed; border-color: #fdba74; }
 
     /* Cerrar sesión integrado en la cabecera (sustituye al badge ACTIVA cuando la
        sesión está activa). Oculto por defecto; account.js marca .is-logged. */
     .acct-head-logout {
       display: none;
       align-items: center;
-      gap: 7px;
-      padding: 7px 13px;
+      gap: 8px;
+      padding: 8px 12px;
       border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.24);
-      background: rgba(255,255,255,.10);
-      color: #fff;
-      font-size: .72rem;
-      font-weight: 800;
-      letter-spacing: .05em;
-      text-transform: uppercase;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,.8);
+      font-size: .84rem;
+      font-weight: 700;
+      letter-spacing: .01em;
       line-height: 1;
       cursor: pointer;
-      transition: background .16s ease, border-color .16s ease;
+      transition: color .16s ease, background .16s ease;
     }
-    .acct-head-logout i { font-size: .9em; color: #fff; }
-    .acct-head-logout:hover { background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.38); }
-    .acct-head-logout:active { background: rgba(255,255,255,.14); }
+    .acct-head-logout i { font-size: 1em; color: inherit; }
+    .acct-head-logout:hover { color: #fff; background: rgba(255,255,255,.1); }
+    .acct-head-logout:active { background: rgba(255,255,255,.16); }
     /* En sesión activa: mostrar "SALIR" y ocultar el badge ACTIVA. */
     .acct-card.is-logged .acct-head .acct-head-logout { display: inline-flex; }
     .acct-card.is-logged .acct-head .account-session-state { display: none; }
@@ -244,6 +283,13 @@
     .acct-skel-lg { height: 14px; width: 65%; }
     .acct-skel-md { width: 50%; }
     .acct-skel-sm { width: 32%; }
+    /* Sobre la tarjeta invitado (oscura) el esqueleto va inset y con barras
+       translúcidas claras en vez del gris sobre blanco. */
+    .acct-card.is-guest .acct-skel-wrap { padding: 12px 22px 16px; }
+    .acct-card.is-guest .acct-skel {
+      background: linear-gradient(90deg, rgba(255,255,255,.06) 25%, rgba(255,255,255,.14) 50%, rgba(255,255,255,.06) 75%);
+      background-size: 200% 100%;
+    }
     @keyframes acct-shimmer {
       0%   { background-position:  200% 0; }
       100% { background-position: -200% 0; }
@@ -306,15 +352,15 @@
       gap: 12px;
       align-content: start;
       padding: 13px 13px 14px;
-      border: 1px solid #e6e9ef;
+      border: 1px solid transparent;
       border-radius: 16px;
       background: #fff;
       color: #0f172a;
-      transition: border-color .15s ease, background .15s ease, box-shadow .18s ease, transform .15s ease;
+      box-shadow: 0 0 0 1px rgba(15,23,42,.03), 0 0 8px rgba(15,23,42,.06);
+      transition: background .15s ease, box-shadow .18s ease, transform .15s ease;
     }
     .acct-tab-tile:hover {
-      border-color: #cbd5e1;
-      box-shadow: 0 8px 20px rgba(15,23,42,.07);
+      box-shadow: 0 0 0 1px rgba(15,23,42,.04), 0 0 16px rgba(15,23,42,.12);
       transform: translateY(-1px);
     }
     .acct-tab-top {
@@ -354,11 +400,11 @@
       letter-spacing: -.01em;
       line-height: 1.1;
     }
+    /* Mismo oscuro que el banner "Mi cuenta" (.acct-card.is-logged .acct-head). */
     .acct-tab-tile.is-active {
-      background: #0f172a;
-      border-color: #0f172a;
+      background: #1f2124;
       color: #fff;
-      box-shadow: 0 12px 28px rgba(15,23,42,.22);
+      box-shadow: 0 0 16px rgba(31,33,36,.22);
     }
     .acct-tab-tile.is-active .acct-tab-ico { background: rgba(255,255,255,.14); color: #fff; }
     .acct-tab-tile.is-active .acct-tab-count { background: rgba(255,255,255,.16); color: #fff; }
@@ -461,16 +507,20 @@
       background: #1f2124;
     }
     .acct-card.is-logged .acct-head {
-      padding: 20px 22px 0;
+      padding: 16px 22px 0;
       border-bottom: 0;
     }
+    /* "Mi cuenta" hereda el título compartido (Russo One .95rem/700) igual que
+       "Pedidos" y "Necesitas ayuda"; solo cambiamos el color a blanco. */
     .acct-card.is-logged .acct-head h2 {
       color: #f8fafc;
-      font-size: .8rem;
-      font-weight: 800;
-      letter-spacing: .09em;
-      text-transform: uppercase;
-      opacity: .68;
+      opacity: 1;
+    }
+    /* El botón "Salir" es más alto que el título; con margen vertical negativo
+       deja de estirar la fila (align-items:center) y el título "MI CUENTA"
+       queda a la misma altura que "PEDIDOS". El botón conserva su tamaño. */
+    .acct-card.is-logged .acct-head-logout {
+      margin-block: -7px;
     }
     /* Badge ACTIVA sobre fondo oscuro */
     .acct-card.is-logged .account-session-state--logged-in {
@@ -518,11 +568,10 @@
     }
 
     /* ─── SECCIÓN PEDIDOS (generada por JS) ───────────────────── */
-    .order-history {}
-
     .acct-orders-count {
       font-size: .8rem;
       font-weight: 700;
+      line-height: 1;
       color: #94a3b8;
       white-space: nowrap;
     }
@@ -603,6 +652,10 @@
     .order-history-item.is-delivered {
       border: 2px solid #16a34a;
     }
+    /* Pedido cancelado/incidencia: borde rojo */
+    .order-history-item.is-canceled {
+      border: 2px solid #991b1b;
+    }
     /* Al abrir el menú, elevar la tarjeta sobre las siguientes */
     .order-history-item.is-menu-open {
       z-index: 20;
@@ -667,7 +720,7 @@
     .order-menu-bang {
       display: none;
       font-weight: 900;
-      font-size: 1.1rem;
+      font-size: 1.35rem;
       line-height: 1;
       color: #ef4444;
     }
@@ -740,13 +793,9 @@
     .order-menu-item-bang {
       margin-left: auto;
       flex-shrink: 0;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: #fee2e2;
       color: #ef4444;
       font-weight: 900;
-      font-size: .8rem;
+      font-size: 1.35rem;
       line-height: 1;
       display: inline-flex;
       align-items: center;
@@ -895,60 +944,80 @@
       border-top: 1px solid rgba(15,23,42,.07);
     }
     .tracking-status {
+      display: flex;
+      align-items: center;
+      gap: .5em;
       font-size: 1.45rem;
       font-weight: 800;
       color: #0f172a;
       line-height: 1.1;
     }
+    /* La palabra siempre en negro; solo el icono toma el color del estado
+       (--acc, lo pone .tracking-inline). Misma paleta que el panel admin. */
+    .tracking-status-ico {
+      display: inline-flex;
+      flex: 0 0 auto;
+      color: var(--acc, #475569);
+    }
+    .tracking-status-ico svg { width: 1.05em; height: 1.05em; display: block; }
+    /* Línea de tiempo segmentada: iconos y segmentos son hermanos de una fila
+       flex, no una barra continua con los emojis encima. Así cada segmento
+       conserva sus extremos redondeados y el `gap` le da aire al icono tanto
+       al principio como al final. */
     .track-line {
-      position: relative;
+      /* Si un contenedor (.tracking-inline) define el tamaño, manda él; si no,
+         29px. Sin el fallback los iconos se quedaban sin medida en /pedido. */
+      --icon-size: var(--timeline-icon-size, 29px);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      /* La fila ya reserva la altura del icono (antes sobresalían de una barra
+         de 10px y los márgenes lo compensaban). El hueco superior lo pone el
+         `gap` del contenedor. */
+      margin-bottom: 8px;
+    }
+    .track-seg {
+      flex: 1 1 0;
+      min-width: 0;
       height: 10px;
       border-radius: 999px;
-      background: #e7ebf0;
-      overflow: visible;
-      margin-top: 8px;
-      margin-bottom: 18px;
-      --icon-size: var(--timeline-icon-size);
+      background-color: #e7ebf0;
     }
-    .track-line > i {
-      position: absolute;
-      inset: 0 auto 0 0;
-      width: var(--progress, 40%);
-      background: linear-gradient(90deg, #d946ef, #7c3aed);
-      border-radius: 999px;
-      display: block;
+    /* El tramo recorrido: color plano y sólido del estado (--acc). */
+    .track-seg.is-on {
+      background-color: var(--acc, #16a34a);
     }
-    .track-line.is-delivered > i {
-      background: linear-gradient(90deg, #22c55e, #16a34a);
-    }
-    .tracking-icons {
-      position: absolute;
-      top: 50%;
-      left: 0;
-      right: 0;
-      --icon-size: var(--timeline-icon-size);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transform: translateY(calc(-50% - 0.9px));
-      z-index: 3;
-      pointer-events: none;
-    }
-    .tracking-icons span {
+    .track-ico {
+      flex: 0 0 auto;
       width: var(--icon-size);
       height: var(--icon-size);
       border-radius: 999px;
       background: #fff;
-      color: #111827;
-      border: 3px solid #f8fafc;
+      color: #64748b;
+      border: 1px solid #ecebeb;
       display: grid;
       place-items: center;
-      font-size: .9rem;
-      opacity: 1;
-      box-shadow: 0 2px 6px rgba(15,23,42,.30);
-      transition: opacity .16s ease, transform .16s ease;
+      box-shadow: 0 2px 6px rgba(229,229,229,.30);
     }
-    .tracking-icons span.is-on { opacity: 1; }
+    /* El icono es un SVG de línea que hereda `color` con currentColor; se
+       dimensiona en proporción al círculo, así vale para desktop y móvil. */
+    .track-ico svg {
+      width: 58%;
+      height: 58%;
+      display: block;
+    }
+    /* Hito completado: icono y borde en el color del estado (--acc), borde 2px. */
+    .track-ico.is-done {
+      color: var(--acc, #16a34a);
+      border: 2px solid var(--acc, #16a34a);
+    }
+    /* Primer hito de un pedido cancelado: mismo tratamiento que el completado
+       (el estado ES definitivo), pero con el icono de cancelación. --acc ya
+       viene en rojo desde statusAccent(), así que no se fija el color aquí. */
+    .track-ico.is-canceled {
+      color: var(--acc, #991b1b);
+      border: 2px solid var(--acc, #991b1b);
+    }
 
     /* Estado vacío */
     .history-empty {
@@ -984,19 +1053,307 @@
       .acct-tab-name { font-size: .82rem; }
       .history-top { grid-template-columns: 62px 1fr auto; }
       .history-date { grid-column: 3; grid-row: 1; padding-left: 0; margin-top: 0; }
-      .tracking-icons { --icon-size: 26px; }
-      .tracking-icons span { font-size: .82rem; }
-      .tracking-inline { --timeline-icon-size: 25px; }
+      /* Círculo más pequeño que en escritorio y huecos más estrechos, para que
+         los segmentos se lleven el ancho que sobra. El SVG escala solo con el
+         círculo. Mismos valores que en /pedido/. */
+      .track-line { --timeline-icon-size: 26px; gap: 4px; }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       REDISEÑO · UNA SOLA COLUMNA (dirección B)
+
+       Antes: dos columnas, la izquierda entre 420 y 560px solo para el
+       perfil. El contenido se apretaba en el resto y la columna izquierda
+       quedaba vacía más de la mitad — en «Ayuda», dos tercios de página.
+       Ahora: la identidad es una franja a lo ancho arriba y el contenido
+       ocupa la página entera. Misma estructura en escritorio y en móvil,
+       así que se deja de mantener dos maquetaciones del mismo contenido.
+
+       Va al final del <style> a propósito: gana por orden de cascada sin
+       tener que subir la especificidad de cada regla.
+       ═══════════════════════════════════════════════════════════════ */
+
+    .acct-page {
+      width: min(1160px, calc(100% - 40px));
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 14px;
+    }
+    /* El <aside> desaparece como caja: sus hijos pasan a ser filas del grid. */
+    .acct-sidebar { display: contents; }
+    /* Sobraba: igualaba alturas entre las dos columnas que ya no existen. */
+    .acct-main[data-active="help"] { align-self: auto; }
+    .acct-main[data-active="help"] .acct-panel[data-panel="help"],
+    .acct-main[data-active="help"] .acct-help-card { height: auto; }
+
+    /* ─── FRANJA DE IDENTIDAD ─────────────────────────────────────
+       Vale para sesión activa y para invitado: en los dos casos es la
+       misma banda oscura a lo ancho. Cambia lo que lleva dentro. */
+    .acct-card.is-logged,
+    .acct-card.is-guest { padding: 0; overflow: hidden; background: #1f2124; }
+    .acct-card.is-logged .acct-head,
+    .acct-card.is-guest .acct-head {
+      /* margin:0 es OBLIGATORIO. La regla base .acct-head usa margen negativo
+         (-22px arriba y a los lados) para sangrar sobre el padding de .acct-card,
+         más 16px abajo. Con la tarjeta a padding:0 ese margen negativo saca la
+         cabecera FUERA: overflow:hidden corta «MI CUENTA» y el badge, y los 16px
+         de abajo dejan ver el blanco de la tarjeta como una línea suelta. */
+      margin: 0;
+      background: #1f2124;
+      padding: 14px 22px 0;
+      border-bottom: 0;
+    }
+    .acct-card.is-guest .acct-head h2 { color: #f8fafc; opacity: 1; }
+    .acct-card.is-guest .account-session-state--guest {
+      background: rgba(255,255,255,.12);
+      color: #cbd5e1;
+      border: 0;
+      box-shadow: none;
+    }
+    /* La fila: identidad a la izquierda, accesos a la derecha. */
+    .acct-card.is-logged #accountStatus,
+    .acct-card.is-guest #accountStatus {
+      background: #1f2124;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      padding: 10px 22px 16px;
+    }
+    .acct-card.is-logged .acct-user-row {
+      flex: 1 1 240px;
+      min-width: 0;
+      margin: 0;
+      padding: 0;
+      background: none;
+    }
+    .acct-card.is-logged .account-avatar,
+    .acct-card.is-logged .account-avatar-fallback { width: 48px; height: 48px; }
+    .acct-card.is-logged .acct-user-name { font-size: 1.02rem; }
+    /* La línea «Tu cuenta está conectada» se retiró: era redundante junto al
+       nombre, el correo y el botón «Salir». La caja se colapsa para no dejar
+       una fila vacía en la franja — renderLoggedIn() le pone hidden=false, así
+       que hace falta display:none para ganarle. El elemento sigue en el DOM
+       porque account.js aborta el render si no lo encuentra. */
+    .acct-card.is-logged #accountLoggedInBox { display: none; }
+
+    /* ─── ACCESOS DENTRO DE LA FRANJA ─────────────────────────────
+       Pasan de tres cuadrados apilados a botones horizontales sobre el
+       oscuro. display:contents en .acct-tab-top deshace su agrupación
+       para poder ordenar icono → nombre → contador en una sola fila. */
+    .acct-card.is-logged .acct-metrics,
+    .acct-card.is-guest .acct-metrics {
+      flex: 0 0 auto;
+      display: flex;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+    }
+    .acct-card.is-logged .acct-tab-tile,
+    .acct-card.is-guest .acct-tab-tile {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 13px;
+      background: rgba(255,255,255,.08);
+      color: #e2e8f0;
+      border: 0;
+      box-shadow: none;
+    }
+    .acct-card.is-logged .acct-tab-top,
+    .acct-card.is-guest .acct-tab-top { display: contents; }
+    .acct-card.is-logged .acct-tab-ico,
+    .acct-card.is-guest .acct-tab-ico {
+      order: 1;
+      width: 28px; height: 28px;
+      background: rgba(255,255,255,.12);
+      color: #fff;
+      font-size: .82rem;
+    }
+    .acct-card.is-logged .acct-tab-name,
+    .acct-card.is-guest .acct-tab-name { order: 2; color: #e2e8f0; font-size: .8rem; }
+    .acct-card.is-logged .acct-tab-count,
+    .acct-card.is-guest .acct-tab-count {
+      order: 3;
+      background: rgba(255,255,255,.14);
+      color: #fff;
+    }
+    .acct-card.is-logged .acct-tab-tile.is-active { background: #fff; box-shadow: none; }
+    .acct-card.is-logged .acct-tab-tile.is-active .acct-tab-ico { background: #f1f5f9; color: #0f172a; }
+    .acct-card.is-logged .acct-tab-tile.is-active .acct-tab-name { color: #0f172a; }
+    .acct-card.is-logged .acct-tab-tile.is-active .acct-tab-count { background: #1f2124; color: #fff; }
+
+    /* ─── INVITADO ────────────────────────────────────────────────
+       Sin sesión no hay avatar ni «Salir», así que ese sitio lo ocupa la
+       invitación a entrar: la franja ES la llamada a iniciar sesión, no
+       un hueco donde faltan datos. */
+    .acct-card.is-guest .acct-login-box {
+      flex: 1 1 260px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+      margin: 0;
+      padding: 0;
+      background: none;
+      border: 0;
+    }
+    .acct-card.is-guest .acct-login-hint {
+      flex: 0 1 auto;
+      margin: 0;
+      color: rgba(226,232,240,.72);
+      font-size: .85rem;
+    }
+    /* El contenedor del botón de Google es un <div> de bloque: dentro de un
+       flex se estiraba a todo el ancho (729px medidos) y empujaba el aviso a
+       una tercera línea. Con flex:0 0 auto se ajusta a lo que Google pinta y
+       el bloque cabe en una sola fila. */
+    .acct-card.is-guest #googleLoginButton {
+      /* ANCHURA FIJA, NUNCA auto. Google mide este contenedor para decidir el
+         tamaño del botón, y al renderizar aún está vacío: con width:auto mide
+         0, el botón sale a cero y finalizeGoogleButtonRender() —que espera un
+         iframe con anchura > 0— acaba mostrando «No se pudo cargar el botón».
+         La regla base fija width:100%, que aquí lo estiraba a 729px y partía
+         el bloque en tres líneas; 260px es el término medio: definido para
+         Google y estrecho para caber junto al aviso. */
+      width: 260px;
+      flex: 0 0 auto;
+      max-width: 100%;
+    }
+
+    /* En móvil la franja es una columna, así que el motivo de los 260px —caber
+       en la misma fila que el aviso— no aplica: el botón ocupa todo el ancho.
+       Sigue siendo una anchura RESUELTA (100% de la tarjeta, ~330px), no auto,
+       que es lo que Google necesita medir para no pintar el botón a cero.
+       account.js lee esta anchura y se la pasa a renderButton({width}), porque
+       el iframe de GSI no se estira solo con CSS. */
+    @media (max-width: 1024px) {
+      .acct-card.is-guest #googleLoginButton {
+        width: 100%;
+        flex: 1 1 100%;
+      }
+    }
+
+    /* En escritorio el botón va PRIMERO y el aviso después: la acción manda y
+       el texto queda como apoyo. Se hace con `order` y no reordenando el HTML
+       para no tocar el orden de lectura del DOM —el aviso sigue anunciándose
+       antes que el botón— ni el layout en móvil, donde la columna mantiene
+       texto → botón. */
+    @media (min-width: 1025px) {
+      .acct-card.is-guest #googleLoginButton { order: -1; }
+    }
+    /* El aviso ocupa su propia línea y en claro: en gris oscuro sobre la
+       franja no se leía. */
+    .acct-card.is-guest #authMessage,
+    .acct-card.is-guest .account-note {
+      flex: 1 0 100%;
+      margin: 0;
+      color: rgba(226,232,240,.6);
+      font-size: .78rem;
+    }
+    .acct-card.is-guest #authMessage:empty { display: none; }
+    /* Un «0» aquí no informa de nada: solo dice que no has entrado. */
+    .acct-card.is-guest .acct-tab-count { display: none; }
+
+    /* ─── CABECERA DEL LISTADO EN UNA SOLA FILA ───────────────────
+       Título, contador, filtros y buscador compartían tres alturas
+       seguidas; el primer pedido empezaba unos 90px más abajo. */
+    .order-history {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 14px;
+    }
+    /* Misma regla base con margen negativo: al anularlo hay que quitar también
+       su padding lateral (si no, el título queda indentado el doble) y el
+       borde inferior, que ahora solo mediría lo que ocupa la palabra. */
+    .order-history-head {
+      flex: 0 0 auto;
+      margin: 0;
+      padding: 0;
+      border-bottom: 0;
+    }
+    .order-history .acct-tools {
+      flex: 1 1 auto;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      margin: 0;
+    }
+    .order-history .acct-tabs { border-bottom: 0; }
+    .order-history .acct-search { flex: 0 1 230px; width: auto; padding: 9px 14px; }
+    .order-history-list { flex: 1 0 100%; }
+
+    /* ─── DATOS Y DIRECCIONES, LADO A LADO ────────────────────────
+       Con la página entera disponible caben en paralelo y editar el
+       perfil deja de exigir scroll. */
+    @media (min-width: 900px) {
+      .acct-panel[data-panel="addresses"] {
+        display: grid;
+        grid-template-columns: 1.15fr 1fr;
+        align-items: start;
+        gap: 14px;
+      }
+      .acct-panel[data-panel="addresses"] .acct-empty-note { grid-column: 1 / -1; }
+      /* Ayuda: los tres enlaces se reparten a lo ancho en vez de apilarse
+         dejando dos tercios de página vacíos. */
+      .acct-help-card { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+      .acct-help-card .acct-cardhead { grid-column: 1 / -1; }
+      .acct-help-link {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 9px;
+        background: #f8fafc;
+        border-radius: 14px;
+        padding: 14px;
+      }
+    }
+
+    /* ─── MÓVIL ───────────────────────────────────────────────────
+       Misma estructura, apilada: la franja se convierte en identidad
+       arriba y tres accesos iguales debajo. */
+    @media (max-width: 760px) {
+      .acct-page { width: min(680px, calc(100% - 28px)); }
+      .acct-card.is-logged .acct-head,
+      .acct-card.is-guest .acct-head { padding: 14px 16px 0; }
+      .acct-card.is-logged #accountStatus,
+      .acct-card.is-guest #accountStatus { padding: 10px 16px 16px; gap: 12px; }
+      .acct-card.is-logged .acct-user-row { flex: 1 0 100%; }
+      .acct-card.is-logged .account-avatar,
+      .acct-card.is-logged .account-avatar-fallback { width: 44px; height: 44px; }
+      .acct-card.is-logged .acct-metrics,
+      .acct-card.is-guest .acct-metrics {
+        flex: 1 0 100%;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 7px;
+      }
+      .acct-card.is-logged .acct-tab-tile,
+      .acct-card.is-guest .acct-tab-tile {
+        flex-direction: column;
+        gap: 6px;
+        padding: 10px 6px;
+        text-align: center;
+        position: relative;
+      }
+      .acct-card.is-logged .acct-tab-name,
+      .acct-card.is-guest .acct-tab-name { font-size: .74rem; }
+      .acct-card.is-logged .acct-tab-count { position: absolute; top: 6px; right: 8px; }
+      .acct-card.is-guest .acct-login-box { flex: 1 0 100%; }
+      /* La barra de una fila se apila sola cuando no cabe. */
+      .order-history .acct-tools { flex: 1 0 100%; justify-content: flex-start; flex-wrap: wrap; }
+      .order-history .acct-search { flex: 1 0 100%; }
     }
   </style>
 
   <!-- Catálogo de productos: necesario para el menú compartido (desktop + móvil),
        igual que en el resto de páginas. Sin esto el menú "Productos" se construye
        sin datos. -->
-  <script src="/data/products.js?v=20260620-2" defer></script>
+  <script src="/data/products.js?v=20260813-9" defer></script>
   <script src="/js/global-assets.js?v=20260613-14" defer></script>
-  <script src="/js/address-fields.js?v=20260620-2" defer></script>
-  <script src="/js/account.js?v=20260620-2" defer></script>
+  <script src="/js/address-fields.js?v=20260813-9" defer></script>
+  <script src="/js/account.js?v=20260813-9" defer></script>
 </head>
 <body class="account-page">
   <div id="site-header-slot"></div>
@@ -1009,7 +1366,7 @@
       <aside class="acct-sidebar">
 
       <!-- ── TARJETA DE SESIÓN ─────────────────────────────── -->
-      <div class="acct-card" id="accountSessionShell">
+      <div class="acct-card is-guest" id="accountSessionShell">
         <div class="acct-head">
           <h2>Mi cuenta</h2>
           <span id="accountSessionState" class="account-session-state account-session-state--guest">Invitado</span>
@@ -1125,6 +1482,226 @@
   </main>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

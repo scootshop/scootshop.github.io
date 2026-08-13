@@ -21,9 +21,10 @@
   var PREVIEW_ACTIVE = false;
   var PREVIEW_ORDERS_KEY = 'ss_preview_orders_v1';
   var LOCAL_DEV_ORDERS_KEY = 'ss_local_dev_orders_account_v3';
-  var DEV_LOGIN_WRAPPER_ID = 'localDevLoginWrap';
-  var DEV_LOGIN_EMAIL_KEY = 'ss_local_login_email';
-  var DEV_LOGIN_NAME_KEY = 'ss_local_login_name';
+  // Caché stale-while-revalidate de los pedidos del usuario: permite pintar la
+  // lista al instante en la siguiente visita mientras se revalida en segundo
+  // plano. sessionStorage (por pestaña) y atada al uid para no cruzar cuentas.
+  var ORDERS_CACHE_KEY = 'ss_account_orders_cache_v1';
   try {
     PREVIEW_ACTIVE = new URLSearchParams(window.location.search).get('preview_active') === '1';
   } catch (_) {
@@ -239,25 +240,76 @@
       .replace(/'/g, '&#39;');
   }
 
+  // Criterio ÚNICO de "pedido que no va a llegar". Antes cada función tenía el
+  // suyo: el color y el borde reconocían las seis variantes, pero la etiqueta y
+  // el índice del timeline solo 'cancelled'. Un pedido en 'canceled' (sin doble
+  // L), 'refunded', etc. caía en el default y se pintaba como «Preparando» con
+  // el primer hito marcado, aunque la tarjeta saliera en rojo de cancelado.
+  var CANCELED_STATUSES = /^(cancelled|canceled|refunded|payment_failed|dispute|error)$/;
+
+  function isCanceledStatus(status) {
+    return CANCELED_STATUSES.test(String(status || ''));
+  }
+
   function trackingStageIndex(status) {
+    if (isCanceledStatus(status)) return 0;
     if (status === 'pending_payment') return 0;
     if (status === 'paid') return 1;
     if (status === 'processing' || status === 'preparing') return 2;
     if (status === 'shipped') return 3;
     if (status === 'delivered') return 4;
-    if (status === 'cancelled' || status === 'error') return 0;
     return 2;
   }
 
   function trackingStatusLabel(status) {
-    if (status === 'pending_payment') return '⏳ Pendiente pago';
-    if (status === 'paid') return '✅ Pagado';
-    if (status === 'processing' || status === 'preparing') return '📦 Preparando';
-    if (status === 'shipped') return '🚚 Enviado';
-    if (status === 'delivered') return '🏠 Entregado';
-    if (status === 'cancelled') return '❌ Cancelado';
-    if (status === 'error') return '⚠️ Error';
-    return '📦 Preparando';
+    if (status === 'pending_payment') return 'Pendiente pago';
+    if (status === 'paid') return 'Pagado';
+    if (status === 'processing' || status === 'preparing') return 'Preparando';
+    if (status === 'shipped') return 'Enviado';
+    if (status === 'delivered') return 'Entregado';
+    // Cada motivo con su nombre: un pedido reembolsado o con el pago fallido no
+    // es lo mismo que uno cancelado, aunque compartan color e icono.
+    if (status === 'cancelled' || status === 'canceled') return 'Cancelado';
+    if (status === 'refunded') return 'Reembolsado';
+    if (status === 'payment_failed') return 'Pago fallido';
+    if (status === 'dispute') return 'En disputa';
+    if (status === 'error') return 'Error';
+    return 'Preparando';
+  }
+
+  // Color del estado para la cabecera y el tramo hecho del timeline. Misma
+  // paleta que el panel admin (b-pay/b-paid/b-pend/b-res/b-ship/b-deliv/b-canc):
+  // un color por estado. Se inyecta como --acc en .tracking-inline.
+  function statusAccent(status) {
+    switch (status) {
+      case 'pending_payment': return '#9a3412';
+      case 'paid': return '#15803d';
+      case 'processing':
+      case 'preparing': return '#7c3aed';
+      case 'reserved': return '#5b21b6';
+      case 'shipped': return '#2563eb';
+      case 'delivered': return '#16a34a';
+      case 'cancelled':
+      case 'canceled':
+      case 'refunded':
+      case 'payment_failed':
+      case 'dispute':
+      case 'error': return '#991b1b';
+      default: return '#475569';
+    }
+  }
+
+  // Icono de línea de la etapa actual para la cabecera (mismo set que el
+  // timeline): reloj → check al pagar → caja → camión → casa; calendario si está
+  // reservado, ✕ si hay incidencia.
+  function trackingStatusIcon(status) {
+    if (status === 'pending_payment') return TRACK_ICON.hourglass;
+    if (status === 'paid') return TRACK_ICON.check;
+    if (status === 'reserved') return TRACK_ICON.calendar;
+    if (status === 'shipped') return TRACK_ICON.truck;
+    if (status === 'delivered') return TRACK_ICON.house;
+    if (status === 'cancelled' || status === 'canceled' || status === 'refunded' || status === 'payment_failed' || status === 'dispute' || status === 'error') return TRACK_ICON.alert;
+    return TRACK_ICON.box;
   }
 
   function trackingProgress(status) {
@@ -715,6 +767,50 @@
     return { allOrders: allOrders, filtered: filtered, baseOrders: filtered.slice(0, 10) };
   }
 
+  // Cuatro hitos. El primero es transformable: reloj de arena mientras el pago
+  // está pendiente, check en cuanto se cobra. `at` es la etapa
+  // (trackingStageIndex) a partir de la cual el hito se da por completado.
+  // Iconos SVG de línea (set coherente: trazo 2, esquinas redondeadas). Heredan
+  // el color con currentColor, así el CSS los pinta gris (pendiente) o verde
+  // (.is-done). Reloj de arena → check al pagar; después caja, camión y casa.
+  var TRACK_ICON = {
+    hourglass: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.17a2 2 0 0 0-.59-1.41L12 12l-4.41 4.42A2 2 0 0 0 7 17.83V22"/><path d="M7 2v4.17a2 2 0 0 0 .59 1.41L12 12l4.41-4.41A2 2 0 0 0 17 6.17V2"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>',
+    box: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="m7.5 4.27 9 5.15"/></svg>',
+    truck: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>',
+    house: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .71-1.53l7-6a2 2 0 0 1 2.59 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
+    alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>',
+    calendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>'
+  };
+  var TRACKING_STAGES = [
+    { at: 1, title: 'Pendiente pago', icon: TRACK_ICON.hourglass, doneTitle: 'Pagado', doneIcon: TRACK_ICON.check },
+    { at: 2, title: 'Preparando', icon: TRACK_ICON.box },
+    { at: 3, title: 'Enviado', icon: TRACK_ICON.truck },
+    { at: 4, title: 'Entregado', icon: TRACK_ICON.house }
+  ];
+
+  // Iconos y segmentos alternados en una misma fila flex. El segmento i-1 une
+  // el hito anterior con este y se pinta al alcanzarlo.
+  function trackLineHtml(stageIdx, canceled, canceledTitle) {
+    var parts = [];
+    TRACKING_STAGES.forEach(function (stage, i) {
+      var done = stageIdx >= stage.at;
+      if (i > 0) {
+        parts.push('<i class="track-seg' + (done ? ' is-on' : '') + '" aria-hidden="true"></i>');
+      }
+      // En un pedido cancelado el primer hito deja de ser «pendiente de pago»:
+      // pasa a ser el propio motivo de la cancelación, con su icono y el color
+      // del estado. Los tres siguientes se quedan apagados, porque el recorrido
+      // se interrumpió ahí.
+      var esCancelado = canceled && i === 0;
+      var icon = esCancelado ? TRACK_ICON.alert : (done && stage.doneIcon ? stage.doneIcon : stage.icon);
+      var title = esCancelado ? (canceledTitle || 'Cancelado') : (done && stage.doneTitle ? stage.doneTitle : stage.title);
+      var cls = 'track-ico' + (done ? ' is-done' : '') + (esCancelado ? ' is-canceled' : '');
+      parts.push('<span class="' + cls + '" title="' + esc(title) + '">' + icon + '</span>');
+    });
+    return '<div class="track-line' + (stageIdx >= 4 ? ' is-delivered' : '') + '">' + parts.join('') + '</div>';
+  }
+
   function ordersRowsHtml(baseOrders) {
     return baseOrders.map(function (order) {
       var orderNumber = orderNumberLabel(order);
@@ -723,13 +819,12 @@
       var status = trackingStatusLabel(rawStatus);
       var lastUpdate = formatLastUpdate(order.updated_at || order.created_at);
       var date = formatShortDate(order.created_at);
-      var progress = trackingProgress(rawStatus);
       var stageIdx = trackingStageIndex(rawStatus);
-      var trackLineClass = 'track-line' + (stageIdx >= 4 ? ' is-delivered' : '');
       var viewUrl = '/pedido/?order=' + encodeURIComponent(String(order.id || '')) + (PREVIEW_ACTIVE ? '&preview_active=1' : '');
-      var deliveredCls = stageIdx >= 4 ? ' is-delivered' : '';
+      var canceled = isCanceledStatus(rawStatus);
+      var cardStateCls = stageIdx >= 4 ? ' is-delivered' : (canceled ? ' is-canceled' : '');
       return [
-        '<article class="order-history-item' + deliveredCls + '">',
+        '<article class="order-history-item' + cardStateCls + '">',
         '<a class="order-history-link" href="' + esc(viewUrl) + '">',
         '  <div class="history-top">',
         '    ' + renderOrderAvatar(orderNumber, avatar),
@@ -739,18 +834,9 @@
         '    </div>',
         '    <div class="history-date">' + esc(date) + '</div>',
         '  </div>',
-        '  <div class="tracking-inline">',
-        '    <div class="tracking-status">' + esc(status) + '</div>',
-        '    <div class="' + esc(trackLineClass) + '" style="--progress:' + esc(progress + '%') + ';">',
-        '      <i aria-hidden="true"></i>',
-        '      <div class="tracking-icons">',
-        '        <span class="' + (stageIdx >= 0 ? 'is-on' : '') + '" title="Pendiente pago">⏳</span>',
-        '        <span class="' + (stageIdx >= 1 ? 'is-on' : '') + '" title="Pagado">✅</span>',
-        '        <span class="' + (stageIdx >= 2 ? 'is-on' : '') + '" title="Preparando">📦</span>',
-        '        <span class="' + (stageIdx >= 3 ? 'is-on' : '') + '" title="Enviado">🚚</span>',
-        '        <span class="' + (stageIdx >= 4 ? 'is-on' : '') + '" title="Entregado">🏠</span>',
-        '      </div>',
-        '    </div>',
+        '  <div class="tracking-inline" style="--acc:' + statusAccent(rawStatus) + '">',
+        '    <div class="tracking-status"><span class="tracking-status-ico">' + trackingStatusIcon(rawStatus) + '</span>' + esc(status) + '</div>',
+        '    ' + trackLineHtml(stageIdx, canceled, status),
         '  </div>',
         '</a>',
         orderMenuHtml(order),
@@ -870,6 +956,13 @@
     if (main) main.setAttribute('data-active', tab);
   }
 
+  // Tope de direcciones guardadas: lo manda el backend (CUSTOMER_ADDRESS_MAX).
+  var ADDRESS_MAX_FALLBACK = 5;
+
+  function addressLimit() {
+    return Number(state.addressesMax || 0) || ADDRESS_MAX_FALLBACK;
+  }
+
   function updateAddressCount() {
     var el = $('accountQuickAddresses');
     if (el) el.textContent = String((state.addresses || []).length);
@@ -897,6 +990,7 @@
       if (!res.ok || !res.data || !res.data.ok) { hideAccountExtras(); return; }
       state.profile = res.data.profile || {};
       state.addresses = Array.isArray(res.data.addresses) ? res.data.addresses : [];
+      state.addressesMax = Number(res.data.addresses_max || 0) || ADDRESS_MAX_FALLBACK;
       state.editingAddressId = null;
       var note = $('addressesGuestNote');
       if (note) note.hidden = true;
@@ -906,21 +1000,46 @@
     }).catch(function () { hideAccountExtras(); });
   }
 
+  // El teléfono se guarda con prefijo ("+34 666318747"); el formulario lo muestra partido.
+  function splitPhone(raw) {
+    var value = String(raw || '').trim();
+    var m = value.match(/^(\+\d{1,4})\s*(.*)$/);
+    return m ? { prefix: m[1], national: m[2].trim() } : { prefix: '+34', national: value };
+  }
+
   function renderProfileCard() {
     var card = $('accountProfileCard');
     if (!card || !window.SS_ADDR) return;
     var p = state.profile || {};
+    var phone = splitPhone(p.phone);
     card.hidden = false;
     card.innerHTML = [
       '<div class="acct-cardhead"><h2 class="acct-cardhead__title">Mis datos<i class="fa-solid fa-user" aria-hidden="true"></i></h2></div>',
       '<form class="acct-form" id="accountProfileForm" novalidate>',
-      window.SS_ADDR.contactFieldsHtml({ idPrefix: 'prof', emailDisabled: true, values: { fullName: p.name || '', email: p.email || '', phone: p.phone || '' } }),
+      window.SS_ADDR.contactFieldsHtml({ idPrefix: 'prof', emailDisabled: true, values: { fullName: p.name || '', email: p.email || '', phonePrefix: phone.prefix, phone: window.SS_ADDR.formatPhone(phone.national) } }),
       '  <div class="acct-form-actions">',
       '    <button type="submit" class="acct-btn acct-btn--dark" id="profileSaveBtn">Guardar</button>',
       '    <span class="acct-form-note" id="profileNote"></span>',
       '  </div>',
       '</form>'
     ].join('');
+
+    // Teléfono en formato "666 318 747" también mientras se escribe (igual que el checkout).
+    var phoneEl = card.querySelector('[data-addr="phone"]');
+    if (phoneEl) {
+      phoneEl.addEventListener('beforeinput', function (e) {
+        if (e.data && /\D/.test(e.data)) e.preventDefault();
+      });
+      phoneEl.addEventListener('input', function () {
+        phoneEl.value = window.SS_ADDR.formatPhone(phoneEl.value);
+      });
+    }
+    var prefixEl = card.querySelector('[data-addr="phonePrefix"]');
+    if (prefixEl) {
+      prefixEl.addEventListener('beforeinput', function (e) {
+        if (e.data && /[^+\d]/.test(e.data)) e.preventDefault();
+      });
+    }
   }
 
   function addressText(a) {
@@ -974,11 +1093,18 @@
     if (!card) return;
     card.hidden = false;
     var editing = state.editingAddressId !== null && state.editingAddressId !== undefined;
-    var html = ['<div class="acct-cardhead"><h2 class="acct-cardhead__title">Direcciones<i class="fa-solid fa-location-dot" aria-hidden="true"></i></h2>'];
+    var max = addressLimit();
+    var count = (state.addresses || []).length;
+    var atLimit = count >= max;
+    var html = [
+      '<div class="acct-cardhead"><h2 class="acct-cardhead__title">Direcciones<i class="fa-solid fa-location-dot" aria-hidden="true"></i></h2>',
+      '<div class="acct-cardhead__aside">',
+      '<span class="acct-count' + (atLimit ? ' is-full' : '') + '" title="Máximo ' + max + ' direcciones guardadas">' + count + '/' + max + '</span>'
+    ];
     if (!editing) {
-      html.push('<button type="button" class="acct-link-btn" id="addAddressBtn">+ Añadir</button>');
+      html.push('<button type="button" class="acct-link-btn" id="addAddressBtn"' + (atLimit ? ' disabled title="Has alcanzado el máximo de ' + max + ' direcciones"' : '') + '>+ Añadir</button>');
     }
-    html.push('</div>');
+    html.push('</div></div>');
 
     var current = {};
     if (editing) {
@@ -990,6 +1116,9 @@
       html.push('<p class="acct-empty-note">Aún no tienes direcciones guardadas. Añade una para agilizar tus próximos pedidos.</p>');
     } else {
       html.push(state.addresses.map(addressRowHtml).join(''));
+      if (atLimit) {
+        html.push('<p class="acct-empty-note">Has alcanzado el máximo de ' + max + ' direcciones. Elimina una para poder añadir otra.</p>');
+      }
     }
     card.innerHTML = html.join('');
 
@@ -1005,7 +1134,10 @@
     var note = $('profileNote');
     var c = (window.SS_ADDR && form) ? window.SS_ADDR.readContact(form) : { fullName: '', phone: '' };
     var name = c.fullName;
-    var phone = c.phone;
+    // Guardar con prefijo y en formato "666 318 747": el checkout usa este teléfono
+    // tal cual como prioritario.
+    var national = window.SS_ADDR ? window.SS_ADDR.formatPhone(c.phone) : String(c.phone || '');
+    var phone = national ? ((c.phonePrefix || '+34') + ' ' + national) : '';
     if (btn) { btn.disabled = true; btn.textContent = 'Guardando...'; }
     apiFetch('account_profile_update', { method: 'POST', body: JSON.stringify({ name: name, phone: phone }) }).then(function (res) {
       if (res.ok && res.data && res.data.ok) {
@@ -1054,7 +1186,13 @@
         state.editingAddressId = null;
         return loadProfile();
       }
-      if (note) { note.textContent = 'No se pudo guardar'; note.className = 'acct-form-note acct-form-note--err'; }
+      var err = res.data && res.data.error;
+      if (note) {
+        note.textContent = err === 'address_limit'
+          ? ('Máximo ' + addressLimit() + ' direcciones guardadas')
+          : 'No se pudo guardar';
+        note.className = 'acct-form-note acct-form-note--err';
+      }
       if (btn) { btn.disabled = false; btn.textContent = 'Guardar dirección'; }
     }).catch(function () {
       if (note) { note.textContent = 'Error de conexión'; note.className = 'acct-form-note acct-form-note--err'; }
@@ -1151,7 +1289,11 @@
       accountSessionState.textContent = 'ACTIVA';
       accountSessionState.className = 'account-session-state account-session-state--logged-in';
     }
-    copy.textContent = 'Tu cuenta está conectada.';
+    // Sin texto de estado: que la sesión está activa ya lo dicen el nombre, el
+    // correo y el botón «Salir». El elemento se conserva porque el guard de
+    // arriba (`if (!loginBox || !loggedBox || !copy) return;`) lo exige, y su
+    // caja se colapsa desde el CSS de cuenta/index.html.
+    copy.textContent = '';
     setSessionMode('logged');
     setSessionLayout(true);
     scheduleHeaderAccountStateSync(24);
@@ -1166,6 +1308,9 @@
     var insights = $('accountInsights');
     var statusEl = $('accountStatus');
     if (!loginBox || !loggedBox || !copy) return;
+
+    // Sin sesión no debe quedar rastro de pedidos cacheados en la pestaña.
+    clearOrdersCache();
 
     var localEmulation = isLocalEmulationActive();
     var googleHost = $('googleLoginButton');
@@ -1292,6 +1437,36 @@
     });
   }
 
+  function ordersCacheUid(user) {
+    if (!user) return '';
+    return String(user.id || user.email || '');
+  }
+  function readOrdersCache(user) {
+    var uid = ordersCacheUid(user);
+    if (!uid) return null;
+    try {
+      var raw = sessionStorage.getItem(ORDERS_CACHE_KEY);
+      if (!raw) return null;
+      var obj = JSON.parse(raw);
+      if (!obj || String(obj.uid) !== uid) return null;
+      return Array.isArray(obj.orders) ? obj.orders : null;
+    } catch (_) { return null; }
+  }
+  function writeOrdersCache(user, orders) {
+    var uid = ordersCacheUid(user);
+    if (!uid) return;
+    try {
+      sessionStorage.setItem(ORDERS_CACHE_KEY, JSON.stringify({
+        uid: uid,
+        orders: Array.isArray(orders) ? orders : [],
+        ts: Date.now()
+      }));
+    } catch (_) { /* cuota o modo privado: ignora */ }
+  }
+  function clearOrdersCache() {
+    try { sessionStorage.removeItem(ORDERS_CACHE_KEY); } catch (_) { /* ignore */ }
+  }
+
   function loadOrders() {
     if (state.ordersLoadPromise) return state.ordersLoadPromise;
 
@@ -1327,20 +1502,32 @@
         return state.orders;
       }
 
+      // En la primera carga (aún sin pedidos en memoria) pintamos al instante
+      // la caché de este usuario para percepción inmediata; luego revalidamos.
+      var paintedCache = false;
+      if (!state.orders || !state.orders.length) {
+        var cachedOrders = readOrdersCache(state.user);
+        if (cachedOrders && cachedOrders.length) {
+          state.orders = cachedOrders;
+          renderOrders();
+          paintedCache = true;
+        }
+      }
+
       return apiFetch('account_orders', { method: 'GET' }).then(function (res) {
         if (!res.ok || !res.data || !res.data.ok) {
-          state.orders = [];
-          renderOrders();
-          return [];
+          // Si ya había caché pintada, no la borramos por un fallo transitorio.
+          if (!paintedCache) { state.orders = []; renderOrders(); }
+          return state.orders;
         }
         state.user = res.data.user || state.user;
         state.orders = Array.isArray(res.data.orders) ? res.data.orders : [];
+        writeOrdersCache(state.user, state.orders);
         renderOrders();
         return state.orders;
       }).catch(function () {
-        state.orders = [];
-        renderOrders();
-        return [];
+        if (!paintedCache) { state.orders = []; renderOrders(); }
+        return state.orders;
       });
     });
 
@@ -1391,78 +1578,6 @@
     }).finally(function () {
       state.loginBusy = false;
     });
-  }
-
-  function handleDevLogin() {
-    var savedEmail = '';
-    var savedName = '';
-    try {
-      savedEmail = String(localStorage.getItem(DEV_LOGIN_EMAIL_KEY) || '').trim().toLowerCase();
-      savedName = String(localStorage.getItem(DEV_LOGIN_NAME_KEY) || '').trim();
-    } catch (_) {
-      savedEmail = '';
-      savedName = '';
-    }
-
-    var email = savedEmail || (state.user && state.user.email ? String(state.user.email).trim().toLowerCase() : 'prueba.local@scootshop.co');
-    var name = savedName || (state.user && state.user.name ? String(state.user.name).trim() : 'Prueba Local');
-
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
-      email = 'prueba.local@scootshop.co';
-    }
-    if (!name) {
-      name = 'Prueba Local';
-    }
-
-    state.loginBusy = true;
-    setMessage('Entrando en local con ' + email + '...', '');
-
-    apiFetch('auth_dev_login', {
-      method: 'POST',
-      body: JSON.stringify({
-        email: email,
-        name: name || 'Prueba Local'
-      }),
-    }).then(function (res) {
-      if (!res.ok || !res.data || !res.data.ok) {
-        throw new Error((res.data && (res.data.error || res.data.detail)) || 'dev_login_failed');
-      }
-      try {
-        localStorage.setItem(DEV_LOGIN_EMAIL_KEY, email);
-        localStorage.setItem(DEV_LOGIN_NAME_KEY, name);
-      } catch (_) {
-        /* ignore */
-      }
-      state.user = res.data.user || null;
-      if (state.user) {
-        renderLoggedIn(state.user);
-      } else {
-        renderLoggedOut();
-      }
-      setMessage('Sesión local iniciada correctamente.', 'success');
-      return loadStatus().then(function () {
-        return loadOrders();
-      }).then(function () {
-        startOrdersAutoRefresh();
-        syncSharedAuthUi();
-        loadProfile();
-      });
-    }).catch(function (err) {
-      var detail = err && err.message ? String(err.message) : '';
-      setMessage('No se pudo iniciar la sesión local' + (detail ? ': ' + detail : '.'), 'error');
-      renderLoggedOut();
-      state.orders = [];
-      renderOrders();
-    }).finally(function () {
-      state.loginBusy = false;
-    });
-  }
-
-  function ensureDevLoginButton() {
-    var wrapper = $(DEV_LOGIN_WRAPPER_ID);
-    if (wrapper && wrapper.parentNode) {
-      wrapper.parentNode.removeChild(wrapper);
-    }
   }
 
   function clearGoogleLoginUi() {
@@ -1624,18 +1739,42 @@
       markGoogleButtonReady(googleButtonHost, false);
       googleButtonHost.innerHTML = '';
 
-      window.google.accounts.id.renderButton(googleButtonHost, {
-        theme: 'filled_black',
+      // El iframe que pinta GSI NO se estira con CSS: hay que decirle la
+      // anchura al renderizar. Medimos el contenedor (en móvil ocupa el ancho
+      // de la tarjeta, en escritorio son los 260px fijos) y la pasamos.
+      // Google ignora valores fuera de 200-400, así que se recorta al rango; si
+      // la medida saliera 0 —contenedor aún sin layout— se omite el parámetro y
+      // vuelve al comportamiento anterior en vez de pintar un botón inválido.
+      var hostWidth = 0;
+      try {
+        hostWidth = Math.round(googleButtonHost.getBoundingClientRect().width || 0);
+      } catch (_) {
+        hostWidth = 0;
+      }
+      var gsiOptions = {
+        // 'outline' (botón blanco con borde) y no 'filled_black': desde el
+        // rediseño la caja de invitado vive sobre la franja oscura #1f2124, y
+        // un pill negro sobre casi-negro desaparecía.
+        theme: 'outline',
         size: 'large',
         shape: 'pill',
         text: 'signin_with',
         logo_alignment: 'left',
         locale: 'es',
-      });
+      };
+      if (hostWidth > 0) {
+        gsiOptions.width = Math.max(200, Math.min(400, hostWidth));
+      }
+      window.google.accounts.id.renderButton(googleButtonHost, gsiOptions);
       finalizeGoogleButtonRender(googleButtonHost, 0, 0, 0);
       state.googleReady = true;
       if (!state.user) {
-        setMessage('Pulsa el botón para entrar con Google.', '');
+        // Sin microcopy: el botón de Google que acaba de renderizarse ya dice
+        // lo que hay que hacer. Se mantiene la llamada con texto vacío porque
+        // aquí SÍ hay que limpiar: si antes falló la carga del botón quedaría
+        // en pantalla un error («No se pudo cargar el botón de Google») que ya
+        // no es cierto.
+        setMessage('', '');
       }
     }).catch(function (err) {
       var reason = err && err.message ? String(err.message) : '';
@@ -1737,7 +1876,10 @@
     document.addEventListener('click', function (event) {
       var t = event.target;
       if (!t || !t.closest) return;
-      if (t.closest('#addAddressBtn')) { state.editingAddressId = 0; renderAddressCard(); return; }
+      if (t.closest('#addAddressBtn')) {
+        if ((state.addresses || []).length >= addressLimit()) return;
+        state.editingAddressId = 0; renderAddressCard(); return;
+      }
       if (t.closest('#addrCancelBtn')) { state.editingAddressId = null; renderAddressCard(); return; }
       var edit = t.closest('[data-addr-edit]');
       if (edit) { state.editingAddressId = Number(edit.getAttribute('data-addr-edit')); renderAddressCard(); return; }
@@ -1785,22 +1927,32 @@
         }
       };
     }
-    apiFetch('auth_config', { method: 'GET' }).then(function (res) {
+    // auth_config solo alimenta el Google Login del invitado; no debe bloquear
+    // la sesión ni los pedidos. Se lanza en paralelo a loadStatus para que la
+    // lista aparezca tras UNA sola llamada (estado), no tres en cadena.
+    var configReady = apiFetch('auth_config', { method: 'GET' }).then(function (res) {
       state.config = (res.data && res.data.ok) ? res.data : null;
       if (!state.config || !state.config.googleConfigured || !state.config.googleClientId) {
         setMessage('Google Login aún no está configurado en este entorno.', 'error');
       }
     }).catch(function () {
       setMessage('No se pudo cargar la configuración de la cuenta.', 'error');
+    });
+
+    var statusReady = loadStatus();
+
+    // Los pedidos dependen solo de la sesión: arrancan en cuanto hay estado.
+    statusReady.then(function () {
+      return loadOrders();
     }).finally(function () {
-      loadStatus().then(function () {
-        ensureGoogleLoginForGuest();
-        return loadOrders();
-      }).finally(function () {
-        startOrdersAutoRefresh();
-        syncSharedAuthUi();
-        loadProfile();
-      });
+      startOrdersAutoRefresh();
+      syncSharedAuthUi();
+      loadProfile();
+    });
+
+    // El login de invitado necesita config + estado de sesión ya resueltos.
+    Promise.all([configReady, statusReady]).then(function () {
+      ensureGoogleLoginForGuest();
     });
   }
 

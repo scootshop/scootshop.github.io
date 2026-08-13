@@ -37,146 +37,16 @@
     return Number(value);
   }
 
-  function escapeHtml(value) {
-    return String(value === null || value === undefined ? '' : value)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
+  /* Aquí había un escapeHtml() sin un solo uso en este archivo. Cada módulo que lo
+     necesita tiene el suyo (cart-runtime, index.js, product-enhancements…). */
 
-  function getMenuSeries() {
-    if (typeof window.SCOOTSHOP_getMenuSeries === 'function') {
-      return window.SCOOTSHOP_getMenuSeries();
-    }
-
-    var products = Array.isArray(window.SCOOTSHOP_PRODUCTS) ? window.SCOOTSHOP_PRODUCTS : [];
-    var seriesMap = new Map();
-
-    products.forEach(function (product) {
-      if (!product || !product.series || !product.href) return;
-      var key = String(product.series).toLowerCase();
-      if (!seriesMap.has(key)) {
-        seriesMap.set(key, {
-          key: key,
-          label: 'Serie ' + String(product.series).toUpperCase(),
-          items: []
-        });
-      }
-      seriesMap.get(key).items.push({
-        label: product.menuLabel || product.name,
-        href: product.href,
-        order: Number(product.menuOrder || product.homeOrder || 0)
-      });
-    });
-
-    return Array.from(seriesMap.values()).map(function (series) {
-      series.items.sort(function (left, right) {
-        return Number(left.order || 0) - Number(right.order || 0);
-      });
-      series.items = series.items.map(function (item) {
-        return { label: item.label, href: item.href };
-      });
-      return series;
-    }).filter(function (series) {
-      return series.items.length > 0;
-    });
-  }
-
-  function getMenuCategories() {
-    if (typeof window.SCOOTSHOP_getMenuCategories === 'function') {
-      return window.SCOOTSHOP_getMenuCategories();
-    }
-
-    return [{
-      key: 'default',
-      label: 'Productos',
-      series: getMenuSeries()
-    }];
-  }
-
-  function buildDesktopProductsMenu(host) {
-    if (!host) return;
-
-    var fallbackLink = host.querySelector('a[href]');
-    var fallbackHref = fallbackLink ? (fallbackLink.getAttribute('href') || '/#comprar') : '/#comprar';
-
-    var categories = getMenuCategories();
-    var hasManyCategories = categories.length > 1;
-    var groups = categories.map(function (category) {
-      var seriesMarkup = (category.series || []).map(function (series) {
-        var links = series.items.map(function (item) {
-          return '<a href="' + escapeHtml(item.href) + '" role="menuitem">' + escapeHtml(item.label) + '</a>';
-        }).join('');
-
-        return '' +
-          '<section class="pc-products-group" aria-label="' + escapeHtml(series.label) + '">' +
-            '<button class="pc-series-toggle" type="button" aria-expanded="false" aria-controls="pc-series-' + escapeHtml(category.key + '-' + series.key) + '">' +
-              '<span>' + escapeHtml(series.label) + '</span>' +
-              '<i class="fa-solid fa-chevron-down pc-products-caret" aria-hidden="true"></i>' +
-            '</button>' +
-            '<div class="pc-series-list" id="pc-series-' + escapeHtml(category.key + '-' + series.key) + '" hidden>' + links + '</div>' +
-          '</section>';
-      }).join('');
-
-      if (!hasManyCategories) return '<div class="pc-products-groups">' + seriesMarkup + '</div>';
-      return '<section class="pc-products-category" aria-label="' + escapeHtml(category.label) + '"><div class="pc-products-category-title">' + escapeHtml(category.label) + '</div><div class="pc-products-groups">' + seriesMarkup + '</div></section>';
-    }).join('');
-
-    host.innerHTML = '' +
-      '<button class="pc-products-trigger" type="button" aria-expanded="false" aria-controls="pcProductsPanel">' +
-        '<i class="fa-solid fa-cart-shopping nav-icon" aria-hidden="true"></i>Productos' +
-      '</button>' +
-      '<div class="pc-products-panel" id="pcProductsPanel" role="menu" aria-label="Submenú de productos" hidden>' +
-        '<div class="pc-products-title">' + (hasManyCategories ? 'Categorías' : 'Series') + '</div>' +
-        groups +
-      '</div>';
-
-    host.dataset.productsHref = fallbackHref;
-
-    // El HTML del menú se acaba de regenerar (trigger/panel nuevos). Liberamos el
-    // flag de enlace para que initDesktopProductsMenu vuelva a enlazar los nuevos
-    // elementos; de lo contrario, un menú reconstruido tras cargar el catálogo
-    // (p. ej. en /cuenta, que no incluye products.js de forma estática) quedaría
-    // sin handlers y el desplegable "Productos" no abriría.
-    delete host.dataset.bound;
-  }
-
-  function buildMobileProductsMenu(root) {
-    if (!root) return;
-
-    var categories = getMenuCategories();
-    var hasManyCategories = categories.length > 1;
-    var groups = categories.map(function (category) {
-      var seriesMarkup = (category.series || []).map(function (series) {
-        var links = series.items.map(function (item) {
-          return '<a class="mm-sub2-link" href="' + escapeHtml(item.href) + '">' + escapeHtml(item.label) + '</a>';
-        }).join('');
-
-        return '' +
-          '<button class="mm-sub-link" data-series="' + escapeHtml(category.key + '-' + series.key) + '" type="button">' +
-            '<span>' + escapeHtml(series.label.toUpperCase()) + '</span>' +
-            '<i class="fa-solid fa-chevron-down mm-chevron-sm"></i>' +
-          '</button>' +
-          '<div class="mm-sub2" data-series-content="' + escapeHtml(category.key + '-' + series.key) + '">' + links + '</div>';
-      }).join('');
-
-      if (!hasManyCategories) return '<div class="mm-sub-category-card">' + seriesMarkup + '</div>';
-      return '<section class="mm-sub-category-card mm-sub-category" aria-label="' + escapeHtml(category.label) + '"><div class="mm-sub-category-title mm-sub-category-title--compact">' + escapeHtml(category.label) + '</div>' + seriesMarkup + '</section>';
-    }).join('');
-
-    root.innerHTML = '<div class="mm-sub-shell"><div class="mm-sub-title">' + (hasManyCategories ? 'CATEGORIAS' : 'SERIES') + '</div>' + groups + '</div>';
-  }
-
+  // El panel de Productos (escritorio y móvil) lo pinta js/products-menu.js, que
+  // es su único dueño. Aquí solo se delega. No reimplantes el render: la copia
+  // paralela que había aquí y en js/index.js es justo lo que hacía que las dos
+  // superficies divergieran.
   function renderSharedProductMenus(root) {
-    var scope = root || document;
-
-    var desktopHosts = scope.querySelectorAll('[data-products-desktop-root]');
-    for (var i = 0; i < desktopHosts.length; i++) buildDesktopProductsMenu(desktopHosts[i]);
-
-    var mobileRoots = scope.querySelectorAll('[data-products-mobile-root]');
-    for (var j = 0; j < mobileRoots.length; j++) buildMobileProductsMenu(mobileRoots[j]);
+    var api = window.SS_PRODUCT_MENUS;
+    return !!(api && api.render(root));
   }
 
   function buildCheckoutUrl(product) {
@@ -219,33 +89,12 @@
     });
   }
 
-  function applyProductBrandBadge(products) {
-    if (!Array.isArray(products) || !products.length) return;
-
-    var path = normalizePath(window.location.pathname || '');
-    if (!/^\/(patinetes|motos|bicicletas)\//.test(path)) return;
-
-    var badge = document.querySelector('.page-title .badge-min');
-    if (!badge) return;
-
-    var match = null;
-    for (var i = 0; i < products.length; i++) {
-      var product = products[i];
-      if (!product || !product.href) continue;
-      if (normalizePath(product.href) === path) {
-        match = product;
-        break;
-      }
-    }
-
-    var brand = match && match.brand ? String(match.brand).trim() : '';
-    if (!brand) return;
-
-    var icon = badge.querySelector('i');
-    badge.textContent = '';
-    if (icon) badge.appendChild(icon);
-    badge.appendChild(document.createTextNode(' ' + brand));
-  }
+  // Desactivado a propósito: el chip .badge-min del título conserva la serie
+  // estática del HTML ("Serie N", "Ecoxtrem"…) en vez de saltar al brand OEM
+  // del catálogo (~1.6s tras cargar). Evita el flip visible (precarga) y no
+  // expone marcas OEM. Antes reescribía el texto con el brand del producto; si
+  // se quiere reactivar, ver git / memoria project_ficha_cls_precarga.
+  function applyProductBrandBadge() { /* no-op */ }
 
   // Oculta HTML para evitar FOUC mientras inyecta CSS (se auto-quita con timeout)
   // Si la página ya enlaza main.css en <head>, ya tiene CSS crítico y no debe ocultarse.
@@ -461,7 +310,22 @@
     if (rel.indexOf("manifest") > -1) shouldBump = true;
     if (rel.indexOf("preload") > -1 && as === "image") shouldBump = true;
 
-    if (shouldBump) el.setAttribute("href", addVerToUrl(href, ver));
+    if (!shouldBump) return;
+
+    el.setAttribute("href", addVerToUrl(href, ver));
+
+    // Si la precarga es responsive, hay que versionar TAMBIEN sus candidatos.
+    // Dejandolos con la version anterior, el href y el imagesrcset apuntaban a
+    // URLs distintas y el navegador acababa descargando las dos imagenes.
+    var imageSrcset = el.getAttribute("imagesrcset");
+    if (imageSrcset) {
+      el.setAttribute("imagesrcset", imageSrcset.split(",").map(function (candidate) {
+        var parts = candidate.trim().split(/\s+/);
+        if (!parts[0]) return candidate.trim();
+        parts[0] = addVerToUrl(parts[0], ver);
+        return parts.join(" ");
+      }).join(", "));
+    }
   }
 
   function bumpStyleAttr(el, ver) {
@@ -485,27 +349,31 @@
   function bumpAttr(el, attr, ver) {
     var v = el.getAttribute(attr);
     if (!v) return;
-    if (attr.indexOf("srcset") > -1) el.setAttribute(attr, bumpSrcset(v, ver));
-    else el.setAttribute(attr, addVerToUrl(v, ver));
+    var nuevo = (attr.indexOf("srcset") > -1) ? bumpSrcset(v, ver) : addVerToUrl(v, ver);
+    /* Si no cambia nada, NO se escribe. Escribir el mismo src vuelve a lanzar el
+       algoritmo de carga de la imagen, y sobre una que ya estaba bajando eso es una
+       descarga tirada y un hueco en blanco a la vista. Este guardia vale para todo el
+       sitio: cualquier <img> que ya venga versionado deja de pasar por el aro. */
+    if (nuevo === v) return;
+    el.setAttribute(attr, nuevo);
   }
 
+  /* LAS IMÁGENES YA NO SE VERSIONAN AQUÍ, y es deliberado.
+
+     Desde agosto de 2026 el bump global no toca las fotos: se sirven immutable y
+     re-versionarlas obligaba a rebajar ~1,1 MB por ficha en cada despliegue. Sus URLs
+     quedan congeladas en la versión en que se subieron. Si esta pasada siguiera
+     poniéndoles la versión ACTUAL, reescribiría `1.webp?v=…-12` a `…-13` sobre una
+     imagen que el navegador YA estaba bajando: se tira lo empezado, se pide la otra
+     URL y la foto parpadea. Medido en la ficha del M41: 25 fotos bajadas dos veces.
+
+     Es la misma regla que index-head.js ya se aplicaba a sí mismo ("avoid changing
+     already requested src/href at runtime"), que aquí faltaba.
+
+     Lo que SÍ se sigue versionando es lo que de verdad va con la versión global: CSS,
+     JS, los url() de estilos y los <link>. */
   function bumpNode(root, ver) {
     if (!root || root.nodeType !== 1) return;
-
-    if (root.matches && root.matches("img")) {
-      var isLazy = (root.getAttribute("loading") === "lazy");
-      if (!root.complete || isLazy) bumpAttr(root, "src", ver);
-      bumpAttr(root, "data-src", ver);
-      bumpAttr(root, "srcset", ver);
-      bumpAttr(root, "data-srcset", ver);
-    }
-
-    if (root.matches && root.matches("source")) {
-      bumpAttr(root, "srcset", ver);
-      bumpAttr(root, "data-srcset", ver);
-      bumpAttr(root, "src", ver);
-      bumpAttr(root, "data-src", ver);
-    }
 
     if (root.matches && root.matches("link")) {
       bumpLinkAttr(root, ver);
@@ -520,31 +388,7 @@
       bumpStyleAttr(root, ver);
     }
 
-    if (root.matches && root.matches("[data-img]")) {
-      var dataImg = root.getAttribute("data-img");
-      if (dataImg) root.setAttribute("data-img", addVerToUrl(dataImg, ver));
-    }
-
     if (root.querySelectorAll) {
-      var imgs = root.querySelectorAll("img");
-      for (var i = 0; i < imgs.length; i++) {
-        var img = imgs[i];
-        var isLazy2 = (img.getAttribute("loading") === "lazy");
-        if (!img.complete || isLazy2) bumpAttr(img, "src", ver);
-        bumpAttr(img, "data-src", ver);
-        bumpAttr(img, "srcset", ver);
-        bumpAttr(img, "data-srcset", ver);
-      }
-
-      var sources = root.querySelectorAll("source");
-      for (var j = 0; j < sources.length; j++) {
-        var s = sources[j];
-        bumpAttr(s, "srcset", ver);
-        bumpAttr(s, "data-srcset", ver);
-        bumpAttr(s, "src", ver);
-        bumpAttr(s, "data-src", ver);
-      }
-
       var links = root.querySelectorAll("link[href]");
       for (var k = 0; k < links.length; k++) {
         bumpLinkAttr(links[k], ver);
@@ -561,12 +405,10 @@
         if (t.indexOf("url(") > -1) styles[n].textContent = bumpCssUrlString(t, ver);
       }
 
-      var dataImgs = root.querySelectorAll("[data-img]");
-      for (var p = 0; p < dataImgs.length; p++) {
-        var item = dataImgs[p];
-        var raw = item.getAttribute("data-img");
-        if (raw) item.setAttribute("data-img", addVerToUrl(raw, ver));
-      }
+      /* [data-img] tampoco se versiona: es la foto grande que carga cada miniatura de
+         la galería al pulsarla. Subirle la versión significaba pedir una URL distinta
+         de la que ya está en caché, o sea rebajar la misma foto por pulsar. Va con la
+         misma regla que el resto de imágenes. */
     }
   }
 
@@ -649,9 +491,12 @@
     }
   }
 
-  function applyPartialHtml(slotId, slot, html) {
-    if (!slot || !html) return false;
-    slot.innerHTML = html;
+  /* Hidratar = rellenar lo que el HTML del parcial trae vacío (el submenú de
+     productos) y refrescar lo que depende del estado (cuenta, carrito). Va separado
+     de PINTAR a propósito: hay un caso —el habitual en visitas repetidas— en el que
+     el DOM ya es correcto y solo falta hidratarlo. */
+  function hydratePartial(slot) {
+    if (!slot) return;
     renderSharedProductMenus(slot);
     initDesktopProductsMenu();
     if (window.SS_AUTH_UI && typeof window.SS_AUTH_UI.refresh === 'function') {
@@ -660,14 +505,34 @@
     if (window.SS_CART && typeof window.SS_CART.refreshButtons === 'function') {
       window.SS_CART.refreshButtons();
     }
-    if (slotId === 'mobile-menu-slot') {
-      try {
-        setTimeout(function () {
-          /* mobile menu ready */
-        }, 50);
-      } catch (e) { /* ignore */ }
-    }
+  }
+
+  /* Deshacer el bloqueo de scroll si el menú ha dejado de estar abierto. Red de
+     seguridad: el bloqueo lo pone mobile-menu.js en el BODY, así que sobrevive a
+     cualquier sustitución del panel. Si alguna vez se sustituye con el menú abierto,
+     al menos la página no se queda congelada. */
+  function soltarBloqueoSiNoHayMenu() {
+    var body = document.body;
+    if (!body || !body.classList.contains('mm-lock-scroll')) return;
+    var panel = document.getElementById('mobileMenu');
+    if (panel && panel.classList.contains('active')) return;
+    var y = Math.abs(parseInt(body.style.top || '0', 10)) || 0;
+    body.classList.remove('mm-lock-scroll');
+    body.style.top = '';
+    try { window.scrollTo(0, y); } catch (_) {}
+  }
+
+  function applyPartialHtml(slotId, slot, html) {
+    if (!slot || !html) return false;
+    slot.innerHTML = html;
+    hydratePartial(slot);
+    if (slotId === 'mobile-menu-slot') soltarBloqueoSiNoHayMenu();
     return true;
+  }
+
+  function menuMovilAbierto() {
+    var panel = document.getElementById('mobileMenu');
+    return !!(panel && panel.classList.contains('active'));
   }
 
   function loadPartial(slotId, url) {
@@ -682,6 +547,12 @@
       hydratedFromCache = applyPartialHtml(slotId, slot, cachedHtml);
     }
 
+    /* El hueco puede venir YA pintado de antes de que corriera este archivo:
+       primeCachedPartials() (global-assets.js) vuelca la misma caché de sesión nada
+       más arrancar, para que la barra no aparezca vacía. En ese caso el DOM ya es
+       correcto —lo que le falta es la hidratación, que aquella función no hace. */
+    var yaPintadoDesdeCache = !!cachedHtml && !hydratedFromCache && slot.children.length > 0;
+
     return fetch(verUrl, { cache: hydratedFromCache ? 'force-cache' : 'default', credentials: 'same-origin' })
       .then(function (res) {
         if (!res.ok) throw new Error("No se pudo cargar " + url);
@@ -690,133 +561,41 @@
       .then(function (html) {
         if (!html) return hydratedFromCache;
         writePartialCache(url, ver, html);
-        if (cachedHtml === html && hydratedFromCache) {
+
+        /* NO se vuelve a pintar si lo que llega es EXACTAMENTE lo que ya se ve.
+           Antes sí se reemplazaba en este caso —el más frecuente, porque la caché de
+           sesión guarda el mismo html que sirve el servidor— y eso rompía el menú:
+           reproducido sirviendo el parcial a 1,5 s (lo normal en datos móviles), si el
+           cliente lo tenía abierto en ese instante el panel se destruía y renacía SIN
+           `.active`. El menú desaparecía y, como el bloqueo de scroll vive en el body,
+           la página se quedaba congelada y sin menú. Aquí solo falta hidratar. */
+        if (cachedHtml === html && (hydratedFromCache || yaPintadoDesdeCache)) {
+          if (yaPintadoDesdeCache) hydratePartial(slot);
           return true;
         }
+
+        /* El html ha cambiado de verdad (despliegue nuevo) y el menú está abierto:
+           se espera a que se cierre. Sustituirlo debajo del dedo es justo el fallo de
+           arriba, solo que por otro camino. */
+        if (slotId === 'mobile-menu-slot' && menuMovilAbierto()) {
+          var reintento = window.setInterval(function () {
+            if (menuMovilAbierto()) return;
+            window.clearInterval(reintento);
+            applyPartialHtml(slotId, slot, html);
+          }, 400);
+          return true;
+        }
+
         return applyPartialHtml(slotId, slot, html);
       })
       .catch(function () { return hydratedFromCache; });
   }
 
+  // El comportamiento del desplegable de escritorio también vive en
+  // js/products-menu.js. Aquí solo se delega.
   function initDesktopProductsMenu() {
-    var hosts = document.querySelectorAll('[data-products-desktop-root]');
-    for (var hostIdx = 0; hostIdx < hosts.length; hostIdx++) {
-      var host = hosts[hostIdx];
-      if (!host || host.dataset.bound === 'true') continue;
-
-      var trigger = host.querySelector('.pc-products-trigger');
-      var panel = host.querySelector('.pc-products-panel');
-      var toggles = host.querySelectorAll('.pc-series-toggle');
-      if (!trigger || !panel) continue;
-
-      (function (currentHost, currentTrigger, currentPanel, currentToggles) {
-        function closeHost() {
-          currentHost.classList.remove('is-open');
-          currentTrigger.setAttribute('aria-expanded', 'false');
-          currentPanel.hidden = true;
-
-          currentToggles.forEach(function (toggle) {
-            var list = document.getElementById(toggle.getAttribute('aria-controls'));
-            toggle.setAttribute('aria-expanded', 'false');
-            toggle.parentElement.classList.remove('is-open');
-            if (list) list.hidden = true;
-          });
-        }
-
-        currentTrigger.addEventListener('click', function (event) {
-          event.preventDefault();
-          var willOpen = currentPanel.hidden;
-
-          hosts.forEach(function (otherHost) {
-            if (otherHost === currentHost) return;
-            var otherTrigger = otherHost.querySelector('.pc-products-trigger');
-            var otherPanel = otherHost.querySelector('.pc-products-panel');
-            if (!otherTrigger || !otherPanel) return;
-            otherHost.classList.remove('is-open');
-            otherTrigger.setAttribute('aria-expanded', 'false');
-            otherPanel.hidden = true;
-            otherHost.querySelectorAll('.pc-series-toggle').forEach(function (toggle) {
-              var list = document.getElementById(toggle.getAttribute('aria-controls'));
-              toggle.setAttribute('aria-expanded', 'false');
-              toggle.parentElement.classList.remove('is-open');
-              if (list) list.hidden = true;
-            });
-          });
-
-          currentHost.classList.toggle('is-open', willOpen);
-          currentTrigger.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
-          currentPanel.hidden = !willOpen;
-          if (!willOpen) closeHost();
-        });
-
-        currentToggles.forEach(function (toggle) {
-          toggle.addEventListener('click', function () {
-            var list = document.getElementById(toggle.getAttribute('aria-controls'));
-            if (!list) return;
-            var willOpen = list.hidden;
-
-            currentToggles.forEach(function (otherToggle) {
-              var otherList = document.getElementById(otherToggle.getAttribute('aria-controls'));
-              otherToggle.setAttribute('aria-expanded', 'false');
-              otherToggle.parentElement.classList.remove('is-open');
-              if (otherList) otherList.hidden = true;
-            });
-
-            toggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
-            toggle.parentElement.classList.toggle('is-open', willOpen);
-            list.hidden = !willOpen;
-          });
-        });
-
-        currentHost.querySelectorAll('.pc-series-list a').forEach(function (link) {
-          link.addEventListener('click', function () {
-            closeHost();
-          });
-        });
-
-        host.dataset.bound = 'true';
-      })(host, trigger, panel, toggles);
-    }
-
-    if (!document.documentElement.dataset.pcProductsMenuBound) {
-      document.addEventListener('click', function (event) {
-        var openHosts = document.querySelectorAll('[data-products-desktop-root].is-open');
-        openHosts.forEach(function (host) {
-          if (host.contains(event.target)) return;
-          var trigger = host.querySelector('.pc-products-trigger');
-          var panel = host.querySelector('.pc-products-panel');
-          if (trigger) trigger.setAttribute('aria-expanded', 'false');
-          if (panel) panel.hidden = true;
-          host.classList.remove('is-open');
-          host.querySelectorAll('.pc-series-toggle').forEach(function (toggle) {
-            var list = document.getElementById(toggle.getAttribute('aria-controls'));
-            toggle.setAttribute('aria-expanded', 'false');
-            toggle.parentElement.classList.remove('is-open');
-            if (list) list.hidden = true;
-          });
-        });
-      });
-
-      document.addEventListener('keydown', function (event) {
-        if (event.key !== 'Escape') return;
-        var openHosts = document.querySelectorAll('[data-products-desktop-root].is-open');
-        openHosts.forEach(function (host) {
-          var trigger = host.querySelector('.pc-products-trigger');
-          var panel = host.querySelector('.pc-products-panel');
-          if (trigger) trigger.setAttribute('aria-expanded', 'false');
-          if (panel) panel.hidden = true;
-          host.classList.remove('is-open');
-          host.querySelectorAll('.pc-series-toggle').forEach(function (toggle) {
-            var list = document.getElementById(toggle.getAttribute('aria-controls'));
-            toggle.setAttribute('aria-expanded', 'false');
-            toggle.parentElement.classList.remove('is-open');
-            if (list) list.hidden = true;
-          });
-        });
-      });
-
-      document.documentElement.dataset.pcProductsMenuBound = 'true';
-    }
+    var api = window.SS_PRODUCT_MENUS;
+    if (api) api.initDesktop();
   }
 
   // =========================
@@ -844,25 +623,51 @@
       // Detectar si es M41 o Bison GT para tránsito express
       var isExpressShipping = /\/(m41-tank-ultimate-1000w|bison-gt-carbon-design)\//.test(window.location.pathname);
       
+      // El tránsito va en su PROPIA línea, con su propio icono (el calendario que le
+      // pone .ship-transit en tarjetas.css). Pegado a la preparación en el mismo
+      // renglón no cabía en móvil: se partía por donde quería y los días quedaban
+      // sueltos en una tercera línea sin icono. Esta estructura de tres <div> tiene
+      // que ser la MISMA que la del HTML de las fichas: aquí se reescribe la caja
+      // entera en cada carga, así que lo que se escriba aquí es lo que se ve.
       if (isExpressShipping) {
         shippingBox.innerHTML = '' +
           '<div><strong>Envío gratis</strong> (Península)</div>' +
-          '<div>Preparación: <strong>1 día hábil</strong> · Tránsito: <span class="transit-express"><strong>2-3 días</strong><i class="icon-fire"></i></span></div>';
+          '<div>Preparación: <strong>1 día hábil</strong></div>' +
+          '<div class="ship-transit">Tránsito: <span class="transit-express"><strong>2-3 días</strong><i class="icon-fire"></i></span></div>';
       } else {
         shippingBox.innerHTML = '' +
           '<div><strong>Envío gratis</strong> (Península)</div>' +
-          '<div>Preparación: <strong>1 día hábil</strong> · Tránsito: <strong>5–7 días hábiles</strong></div>';
+          '<div>Preparación: <strong>1 día hábil</strong></div>' +
+          '<div class="ship-transit">Tránsito: <strong>5–7 días hábiles</strong></div>';
       }
     }
 
     // Galería
     var mainImg = document.getElementById("mainImage");
     if (mainImg) {
+      // Red de seguridad del srcset: si faltara una variante (producto nuevo al
+      // que no se le paso build-card-shots.py), el navegador NO cae solo al src
+      // y la foto quedaria rota. Al primer fallo se retira el srcset y se
+      // recupera el original.
+      mainImg.addEventListener("error", function () {
+        if (!mainImg.hasAttribute("srcset")) return;
+        var original = mainImg.getAttribute("src");
+        mainImg.removeAttribute("srcset");
+        mainImg.removeAttribute("sizes");
+        if (original) mainImg.setAttribute("src", original);
+      });
+
       var thumbs = document.querySelectorAll(".thumb");
       thumbs.forEach(function (b) {
         b.addEventListener("click", function () {
           var src = b.getAttribute("data-img");
           if (!src) return;
+          // IMPRESCINDIBLE quitar el srcset antes de tocar src: mientras hay
+          // srcset el navegador elige de ahi e IGNORA el src, asi que la foto
+          // no cambiaria al pulsar la miniatura. Ademas es lo correcto: el
+          // srcset inicial describe la portada, no esta otra foto.
+          mainImg.removeAttribute("srcset");
+          mainImg.removeAttribute("sizes");
           mainImg.src = addVerToUrl(src, window.ASSET_VER || fallbackVersion());
 
           thumbs.forEach(function (x) { x.classList.remove("active"); });
@@ -958,26 +763,30 @@
     var panelInner = document.querySelector('.panel-inner');
     if (!panelInner) return;
 
-    var colorVariants = panelInner.querySelector('.color-variants');
+    // Caja de variantes del panel: aqui solo importa DONDE va, no de que eje es.
+    var cajaVariantes = panelInner.querySelector('.color-variants');
     var desc = panelInner.querySelector('.desc');
-    var quickSpecs = panelInner.querySelector('.quick-specs');
+    // Lo inyecta product-enhancements.js despues de .desc. Si no se contempla
+    // aqui, esta funcion vuelve a pegar el CTA justo detras de .desc y lo tira
+    // debajo ~1s despues de cargar, a la vista del cliente.
+    var compat = panelInner.querySelector('.compat-box');
     var ctaCol = panelInner.querySelector('.cta-col');
 
-    // Desired order: price, color+stock, description/specs, then CTA.
-    if (colorVariants) {
-      var firstContent = desc || quickSpecs || ctaCol;
-      if (firstContent && colorVariants !== firstContent) {
-        panelInner.insertBefore(colorVariants, firstContent);
+    // Desired order: price, color+stock, description, compatible accessories, then CTA.
+    if (cajaVariantes) {
+      var firstContent = desc || compat || ctaCol;
+      if (firstContent && cajaVariantes !== firstContent) {
+        panelInner.insertBefore(cajaVariantes, firstContent);
       }
     }
 
-    if (desc && quickSpecs && desc.nextElementSibling !== quickSpecs) {
-      panelInner.insertBefore(quickSpecs, desc.nextSibling);
+    if (desc && compat && desc.nextElementSibling !== compat) {
+      panelInner.insertBefore(compat, desc.nextSibling);
     }
 
     if (!ctaCol) return;
 
-    var anchor = quickSpecs || desc || colorVariants;
+    var anchor = compat || desc || cajaVariantes;
     if (!anchor) return;
     if (anchor.nextElementSibling !== ctaCol) {
       panelInner.insertBefore(ctaCol, anchor.nextSibling);
@@ -1064,37 +873,38 @@
     }
   }
 
+  /* Sitio del aviso de stock, por orden de preferencia. La ficha NO decide: si
+     tiene selector de opciones va en su cabecera y, si no, en la fila del precio.
+     En los dos casos acaba arriba a la derecha del panel, que es lo que hace que
+     todas las fichas se vean igual sin tener que tocarlas una a una. El último
+     caso es la red de seguridad de una ficha sin ninguna de las dos cosas.
+
+     La PRIMERA cabecera, no la del color: los cuatro manillares tienen además un
+     selector de medida (y el UNO y el KOCEVLO, otro de modelo) que reutiliza esta
+     misma clase, y desde que los bloques se ven como una sola tarjeta el aviso
+     colgado del color quedaba flotando a media altura del cuadro. Buscando la
+     primera sube al borde superior. En el resto de fichas no cambia nada: allí la
+     única cabecera de opciones ES la del color. */
+  function findStockNoteHome(ctaCol) {
+    return document.querySelector('.panel-inner .color-variants-head')
+      || document.querySelector('.color-variants')
+      || document.querySelector('.panel .price-row')
+      || ctaCol
+      || null;
+  }
+
   function ensureStockNote(ctaCol) {
-    var colorVariants = document.querySelector('.color-variants');
-    if (colorVariants) {
-      var colorNote = colorVariants.querySelector('.stock-note');
-      if (colorNote) {
-        colorNote.classList.add('stock-note--variant');
-        return colorNote;
-      }
+    var home = findStockNoteHome(ctaCol);
+    if (!home) return null;
 
-      var existingFromCta = ctaCol ? ctaCol.querySelector('.stock-note') : null;
-      if (existingFromCta) {
-        existingFromCta.classList.add('stock-note--variant');
-        colorVariants.appendChild(existingFromCta);
-        return existingFromCta;
-      }
-
-      colorNote = document.createElement('p');
-      colorNote.className = 'stock-note stock-note--variant';
-      colorVariants.appendChild(colorNote);
-      return colorNote;
+    /* Se busca en TODA la ficha, no solo dentro de home: si el HTML estático la
+       trae en otro sitio se recoloca, en vez de dejar dos avisos a la vez. */
+    var note = document.querySelector('.stock-note');
+    if (!note) {
+      note = document.createElement('p');
+      note.className = 'stock-note';
     }
-
-    if (!ctaCol) return null;
-    var note = ctaCol.querySelector('.stock-note');
-    if (note) return note;
-
-    note = document.createElement('p');
-    note.className = 'stock-note';
-    var reserveBtn = ctaCol.querySelector('#reserveBtn, .btn-reserve');
-    if (reserveBtn && reserveBtn.parentNode === ctaCol) ctaCol.insertBefore(note, reserveBtn);
-    else ctaCol.appendChild(note);
+    if (note.parentElement !== home) home.appendChild(note);
     return note;
   }
 
@@ -1292,12 +1102,8 @@
           }
 
           if (stockNote) {
-            var inClasses = 'stock-note stock-note--in';
-            if (stockNote.parentElement && stockNote.parentElement.classList.contains('color-variants')) {
-              inClasses += ' stock-note--variant';
-            }
-            stockNote.className = inClasses;
-            stockNote.textContent = 'Disponible en stock';
+            stockNote.className = 'stock-note stock-note--in';
+            stockNote.textContent = 'Stock';
           }
           if (stateValue) stateValue.textContent = 'Disponible';
         } else {
@@ -1327,13 +1133,9 @@
           ctaCol.classList.remove('cta-col--with-cart');
 
           if (stockNote) {
-            var outClasses = stock === 'out_of_stock' ? 'stock-note stock-note--out' : 'stock-note';
-            if (stockNote.parentElement && stockNote.parentElement.classList.contains('color-variants')) {
-              outClasses += ' stock-note--variant';
-            }
-            stockNote.className = outClasses;
+            stockNote.className = stock === 'out_of_stock' ? 'stock-note stock-note--out' : 'stock-note';
             stockNote.textContent = stock === 'out_of_stock'
-              ? 'Actualmente agotado. Puedes reservar por WhatsApp.'
+              ? 'NO Stock'
               : 'Disponible para reserva por WhatsApp.';
           }
           if (stateValue) stateValue.textContent = stock === 'out_of_stock' ? 'Agotado' : 'Reserva abierta';
@@ -1398,14 +1200,14 @@
 
             // Carga partials en paralelo para evitar latencia percibida en header/menu/carrito.
             Promise.all([
-              loadPartial('site-header-slot', '/partials/site-header.html'),
-              loadPartial('mobile-menu-slot', '/partials/mobile-menu.html')
+              loadPartial('site-header-slot', '/partials/site-header'),
+              loadPartial('mobile-menu-slot', '/partials/mobile-menu')
             ]).catch(function () { /* silencioso */ });
           } catch (e) {
             // En caso de cualquier error, procedemos con la carga de partials
             Promise.all([
-              loadPartial('site-header-slot', '/partials/site-header.html'),
-              loadPartial('mobile-menu-slot', '/partials/mobile-menu.html')
+              loadPartial('site-header-slot', '/partials/site-header'),
+              loadPartial('mobile-menu-slot', '/partials/mobile-menu')
             ]).catch(function () { /* silencioso */ });
           }
 
@@ -1420,11 +1222,11 @@
             var menuSlot = document.getElementById('mobile-menu-slot');
             if (headerSlot && headerSlot.children.length === 0) {
 
-              loadPartial('site-header-slot', '/partials/site-header.html');
+              loadPartial('site-header-slot', '/partials/site-header');
             }
             if (menuSlot && menuSlot.children.length === 0) {
 
-              loadPartial('mobile-menu-slot', '/partials/mobile-menu.html');
+              loadPartial('mobile-menu-slot', '/partials/mobile-menu');
             }
           } catch (e) { /* ignore */ }
         }, 900);

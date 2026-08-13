@@ -6,7 +6,7 @@
   <title>Pago | SCOOT SHOP</title>
   <meta name="description" content="Pago seguro: Stripe, PayPal, Bizum o transferencia bancaria." />
   <link rel="canonical" href="https://scootshop.co/pago" />
-  <meta name="asset-version" content="20260813-8" />
+  <meta name="asset-version" content="20260813-9" />
 
   <meta property="og:url" content="https://scootshop.co/pago" />
   <meta property="og:title" content="Pago | SCOOT SHOP" />
@@ -34,19 +34,19 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-  <link rel="manifest" href="/site.webmanifest?v=20260813-8" />
+  <link rel="manifest" href="/site.webmanifest?v=20260813-9" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@500;800&display=swap" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@500;800&display=swap" media="print" onload="this.media='all'" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@500;800&display=swap" /></noscript>
-  <link rel="stylesheet" href="/css/icons.css?v=20260813-8" />
-  <link rel="stylesheet" href="/css/main.css?v=20260813-8" />
+  <link rel="stylesheet" href="/css/icons.css?v=20260813-9" />
+  <link rel="stylesheet" href="/css/main.css?v=20260813-9" />
   <script src="/js/asset-sync.js?v=20260605-2"></script>
   <script src="/js/global-assets.js?v=20260605-2"></script>
 
-  <link rel="stylesheet" href="/css/pago.css?v=20260813-8" />
+  <link rel="stylesheet" href="/css/pago.css?v=20260813-9" />
 
   <script id="stripe-js" src="https://js.stripe.com/v3/" async></script>
 </head>
@@ -463,11 +463,14 @@
     </div>
   </div>
 
-  <!-- pago.js se sirve como immutable: el ?v global no basta para refrescarlo. Subir
-       SIEMPRE el sufijo &r al tocar js/pago.js (este HTML es no-store y llega ya). -->
-  <script src="/js/pago.js?v=20260813-8&amp;r=20260813-1"></script>
+  <!-- Con bump global basta el ?v: al reescribirlo aquí, la URL cambia y el fichero
+       —que se sirve como immutable— se vuelve a bajar. El sufijo &r solo hace falta
+       para tocar pago.js SIN bump, y entonces hay que escribirlo con & literal: el
+       script de bump reescribe el ?v y convertía un &amp; en un parámetro basura. -->
+  <script src="/js/pago.js?v=20260813-9"></script>
 </body>
 </html>
+
 
 
 

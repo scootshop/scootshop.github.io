@@ -174,12 +174,6 @@
     return 'Invitado';
   }
 
-  function setText(id, text) {
-    var el = $(id);
-    if (!el) return;
-    el.textContent = text;
-  }
-
   function setPanelMessage(text, kind) {
     qsa('[data-auth-message]').forEach(function (node) {
       node.className = 'account-quick-message' + (kind === 'error' ? ' is-error' : kind === 'success' ? ' is-success' : '');
@@ -207,18 +201,8 @@
     ].join('') + dotHtml;
   }
 
-  function renderAvatar(targetId, user) {
-    var wrap = $(targetId);
-    if (!wrap) return;
-    var picture = user && user.picture ? String(user.picture).trim() : '';
-    var initials = ((user && user.name) ? String(user.name).trim() : (user && user.email ? String(user.email).trim() : 'U')) || 'U';
-    initials = initials.slice(0, 1).toUpperCase();
-    if (picture) {
-      wrap.innerHTML = '<img class="account-quick-avatar-img" src="' + esc(picture) + '" alt="Avatar de ' + esc(user.name || user.email || 'usuario') + '" referrerpolicy="no-referrer">';
-      return;
-    }
-    wrap.innerHTML = '<div class="account-quick-avatar-fallback" aria-hidden="true">' + esc(initials) + '</div>';
-  }
+  /* Aquí había un renderAvatar(targetId, user) que no llamaba nadie: el avatar de la
+     cuenta lo pinta el suyo propio en account.js. */
 
   function formatOrderStatus(status) {
     var value = String(status || '').toLowerCase();
@@ -349,6 +333,9 @@
       }
       state.user = res.data.user || null;
       state.uiState = resolveUiState(state.user);
+      // La sesion acaba de cambiar: lo cacheado ya no vale.
+      invalidateStatus();
+      statusResolvedOnce = true;
       renderAll();
       setPanelMessage('Sesión iniciada correctamente.', 'success');
       return loadOrders();
@@ -357,6 +344,7 @@
       if (err && err.message === 'google_not_configured') {
         message = 'Google Login no está disponible en este entorno.';
       }
+      invalidateStatus();
       state.user = null;
       state.uiState = 'guest';
       setPanelMessage(message, 'error');
@@ -367,6 +355,15 @@
   }
 
   function setupGoogleButtons(clientId) {
+    // No cargar la libreria GSI de Google (~89 KB) si no hay ningun boton de
+    // login que pintar. El header solo enlaza a /cuenta (que usa account.js),
+    // asi que en fichas / home / checkout no existe ningun
+    // [data-google-login-target] y GSI seria peso muerto. Si en el futuro se
+    // añade un target, esta funcion se vuelve a llamar (boot / render) y carga.
+    if (!document.querySelector('[data-google-login-target]')) {
+      return;
+    }
+
     var normalizedClientId = String(clientId || '').trim();
     var host = String((window.location && window.location.hostname) || '').toLowerCase();
     var isLocalHost = host === 'localhost' || host === '127.0.0.1' || host === '::1';
@@ -460,8 +457,53 @@
 
   }
 
-  function loadStatus() {
-    return apiFetch('auth_status', { method: 'GET' }).then(function (res) {
+  // Fuente unica del estado de sesion.
+  // En una carga normal auth_status se pedia DOS veces con la misma URL y las
+  // mismas credenciales: boot() lo llama tras auth_config, y `pageshow` —que
+  // tambien se dispara en la carga inicial, no solo al volver desde bfcache—
+  // disparaba refreshOnResume() con una segunda llamada identica.
+  // Mientras hay una peticion en vuelo (o acaba de resolverse) se comparte la
+  // MISMA promesa, asi que todos los que la esperan reciben el mismo resultado.
+  // La ventana es corta a proposito: no queremos cachear la sesion, solo fundir
+  // las llamadas que ocurren a la vez.
+  var statusCache = { promise: null, at: 0 };
+  var STATUS_DEDUPE_MS = 3000;
+  var statusResolvedOnce = false;
+
+  function invalidateStatus() {
+    statusCache.promise = null;
+    statusCache.at = 0;
+  }
+
+  // auth_config es configuracion estatica (client id de Google): no cambia en la
+  // vida de la pagina. En las fichas el header se inyecta tarde y
+  // SS_AUTH_UI.refresh() re-arranca el modulo, con lo que boot() volvia a
+  // pedirla: 2 veces en ficha, y una mas por cada refresh posterior.
+  // Cacheamos la PETICION, no sus efectos: el .then de boot() se sigue
+  // ejecutando en cada arranque para volver a montar los botones de Google
+  // sobre el DOM nuevo.
+  var configPromise = null;
+
+  function fetchConfig() {
+    if (!configPromise) {
+      configPromise = apiFetch('auth_config', { method: 'GET' }).catch(function (err) {
+        // Un fallo no debe quedar cacheado para siempre: el siguiente arranque
+        // lo reintenta.
+        configPromise = null;
+        throw err;
+      });
+    }
+    return configPromise;
+  }
+
+  function loadStatus(options) {
+    var force = !!(options && options.force);
+    if (!force && statusCache.promise && (Date.now() - statusCache.at) < STATUS_DEDUPE_MS) {
+      return statusCache.promise;
+    }
+
+    statusCache.at = Date.now();
+    statusCache.promise = apiFetch('auth_status', { method: 'GET' }).then(function (res) {
       if (!res.ok || !res.data || !res.data.ok) {
         state.user = null;
         state.uiState = 'guest';
@@ -469,23 +511,35 @@
         state.user = res.data.user || null;
         state.uiState = resolveUiState(state.user);
       }
+      statusResolvedOnce = true;
       renderAll();
       return state.user;
     }).catch(function () {
-      state.user = null;
-      state.uiState = 'guest';
-      renderAll();
-      return null;
+      // Un fallo de red NO es un cierre de sesion. Si ya teniamos una respuesta
+      // buena, la conservamos: antes, un corte momentaneo al recuperar el foco
+      // mandaba al usuario a "invitado" en el header. Solo caemos a invitado si
+      // nunca hemos llegado a saber el estado.
+      invalidateStatus();
+      if (!statusResolvedOnce) {
+        state.user = null;
+        state.uiState = 'guest';
+        renderAll();
+      }
+      return state.user || null;
     });
+
+    return statusCache.promise;
   }
 
-  function refreshOnResume() {
+  function refreshOnResume(event) {
     if (!hasTargets()) return;
-    if (!document.hidden) {
-      loadStatus().then(function () {
-        return loadOrders();
-      });
-    }
+    if (document.hidden) return;
+    // Volver desde bfcache (atras/adelante) SI justifica releer: la pagina puede
+    // llevar minutos congelada y la sesion haber cambiado en otra pestana.
+    var fromBfcache = !!(event && event.persisted);
+    loadStatus({ force: fromBfcache }).then(function () {
+      return loadOrders();
+    });
   }
 
   function boot() {
@@ -493,7 +547,7 @@
     state.booted = true;
     bindEvents();
 
-    apiFetch('auth_config', { method: 'GET' }).then(function (res) {
+    fetchConfig().then(function (res) {
       state.config = (res.data && res.data.ok) ? res.data : null;
       if (state.config && state.config.googleConfigured && state.config.googleClientId) {
         setupGoogleButtons(state.config.googleClientId);

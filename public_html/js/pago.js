@@ -52,21 +52,25 @@
          meses se sigue leyendo aunque el catálogo haya cambiado.
          Devuelve '' cuando la línea no tiene variantes: quien pinta decide si eso es
          "Único" o no mostrar nada. */
-      function describirVariantes(item){
-        if(!item) return '';
-        var producto = null;
+      function productoDeLinea(item){
+        if(!item) return null;
         try {
           var lista = window.SCOOTSHOP_PRODUCTS ||
             (window.SCOOTSHOP_CATALOG && window.SCOOTSHOP_CATALOG.products) || [];
           var sinBarra = function(v){ return String(v || '').replace(/\/+$/, ''); };
           var url = sinBarra(item.url || item.href);
-          var sku = String(item.sku || '');
+          var skuItem = String(item.sku || '');
           for (var i = 0; i < lista.length; i++) {
-            if ((sku && lista[i].sku === sku) || (url && sinBarra(lista[i].href) === url)) {
-              producto = lista[i]; break;
+            if ((skuItem && lista[i].sku === skuItem) || (url && sinBarra(lista[i].href) === url)) {
+              return lista[i];
             }
           }
         } catch(_){}
+        return null;
+      }
+      function describirVariantes(item){
+        if(!item) return '';
+        var producto = productoDeLinea(item);
         if (window.SS_ATTRS && typeof window.SS_ATTRS.describirTexto === 'function') {
           return window.SS_ATTRS.describirTexto(item, producto);
         }
@@ -274,7 +278,14 @@
 
       function resolveColorVariantMeta(product, selectedColorKey, selectedColorLabel, selectedImage){
         if(!product) return null;
-        var variants = Array.isArray(product.colorVariants) ? product.colorVariants : [];
+        /* Las opciones salen del NUCLEO: da igual que el eje sea color, modelo o medida,
+           y da igual como las declare el catalogo. Antes se leia `colorVariants`, que
+           solo existia si el eje era de color. */
+        var variants = [];
+        if (window.SS_ATTRS) {
+          var ejesProd = window.SS_ATTRS.ejes(product);
+          for (var ep = 0; ep < ejesProd.length; ep++) variants = variants.concat(ejesProd[ep].options);
+        }
         var gallery = Array.isArray(product.gallery) ? product.gallery : [];
         if(!variants.length || !gallery.length) return null;
 
@@ -330,7 +341,7 @@
             category: 'cart',
             colorKey: colorKey,
             colorLabel: colorLabel,
-            cartItems: cartItemsPayload
+            cartItems: cartItemsForRequest()
           });
           return checkoutMetaPromise;
         }
@@ -442,6 +453,18 @@
       var resumeOrderIdParam = safeText(getParam('order')) || safeText(getParam('existingOrderId')) || '';
       var isCartMode = getParam('cart') === '1';
       var cartItems = isCartMode ? loadCheckoutCart() : [];
+      /* ── LO QUE VIAJA AL PEDIDO ───────────────────────────────────────────────
+         `attrs` es la verdad estructurada de la línea ({ model:'vmp', size:'720' }):
+         claves estables de eje y de opción, que es lo que puede reinterpretar
+         cualquiera más adelante. `variant_text` es la representación que el cliente
+         vio al comprar, escrita por el núcleo y por nadie más.
+
+         Van las DOS a propósito. Solo con `attrs`, un pedido de hace un año se
+         releería con el catálogo de hoy y podría cambiar de texto —o quedarse mudo si
+         se retiró la opción—. Solo con el texto, el pedido no sería consultable por
+         máquina. Así el servidor no tiene que interpretar ejes: guarda y devuelve.
+         `color`/`colorLabel` se mantienen porque son la identidad histórica de la
+         línea y hay pedidos vivos que solo tienen eso. */
       var cartItemsPayload = cartItems.map(function(item){
         return {
           sku: item.sku,
@@ -452,9 +475,46 @@
           url: item.url || '',
           color: item.color || '',
           colorKey: item.color || '',
-          colorLabel: item.colorLabel || ''
+          colorLabel: item.colorLabel || '',
+          attrs: item.attrs || null,
+          variant_text: ''
         };
       });
+
+      /* El texto se sella lo más tarde posible: al construir el payload el núcleo y el
+         catálogo pueden no haber llegado todavía, y sellar "Modelo: vmp" —la clave
+         cruda— dejaría eso escrito en el pedido para siempre. Todo envío pasa por
+         aquí. */
+      function cartItemsForRequest(){
+        for(var i = 0; i < cartItemsPayload.length; i++){
+          var texto = describirVariantes(cartItems[i]);
+          if(texto) cartItemsPayload[i].variant_text = texto;
+        }
+        return cartItemsPayload;
+      }
+
+      // Lo mismo para la compra directa, que no tiene línea de carrito detrás.
+      function singleVariantText(){
+        return describirVariantes(lineaCompraDirecta());
+      }
+      function lineaCompraDirecta(){
+        return { sku: sku, url: productUrl, color: colorKey || colorLabel, colorLabel: colorLabel };
+      }
+      /* La compra directa llega por URL con un solo valor (`?color=vmp`) y sin decir de
+         qué eje es. El núcleo ya sabe resolverlo contra el catálogo, así que se le
+         pide la lectura estructurada y de ahí salen los atributos nombrados: el pedido
+         se guarda con { model:'vmp' } aunque el enlace siga hablando de "color". */
+      function singleAttrs(){
+        try {
+          if(!window.SS_ATTRS || typeof window.SS_ATTRS.describir !== 'function') return null;
+          var linea = lineaCompraDirecta();
+          var partes = window.SS_ATTRS.describir(linea, productoDeLinea(linea));
+          if(!partes.length) return null;
+          var out = {};
+          for(var i = 0; i < partes.length; i++) out[partes[i].key] = partes[i].value;
+          return out;
+        } catch(_){ return null; }
+      }
       var savedShipping = loadCheckoutShipping();
 
       if(priceRaw){
@@ -714,7 +774,7 @@
             customer_email: safeText(savedShipping && savedShipping.email).toLowerCase(),
             frontend_base_amount: priceNum ? priceNum.toFixed(2) : '0.00',
             category: safeText(checkoutMetaState && checkoutMetaState.category),
-            cart_items: isCartMode ? cartItemsPayload : []
+            cart_items: isCartMode ? cartItemsForRequest() : []
           };
 
           return fetch(LOCAL_API_BASE + '/index.php?route=discount_validate', {
@@ -945,7 +1005,7 @@
           discount_code: discountCode || '',
           customer_email: safeText(savedShipping && savedShipping.email).toLowerCase(),
           category: safeText(checkoutMetaState && checkoutMetaState.category),
-          cart_items: isCartMode ? cartItemsPayload : [],
+          cart_items: isCartMode ? cartItemsForRequest() : [],
           // Al reanudar un pedido, el backend recupera de él el envío guardado
           // (recargos manuales de admin). Sin esto el resumen mostraría el precio
           // de catálogo y no coincidiría con lo que se cobra.
@@ -972,7 +1032,7 @@
           customer_email: safeText(savedShipping && savedShipping.email).toLowerCase(),
           frontend_base_amount: priceNum ? priceNum.toFixed(2) : '0.00',
           category: safeText(checkoutMetaState && checkoutMetaState.category),
-          cart_items: isCartMode ? cartItemsPayload : []
+          cart_items: isCartMode ? cartItemsForRequest() : []
         };
 
         return fetch(LOCAL_API_BASE + '/index.php?route=discount_validate', {
@@ -1234,17 +1294,12 @@
           } catch(_){}
         };
         try {
-          if(window.SS_ATTRS && window.SS_ATTRS.ready && window.SS_ATTRS.ready.then){
-            window.SS_ATTRS.ready.then(repintarVariantes);
-          } else {
-            document.addEventListener('ss:attrs', function(){
-              if(window.SS_ATTRS && window.SS_ATTRS.ready && window.SS_ATTRS.ready.then){
-                window.SS_ATTRS.ready.then(repintarVariantes);
-              } else {
-                repintarVariantes();
-              }
-            }, { once: true });
+          /* La promesa se coge o se crea: esta página puede correr antes que el núcleo. */
+          if(!window.SS_READY && typeof Promise === 'function'){
+            window.SS_READY = new Promise(function(res){ window.__ssResolverReady = res; });
           }
+          if(window.SS_READY) window.SS_READY.then(repintarVariantes);
+          else repintarVariantes();
         } catch(_){}
 
         // Populate fee hints in tabs
@@ -1747,11 +1802,13 @@
               discount_code: appliedDiscountCode || undefined,
               frontend_base_amount: priceNum ? priceNum.toFixed(2) : undefined,
               shipping_amount: (currentPricingSnapshot && Number.isFinite(currentPricingSnapshot.shipping)) ? currentPricingSnapshot.shipping.toFixed(2) : '0.00',
-              cart_items: isCartMode ? cartItemsPayload : undefined,
+              cart_items: isCartMode ? cartItemsForRequest() : undefined,
               ref: ref,
               productUrl: meta.productUrl || productUrl || undefined,
               productImageUrl: meta.productImage || productImage || undefined,
               productColor: meta.colorKey || colorKey || undefined,
+              productAttrs: singleAttrs() || undefined,
+              productVariantText: singleVariantText() || undefined,
               productColorLabel: meta.colorLabel || colorLabel || undefined,
               paymentMethod: method,
               shipping: savedShipping || undefined,
@@ -2044,11 +2101,13 @@
               discount_code: appliedDiscountCode || undefined,
               frontend_base_amount: priceNum ? priceNum.toFixed(2) : undefined,
               shipping_amount: (currentPricingSnapshot && Number.isFinite(currentPricingSnapshot.shipping)) ? currentPricingSnapshot.shipping.toFixed(2) : '0.00',
-              cart_items: isCartMode ? cartItemsPayload : undefined,
+              cart_items: isCartMode ? cartItemsForRequest() : undefined,
               ref: ref,
               productUrl: meta.productUrl || productUrl || undefined,
               productImageUrl: meta.productImage || productImage || undefined,
               productColor: meta.colorKey || colorKey || undefined,
+              productAttrs: singleAttrs() || undefined,
+              productVariantText: singleVariantText() || undefined,
               productColorLabel: meta.colorLabel || colorLabel || undefined,
               checkoutPath: buildStripeReturnPath(mode),
               paymentMethodMode: mode,
@@ -2283,11 +2342,13 @@
                   discount_code: appliedDiscountCode || undefined,
                   frontend_base_amount: priceNum ? priceNum.toFixed(2) : undefined,
                   shipping_amount: (currentPricingSnapshot && Number.isFinite(currentPricingSnapshot.shipping)) ? currentPricingSnapshot.shipping.toFixed(2) : '0.00',
-                  cart_items: isCartMode ? cartItemsPayload : undefined,
+                  cart_items: isCartMode ? cartItemsForRequest() : undefined,
                   ref: ref,
                   productUrl: meta.productUrl || productUrl || undefined,
                   productImageUrl: meta.productImage || productImage || undefined,
                   productColor: meta.colorKey || colorKey || undefined,
+                  productAttrs: singleAttrs() || undefined,
+                  productVariantText: singleVariantText() || undefined,
                   productColorLabel: meta.colorLabel || colorLabel || undefined,
                   checkoutPath: buildStripeReturnPath(mode === 'klarna' ? 'klarna' : (mode === 'paypal' ? 'paypal' : (mode === 'scalapay' ? 'scalapay' : 'card'))),
                   paymentMethodMode: mode === 'klarna' ? 'klarna' : (mode === 'paypal' ? 'paypal' : (mode === 'scalapay' ? 'scalapay' : 'dynamic')),

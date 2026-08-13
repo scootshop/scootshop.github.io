@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Admin | SCOOT SHOP</title>
   <meta name="robots" content="noindex,nofollow" />
-  <meta name="asset-version" content="20260620-2" />
+  <meta name="asset-version" content="20260813-9" />
   <script src="/js/asset-sync.js?v=20260605-2" defer></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
@@ -135,37 +135,73 @@
 
     /* ORDERS TABLE */
     .o-tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:.84rem}
-    .o-tbl th{text-align:left;padding:11px 14px;font-size:.67rem;text-transform:uppercase;letter-spacing:.06em;color:var(--subtle);font-weight:700;border-bottom:1px solid var(--line);background:#fafbfc;white-space:nowrap}
-    .o-tbl th.sortable{cursor:pointer;user-select:none}
-    .o-tbl th.sortable:hover{color:var(--ink)}
+    .o-tbl th{text-align:left;padding:13px 16px;font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);font-weight:800;border-bottom:1px solid var(--line);background:#f8fafc;white-space:nowrap}
+    .o-tbl th.sortable{cursor:pointer;user-select:none;transition:color .12s}
+    .o-tbl th.sortable:hover{color:var(--navy)}
     .sort-ind{font-size:.66rem;margin-left:4px;color:#94a3b8}
-    .o-tbl td{padding:12px 14px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+    .o-tbl td{padding:15px 16px;border-bottom:1px solid #eef2f7;vertical-align:middle}
     .o-tbl tr:last-child td{border-bottom:0}
-    .o-tbl tbody tr{cursor:pointer;transition:background .1s}
-    .o-tbl tbody tr:hover{background:#f8faff}
+    .o-tbl tbody tr{cursor:pointer;transition:background .12s,box-shadow .12s}
+    .o-tbl tbody tr:hover{background:#f6f9ff;box-shadow:inset 3px 0 0 var(--accent)}
     .o-tbl tbody tr.row-account-order{background:#fffdf2}
-    .o-tbl tbody tr.row-account-order:hover{background:#fff8dc}
-    .oid{font-weight:700;font-size:.77rem;color:var(--navy);font-family:'SF Mono',SFMono-Regular,ui-monospace,monospace;white-space:nowrap}
+    .o-tbl tbody tr.row-account-order:hover{background:#fff8dc;box-shadow:inset 3px 0 0 var(--yellow)}
+    .oid{font-weight:700;font-size:.77rem;color:var(--navy);font-family:'SF Mono',SFMono-Regular,ui-monospace,monospace;white-space:nowrap;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
     .cust-main{font-weight:700;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .cust-sub{font-size:.73rem;color:var(--subtle);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .cust-sub{font-size:.73rem;color:var(--subtle);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-variant-numeric:tabular-nums}
     .prod-c{max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:.81rem}
     .prod-lines{display:grid;gap:2px;max-width:300px;white-space:normal;color:var(--muted);font-size:.79rem;line-height:1.25}
     .prod-line{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .prod-more{font-size:.72rem;font-weight:700;color:#475569}
-    .pay-c{font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
-    .date-c{color:var(--subtle);font-size:.77rem;white-space:nowrap}
-    .amt-c{font-weight:700;white-space:nowrap;text-align:right}
-    .risk-chip{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;background:#fff7ed;color:#9a3412;border:1px solid #fed7aa;font-size:.62rem;font-weight:800;letter-spacing:.03em;margin-left:6px;text-transform:uppercase}
+    .pay-c{display:inline-flex;align-items:center;font-size:.66rem;color:#475569;font-weight:800;text-transform:uppercase;letter-spacing:.04em;background:#f1f5f9;border:1px solid #e7ecf2;padding:3px 9px;border-radius:999px;white-space:nowrap}
+    .date-c{color:var(--subtle);font-size:.76rem;white-space:nowrap;font-variant-numeric:tabular-nums}
+    .amt-c{font-weight:800;font-size:.9rem;color:var(--ink);white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+    .act-col{width:84px;text-align:center}
+    /* Bloque de estado: badge principal + meta (tracking/correo) en linea inferior */
+    .st-stack{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+    .st-meta{display:flex;flex-wrap:wrap;align-items:center;gap:5px}
+    .risk-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;background:#fff7ed;color:#9a3412;border:1px solid #fed7aa;font-size:.63rem;font-weight:800;letter-spacing:.02em;text-transform:uppercase;line-height:1.45;white-space:nowrap}
     .row-ops{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
     .row-op-btn{border:1px solid var(--line);background:#fff;color:#475569;font-size:.68rem;font-weight:700;padding:3px 7px;border-radius:6px;cursor:pointer;font-family:inherit}
     .row-op-btn:hover{border-color:var(--navy);color:var(--navy);background:#f8fafc}
+    /* Indicador de email en la fila — hereda el color del estado del pedido (clase b-*) */
+    .mail-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:.63rem;font-weight:800;letter-spacing:.02em;white-space:nowrap;border:1px solid transparent;line-height:1.45}
+    /* Enviado: relleno con el color del estado (lo aporta la clase b-*) */
+    /* Sin correo: mismo color de estado pero hueco/punteado para distinguir de un vistazo */
+    .mail-chip--none{background:transparent!important;border-style:dashed;border-color:currentColor;opacity:.7}
+    /* Hora relativa + absoluta en la columna Actualizado */
+    .date-rel{font-size:.77rem;color:#475569;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+    .date-abs{font-size:.7rem;color:var(--subtle);font-variant-numeric:tabular-nums;white-space:nowrap;margin-top:1px}
+    /* Fila que requiere accion operativa: acento ambar persistente a la izquierda */
+    .o-tbl tbody tr.row-priority{box-shadow:inset 4px 0 0 var(--yellow)}
+    .o-tbl tbody tr.row-priority:hover{background:#fffaf0;box-shadow:inset 4px 0 0 var(--yellow)}
+    .o-tbl tbody tr.row-account-order.row-priority:hover{background:#fdf6e3;box-shadow:inset 4px 0 0 var(--yellow)}
+    /* Menu kebab (3 puntos) — unico control de la columna ACCIONES */
+    .row-ops{justify-content:center}
+    .row-kebab-wrap{position:relative;display:inline-flex}
+    .row-kebab-btn{font-size:1.15rem;line-height:1;width:32px;height:30px;padding:0;display:inline-flex;align-items:center;justify-content:center;font-weight:900;color:#64748b}
+    .row-kebab-btn:hover{background:#eef2ff;border-color:var(--navy);color:var(--navy)}
+    .row-kebab-menu{position:absolute;top:calc(100% + 4px);right:0;z-index:40;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 30px rgba(15,23,42,.18);padding:5px;min-width:208px;display:flex;flex-direction:column;gap:1px}
+    .row-kebab-menu[hidden]{display:none}
+    .row-kebab-item{display:flex;align-items:center;gap:9px;width:100%;text-align:left;border:0;background:none;color:#334155;font-size:.76rem;font-weight:700;padding:8px 10px;border-radius:7px;cursor:pointer;font-family:inherit;transition:background .1s}
+    .row-kebab-item:hover{background:#f1f5f9;color:var(--navy)}
+    .row-kebab-item:disabled{opacity:.45;cursor:not-allowed}
+    .row-kebab-item:disabled:hover{background:none;color:#334155}
+    .row-kebab-item .kb-ico{font-size:.95rem;line-height:1;width:18px;text-align:center;flex:0 0 auto}
+    .row-kebab-item .kb-l{flex:1 1 auto}
+    .row-kebab-item.kb-primary{color:var(--navy)}
+    .row-kebab-item.kb-mail{color:#1d4ed8}
+    .row-kebab-item.kb-copied{background:#ecfdf5;color:#047857}
+    .row-kebab-sep{height:1px;background:var(--line);margin:5px 4px}
+    .row-kebab-cap{font-size:.6rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--subtle);padding:2px 10px 4px}
     .cb-col{width:38px;padding-left:14px!important;padding-right:6px!important}
     .o-cb{width:15px;height:15px;cursor:pointer;accent-color:var(--navy)}
 
     /* BADGES */
-    .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:.67rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
-    .b-paid{background:var(--green-bg);color:var(--green-t)}
+    .badge{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:999px;font-size:.67rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;line-height:1.4}
+    .b-paid{background:#e8f9f0;color:#15803d}
+    .b-deliv{background:#bbf7d0;color:#14532d}
     .b-pend{background:#f3e8ff;color:#7c3aed}
+    .b-pay{background:#ffedd5;color:#9a3412}
     .b-ship{background:var(--blue-bg);color:var(--blue-t)}
     .b-res{background:#ede9fe;color:#5b21b6}
     .b-canc{background:var(--red-bg);color:var(--red-t)}
@@ -200,6 +236,11 @@
     /* CARDS */
     .card{background:var(--card);border:1px solid var(--line);border-radius:var(--rl);overflow:hidden;margin-top:14px;box-shadow:var(--sh)}
     .card-head{padding:13px 18px 11px;border-bottom:1px solid var(--line);font-weight:800;font-size:.73rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);display:flex;align-items:center;gap:8px}
+    .ch-edit{margin-left:auto;display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:#fff;color:var(--navy3);font-size:.66rem;font-weight:800;text-transform:none;letter-spacing:0;padding:5px 11px;border-radius:8px;cursor:pointer;font-family:inherit;transition:border-color .14s,color .14s,background .14s}
+    .ch-edit:hover{border-color:var(--navy);color:var(--navy);background:#f8fafc}
+    .se-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px 16px}
+    .se-grid .se-full{grid-column:1/-1}
+    @media(max-width:560px){ .se-grid{grid-template-columns:1fr} }
     .card-body{padding:16px 18px 18px}
 
     /* KV */
@@ -399,27 +440,58 @@
     .addr-lines{display:grid;gap:3px;line-height:1.35}
     .field-missing{color:var(--red-t);font-weight:700;font-size:.77rem}
     .ops-grid{display:flex;flex-wrap:wrap;gap:8px}
-    .cust-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}
-    .cust-kpi{padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fafbfc}
-    .cust-kpi .k{display:block;font-size:.64rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--subtle);margin-bottom:3px}
-    .cust-kpi .v{display:block;font-size:.96rem;font-weight:800;color:var(--ink)}
-    .cust-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
-    .cust-avatar{width:44px;height:44px;border-radius:14px;object-fit:cover;border:1px solid var(--line);background:#fff;flex-shrink:0}
-    .cust-avatar-fallback{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:#f1f5f9;border:1px solid var(--line);font-weight:800;color:var(--navy);flex-shrink:0}
-    .cust-meta{display:grid;gap:2px;min-width:0}
-    .cust-name{font-size:.96rem;font-weight:800;color:var(--ink);word-break:break-word}
-    .cust-email{font-size:.76rem;color:var(--muted);word-break:break-word}
-    .cust-detail-orders{display:grid;gap:10px;margin-top:12px}
-    .cust-order{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff}
+    /* ===== Detalle de cliente (rediseño) ===== */
+    .cust-head{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;padding:2px}
+    .cust-avatar{width:52px;height:52px;border-radius:16px;object-fit:cover;border:1px solid var(--line);background:#fff;flex-shrink:0}
+    .cust-avatar-fallback{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:#f1f5f9;border:1px solid var(--line);font-weight:800;font-size:1.05rem;color:var(--navy);flex-shrink:0}
+    .cust-meta{display:grid;gap:4px;min-width:0;flex:1}
+    .cust-name{font-size:1.06rem;font-weight:800;color:var(--ink);word-break:break-word;letter-spacing:-.01em}
+    .cust-email{font-size:.78rem;color:var(--muted);word-break:break-word;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+    .cust-id-chip{font-family:ui-monospace,monospace;font-size:.68rem;background:#f1f5f9;color:var(--muted);padding:1px 7px;border-radius:6px;font-weight:700}
+    /* KPI strip */
+    .cust-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;margin-top:14px}
+    .cust-kpi{padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff,#fafbfc)}
+    .cust-kpi .k{display:flex;align-items:center;gap:4px;font-size:.59rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--subtle);margin-bottom:4px}
+    .cust-kpi .v{display:block;font-size:.94rem;font-weight:800;color:var(--ink);word-break:break-word}
+    .cust-kpi.kpi--ok .v{color:var(--green-t)}
+    .cust-kpi.kpi--warn .v{color:var(--yellow-t)}
+    /* Toolbar */
+    .cust-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+    /* Section titles */
+    .cust-sec-title{display:flex;align-items:center;gap:8px;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--subtle);margin:18px 0 10px}
+    .cust-sec-title .cnt{background:#f1f5f9;color:var(--muted);border-radius:999px;padding:1px 9px;font-size:.66rem}
+    .cust-detail-orders{display:grid;gap:12px}
+    /* Order card */
+    .cust-order{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fff;box-shadow:var(--sh);transition:box-shadow .16s,border-color .16s}
+    .cust-order:hover{box-shadow:var(--sh-md)}
+    .cust-order--priority{border-color:#fdba74;background:linear-gradient(180deg,#fffaf3,#fff)}
     .cust-order-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
-    .cust-order-main{display:grid;gap:4px;min-width:0}
-    .cust-order-id{font-family:'SF Mono',SFMono-Regular,ui-monospace,monospace;font-size:.72rem;font-weight:700;color:var(--navy)}
-    .cust-order-sub{font-size:.78rem;color:var(--subtle)}
-    .cust-order-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+    .cust-order-main{display:grid;gap:6px;min-width:0;flex:1}
+    .cust-order-idrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .cust-order-id{font-family:ui-monospace,monospace;font-size:.82rem;font-weight:800;color:var(--navy)}
+    .cust-order-sub{font-size:.8rem;color:var(--muted)}
+    .cust-order-badges{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+    .cust-order-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}
     .cust-order-grid .cell{padding:8px 10px;background:#fafbfc;border:1px solid #eef2f7;border-radius:10px}
-    .cust-order-grid .lbl{display:block;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--subtle);margin-bottom:2px}
-    .cust-order-grid .val{display:block;font-size:.8rem;font-weight:700;color:var(--ink);word-break:break-word}
-    .cust-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .cust-order-grid .lbl{display:block;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--subtle);margin-bottom:2px}
+    .cust-order-grid .val{display:block;font-size:.82rem;font-weight:700;color:var(--ink);word-break:break-word}
+    /* Action bar */
+    .cust-order-acts{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+    .oa-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;color:var(--navy3);font-size:.74rem;font-weight:700;padding:7px 12px;border-radius:9px;cursor:pointer;font-family:inherit;transition:border-color .14s,color .14s,background .14s;white-space:nowrap}
+    .oa-btn:hover{border-color:var(--navy);color:var(--navy);background:#f8fafc}
+    .oa-btn--primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+    .oa-btn--primary:hover{background:var(--navy2);color:#fff}
+    .oa-btn--mail:not(:disabled):hover{border-color:var(--accent);color:var(--accent)}
+    .oa-btn:disabled{opacity:.45;cursor:not-allowed}
+    .oa-ico{font-size:.86rem;line-height:1}
+    /* History timeline */
+    .cust-hist-item{display:grid;grid-template-columns:auto 1fr;gap:10px;padding:10px 2px;border-bottom:1px solid #f1f5f9}
+    .cust-hist-item:last-child{border-bottom:0}
+    .cust-hist-dot{width:9px;height:9px;border-radius:50%;background:var(--accent);margin-top:5px;flex-shrink:0}
+    .cust-hist-h{font-size:.78rem;font-weight:700;color:var(--ink);word-break:break-word}
+    .cust-hist-h .oid{font-family:ui-monospace,monospace;color:var(--navy)}
+    .cust-hist-meta{font-size:.7rem;color:var(--subtle);margin-top:1px}
+    .cust-hist-chg{font-size:.76rem;color:var(--muted);margin-top:3px;word-break:break-word}
     .cust-empty-note{padding:16px;border:1px dashed var(--line);border-radius:12px;background:#fafbfc;color:var(--muted);font-size:.84rem}
 
     /* HISTORY */
@@ -481,9 +553,24 @@
     .btn-d:hover{background:#dc2626}
 
     /* DETAIL TOP */
-    .det-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+    .det-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px 14px;flex-wrap:wrap;margin-bottom:14px}
     .det-title{font-size:1.08rem;font-weight:900;letter-spacing:-.02em;color:var(--navy)}
     .det-sub{font-size:.78rem;color:var(--muted);font-weight:600;margin-top:2px}
+    /* Tira de datos clave en el encabezado del pedido (fila propia) */
+    .det-facts{display:flex;flex-wrap:wrap;gap:8px;flex-basis:100%}
+    .qa-bar--solo{border:1px solid var(--line);border-radius:12px;margin-top:12px}
+    .det-fact{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:8px;background:#f8fafc;border:1px solid var(--line);font-size:.74rem;font-weight:700;color:#475569;white-space:nowrap}
+    .det-fact .lbl{color:var(--subtle);font-weight:700}
+    .det-fact code{font-family:'SF Mono',monospace;color:var(--blue-t);font-weight:700}
+    /* Bloque colapsable reutilizable (avanzado / facturacion / log emails) */
+    details.collapse{border:1px solid var(--line);border-radius:10px;background:#fcfcfd;margin-top:10px}
+    details.collapse>summary{list-style:none;cursor:pointer;padding:10px 13px;font-size:.77rem;font-weight:800;color:var(--muted);display:flex;align-items:center;gap:7px}
+    details.collapse>summary::-webkit-details-marker{display:none}
+    details.collapse>summary::after{content:'\25BE';margin-left:auto;font-size:.72rem;transition:transform .15s}
+    details.collapse[open]>summary::after{transform:rotate(180deg)}
+    details.collapse[open]>summary{border-bottom:1px solid var(--line)}
+    details.collapse>.collapse-body{padding:13px}
+    .same-as{font-size:.8rem;color:var(--muted);display:flex;align-items:center;gap:7px}
 
     /* RESPONSIVE */
     @media(min-width:1440px){
@@ -684,7 +771,7 @@
               <th class="sortable" data-sort="payment">Pago <span class="sort-ind" data-ind="payment"></span></th>
               <th class="sortable" data-sort="amount" style="text-align:right">Importe <span class="sort-ind" data-ind="amount"></span></th>
               <th class="sortable" data-sort="updated_at">Actualizado <span class="sort-ind" data-ind="updated_at"></span></th>
-              <th>Acciones</th>
+              <th class="act-col">Acciones</th>
             </tr></thead>
             <tbody id="ordersList"></tbody>
           </table>
@@ -769,6 +856,7 @@
           <div id="customerDetailTop" class="cust-head"></div>
           <div id="customerDetailKpis" class="cust-kpis"></div>
           <div class="cust-toolbar" style="margin-top:12px">
+            <button class="btn-s" id="btnCustomerCopyEmail">Copiar email</button>
             <button class="btn-s" id="btnCustomerSync">Sincronizar por email</button>
             <button class="btn-s" id="btnCustomerClose">Cerrar detalle</button>
           </div>
@@ -913,28 +1001,40 @@
             <label class="flbl" for="message">Mensaje al cliente</label>
             <input id="message" type="text" class="fc" placeholder="Se enviar&#xE1; en el correo de notificaci&#xF3;n">
           </div>
-          <div class="fg">
-            <label class="flbl" for="editAmount">Importe (&#x20AC;)</label>
-            <input id="editAmount" type="number" step="0.01" min="0" class="fc" placeholder="0.00">
-          </div>
-          <div class="fg">
-            <label class="flbl" for="editProductName">Nombre producto</label>
-            <input id="editProductName" type="text" class="fc" placeholder="Ej: TF3 PRO">
-          </div>
-          <div class="fg">
-            <label class="flbl" for="editImage">URL imagen producto</label>
-            <input id="editImage" type="url" class="fc" placeholder="https://...">
-          </div>
         </div>
-        <div id="editImagePreview" style="display:none;margin-bottom:10px">
-          <img id="editImageThumb" style="width:52px;height:52px;object-fit:contain;border-radius:8px;border:1px solid var(--line);background:#fff" alt="preview">
-        </div>
-        <div id="updateItemsSummary" class="msg msg--info" style="display:none;margin-bottom:10px"></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <details class="collapse adv-edit">
+          <summary>&#x270F;&#xFE0F; Editar datos del pedido (avanzado)</summary>
+          <div class="collapse-body">
+            <div class="form-grid">
+              <div class="fg">
+                <label class="flbl" for="editShipping">Coste de env&#xED;o (&#x20AC;)</label>
+                <input id="editShipping" type="number" step="0.01" min="0" class="fc" placeholder="0.00">
+              </div>
+              <div class="fg">
+                <label class="flbl" for="editProductName">Nombre producto</label>
+                <input id="editProductName" type="text" class="fc" placeholder="Ej: TF3 PRO">
+              </div>
+              <div class="fg">
+                <label class="flbl" for="editImage">URL imagen producto</label>
+                <input id="editImage" type="url" class="fc" placeholder="https://...">
+              </div>
+            </div>
+            <div id="shipCostBox" style="display:none;margin-top:12px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--soft, #f6f8fb)">
+              <div style="font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:8px">Desglose del pedido</div>
+              <div id="shipCostRows" style="font-size:.84rem;line-height:1.9"></div>
+              <div id="shipCostWarn" style="display:none;margin-top:8px;font-size:.76rem;color:#92400e;background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:7px 10px"></div>
+            </div>
+            <div id="editImagePreview" style="display:none;margin-top:10px">
+              <img id="editImageThumb" style="width:52px;height:52px;object-fit:contain;border-radius:8px;border:1px solid var(--line);background:#fff" alt="preview">
+            </div>
+          </div>
+        </details>
+        <div id="updateItemsSummary" class="msg msg--info" style="display:none;margin-top:10px"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
           <button class="btn-p" id="btnSave">&#x1F4BE; Guardar cambios</button>
           <button class="btn-s" id="btnResend" style="background:var(--blue-bg);color:var(--blue-t);border-color:#93c5fd">&#x1F4E7; Reenviar correo</button>
         </div>
-        <div class="hint">Guardar actualiza datos del pedido. Reenviar lanza un aviso manual protegido por control anti-duplicado.</div>
+        <div class="hint">&#x1F4E7; <strong>Reenviar correo</strong> notifica al cliente (protegido por control anti-duplicado). &#x1F4BE; <strong>Guardar</strong> actualiza el pedido sin enviar nada.</div>
         <div id="updateOut"></div>
       </div>
     </div>
@@ -980,6 +1080,30 @@
 </div>
 
 <!-- PRICE MODAL -->
+<div id="shipEditModal" class="modal-ov modal-ov--scroll" hidden>
+  <div class="modal-box modal-box--create">
+    <h3>&#x270F;&#xFE0F; Editar contacto y env&#xED;o</h3>
+    <div id="shipEditOrderId" style="font-weight:700;margin-bottom:14px;color:var(--muted);font-size:.84rem"></div>
+    <div class="se-grid">
+      <label class="modal-lbl se-full">Nombre <input id="seName" class="modal-inp" type="text" autocomplete="off"></label>
+      <label class="modal-lbl se-full">Email <input id="seEmail" class="modal-inp" type="email" autocomplete="off"></label>
+      <label class="modal-lbl">Tel&#xE9;fono <input id="sePhone" class="modal-inp" type="tel" autocomplete="off"></label>
+      <label class="modal-lbl">C&#xF3;digo postal <input id="sePostal" class="modal-inp" type="text" autocomplete="off"></label>
+      <label class="modal-lbl se-full">Direcci&#xF3;n <input id="seAddress" class="modal-inp" type="text" autocomplete="off"></label>
+      <label class="modal-lbl se-full">Piso / Puerta / Referencia <input id="seAddress2" class="modal-inp" type="text" autocomplete="off"></label>
+      <label class="modal-lbl">Ciudad <input id="seCity" class="modal-inp" type="text" autocomplete="off"></label>
+      <label class="modal-lbl">Provincia / Regi&#xF3;n <input id="seProvince" class="modal-inp" type="text" autocomplete="off"></label>
+      <label class="modal-lbl se-full">Pa&#xED;s <input id="seCountry" class="modal-inp" type="text" autocomplete="off"></label>
+      <label class="modal-lbl se-full">Notas de entrega <textarea id="seNotes" class="modal-inp" rows="2"></textarea></label>
+    </div>
+    <div id="seMsg"></div>
+    <div class="modal-acts">
+      <button class="btn-s" id="seCancel">Cancelar</button>
+      <button class="btn-p" id="seSave">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
 <div id="priceModal" class="modal-ov" hidden>
   <div class="modal-box">
     <h3>&#x270F;&#xFE0F; Editar precio</h3>
@@ -1034,6 +1158,7 @@
           <option value="b">Bicicletas</option>
           <option value="motos">Motos</option>
           <option value="acc">Accesorios</option>
+          <option value="acc-limit">Limitadores</option>
         </select>
       </label>
       <label class="modal-lbl">Categor&#xED;a
@@ -1239,12 +1364,14 @@
   let currentPage = 1, totalPages = 1, totalOrders = 0;
   let loadedOrdersTotal = 0;
   let serverOrdersTotal = 0;
+  let ordersCountSnapshot = [];        // set completo (sin filtro de estado) para contar por estado
   let sortBy = 'updated_at';
   let sortDir = 'desc';
   const CLIENT_PAGE_SIZE = 20;
   const ORDERS_VIEW_KEY = 'ss_admin_orders_view_v7';
   const CUSTOMERS_VIEW_KEY = 'ss_admin_customers_view_v1';
   let currentOrderId = '', currentOrderStatus = '', activeTab = 'orders';
+  let currentOrderObj = null;
   let currentCustomerId = 0, currentCustomerDetail = null;
   let currentOrderEmailHistory = [];
   let currentOrderCustomerEmail = '';
@@ -1328,13 +1455,23 @@
       if(!colorLabel && items.length === 1){
         colorLabel = String((o && (o.product_color_label || o.product_color)) || '').trim();
       }
+      /* El texto de variantes llega ya escrito desde la API (`variant_text`): en los
+         pedidos nuevos lo redactó el núcleo cuando el cliente compró, y en los antiguos
+         lo resuelve el servidor en un único sitio. El panel NO vuelve a decidir qué es
+         ese valor: ponía "Color:" pasara lo que pasara y enseñaba un MODELO como si
+         fuera un color, contradiciendo a la ficha y al pedido del cliente. */
+      var variantText = String(item && (item.variant_text || item.variantText) || '').trim();
+      if(!variantText && items.length === 1){
+        variantText = String((o && o.product_variant_text) || '').trim();
+      }
       return {
         name: name,
         sku: String(item && item.sku || '').trim(),
         qty: qty,
         image: image,
         url: String(item && (item.url || item.href || item.link || item.product_url) || '').trim(),
-        colorLabel: colorLabel
+        colorLabel: colorLabel,
+        variantText: variantText || (colorLabel ? ('Color: ' + colorLabel) : '')
       };
     }).filter(Boolean);
   }
@@ -1364,8 +1501,10 @@
     return '<div class="prod-lines">'+lines+rest+'</div>';
   }
   function badgeClass(st){
-    if(st==='paid'||st==='delivered') return 'b-paid';
-    if(st==='pending_payment'||st==='preparing') return 'b-pend';
+    if(st==='delivered') return 'b-deliv';
+    if(st==='paid') return 'b-paid';
+    if(st==='pending_payment') return 'b-pay';
+    if(st==='preparing') return 'b-pend';
     if(st==='reserved') return 'b-res';
     if(st==='shipped') return 'b-ship';
     if(st==='canceled'||st==='refunded'||st==='error'||st==='payment_failed'||st==='dispute') return 'b-canc';
@@ -1384,6 +1523,8 @@
     const m = {
       stripe: 'Stripe',
       paypal: 'PayPal',
+      klarna: 'Klarna',
+      scalapay: 'Scalapay',
       bizum: 'Bizum',
       transfer: 'Transferencia',
       bank_transfer: 'Transferencia',
@@ -1638,6 +1779,12 @@
   if($('customerSearch')) $('customerSearch').addEventListener('input', ()=>{ if(activeTab==='customers') loadCustomers(); });
   if($('btnCustomerClose')) $('btnCustomerClose').addEventListener('click', ()=>{ currentCustomerId = 0; currentCustomerDetail = null; const card = $('customerDetailCard'); if(card) card.style.display = 'none'; });
   if($('btnCustomerSync')) $('btnCustomerSync').addEventListener('click', ()=>{ if(currentCustomerId) syncCustomerByEmail(currentCustomerId); });
+  if($('btnCustomerCopyEmail')) $('btnCustomerCopyEmail').addEventListener('click', ()=>{ const em = currentCustomerDetail && currentCustomerDetail.customer ? currentCustomerDetail.customer.email : ''; if(em) custCopy(em, 'Email copiado'); });
+  // Editar contacto y envío (botón inyectado dinámicamente en el detalle del pedido)
+  document.addEventListener('click', (ev)=>{ const b = ev.target && ev.target.closest ? ev.target.closest('[data-edit-ship]') : null; if(b){ ev.preventDefault(); openShipEdit(); } });
+  if($('seCancel')) $('seCancel').addEventListener('click', closeShipEdit);
+  if($('seSave')) $('seSave').addEventListener('click', saveShipEdit);
+  if($('shipEditModal')) $('shipEditModal').addEventListener('click', (ev)=>{ if(ev.target===$('shipEditModal')) closeShipEdit(); });
   if($('customerList')) {
     // Use capture so the row-op click stopper does not block the customer actions.
     $('customerList').addEventListener('click', (ev)=>{
@@ -1651,11 +1798,15 @@
   }
   if($('customerDetailOrders')) {
     $('customerDetailOrders').addEventListener('click', (ev)=>{
-      const btn = ev.target && ev.target.closest ? ev.target.closest('[data-customer-order-id]') : null;
+      const btn = ev.target && ev.target.closest ? ev.target.closest('[data-cust-act]') : null;
       if(!btn) return;
-      const orderId = btn.getAttribute('data-customer-order-id');
-      if(!orderId) return;
-      copyText(orderId, 'ID copiado');
+      const act = btn.getAttribute('data-cust-act');
+      const id = btn.getAttribute('data-id') || '';
+      if(!id) return;
+      if(act==='view'){ loadOrderDetail(id); }
+      else if(act==='copyid'){ custCopy(id, 'ID copiado'); }
+      else if(act==='link'){ copyCustomerOrderLink(id); }
+      else if(act==='resend'){ if(!btn.disabled) customerResend(id); }
     });
   }
 
@@ -1719,8 +1870,25 @@
     const d = new Date(String(raw).includes('T') ? raw : (raw + 'Z'));
     return Number.isNaN(d.getTime()) ? null : d;
   }
+  function relativeTime(d){
+    const dt = parseDateSafe(d); if(!dt) return '';
+    let s = Math.floor((Date.now() - dt.getTime())/1000);
+    if(s < 0) s = 0;
+    if(s < 45) return 'hace un momento';
+    const m = Math.floor(s/60); if(m < 60) return 'hace '+m+' min';
+    const h = Math.floor(m/60); if(h < 24) return 'hace '+h+' h';
+    const days = Math.floor(h/24); if(days < 30) return 'hace '+days+' d';
+    const mo = Math.floor(days/30); if(mo < 12) return 'hace '+mo+(mo>1?' meses':' mes');
+    const y = Math.floor(mo/12); return 'hace '+y+(y>1?' años':' año');
+  }
   function isRiskStatus(st){
     return ['pending_payment','payment_failed','error','dispute'].includes(String(st||''));
+  }
+  // Pedido que requiere accion operativa: pago pendiente/fallido/disputa o pagado sin tracking.
+  function needsAction(o){
+    if(isRiskStatus(o.status)) return true;
+    if(o.status === 'paid' && !String(o.tracking||'').trim()) return true;
+    return false;
   }
   function buildOrderSearchText(o){
     const status = statusLabel(o.status||'');
@@ -1898,6 +2066,9 @@
       orders = data.orders||[];
       loadedOrdersTotal = orders.length;
       serverOrdersTotal = data.total||orders.length;
+      // Snapshot para los contadores de los chips: solo cuando no hay filtro de estado
+      // (asi los numeros se mantienen estables al pulsar un chip de estado).
+      if(!status) ordersCountSnapshot = orders.slice();
       currentPage = Math.max(1, Number(page)||1);
     }
   }
@@ -1922,6 +2093,57 @@
   }
   function customerOrderLink(id){
     return '/pedido/?order='+encodeURIComponent(String(id||''));
+  }
+  // Copia con feedback en el panel de clientes (copyText global escribe en otro panel)
+  async function custCopy(v, okMsg){
+    if(!v) return;
+    try { await navigator.clipboard.writeText(String(v)); }
+    catch(_){ window.prompt('Copia manualmente:', String(v)); return; }
+    $('customersMsg').innerHTML = '<div class="msg msg--ok">'+esc(okMsg||'Copiado')+'</div>';
+    setTimeout(()=>{ $('customersMsg').innerHTML=''; }, 2500);
+  }
+  // Enlace privado del pedido (con token real). Solo válido si el pedido tiene token.
+  function buildPrivateOrderLink(order){
+    if(!order) return '';
+    const tok = String(order.token||'').trim();
+    if(!tok) return '';
+    return location.origin + '/pedido/?order=' + encodeURIComponent(order.id) + '&token=' + encodeURIComponent(tok);
+  }
+  function findCustomerOrder(id){
+    const d = currentCustomerDetail;
+    return (d && Array.isArray(d.orders)) ? d.orders.find(x=>String(x.id)===String(id)) : null;
+  }
+  function copyCustomerOrderLink(id){
+    const url = buildPrivateOrderLink(findCustomerOrder(id));
+    if(!url){
+      $('customersMsg').innerHTML = '<div class="msg msg--warn">Este pedido no tiene token; no se puede generar enlace privado. Usa “Ver pedido”.</div>';
+      setTimeout(()=>{ $('customersMsg').innerHTML=''; }, 4000);
+      return;
+    }
+    custCopy(url, 'Enlace privado copiado');
+  }
+  async function customerResend(id){
+    const o = findCustomerOrder(id);
+    if(!o) return;
+    const email = String(o.email||'').trim();
+    if(!email || email==='—' || !RESENDABLE_STATUSES.has(o.status)){
+      $('customersMsg').innerHTML = '<div class="msg msg--warn">Este pedido no admite reenvío (sin email o estado no válido).</div>';
+      setTimeout(()=>{ $('customersMsg').innerHTML=''; }, 4000);
+      return;
+    }
+    const ok = await showConfirm('📧','Reenviar correo','Se reenviará el correo del estado actual ('+statusLabel(o.status)+') a '+email+'.\n\nProtegido por control anti-duplicado.','Enviar','pri');
+    if(!ok) return;
+    $('customersMsg').innerHTML = '<div class="msg msg--info">Reenviando correo del pedido '+esc(o.id)+'…</div>';
+    const res = await apiPost('admin_status',{ id:o.id, status:o.status, tracking:(o.tracking||null), force_email:true });
+    const en = res && res.emailNotification;
+    if(res && res.ok && en && en.reason==='sent'){
+      $('customersMsg').innerHTML = '<div class="msg msg--ok">✅ Correo reenviado a '+esc(en.email||email)+'</div>';
+    } else if(res && res.ok){
+      $('customersMsg').innerHTML = '<div class="msg msg--warn">No se reenvió ('+esc((en&&en.reason)||'sin_email')+').</div>';
+    } else {
+      $('customersMsg').innerHTML = '<div class="msg msg--err">No se pudo reenviar el correo.</div>';
+    }
+    setTimeout(()=>{ $('customersMsg').innerHTML=''; }, 5000);
   }
   async function fetchCustomers(){
     $('customersLoading').hidden = false;
@@ -1999,69 +2221,80 @@
     const summary = detail.summary || {};
     card.style.display = 'block';
     card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const ordersAll = Array.isArray(detail.orders) ? detail.orders : [];
+    const lastOrder = ordersAll.length ? ordersAll[0] : null;
     top.innerHTML = [
       customerAvatarHtml(customer),
-      '<div class="cust-meta" style="flex:1">',
+      '<div class="cust-meta">',
         '<div class="cust-name">'+esc(customer.name || customer.email || '(sin nombre)')+'</div>',
-        '<div class="cust-email">'+esc(customer.email || '—')+' · ID '+esc(customer.id)+'</div>',
-        '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">',
+        '<div class="cust-email">'+esc(customer.email || '—')+'<span class="cust-id-chip">ID '+esc(customer.id)+'</span></div>',
+        '<div class="cust-order-badges" style="margin-top:2px">',
           customerStatusBadge(summary.last_status || 'customer'),
-          '<span class="badge badge--account">Pedidos: '+esc(String((detail.orders || []).length))+'</span>',
+          '<span class="badge badge--account">'+esc(String(ordersAll.length))+' pedido'+(ordersAll.length===1?'':'s')+'</span>',
         '</div>',
       '</div>',
     ].join('');
 
+    const pend = Number(summary.pending_orders || 0);
     kpis.innerHTML = [
-      '<div class="cust-kpi"><span class="k">Gasto total</span><span class="v">'+esc(customerMoney(summary.total_spent))+'</span></div>',
-      '<div class="cust-kpi"><span class="k">Pedidos pagados</span><span class="v">'+esc(String(summary.paid_orders || 0))+'</span></div>',
-      '<div class="cust-kpi"><span class="k">Pendientes</span><span class="v">'+esc(String(summary.pending_orders || 0))+'</span></div>',
-      '<div class="cust-kpi"><span class="k">Último tracking</span><span class="v">'+esc(summary.last_tracking || '—')+'</span></div>'
+      '<div class="cust-kpi kpi--ok"><span class="k">💶 Gasto total</span><span class="v">'+esc(customerMoney(summary.total_spent))+'</span></div>',
+      '<div class="cust-kpi"><span class="k">✅ Pagados</span><span class="v">'+esc(String(summary.paid_orders || 0))+'</span></div>',
+      '<div class="cust-kpi'+(pend>0?' kpi--warn':'')+'"><span class="k">⏳ Pendientes</span><span class="v">'+esc(String(pend))+'</span></div>',
+      '<div class="cust-kpi"><span class="k">🗓 Último pedido</span><span class="v">'+esc(summary.last_order_at ? shortDate(summary.last_order_at) : '—')+'</span></div>',
+      '<div class="cust-kpi"><span class="k">💳 Método</span><span class="v">'+esc(lastOrder ? paymentLabel(lastOrder.payment_method) : '—')+'</span></div>',
+      '<div class="cust-kpi"><span class="k">📦 Tracking</span><span class="v">'+esc(summary.last_tracking || '—')+'</span></div>'
     ].join('');
 
-    const orders = Array.isArray(detail.orders) ? detail.orders : [];
+    const orders = ordersAll;
     if(!orders.length){
-      ordersBox.innerHTML = '<div class="cust-empty-note">Este cliente todavía no tiene pedidos vinculados.</div>';
+      ordersBox.innerHTML = '<div class="cust-sec-title">Pedidos <span class="cnt">0</span></div><div class="cust-empty-note">Este cliente todavía no tiene pedidos vinculados.</div>';
     } else {
-      ordersBox.innerHTML = orders.map(order => {
+      ordersBox.innerHTML = '<div class="cust-sec-title">Pedidos <span class="cnt">'+orders.length+'</span></div>'
+        + '<div class="cust-detail-orders">' + orders.map(order => {
+        const pri = needsAction(order);
+        const email = String(order.email||'').trim();
+        const canResend = RESENDABLE_STATUSES.has(order.status) && email && email!=='—';
+        const hasToken = !!String(order.token||'').trim();
         return [
-          '<article class="cust-order">',
+          '<article class="cust-order'+(pri?' cust-order--priority':'')+'">',
             '<div class="cust-order-top">',
               '<div class="cust-order-main">',
-                '<div class="cust-order-id">'+esc(order.id)+'</div>',
-                '<div class="cust-order-sub">'+esc(order.product || order.sku || 'Pedido')+'</div>',
-                '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">',
+                '<div class="cust-order-idrow">',
+                  '<span class="cust-order-id">'+esc(order.id)+'</span>',
                   customerStatusBadge(order.status),
-                  '<span class="badge badge--account">'+esc(paymentLabel(order.payment_method))+'</span>',
                 '</div>',
-              '</div>',
-              '<div class="row-ops">',
-                '<a class="row-op-btn" href="'+esc(customerOrderLink(order.id))+'" target="_blank" rel="noopener noreferrer">Ver pedido</a>',
-                '<button class="row-op-btn" data-customer-order-id="'+esc(order.id)+'">Copiar ID</button>',
+                '<div class="cust-order-sub">'+esc(order.product || order.sku || 'Pedido')+'</div>',
               '</div>',
             '</div>',
             '<div class="cust-order-grid">',
               '<div class="cell"><span class="lbl">Importe</span><span class="val">'+esc(customerMoney(order.total_amount || order.amount))+'</span></div>',
-              '<div class="cell"><span class="lbl">Tracking</span><span class="val">'+esc(order.tracking || '—')+'</span></div>',
-              '<div class="cell"><span class="lbl">Actualizado</span><span class="val">'+esc(formatDate(order.updated_at || order.created_at))+'</span></div>',
               '<div class="cell"><span class="lbl">Método</span><span class="val">'+esc(paymentLabel(order.payment_method))+'</span></div>',
+              '<div class="cell"><span class="lbl">Tracking</span><span class="val">'+esc(order.tracking || '—')+'</span></div>',
+              '<div class="cell"><span class="lbl">Actualizado</span><span class="val">'+esc(shortDate(order.updated_at || order.created_at))+'</span></div>',
+            '</div>',
+            '<div class="cust-order-acts">',
+              '<button class="oa-btn oa-btn--primary" data-cust-act="view" data-id="'+esc(order.id)+'"><span class="oa-ico">👁</span>Ver pedido</button>',
+              (hasToken ? '<button class="oa-btn" data-cust-act="link" data-id="'+esc(order.id)+'"><span class="oa-ico">🔗</span>Copiar enlace</button>' : ''),
+              '<button class="oa-btn" data-cust-act="copyid" data-id="'+esc(order.id)+'"><span class="oa-ico">🆔</span>Copiar ID</button>',
+              '<button class="oa-btn oa-btn--mail" data-cust-act="resend" data-id="'+esc(order.id)+'"'+(canResend?'':' disabled title="Sin email o estado no reenviable"')+'><span class="oa-ico">✉️</span>Reenviar</button>',
             '</div>',
           '</article>'
         ].join('');
-      }).join('');
+      }).join('') + '</div>';
     }
 
     const history = Array.isArray(detail.history) ? detail.history : [];
     if(!history.length){
-      historyBox.innerHTML = '<div class="cust-empty-note">No hay historial administrativo relacionado con este cliente todavía.</div>';
+      historyBox.innerHTML = '<div class="cust-sec-title">Historial relacionado</div><div class="cust-empty-note">No hay historial administrativo relacionado con este cliente todavía.</div>';
     } else {
-      historyBox.innerHTML = [
-        '<div class="card-head" style="margin-top:4px">Historial relacionado</div>',
-        '<div class="cust-detail-orders">',
-        history.slice(0, 10).map(item => {
-          return '<div class="cust-order"><div class="cust-order-id">'+esc(item.order_id)+' · '+esc(item.field_name)+'</div><div class="cust-order-sub">'+esc(formatDate(item.created_at))+' · '+esc(item.changed_by || 'admin')+'</div><div style="margin-top:6px">'+esc(item.old_value || '—')+' → '+esc(item.new_value || '—')+'</div></div>';
-        }).join(''),
-        '</div>'
-      ].join('');
+      historyBox.innerHTML = '<div class="cust-sec-title">Historial relacionado <span class="cnt">'+history.length+'</span></div>'
+        + history.slice(0, 12).map(item => {
+          return '<div class="cust-hist-item"><span class="cust-hist-dot"></span><div class="cust-hist-body">'
+            + '<div class="cust-hist-h"><span class="oid">'+esc(item.order_id)+'</span> · '+esc(item.field_name)+'</div>'
+            + '<div class="cust-hist-meta">'+esc(formatDate(item.created_at))+' · '+esc(item.changed_by || 'admin')+'</div>'
+            + '<div class="cust-hist-chg">'+esc(item.old_value || '—')+' → '+esc(item.new_value || '—')+'</div>'
+            + '</div></div>';
+        }).join('');
     }
   }
   async function openCustomer(customerId){
@@ -2093,8 +2326,25 @@
     $('customersMsg').innerHTML = '<div class="msg msg--err">No se pudo sincronizar el cliente.</div>';
   }
 
+  /* ---- CONTADOR POR ESTADO EN EL DESPLEGABLE ---- */
+  // Anade "(n)" a cada opcion del filtro de estado. Cuenta sobre el set completo
+  // (snapshot sin filtro de estado) para que los numeros no cambien al filtrar.
+  function updateStatusFilterCounts(){
+    const sel = $('filterStatus');
+    if(!sel) return;
+    const src = (ordersCountSnapshot && ordersCountSnapshot.length) ? ordersCountSnapshot : orders;
+    const cnt = {};
+    src.forEach(o=>{ const s = o.status||''; cnt[s] = (cnt[s]||0) + 1; });
+    Array.from(sel.options).forEach(opt=>{
+      if(opt.dataset.base == null) opt.dataset.base = opt.textContent;
+      const n = opt.value === '' ? src.length : (cnt[opt.value]||0);
+      opt.textContent = opt.dataset.base + ' (' + n + ')';
+    });
+  }
+
   /* ---- RENDER ORDERS ---- */
   function renderOrdersList(){
+    updateStatusFilterCounts();
     const tbody = $('ordersList');
     const filtered = applyOrderFilters(orders);
     totalOrders = filtered.length;
@@ -2128,33 +2378,64 @@
         +(o.product_color_label ? ' <span style="font-size:.75rem;color:#999">('+esc(o.product_color_label)+')</span>' : '')
         +(o.status==='reserved' ? ' <span class="badge b-res" style="font-size:.6rem;padding:1px 7px;margin-left:4px">\uD83D\uDCC5 Reserva</span>' : '')
         +renderDiscountListBadge(o);
-      const statusBadge = '<span class="badge '+badgeClass(o.status)+'">'+statusIcon(o.status)+' '+esc(statusLabel(o.status))+'</span>'
-        +(paidNoTrack ? '<span class="risk-chip">Sin tracking</span>' : '');
-      const ops = '<div class="row-ops" onclick="event.stopPropagation()">'
-        +'<button class="row-op-btn" data-open-id="'+esc(o.id)+'">Ver</button>'
-        +'<button class="row-op-btn" onclick="window.copyFromButton&&window.copyFromButton(this,\''+jsArg(o.id)+'\',\'ID copiado\')">ID</button>'
-        +(email&&email!=='\u2014' ? '<button class="row-op-btn" onclick="window.copyFromButton&&window.copyFromButton(this,\''+jsArg(email)+'\',\'Email copiado\')">Email</button>' : '')
-        +(phone ? '<button class="row-op-btn" onclick="window.copyFromButton&&window.copyFromButton(this,\''+jsArg(phone)+'\',\'Telefono copiado\')">Tel</button>' : '')
-        +(tracking ? '<button class="row-op-btn" onclick="window.copyFromButton&&window.copyFromButton(this,\''+jsArg(tracking)+'\',\'Tracking copiado\')">Tracking</button>' : '')
+      const mailSent = Number(o.email_count||0) > 0;
+      const mailStatusClass = badgeClass(o.status);
+      const mailChip = mailSent
+        ? '<div class="mail-chip '+mailStatusClass+' mail-chip--sent" title="Ultimo email enviado al cliente el '+esc(formatDate(o.email_last_at))+'">\u2709 Avisado'+(o.email_last_at ? ' \u00b7 '+esc(shortDate(o.email_last_at)) : '')+'</div>'
+        : '<div class="mail-chip '+mailStatusClass+' mail-chip--none" title="Aun no se ha enviado ningun email a este cliente">\u2709 Sin avisar</div>';
+      const statusBadge = '<div class="st-stack">'
+        +'<span class="badge '+badgeClass(o.status)+'">'+statusIcon(o.status)+' '+esc(statusLabel(o.status))+'</span>'
+        +'<div class="st-meta">'+(paidNoTrack ? '<span class="risk-chip">Sin tracking</span>' : '')+mailChip+'</div>'
         +'</div>';
-      return '<tr data-id="'+esc(o.id)+'" class="'+((o.is_account_order||Number(o.user_id||0)>0)?'row-account-order':'')+'">'
+      const canResend = RESENDABLE_STATUSES.has(o.status) && email && email!=='\u2014';
+      const copyItem = (val,icon,label)=> '<button class="row-kebab-item" data-copy-val="'+esc(val)+'"><span class="kb-ico">'+icon+'</span><span class="kb-l">'+label+'</span></button>';
+      const ops = '<div class="row-ops" onclick="event.stopPropagation()">'
+        +'<div class="row-kebab-wrap">'
+        +'<button class="row-op-btn row-kebab-btn" title="Acciones" aria-label="Acciones" data-kebab="'+esc(o.id)+'">\u22ee</button>'
+        +'<div class="row-kebab-menu" data-kebab-menu="'+esc(o.id)+'" hidden role="menu">'
+        +'<button class="row-kebab-item kb-primary" data-open-id="'+esc(o.id)+'"><span class="kb-ico">\ud83d\udc41</span><span class="kb-l">Ver pedido</span></button>'
+        +'<button class="row-kebab-item kb-mail" data-resend-id="'+esc(o.id)+'"'+(canResend?'':' disabled title="Sin email de cliente o estado no reenviable"')+'><span class="kb-ico">\ud83d\udce7</span><span class="kb-l">Reenviar correo</span></button>'
+        +'<div class="row-kebab-sep"></div>'
+        +'<div class="row-kebab-cap">Copiar al portapapeles</div>'
+        +copyItem(o.id,'\ud83c\udd94','ID pedido')
+        +((email&&email!=='\u2014') ? copyItem(email,'\u2709','Email') : '')
+        +(phone ? copyItem(phone,'\ud83d\udcde','Tel\u00e9fono') : '')
+        +(tracking ? copyItem(tracking,'\ud83d\udce6','Tracking') : '')
+        +'</div></div>'
+        +'</div>';
+      const rowCls = [((o.is_account_order||Number(o.user_id||0)>0)?'row-account-order':''), (needsAction(o)?'row-priority':'')].filter(Boolean).join(' ');
+      return '<tr data-id="'+esc(o.id)+'" class="'+rowCls+'">'
         +'<td class="cb-col" onclick="event.stopPropagation()"><input type="checkbox" class="row-cb o-cb" value="'+esc(o.id)+'"></td>'
         +'<td><span class="oid">'+esc(o.id)+'</span> '+accountOrderBadge(o)+'</td>'
         +'<td><div class="cust-main" title="'+esc(name)+'">'+esc(name)+'</div><div class="cust-sub">'+esc(shortDate(o.created_at))+'</div></td>'
         +'<td><span class="cust-sub" title="'+esc(email)+'">'+esc(email)+'</span></td>'
         +'<td><div title="'+esc(o.product||o.name||'')+(o.product_color_label ? ' - '+o.product_color_label : '')+'">'+productDisplay+'</div></td>'
         +'<td>'+statusBadge+'</td>'
-        +'<td><span class="pay-c">'+esc(paymentLabel(o.payment_method))+'</span></td>'
+        +'<td>'+((paymentLabel(o.payment_method)!=='—') ? '<span class="pay-c">'+esc(paymentLabel(o.payment_method))+'</span>' : '<span class="date-c">—</span>')+'</td>'
         +'<td class="amt-c">'+esc(Number(o.amount||0).toLocaleString('es-ES',{minimumFractionDigits:2}))+' \u20AC</td>'
-        +'<td class="date-c">'+shortDate(o.updated_at||o.created_at)+'</td>'
-        +'<td>'+ops+'</td>'
+        +'<td class="date-c"><div class="date-rel">'+esc(relativeTime(o.updated_at||o.created_at))+'</div><div class="date-abs">'+esc(shortDate(o.updated_at||o.created_at))+'</div></td>'
+        +'<td class="act-col">'+ops+'</td>'
         +'</tr>';
     }).join('');
     tbody.querySelectorAll('tr').forEach(tr=>tr.addEventListener('click',()=>loadOrderDetail(tr.dataset.id)));
     tbody.querySelectorAll('button[data-open-id]').forEach(btn=>btn.addEventListener('click',e=>{
       e.stopPropagation();
+      closeRowKebabs();
       const id = btn.getAttribute('data-open-id');
       if(id) loadOrderDetail(id);
+    }));
+    tbody.querySelectorAll('button[data-kebab]').forEach(btn=>btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      toggleRowKebab(btn.getAttribute('data-kebab'));
+    }));
+    tbody.querySelectorAll('button[data-resend-id]').forEach(btn=>btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      closeRowKebabs();
+      if(!btn.disabled) expressResend(btn.getAttribute('data-resend-id'));
+    }));
+    tbody.querySelectorAll('button[data-copy-val]').forEach(btn=>btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      kebabCopy(btn, btn.getAttribute('data-copy-val'));
     }));
     tbody.querySelectorAll('.row-cb').forEach(cb=>cb.addEventListener('change',updateSelectionBar));
     if(totalPages>1){
@@ -2165,6 +2446,100 @@
     } else { $('pagination').hidden = true; }
     updateSortIndicators();
     saveOrdersViewState();
+  }
+
+  /* ---- MENU KEBAB + REENVIO EXPRESS (lista) ---- */
+  // Estados que admiten reenvio rapido (deben coincidir con $allowed en admin_status).
+  const RESENDABLE_STATUSES = new Set(['pending_payment','paid','preparing','shipped','delivered','canceled','refunded','dispute','payment_failed','error']);
+
+  const cssEsc = (v)=> (window.CSS && CSS.escape) ? CSS.escape(String(v)) : String(v).replace(/"/g,'\\"');
+  function closeRowKebabs(){ document.querySelectorAll('.row-kebab-menu').forEach(m=>{ m.hidden=true; m.removeAttribute('style'); }); }
+  function toggleRowKebab(id){
+    const sel = cssEsc(id);
+    const menu = document.querySelector('.row-kebab-menu[data-kebab-menu="'+sel+'"]');
+    if(!menu) return;
+    const willOpen = menu.hidden;
+    closeRowKebabs();
+    if(!willOpen) return;
+    const btn = document.querySelector('button[data-kebab="'+sel+'"]');
+    menu.hidden = false;
+    // Posicion fija para evitar recorte del .tbl-wrap (overflow); abre hacia arriba si no cabe abajo.
+    if(btn){
+      const r = btn.getBoundingClientRect();
+      menu.style.position = 'fixed';
+      menu.style.right = (window.innerWidth - r.right) + 'px';
+      const mh = menu.offsetHeight;
+      const below = r.bottom + 4;
+      if(below + mh > window.innerHeight - 10 && (r.top - mh - 4) > 10){
+        menu.style.top = (r.top - mh - 4) + 'px';
+      } else {
+        menu.style.top = below + 'px';
+      }
+    }
+  }
+  // Copiar desde un item del menu sin cerrarlo, con feedback en la propia etiqueta.
+  async function kebabCopy(btn, value){
+    if(!btn || !value || btn.dataset.busy==='1') return;
+    const lbl = btn.querySelector('.kb-l');
+    const prev = lbl ? lbl.textContent : btn.textContent;
+    btn.dataset.busy = '1';
+    let copied = false;
+    try { await navigator.clipboard.writeText(String(value)); copied = true; }
+    catch(_){ window.prompt('Copia manualmente:', String(value)); }
+    if(copied){
+      btn.classList.add('kb-copied');
+      if(lbl) lbl.textContent = 'Copiado'; else btn.textContent = 'Copiado';
+    }
+    setTimeout(()=>{
+      btn.classList.remove('kb-copied');
+      if(lbl) lbl.textContent = prev; else btn.textContent = prev;
+      btn.dataset.busy = '0';
+    }, 900);
+  }
+  // Cerrar el menu al hacer click fuera, pulsar Escape o hacer scroll.
+  document.addEventListener('click',e=>{ if(!e.target.closest('.row-kebab-wrap')) closeRowKebabs(); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeRowKebabs(); });
+  window.addEventListener('scroll',()=>closeRowKebabs(),true);
+
+  async function expressResend(id){
+    if(!adminKey || !id || actionLocks.resend) return;
+    const o = orders.find(x=>String(x.id)===String(id));
+    if(!o) return;
+    const email = o.email||o.ship_email||o.payer_email||'';
+    if(!email || !RESENDABLE_STATUSES.has(o.status)){
+      $('ordersMsg').innerHTML = '<div class="msg msg--warn">Este pedido no admite reenvio rapido (sin email o estado no valido). Abrelo con “Ver”.</div>';
+      setTimeout(()=>$('ordersMsg').innerHTML='',4500);
+      return;
+    }
+    const msg = 'Se reenviara el correo correspondiente al estado actual ('+statusLabel(o.status)+') a '+email+'.\n\nProtegido por control anti-duplicado (bloquea reenvios muy recientes).';
+    const ok = await showConfirm('📧','Reenviar correo',msg,'Enviar','pri');
+    if(!ok) return;
+    actionLocks.resend = true;
+    $('ordersMsg').innerHTML = '<div class="msg msg--info">Reenviando correo del pedido '+esc(o.id)+'...</div>';
+    try {
+      const res = await apiPost('admin_status',{ id:o.id, status:o.status, tracking:(o.tracking||null), force_email:true });
+      const en = res && res.emailNotification;
+      if(res && res.ok && en && en.reason==='sent'){
+        $('ordersMsg').innerHTML = '<div class="msg msg--ok">✅ Correo reenviado a '+esc(en.email||email)+'</div>';
+        // Actualiza el badge de la fila sin recargar toda la lista.
+        o.email_count = Number(o.email_count||0) + 1;
+        o.email_last_at = new Date().toISOString();
+        renderOrdersList();
+      } else if(en && en.reason==='duplicate_recent_manual'){
+        let txt = 'Reenvio bloqueado por un intento manual muy reciente';
+        if(en.lastSimilarEmailAt) txt += ' ('+formatDate(en.lastSimilarEmailAt)+')';
+        $('ordersMsg').innerHTML = '<div class="msg msg--warn">'+esc(txt)+'</div>';
+      } else if(en && en.reason==='missing_customer_email'){
+        $('ordersMsg').innerHTML = '<div class="msg msg--warn">Sin email de cliente en el pedido.</div>';
+      } else {
+        $('ordersMsg').innerHTML = '<div class="msg msg--err">No se pudo reenviar el correo.</div>';
+      }
+    } catch(err){
+      $('ordersMsg').innerHTML = '<div class="msg msg--err">Error al reenviar el correo.</div>';
+    } finally {
+      actionLocks.resend = false;
+      setTimeout(()=>{ const m=$('ordersMsg'); if(m && m.querySelector('.msg--ok,.msg--warn')) m.innerHTML=''; },5000);
+    }
   }
 
   /* ---- FILTERS ---- */
@@ -2262,6 +2637,37 @@
   };
 
   /* ---- ORDER DETAIL ---- */
+  function openShipEdit(){
+    const o = currentOrderObj;
+    if(!o) return;
+    const s = o.shipping || {};
+    const set = (id,v)=>{ const el=$(id); if(el) el.value = (v==null?'':String(v)); };
+    set('seName', s.name); set('seEmail', s.email); set('sePhone', s.phone);
+    set('sePostal', s.postal); set('seAddress', s.address); set('seAddress2', s.address2);
+    set('seCity', s.city); set('seProvince', s.province); set('seCountry', s.country); set('seNotes', s.notes);
+    const oid = $('shipEditOrderId'); if(oid) oid.textContent = 'Pedido '+(o.id||currentOrderId||'');
+    const msg = $('seMsg'); if(msg) msg.innerHTML = '';
+    const m = $('shipEditModal'); if(m) m.hidden = false;
+  }
+  function closeShipEdit(){ const m=$('shipEditModal'); if(m) m.hidden = true; }
+  async function saveShipEdit(){
+    if(!adminKey || !currentOrderId) return;
+    const val = id=>{ const el=$(id); return el ? el.value.trim() : ''; };
+    const payload = { id: currentOrderId,
+      name:val('seName'), email:val('seEmail'), phone:val('sePhone'),
+      address:val('seAddress'), address2:val('seAddress2'), city:val('seCity'),
+      province:val('seProvince'), postal:val('sePostal'), country:val('seCountry'), notes:val('seNotes') };
+    const btn=$('seSave'); if(btn){ btn.disabled=true; btn.textContent='Guardando…'; }
+    const res = await apiPost('admin_order_update_contact', payload);
+    if(btn){ btn.disabled=false; btn.textContent='Guardar cambios'; }
+    if(res && res.ok){
+      closeShipEdit();
+      loadOrderDetail(currentOrderId);
+    } else {
+      const msg=$('seMsg');
+      if(msg) msg.innerHTML = '<div class="msg msg--err" style="margin:8px 0 0">'+esc((res&&res.error)||'No se pudo guardar')+'</div>';
+    }
+  }
   async function loadOrderDetail(id){
     currentOrderId = id;
     currentOrderEmailHistory = [];
@@ -2320,6 +2726,7 @@
   function kv(label, val, cls){ return '<div class="kv'+(cls?' '+cls:'')+'"><span class="lbl">'+esc(label)+'</span><span class="val">'+val+'</span></div>'; }
 
   function renderOrder(o, emailHistory){
+    currentOrderObj = o || null;
     const emailHist = Array.isArray(emailHistory) ? emailHistory : [];
     const orderItems = orderItemsFromOrder(o);
     const isAccountOrder = !!(o && (Number(o.user_id||0) > 0));
@@ -2370,6 +2777,8 @@
     const subtotalAmount = moneyFmt(o.subtotal_amount);
     const discountAmount = moneyFmt(o.discount_amount);
     const paymentFeeAmount = moneyFmt(o.payment_fee_amount);
+    const hasStripeFee = o.stripe_fee_amount != null && o.stripe_fee_amount !== '';
+    const stripeFeeAmount = moneyFmt(o.stripe_fee_amount);
     const shippingAmount = moneyFmt(o.shipping_amount);
     const totalAmount = moneyFmt((o.total_amount==null||o.total_amount==='') ? o.amount : o.total_amount);
     const showDiscount = hasDiscount(o);
@@ -2396,32 +2805,27 @@
       +(o.status==='reserved' ? '<span class="badge b-res" style="font-size:.74rem;padding:5px 14px">\uD83D\uDCC5 Reserva</span>' : '')
       +'</div>';
 
-    $('detailFlow').innerHTML = renderStatusFlow(o.status) + statusGuidance(o);
+    $('detailTopBar').innerHTML +=
+       '<div class="det-facts">'
+      +'<span class="det-fact">💳 <span class="lbl">Pago</span> '+esc(paymentLabel(o.payment_method))+'</span>'
+      +'<span class="det-fact">🕒 <span class="lbl">Creado</span> '+esc(relativeTime(o.created_at)||formatDate(o.created_at))+'</span>'
+      +'<span class="det-fact">🔄 <span class="lbl">Actualizado</span> '+esc(relativeTime(o.updated_at)||formatDate(o.updated_at))+'</span>'
+      +(o.tracking ? '<span class="det-fact">📦 <span class="lbl">Tracking</span> <code>'+esc(o.tracking)+'</code>'+tinyCopy(o.tracking,'Tracking copiado')+'</span>' : '')
+      +'</div>';
+
+    let qaBar = '<div class="qa-bar qa-bar--solo">';
+    qaBar += qaCopy('&#x1F4CB; Copiar resumen', summaryText, 'Resumen copiado', 'qa--b');
+    if(o.tracking) qaBar += qaCopy('&#x1F4CB; Copiar tracking', o.tracking, 'Tracking copiado', 'qa--b');
+    if(hasShipping) qaBar += qaCopy('&#x1F4CB; Copiar datos envio', shippingDataText, 'Datos de envio copiados');
+    if(o.payer_email) qaBar += '<a class="qa" href="mailto:'+esc(o.payer_email)+'">&#x1F4E7; Enviar email</a>';
+    if(waNr) qaBar += '<a class="qa qa--g" href="https://wa.me/'+esc(waNr)+'?text='+waMsg+'" target="_blank" rel="noopener">&#x1F4AC; WhatsApp</a>';
+    qaBar += '</div>';
+    $('detailFlow').innerHTML = renderStatusFlow(o.status) + statusGuidance(o) + qaBar;
 
     let html = '';
-    html += '<div class="qa-bar">';
-    html += qaCopy('&#x1F4CB; Copiar resumen', summaryText, 'Resumen copiado', 'qa--b');
-    if(o.tracking) html += qaCopy('&#x1F4CB; Copiar tracking', o.tracking, 'Tracking copiado', 'qa--b');
-    if(hasShipping) html += qaCopy('&#x1F4CB; Copiar datos envio', shippingDataText, 'Datos de envio copiados');
-    if(o.payer_email) html += '<a class="qa" href="mailto:'+esc(o.payer_email)+'">&#x1F4E7; Enviar email</a>';
-    if(waNr) html += '<a class="qa qa--g" href="https://wa.me/'+esc(waNr)+'?text='+waMsg+'" target="_blank" rel="noopener">&#x1F4AC; WhatsApp</a>';
-    html += '</div>';
-
     html += '<div class="det-grid">';
 
-    html += '<div class="card" style="margin-top:0"><div class="card-head">&#x1F464; Cliente</div><div class="card-body">';
-    html += kv('Nombre', esc(s.name || o.payer_name || '\u2014'));
-    html += kv('Email', em ? '<a href="mailto:'+esc(em)+'" style="color:var(--accent)">'+esc(em)+'</a>'+tinyCopy(em,'Email copiado') : '<span class="field-missing">Falta email</span>');
-    html += kv('Telefono', phone ? esc(fmted || phone)+tinyCopy(phone,'Telefono copiado') : '<span class="field-missing">Falta telefono</span>');
-    html += '</div></div>';
 
-    html += '<div class="card" style="margin-top:0"><div class="card-head">&#x1F4CB; Estado operativo</div><div class="card-body">';
-    html += kv('Tipo', '<strong>'+(o.status==='reserved'?'Reserva':'Compra')+'</strong>');
-    if(isAccountOrder) html += kv('Cliente cuenta','<span class="badge badge--account-order">👤 Vinculado a cuenta</span>');
-    if(o.tracking) html += kv('Tracking','<span style="color:var(--blue-t);font-weight:700">'+esc(o.tracking)+'</span>'+tinyCopy(o.tracking,'Tracking copiado'));
-    html += kv('Creado', formatDate(o.created_at));
-    html += kv('Actualizado', formatDate(o.updated_at));
-    html += '</div></div>';
 
     html += '<div class="card" style="margin-top:0"><div class="card-head">&#x1F4B3; Pago</div><div class="card-body">';
     html += kv('Metodo pago','<span style="background:#f1f5f9;padding:2px 8px;border-radius:5px;font-size:.77rem;font-weight:800">'+esc(paymentLabel(o.payment_method))+'</span>');
@@ -2433,7 +2837,10 @@
     } else {
       html += kv('Descuento','<span style="color:#64748b">Sin descuento</span>');
     }
-    html += kv('Comision metodo de pago','<strong>'+esc(paymentFeeAmount)+'</strong>');
+    html += kv('Comision metodo de pago','<strong>'+esc(paymentFeeAmount)+'</strong><span style="display:block;font-size:.69rem;color:var(--subtle);margin-top:2px">Recargo aplicado al cliente</span>');
+    if(hasStripeFee){
+      html += kv('Comision real Stripe','<strong style="color:#b45309">'+esc(stripeFeeAmount)+'</strong><span style="display:block;font-size:.69rem;color:var(--subtle);margin-top:2px">Coste real que cobra Stripe</span>');
+    }
     html += kv('Envio','<strong>'+esc(shippingAmount)+'</strong>');
     html += kv('Total final','<strong style="font-size:1.05rem;color:var(--navy)">'+esc(totalAmount)+'</strong>');
     if(o.txn_id){
@@ -2448,7 +2855,7 @@
       var orderItemsHtml = orderItems.map(function(item){
         var meta = 'Cantidad: '+(item.qty || 1);
         if(item.sku) meta += ' · SKU: '+item.sku;
-        if(item.colorLabel) meta += ' · Color: '+item.colorLabel;
+        if(item.variantText) meta += ' · '+item.variantText;
         var imageHtml = item.image ? '<img src="'+esc(item.image)+'" alt="'+esc(item.name)+'">' : '';
         var nameHtml = item.url
           ? '<a href="'+esc(item.url)+'" target="_blank" rel="noopener" style="color:var(--ink);text-decoration:none">'+esc(item.name)+'</a>'
@@ -2464,14 +2871,22 @@
       html += kv('Artículos', '<div class="order-items">'+orderItemsHtml+'</div>', 'kv--stack');
     }
     html += kv('SKU','<code style="font-size:.77rem;background:#f1f5f9;padding:2px 7px;border-radius:4px">'+esc(o.sku||'\u2014')+'</code>'+tinyCopy(o.sku||'','SKU copiado'));
-    if(o.product_color_label) html += kv('Color', esc(o.product_color_label));
+    /* El rótulo del eje sale del pedido, no de esta plantilla: un patinete elegido
+       por MODELO deja de aparecer aquí bajo la etiqueta "Color". */
+    var variantePedido = String(o.product_variant_text || '').trim();
+    if(variantePedido){
+      var corte = variantePedido.indexOf(': ');
+      html += corte > 0
+        ? kv(esc(variantePedido.slice(0, corte)), esc(variantePedido.slice(corte + 2)))
+        : kv('Variante', esc(variantePedido));
+    } else if(o.product_color_label) html += kv('Color', esc(o.product_color_label));
     if(o.message) html += kv('Mensaje cliente', esc(o.message), 'kv--stack');
     html += '</div></div>';
 
     if(hasShipping){
-      html += '<div class="card" style="margin-top:0"><div class="card-head">&#x1F69A; Envio</div><div class="card-body">';
-      html += kv('Nombre', esc(s.name || '\u2014'));
-      html += kv('Email', s.email ? '<a href="mailto:'+esc(s.email)+'" style="color:var(--accent)">'+esc(s.email)+'</a>'+tinyCopy(s.email,'Email de envio copiado') : '<span class="field-missing">Falta email envio</span>');
+      html += '<div class="card" style="margin-top:0"><div class="card-head">&#x1F69A; Contacto y env&#xED;o<button type="button" class="ch-edit" data-edit-ship="1" title="Editar contacto y env&#xED;o">&#x270F;&#xFE0F; Editar</button></div><div class="card-body">';
+      html += kv('Nombre', esc(s.name || o.payer_name || '\u2014'));
+      html += kv('Email', (s.email||em) ? '<a href="mailto:'+esc(s.email||em)+'" style="color:var(--accent)">'+esc(s.email||em)+'</a>'+tinyCopy(s.email||em,'Email copiado') : '<span class="field-missing">Falta email</span>');
       html += kv('Telefono', phone ? esc(fmted || phone)+(waNr?' &nbsp;<a class="wa-link" href="https://wa.me/'+esc(waNr)+'?text='+waMsg+'" target="_blank" rel="noopener">&#x1F4AC; WA</a>':'')+tinyCopy(phone,'Telefono copiado') : '<span class="field-missing">Falta telefono envio</span>');
       html += kv('Direccion', s.address ? '<span>'+esc(s.address)+'</span>'+tinyCopy(s.address,'Direccion copiada') : '<span class="field-missing">Falta direccion envio</span>');
       if(s.address2) html += kv('Piso / Puerta / Referencia', esc(s.address2)+tinyCopy(s.address2,'Referencia copiada'));
@@ -2486,8 +2901,11 @@
       html += '<div class="card" style="margin-top:0"><div class="card-head">&#x1F69A; Envio</div><div class="card-body"><div class="msg msg--warn" style="margin:0">\u26A0\uFE0F Sin datos de envio registrados</div></div></div>';
     }
 
-    if(hasBilling){
-      html += '<div class="card" style="margin-top:0"><div class="card-head">&#x1F9FE; Facturacion</div><div class="card-body">';
+    const billSame = hasBilling && hasShipping && ['name','address','address2','postal','city','province','country','email','phone'].every(function(k){ return String(b[k]||'').trim().toLowerCase() === String(s[k]||'').trim().toLowerCase(); });
+    if(hasBilling && billSame){
+      html += '<div class="card" style="margin-top:0"><div class="card-head">&#x1F9FE; Facturaci&#xF3;n</div><div class="card-body"><div class="same-as">\u2705 Igual que los datos de env&#xED;o.</div></div></div>';
+    } else if(hasBilling){
+      html += '<div class="card" style="margin-top:0"><div class="card-head">&#x1F9FE; Facturaci&#xF3;n</div><div class="card-body">';
       html += kv('Nombre', esc(b.name || o.payer_name || '\u2014'));
       html += kv('Email', b.email ? '<a href="mailto:'+esc(b.email)+'" style="color:var(--accent)">'+esc(b.email)+'</a>'+tinyCopy(b.email,'Email de facturacion copiado') : esc(o.payer_email||'\u2014'));
       if(b.phone) html += kv('Telefono', esc(fmtPhone(b.phone)||b.phone)+tinyCopy(b.phone,'Telefono facturacion copiado'));
@@ -2519,13 +2937,13 @@
     if(hist.length){
       html += '<div class="card"><div class="card-head">&#x1F4CB; Historial <span style="font-weight:400;font-size:.69rem;color:var(--subtle);text-transform:none;letter-spacing:0;margin-left:auto">'+hist.length+' cambio'+(hist.length!==1?'s':'')+'</span></div>';
       html += '<div class="card-body" style="padding:4px 16px 8px"><ul class="hist-list">';
-      const hfl = {status:'Estado',tracking:'Tracking',message:'Mensaje',amount:'Importe',product_image_url:'Imagen',email_resend:'Correo'};
-      const hDotCls = {status:'hist-dot--status',tracking:'hist-dot--tracking',email_resend:'hist-dot--email',message:'hist-dot--message'};
-      const hIco = {status:'\uD83D\uDD04',tracking:'\uD83D\uDCE6',email_resend:'\uD83D\uDCE7',message:'\uD83D\uDCAC',amount:'\uD83D\uDCB0',product_image_url:'\uD83D\uDDBC\uFE0F'};
+      const hfl = {status:'Estado',tracking:'Tracking',message:'Mensaje',amount:'Importe',product_image_url:'Imagen',email_sent:'Correo',email_resend:'Correo'};
+      const hDotCls = {status:'hist-dot--status',tracking:'hist-dot--tracking',email_sent:'hist-dot--email',email_resend:'hist-dot--email',message:'hist-dot--message'};
+      const hIco = {status:'\uD83D\uDD04',tracking:'\uD83D\uDCE6',email_sent:'\uD83D\uDCE7',email_resend:'\uD83D\uDCE7',message:'\uD83D\uDCAC',amount:'\uD83D\uDCB0',product_image_url:'\uD83D\uDDBC\uFE0F'};
       let lastDay = '';
       hist.forEach(h=>{
         const label = hfl[h.field_name]||h.field_name;
-        const isResend = h.field_name==='email_resend';
+        const isEmail = h.field_name==='email_resend' || h.field_name==='email_sent';
         const isStatus = h.field_name==='status';
         const cls = hDotCls[h.field_name]||'hist-dot--default';
         const ico = hIco[h.field_name]||'\u270F\uFE0F';
@@ -2539,7 +2957,7 @@
           +'<div class="hist-content">'
           +'<div class="hist-meta"><span class="f-tag">'+esc(label)+'</span><span class="hist-date">'+timeStr+'</span></div>'
           +'<div class="hist-txt">'
-          +(isResend ? '<span class="new-v">\u2192 '+esc(h.new_value)+'</span>' : (h.old_value?fmtOld(h.old_value)+' \u2192 ':'')+fmtVal(h.new_value))
+          +(isEmail ? '<span class="new-v">\u2192 '+esc(h.new_value)+'</span>' : (h.old_value?fmtOld(h.old_value)+' \u2192 ':'')+fmtVal(h.new_value))
           +'</div></div></li>';
       });
       html += '</ul></div></div>';
@@ -2562,14 +2980,10 @@
       if(String(latestEmail.delivery_status||'').toLowerCase()==='failed') html += '<div class="eh-alert eh-alert--warn">Ultimo email falló.</div>';
       if(manualResendCount>0) html += '<div class="eh-alert eh-alert--warn">Este pedido tiene reenvios manuales ('+manualResendCount+').</div>';
     }
-    html += '<div class="eh-alert eh-alert--info">Este cambio puede notificar al cliente.</div>';
     html += '</div>';
 
-    html += '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-weight:800;font-size:.71rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">Historial de eventos</div>';
-    if(!emailHist.length){
-      html += '<div class="eh-empty">No hay eventos de email registrados para este pedido.</div>';
-    } else {
-      html += '<div class="eh-grid">';
+    if(emailHist.length){
+      html += '<details class="collapse" style="margin-top:14px"><summary>&#x1F50E; Ver detalle t&#xE9;cnico de los emails ('+emailHist.length+')</summary><div class="collapse-body"><div class="eh-grid">';
       emailHist.forEach(ev=>{
         const status = String(ev.delivery_status||'').toLowerCase();
         html += '<div class="eh-item">'
@@ -2590,7 +3004,7 @@
           +(ev.error_message?'<div class="eh-row"><strong>Error:</strong>'+esc(ev.error_message)+'</div>':'')
         +'</div>';
       });
-      html += '</div>';
+      html += '</div></div></details>';
     }
     html += '</div></div>';
 
@@ -2605,7 +3019,25 @@
     $('tracking').value = o.tracking || '';
     $('message').value = o.message || '';
     if(!$('message').value.trim()) applyDefaultCustomerMessage();
-    $('editAmount').value = o.amount || '';
+    var oShipping = Number(o.shipping_amount || 0) || 0;
+    var oFee = Number(o.payment_fee_amount || 0) || 0;
+    var oDiscount = Number(o.discount_amount || 0) || 0;
+    var oTotal = Number(o.total_amount || o.amount || 0) || 0;
+    // Sin subtotal guardado (pedidos antiguos) lo derivamos del total.
+    var oSubtotal = Number(o.subtotal_amount || 0) || 0;
+    if(oSubtotal <= 0) oSubtotal = Math.max(0, oTotal - oShipping - oFee + oDiscount);
+    shipCostState = {
+      subtotal: oSubtotal,
+      shipping: oShipping,
+      fee: oFee,
+      discount: oDiscount,
+      originalTotal: oTotal,
+      status: o.status || '',
+      settled: ['paid','preparing','shipped','delivered','refunded','dispute'].indexOf(o.status) !== -1,
+      methodLabel: 'Comision ' + (o.payment_method ? String(o.payment_method) : 'pago')
+    };
+    $('editShipping').value = oShipping ? money(oShipping) : '';
+    renderShipCostBreakdown();
     $('editProductName').value = o.name || '';
     $('editImage').value = o.product_image_url || '';
     $('adminNotes').value = o.admin_notes || '';
@@ -2635,7 +3067,7 @@
       var meta = [];
       meta.push('Cantidad: ' + (item.qty || 1));
       if(item.sku) meta.push('SKU: ' + item.sku);
-      if(item.colorLabel) meta.push('Color: ' + item.colorLabel);
+      if(item.variantText) meta.push(item.variantText);
       var imageHtml = item.image
         ? '<img src="'+esc(item.image)+'" alt="'+esc(item.name)+'" style="width:42px;height:42px;object-fit:contain;border:1px solid var(--line);border-radius:6px;background:#fff;flex-shrink:0">'
         : '';
@@ -2655,6 +3087,84 @@
   $('editImage').addEventListener('input', updateImagePreview);
   $('status').addEventListener('change', applyDefaultCustomerMessage);
 
+  /* ---- COSTE DE ENVIO ----
+     El importe de un pedido solo se puede tocar por aqui: el subtotal lo manda
+     siempre el catalogo (resolve_order_pricing lo recalcula por SKU), asi que un
+     recargo manual solo sobrevive dentro de shipping_amount. La comision se
+     calcula sobre el producto, no sobre el envio, por eso no varia al tocarlo. */
+  var shipCostState = null;
+
+  function money(n){ return (Math.round((Number(n)||0)*100)/100).toFixed(2); }
+
+  function currentShippingInput(){
+    var raw = String($('editShipping').value || '').trim().replace(',', '.');
+    if(raw === '') return 0;
+    var n = parseFloat(raw);
+    return Number.isFinite(n) && n >= 0 ? n : null;
+  }
+
+  function renderShipCostBreakdown(){
+    var box = $('shipCostBox');
+    if(!shipCostState){ box.style.display = 'none'; return; }
+    box.style.display = '';
+
+    var shipping = currentShippingInput();
+    var invalid = shipping === null;
+    if(invalid) shipping = shipCostState.shipping;
+
+    var total = shipCostState.subtotal + shipping + shipCostState.fee - shipCostState.discount;
+    var delta = total - shipCostState.originalTotal;
+
+    var rows = [
+      ['Producto (catalogo)', money(shipCostState.subtotal)],
+      ['Envio', money(shipping)]
+    ];
+    if(shipCostState.discount > 0) rows.push(['Descuento', '- ' + money(shipCostState.discount)]);
+    if(shipCostState.fee > 0) rows.push([shipCostState.methodLabel, money(shipCostState.fee)]);
+
+    var html = rows.map(function(r){
+      return '<div style="display:flex;justify-content:space-between;gap:12px"><span style="color:var(--muted)">'+esc(r[0])+'</span><span>'+esc(r[1])+' &#x20AC;</span></div>';
+    }).join('');
+    html += '<div style="display:flex;justify-content:space-between;gap:12px;margin-top:6px;padding-top:6px;border-top:1px solid var(--line);font-weight:800">'
+         +  '<span>TOTAL</span><span>'+esc(money(total))+' &#x20AC;</span></div>';
+    if(Math.abs(delta) >= 0.01){
+      html += '<div style="display:flex;justify-content:space-between;gap:12px;font-size:.78rem;color:'+(delta>0?'#b45309':'#15803d')+'">'
+           +  '<span>Diferencia</span><span>'+(delta>0?'+':'')+esc(money(delta))+' &#x20AC;</span></div>';
+    }
+    $('shipCostRows').innerHTML = html;
+
+    var warn = $('shipCostWarn');
+    var notes = [];
+    if(invalid) notes.push('Importe de envio no valido: se ignora y se mantiene ' + money(shipCostState.shipping) + ' €.');
+    if(shipCostState.settled) notes.push('Este pedido ya esta cobrado (' + statusLabel(shipCostState.status) + '). Cambiar el envio NO cobra la diferencia al cliente: solo descuadra lo registrado frente a lo que se cobro.');
+    else if(shipCostState.fee > 0) notes.push('Si el cliente cambia de metodo de pago, la comision se recalcula sola y el total variara.');
+    warn.style.display = notes.length ? '' : 'none';
+    warn.innerHTML = notes.map(esc).join('<br>');
+  }
+
+  $('editShipping').addEventListener('input', renderShipCostBreakdown);
+
+  async function saveShippingCost(){
+    if(!shipCostState) return { skipped:true };
+    var shipping = currentShippingInput();
+    if(shipping === null) return { error:'bad_shipping' };
+    if(Math.abs(shipping - shipCostState.shipping) < 0.005) return { skipped:true };
+
+    var total = shipCostState.subtotal + shipping + shipCostState.fee - shipCostState.discount;
+    var payload = {
+      id: currentOrderId,
+      subtotal_amount: money(shipCostState.subtotal),
+      shipping_amount: money(shipping),
+      payment_fee_amount: money(shipCostState.fee),
+      discount_amount: money(shipCostState.discount),
+      total_amount: money(total)
+    };
+    if(shipCostState.settled) payload.allow_settled = true;
+    var res = await apiPost('admin_order_amounts', payload);
+    if(res && res.ok) return { saved:true, total: money(total) };
+    return { error: (res && res.error) || 'error' };
+  }
+
   /* ---- SAVE ORDER ---- */
   $('btnSave').onclick = async ()=>{
     if(!adminKey||!currentOrderId||actionLocks.save) return;
@@ -2668,7 +3178,6 @@
       status:$('status').value,
       tracking:$('tracking').value.trim()||null,
       message:$('message').value.trim()||null,
-      amount:$('editAmount').value.trim()||null,
       product_name:$('editProductName').value.trim()||null,
       product_image_url:$('editImage').value.trim()||null
     };
@@ -2676,6 +3185,13 @@
     actionLocks.save = true;
     try {
       await runWithButtonBusy($('btnSave'),'Guardando...', async ()=>{
+        // El envio va por su propia ruta: admin_status solo escribe `amount`, que
+        // no es lo que lee el cliente (manda total_amount).
+        const ship = await saveShippingCost();
+        if(ship.error){
+          $('updateOut').innerHTML = '<div class="msg msg--err">No se pudo guardar el envio'+(ship.error!=='error'?': '+esc(ship.error):'')+'</div>';
+          return;
+        }
         const res = await apiPost('admin_status',Object.assign({id:currentOrderId},body));
         if(res&&res.ok){
           let cls='msg msg--ok',text='Estado actualizado';
@@ -2689,6 +3205,11 @@
               if(res.emailNotification.lastSimilarEmailAt) text += ' ('+formatDate(res.emailNotification.lastSimilarEmailAt)+')';
             }
             else if(res.emailNotification.reason==='status_unchanged') text='Datos guardados. El estado no cambi\u00F3 \u2014 no se envi\u00F3 correo.';
+          }
+          // El envio se guarda aparte: su resultado se antepone para que no lo
+          // pise el mensaje del correo.
+          if(ship.saved){
+            text = 'Env\u00EDo actualizado \u00B7 nuevo total ' + ship.total + ' \u20AC \u2014 ' + text;
           }
           $('updateOut').innerHTML = '<div class="'+cls+'">'+esc(text)+'</div>';
           loadOrderDetail(currentOrderId);
@@ -2712,7 +3233,6 @@
       status:$('status').value,
       tracking:$('tracking').value.trim()||null,
       message:$('message').value.trim()||null,
-      amount:$('editAmount').value.trim()||null,
       product_name:$('editProductName').value.trim()||null,
       product_image_url:$('editImage').value.trim()||null,
       force_email:true
@@ -2721,9 +3241,16 @@
     actionLocks.resend = true;
     try {
       await runWithButtonBusy($('btnResend'),'Enviando...', async ()=>{
+        // Guardar el envio ANTES de enviar: el correo se compone con el desglose
+        // que tenga el pedido en ese momento.
+        const ship = await saveShippingCost();
+        if(ship.error){
+          $('updateOut').innerHTML = '<div class="msg msg--err">No se envio: fallo al guardar el envio'+(ship.error!=='error'?' ('+esc(ship.error)+')':'')+'</div>';
+          return;
+        }
         const res = await apiPost('admin_status',Object.assign({id:currentOrderId},body));
         if(res&&res.ok){
-          if(res.emailNotification&&res.emailNotification.reason==='sent') $('updateOut').innerHTML='<div class="msg msg--ok">\u2705 Correo reenviado a '+esc(res.emailNotification.email)+'</div>';
+          if(res.emailNotification&&res.emailNotification.reason==='sent') $('updateOut').innerHTML='<div class="msg msg--ok">\u2705 Correo reenviado a '+esc(res.emailNotification.email)+(ship.saved?' \u00b7 total '+esc(ship.total)+' \u20ac':'')+'</div>';
           else if(res.emailNotification&&res.emailNotification.reason==='missing_customer_email') $('updateOut').innerHTML='<div class="msg msg--warn">Sin email de cliente en el pedido</div>';
           else if(res.emailNotification&&res.emailNotification.reason==='duplicate_recent_manual'){
             let txt = 'Reenvio bloqueado por intento manual muy reciente';
@@ -3111,14 +3638,10 @@
           pathsTx.value = paths.join('\n');
           pathsRow.hidden = false;
           statusEl.innerHTML = '<span style="color:#166534">✅ '+ paths.length +' imagen'+(paths.length>1?'s':'')+' subida'+(paths.length>1?'s':'')+' correctamente'+(data.gd?'':' (sin conversión WebP)')+'</span>';
-          console.log('[DEBUG] Upload success. Paths:', paths);
-          console.log('[DEBUG] cpImage now:', $('cpImage').value);
-          console.log('[DEBUG] cpGallery now:', $('cpGallery').value);
           pendingFiles = [];
           renderThumbs();
           updateCreatePreview();
         } else {
-          console.error('[DEBUG] Upload failed:', data);
           statusEl.textContent = '❌ Error: '+(data.error||'desconocido');
         }
       } catch(err){
@@ -3226,8 +3749,6 @@
     $('cpPublish').disabled = false;
     $('cpPublish').textContent = 'Crear y publicar';
 
-    console.log('[DEBUG] admin_product_create response:', res);
-
     if(res&&res.ok){
       try{ localStorage.removeItem(CREATE_DRAFT_KEY); }catch(e){}
       closeCreateModal();
@@ -3240,7 +3761,6 @@
       return;
     }
     const err = (res&&res.error)?res.error:(res?'Error sin descripción':'No response from server');
-    console.error('[DEBUG] Error creating product:', err);
     $('createProductMsg').innerHTML = '<div class="msg msg--err">'+esc(err)+'</div>';
   };
 
@@ -3367,6 +3887,28 @@
       ? 'El precio sube respecto al actual.'
       : (diff<0 ? 'El precio baja respecto al actual.' : 'No hay cambio de precio.');
   }
+  /* Un precio vive en 8 sitios (catálogo, mirror y 6 puntos de la ficha). La API
+     devuelve en `updated` lo que tocó de verdad; sin esto, que no encontrase la ficha
+     o que el markup no casara se mostraba igual como "guardado correctamente". */
+  function priceUpdateSummary(res){
+    const u = res && res.updated;
+    if(!u) return '<div class="msg msg--ok">✅ Precio actualizado correctamente.</div>';
+    const f = u.page_fields || {};
+    const hechos = [];
+    if(u.catalog) hechos.push('catálogo');
+    if(u.catalog_mirror) hechos.push('mirror de servidor');
+    if(u.page) hechos.push('ficha ('+Object.keys(f).filter(k=>f[k]>0).length+' puntos)');
+    const avisos = [];
+    if(!u.page){
+      avisos.push('No se pudo parchear la ficha'+(u.page_href?' '+esc(u.page_href):'')+': comprueba que exista su index.html.');
+    } else if(!f.price_now){
+      avisos.push('El precio visible de la ficha no cambió: su markup no coincide con price-now.');
+    }
+    if(!u.activity_logged) avisos.push('El cambio no quedó registrado en el historial de actividad (fallo de BD).');
+    let html = '<div class="msg msg--ok">✅ Precio actualizado en '+hechos.join(', ')+'.</div>';
+    if(avisos.length) html += '<div class="msg msg--warn">⚠️ '+avisos.join(' ')+'</div>';
+    return html;
+  }
   $('prodList').addEventListener('click', e=>{
     const btn = e.target.closest('.price-edit-btn');
     if(!btn) return;
@@ -3413,8 +3955,8 @@
       if(p){ p.priceText=newPrice; p.compareAtPriceText=newCompare; }
       renderProducts();
       $('priceModal').hidden=true; priceEditId='';
-      $('prodMsg').innerHTML='<div class="msg msg--ok">\u2705 Precio actualizado correctamente.</div>';
-      setTimeout(()=>$('prodMsg').innerHTML='',4000);
+      $('prodMsg').innerHTML=priceUpdateSummary(res);
+      setTimeout(()=>$('prodMsg').innerHTML='',9000);
     } else { $('priceModalMsg').innerHTML='<div class="msg msg--err">No se pudo guardar el precio. Revisa formato y vuelve a intentar.</div>'; }
   };
 
@@ -4339,6 +4881,226 @@
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

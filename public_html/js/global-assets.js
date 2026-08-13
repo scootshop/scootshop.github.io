@@ -193,6 +193,22 @@
     } catch (_) {}
   }
 
+  /* ── LA PROMESA EXISTE ANTES QUE EL NUCLEO ──────────────────────────────────
+     `SS_READY` se cumple cuando se pueden resolver atributos contra el catalogo. Se
+     publica AQUI, en el cargador, antes de pedir un solo script: asi cualquier codigo
+     —incluido el script inline de una ficha, que corre antes que todo lo demas— puede
+     escribir `window.SS_READY.then(...)` sin preguntarse si el nucleo ya existe.
+
+     Antes cada consumidor resolvia eso por su cuenta: "si SS_ATTRS existe uso su
+     promesa; si no, escucho el evento ss:attrs y entonces uso su promesa". Ese bloque
+     estaba copiado en cuatro sitios y el que se olvidaba —la ficha— se quedaba sin
+     enterarse. Una sola puerta, disponible desde el instante cero. */
+  if (!window.SS_READY) {
+    window.SS_READY = (typeof Promise === 'function')
+      ? new Promise(function (res) { window.__ssResolverReady = res; })
+      : null;
+  }
+
   function loadRuntime(ver) {
     window.ASSET_VER = ver;
     primeCachedPartials(ver);

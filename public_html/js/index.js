@@ -53,16 +53,6 @@
       .sort((left, right) => Number(left.homeOrder || 0) - Number(right.homeOrder || 0));
   };
 
-  const getMenuCategories = () => {
-    if (typeof window.SCOOTSHOP_getMenuCategories === 'function') return window.SCOOTSHOP_getMenuCategories();
-
-    return [{
-      key: 'default',
-      label: 'Productos',
-      series: getMenuSeries()
-    }];
-  };
-
   const getHomeCategories = () => {
     if (typeof window.SCOOTSHOP_getHomeCategories === 'function') return window.SCOOTSHOP_getHomeCategories();
 
@@ -240,19 +230,6 @@
     });
   };
 
-  const getMenuSeries = () => {
-    if (typeof window.SCOOTSHOP_getMenuSeries === 'function') return window.SCOOTSHOP_getMenuSeries();
-
-    return getHomeSeries().map((series) => ({
-      key: series.key,
-      label: series.label,
-      items: getSeriesProducts(series.key).map((product) => ({
-        label: product.menuLabel || product.name,
-        href: product.href
-      }))
-    })).filter((series) => series.items.length);
-  };
-
   const setYear = () => {
     const yearEl = document.getElementById('y');
     if (yearEl) yearEl.textContent = new Date().getFullYear();
@@ -269,51 +246,77 @@
     return window.setTimeout(callback, 1);
   };
 
-  const initDeferredMapEmbeds = () => {
-    const embeds = $all('iframe[data-src]');
-    if (!embeds.length) return;
-
-    const loadEmbed = (embed) => {
-      if (!embed || embed.dataset.loaded === 'true') return;
-      const nextSrc = embed.getAttribute('data-src');
-      if (!nextSrc) return;
-      embed.dataset.loaded = 'true';
-      embed.setAttribute('src', nextSrc);
-      embed.classList.remove('is-pending');
-    };
-
-    if ('IntersectionObserver' in window) {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          loadEmbed(entry.target);
-          observer.unobserve(entry.target);
-        });
-      }, { rootMargin: '240px 0px' });
-
-      embeds.forEach((embed) => observer.observe(embed));
-      return;
-    }
-
-    runIdle(() => embeds.forEach(loadEmbed));
+  // Las imágenes de producto se sirven `immutable, max-age=1 año`, así que sin
+  // ?v= una foto reemplazada NUNCA llega al visitante que ya la tenía cacheada.
+  // Pasó de verdad: al cambiar 23.webp (era el logo de Ecoxtrem) por el patinete
+  // verde, la ficha se actualizó —sus URLs sí llevan versión— pero la tarjeta del
+  // home y el carrito seguían mostrando el logo. Todo lo que salga de aquí lleva
+  // versión.
+  const assetVer = () => {
+    if (window.ASSET_VER) return String(window.ASSET_VER).trim();
+    const meta = document.querySelector('meta[name="asset-version"]');
+    return meta ? String(meta.getAttribute('content') || '1').trim() : '1';
   };
 
-  const buildGalleryMarkup = (product, productIndex) => {
-    const gallery = Array.isArray(product.gallery) && product.gallery.length
-      ? product.gallery
-      : [{ src: product.image, alt: product.alt || product.name }];
-
-    return gallery.map((media, mediaIndex) => {
-      const isLeadSlide = mediaIndex === 0;
-      const isHeroCard = productIndex === 0 && mediaIndex === 0;
-      const loading = isHeroCard ? 'eager' : 'lazy';
-      const fetchpriority = isHeroCard ? ' fetchpriority="high"' : '';
-      const srcAttr = isLeadSlide
-        ? ' src="' + esc(media.src) + '"'
-        : ' data-src="' + esc(media.src) + '"';
-      return '<img' + srcAttr + ' alt="' + esc(media.alt || product.alt || product.name) + '" loading="' + loading + '"' + fetchpriority + ' decoding="async" />';
-    }).join('');
+  const withVer = (url) => {
+    const raw = String(url || '').trim();
+    if (!raw || /^(https?:)?\/\//.test(raw) || raw.indexOf('?') !== -1) return raw;
+    return raw + '?v=' + encodeURIComponent(assetVer());
   };
+
+  // Anchos de .card-shot en cada punto de corte de .grid, para que el navegador
+  // elija la variante justa en vez de traerse el original de 1200-1500 px:
+  //  ≤640px  → 2 columnas, tarjeta ≈ 46vw (≈173px en un móvil de 390px)
+  //  ≤980px  → 2 columnas anchas
+  //  ≤1199px → 3 columnas
+  //  resto   → 4 columnas en un contenedor de 1340px ⇒ ≈310px fijos
+  const CARD_SHOT_SIZES = '(max-width:640px) 46vw, (max-width:980px) 47vw, (max-width:1199px) 31vw, 320px';
+
+  // Las variantes las genera scripts/build-card-shots.py con esta convención.
+  const cardShotSrcset = (src) => {
+    const clean = String(src || '').split('?')[0];
+    const dot = clean.lastIndexOf('.');
+    if (dot < 1) return '';
+    const base = clean.slice(0, dot);
+    // El escalón de 600 existe por medición: sin él, un móvil DPR3 (174css × 3
+    // = 522px) saltaba al de 800 y se traía un 54 % más de píxeles del necesario.
+    // SIN versión: las fotos no van con la versión global (se sirven immutable y
+    // re-versionarlas las rebajaba enteras en cada despliegue). Ver la regla completa
+    // en scripts/qa/check-image-cache.ps1.
+    return base + '-400.webp 400w, '
+         + base + '-600.webp 600w, '
+         + base + '-800.webp 800w';
+  };
+
+  // Foto única de la tarjeta. Antes esto pintaba TODA la galería como
+  // diapositivas de un carrusel arrastrable; se eliminó porque chocaba con la
+  // segunda vista al pasar el ratón (data-hover-image), que es la que manda.
+  const buildCardShotMarkup = (product, productIndex) => {
+    const lead = (Array.isArray(product.gallery) && product.gallery.length)
+      ? product.gallery[0]
+      : { src: product.image, alt: product.alt || product.name };
+    const isHeroCard = productIndex === 0;
+    const loading = isHeroCard ? 'eager' : 'lazy';
+    const fetchpriority = isHeroCard ? ' fetchpriority="high"' : '';
+    const srcset = cardShotSrcset(lead.src);
+    const responsive = srcset
+      ? ' srcset="' + esc(srcset) + '" sizes="' + CARD_SHOT_SIZES + '"'
+      : '';
+    return '<img class="card-shot" src="' + esc(lead.src) + '"' + responsive + ' alt="' + esc(lead.alt || product.alt || product.name) + '" loading="' + loading + '"' + fetchpriority + ' decoding="async" />';
+  };
+
+  // Red de seguridad del srcset: si a un producto nuevo le faltan las variantes
+  // (p. ej. se creó con el scaffold y no se ejecutó build-card-shots.py), el
+  // navegador NO cae solo al src — dejaría la foto rota. Aquí se detecta el
+  // fallo, se quita el srcset y se recupera el original. Va en captura porque
+  // el evento `error` de <img> no burbujea.
+  document.addEventListener('error', (event) => {
+    const img = event.target;
+    if (!img || img.tagName !== 'IMG' || !img.classList.contains('card-shot')) return;
+    if (!img.hasAttribute('srcset')) return;
+    img.removeAttribute('srcset');
+    img.removeAttribute('sizes');
+  }, true);
 
   const buildPriceRowMarkup = (product) => {
     const now = esc(product.priceText || '');
@@ -345,11 +348,194 @@
     return '<div class="dgt-tooltip dgt-tooltip--info card-dgt" data-dgt-tooltip><button class="dgt-tooltip-toggle" type="button" aria-label="Informacion sobre homologacion DGT" aria-expanded="false" data-tooltip-text="' + esc(product.dgtTooltipText || '') + '"><img class="dgt-badge" src="/img/dgtchapa.svg" alt="Logo DGT" loading="lazy" decoding="async" /></button></div>';
   };
 
+  // Datos comunes que cart-runtime necesita en cualquier botón de añadir.
+  const buildCartDataAttrs = (product, image) => {
+    return ' data-sku="' + esc(product.sku || '') + '"'
+      + ' data-name="' + esc(product.menuLabel || product.name || 'Producto') + '"'
+      + ' data-price="' + esc(product.priceText || '') + '"'
+      + ' data-url="' + esc(product.href || '') + '"'
+      + ' data-image="' + esc(image || product.image || '') + '"'
+      + ' data-stock="in_stock"';
+  };
+
+  // Imagen de la variante: colorVariants trae range:[desde,hasta] con los
+  // índices de sus fotos, así que la primera del color es {href}/img/{desde}.webp.
+  // Es el mismo criterio que usa la ficha para la imagen del carrito.
+  /* La foto de una opción: sus imágenes son identificadores explícitos en el catálogo
+     (`images: [1,2]`), no un tramo que haya que interpretar aquí. */
+  const variantImage = (product, variant) => {
+    const first = (variant && Array.isArray(variant.images) && variant.images.length)
+      ? variant.images[0]
+      : (Array.isArray(variant && variant.range) ? Number(variant.range[0]) : 0);
+    const href = String(product.href || '').replace(/\/+$/, '');
+    if (!href || !first) return product.image || '';
+    return /^\d+$/.test(String(first)) ? (href + '/img/' + first + '.webp') : String(first);
+  };
+
   const buildAddToCartButtonMarkup = (product) => {
     const stock = String(product.stock || 'in_stock').toLowerCase();
     if (stock !== 'in_stock') return '';
 
-    return '<button class="btn-cart" type="button" data-add-to-cart data-added-label="Añadido" data-sku="' + esc(product.sku || '') + '" data-name="' + esc(product.menuLabel || product.name || 'Producto') + '" data-price="' + esc(product.priceText || '') + '" data-url="' + esc(product.href || '') + '" data-image="' + esc(product.image || '') + '" data-stock="in_stock" aria-label="Añadir al carrito ' + esc(product.menuLabel || product.name || 'producto') + '"><i class="fa-solid fa-cart-plus" aria-hidden="true"></i> Añadir</button>';
+    const name = esc(product.menuLabel || product.name || 'producto');
+
+    /* ¿HAY ALGO QUE PREGUNTAR? Lo dicen los ejes declarados por el producto, no una
+       lista de colores. Antes esto miraba `colorVariants`, y por eso el manillar UNO y
+       el KOCEVLO —dos ejes, modelo y medida, y un solo acabado— caían en "añadir
+       directo" y entraban al pedido sin decir qué modelo ni qué medida.
+       Un producto con tres ejes que no existan hoy funciona igual sin tocar esto.
+
+       Una opción agotada se cae de la elección del home para que no se pueda pedir; en
+       la ficha sí sigue visible pero deshabilitada, porque ahí interesa que el cliente
+       vea que existe y está agotada. Qué cuenta como agotada lo decide el núcleo. */
+    const ejes = (window.SS_ATTRS ? window.SS_ATTRS.ejes(product) : [])
+      .map((eje) => ({ eje, options: eje.options.filter((o) => o && o.key && !o.disabled) }))
+      .filter((x) => x.options.length);
+
+    const opcionesTotales = ejes.reduce((n, x) => n + x.options.length, 0);
+    const tieneEjes = ejes.length > 1 || opcionesTotales > 1
+      || (typeof product.variantHint === 'string' && !!product.variantHint);
+    const variants = ejes.length === 1 ? ejes[0].options : [];
+
+    // Sin nada que elegir: se añade directo y el pedido queda sin variante ("Único").
+    if (!tieneEjes && !variants.length) {
+      return '<button class="btn-cart" type="button" data-add-to-cart data-added-label="Añadido"' + buildCartDataAttrs(product) + ' aria-label="Añadir al carrito ' + name + '"><i class="fa-solid fa-cart-plus" aria-hidden="true"></i> Añadir</button>';
+    }
+
+    /* Una sola opción y ningún otro eje: es LA variante del producto, no hay nada que
+       elegir. Entra al carrito con su atributo nombrado ({ color:'negro' },
+       { model:'vmp' }… lo que declare el producto), no solo con la clave suelta: eso es
+       lo que permite que el pedido diga después "Modelo: …" y no "Color: …". */
+    if (!tieneEjes && variants.length === 1) {
+      const only = variants[0];
+      const eje = ejes[0].eje;
+      const attrs = esc(JSON.stringify({ [eje.key]: only.key }));
+      return '<button class="btn-cart" type="button" data-add-to-cart data-added-label="Añadido"' + buildCartDataAttrs(product, variantImage(product, only)) + ' data-color="' + esc(only.key) + '" data-color-label="' + esc(only.label || only.key) + '" data-attrs="' + attrs + '" aria-label="Añadir al carrito ' + name + '"><i class="fa-solid fa-cart-plus" aria-hidden="true"></i> Añadir</button>';
+    }
+
+    /* Hay algo que elegir: el botón abre la MISMA burbuja que la caja "Añade algo más"
+       de las fichas (js/variant-pop.js), que pregunta TODOS los ejes del producto —los
+       colores del catálogo y, además, el modelo y la medida que solo conoce la ficha.
+
+       Antes aquí se pintaba una paleta de colores propia (`.card-colors` +
+       `.color-pop`) y cada círculo era el que añadía. Se quedó corta: solo sabía de
+       color, así que un producto con modelo o medida —los manillares— se añadía
+       desde el home sin esos ejes, o no se podía añadir en condiciones. La burbuja
+       compartida los lee de la ficha del propio producto, así que cubre cualquier
+       combinación presente y futura sin tocar el home.
+
+       El href es lo único que necesita: de ahí saca la ficha y, de ella, los ejes. */
+    return '<button class="btn-cart" type="button" data-open-variants="' + esc(product.href || '') + '"'
+      + ' aria-expanded="false" aria-haspopup="dialog"'
+      + ' aria-label="Elegir opciones de ' + name + '"><i class="fa-solid fa-cart-plus" aria-hidden="true"></i> Añadir</button>';
+  };
+
+  /* La burbuja de variantes vive en su propio archivo, compartido con las fichas.
+     Se pide en cuanto hay una tarjeta que la pueda abrir. Doble red: el módulo se
+     protege con window.__ssVariantPop (en las fichas lo carga también
+     product-enhancements.js) y aquí se evita el segundo <script>. */
+  const ensureVariantPop = () => {
+    if (document.querySelector('script[data-variant-pop]')) return;
+    const s = document.createElement('script');
+    s.src = withVer('/js/variant-pop.js');
+    s.defer = true;
+    s.setAttribute('data-variant-pop', 'true');
+    document.head.appendChild(s);
+  };
+
+  /* ===== Previsualización de la foto sobre la tarjeta =====
+     Nació para la paleta de colores del home —al pasar por un color aparecía su
+     foto— y sigue viva para el hover de la tarjeta, que enseña la segunda vista del
+     producto. La paleta ya no existe: la sustituyó la burbuja compartida
+     (js/variant-pop.js), que pregunta todos los ejes y no solo el color.
+
+     Se usa una capa encima del carrusel en lugar de moverlo, así no se altera su
+     estado ni la diapositiva actual.
+     Disolución + escala: la foto entra fundiéndose sobre la anterior mientras pasa
+     de un 103,5 % a su tamaño natural. Al ser el mismo patinete en la misma pose, se
+     percibe como si se tiñera en el sitio, y el leve movimiento disimula cualquier
+     desalineación entre tomas. Duración y curva las define el CSS
+     (.card-color-preview); aquí solo se cruzan las capas.
+
+     Solo con ratón de verdad. En táctil no hay hover: el navegador sintetiza un
+     "mouseenter" al tocar y la foto se quedaría cambiada hasta tocar fuera. */
+  const CAN_HOVER = !!(window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches);
+
+  const ensurePreviewLayers = (media) => {
+    const layers = Array.prototype.slice.call(media.querySelectorAll('[data-color-preview]'));
+    while (layers.length < 2) {
+      const img = document.createElement('img');
+      img.className = 'card-color-preview';
+      img.setAttribute('data-color-preview', '');
+      img.setAttribute('alt', '');
+      img.setAttribute('aria-hidden', 'true');
+      img.setAttribute('decoding', 'async');
+      media.appendChild(img);
+      layers.push(img);
+    }
+    return layers;
+  };
+
+  /* Contador por tarjeta que invalida los revelados EN VUELO.
+
+     El revelado no es inmediato: espera al onload de la segunda foto y además a dos
+     frames. Ese hueco puede terminar mucho después de que el ratón se haya ido, y
+     entonces encendía la capa cuando ya no había nadie encima. Rozando una tarjeta y
+     saliendo, el ocultar no encontraba todavía nada puesto (no hacía nada) y el onload
+     posterior dejaba la segunda foto fija PARA SIEMPRE, porque solo se apaga al salir
+     y ya se había salido.
+
+     Cada intento de mostrar coge un número, y ocultar quema el vigente. El revelado
+     solo se aplica si el suyo sigue siendo el bueno. */
+  const nextPreviewToken = (media) => {
+    media.ssPreviewToken = (media.ssPreviewToken || 0) + 1;
+    return media.ssPreviewToken;
+  };
+
+  const showColorPreview = (card, src) => {
+    if (!card || !src) return;
+    const media = card.querySelector('.card-media');
+    if (!media) return;
+
+    const layers = ensurePreviewLayers(media);
+    const active = layers.filter((l) => l.classList.contains('is-on'))[0] || null;
+    // Ya se está mostrando ese color: no repetimos la animación.
+    if (active && active.getAttribute('src') === src) return;
+
+    const next = layers.filter((l) => l !== active)[0] || layers[0];
+    const token = nextPreviewToken(media);
+    let revealed = false;
+    const reveal = () => {
+      if (revealed) return;
+      revealed = true;
+      // Doble rAF: el navegador necesita registrar el estado inicial (opacidad
+      // 0 y escala ampliada) antes de animar. Sin esto el cambio sería seco.
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        // El ratón pudo irse mientras cargaba la foto, o entre estos dos frames.
+        if (media.ssPreviewToken !== token) return;
+        next.classList.add('is-on');
+        if (active && active !== next) active.classList.remove('is-on');
+      }));
+    };
+
+    next.classList.remove('is-on');
+    // Un onload viejo de esta misma capa quedaría colgado apuntando a otra foto.
+    next.onload = null;
+    if (next.getAttribute('src') === src && next.complete) { reveal(); return; }
+    // La segunda vista no está en el documento: esperamos a tenerla cargada
+    // para no fundir sobre un hueco en blanco.
+    next.onload = reveal;
+    next.setAttribute('src', src);
+    if (next.complete) reveal();
+  };
+
+  const hideColorPreview = (card) => {
+    if (!card) return;
+    // Quema el número vigente: si hay una foto aún cargando, su revelado llegará
+    // cuando el ratón ya no esté y se descartará solo.
+    const media = card.querySelector('.card-media');
+    if (media) nextPreviewToken(media);
+    const layers = card.querySelectorAll('[data-color-preview]');
+    for (let i = 0; i < layers.length; i++) layers[i].classList.remove('is-on');
   };
 
   const buildCardMarkup = (product, productIndex) => {
@@ -366,7 +552,14 @@
       'data-link="' + esc(product.href || '') + '"',
       'aria-label="' + esc(product.homeAriaLabel || product.name || 'Producto') + '"'
     ];
-    return '<article ' + cardAttrs.join(' ') + '><div class="card-media"><div class="carousel" data-carousel><div class="carousel-track">' + buildGalleryMarkup(product, productIndex) + '</div></div><div class="carousel-dots" aria-label="Selector de imagenes"></div></div><div class="card-info"><span class="chip-name">' + esc(product.badgeText || product.menuLabel || product.name || '') + '</span><div class="card-body"><div class="card-brand">' + esc(product.brand || '') + '</div><div class="title">' + esc(product.homeTitle || product.name || '') + '</div></div>' + buildDgtInfoMarkup(product) + '</div><div class="card-bottom">' + buildPriceRowMarkup(product) + '<div class="btn-row"><a class="btn-primary" href="' + esc(product.href || '#') + '" data-buy-button>VISTA</a>' + buildAddToCartButtonMarkup(product) + '</div></div></article>';
+    // Segunda vista del producto: se funde encima al pasar el ratón por la
+    // tarjeta (mismo efecto que al pasar por un color). Los 34 productos del
+    // catálogo tienen gallery[1] y en todos difiere de la foto de portada.
+    const hoverShot = (product.gallery || [])[1];
+    if (hoverShot && hoverShot.src) {
+      cardAttrs.push('data-hover-image="' + esc(hoverShot.src) + '"');
+    }
+    return '<article ' + cardAttrs.join(' ') + '><div class="card-media">' + buildCardShotMarkup(product, productIndex) + '</div><div class="card-info"><span class="chip-name">' + esc(product.badgeText || product.menuLabel || product.name || '') + '</span><div class="card-body"><div class="card-brand">' + esc(product.brand || '') + '</div><div class="title">' + esc(product.homeTitle || product.name || '') + '</div></div>' + buildDgtInfoMarkup(product) + '</div><div class="card-bottom">' + buildPriceRowMarkup(product) + '<div class="btn-row"><a class="btn-primary" href="' + esc(product.href || '#') + '" data-buy-button>VISTA</a>' + buildAddToCartButtonMarkup(product) + '</div></div></article>';
   };
 
   const buildHomeEmptyStateMarkup = (categoryKey) => {
@@ -384,7 +577,8 @@
     ix:       { accent: '#7c3aed' },
     b:        { accent: '#16a34a' },
     motos:    { accent: '#0ea5e9' },
-    acc:      { accent: '#f59e0b' }
+    acc:      { accent: '#f59e0b' },
+    'acc-limit': { accent: '#dc2626' }
   };
 
   const getSeriesVisual = (seriesKey) => SERIES_VISUALS[String(seriesKey || '').toLowerCase()] || null;
@@ -752,25 +946,6 @@
     sections.forEach((section) => seriesRailObserver.observe(section));
   };
 
-  const refreshHomeCatalog = ({ scrollIntoView = false } = {}) => {
-    renderHomeCatalog(activeHomeCategoryKey);
-    initCards();
-    runIdle(() => {
-      initCardReveal();
-      initCarousels();
-      initDgtTooltips();
-      initSeriesRail();
-      initHomeCategorySpy();
-    });
-
-    if (scrollIntoView) {
-      const target = document.querySelector('[data-home-catalog-root]');
-      if (target && typeof target.scrollIntoView === 'function') {
-        target.scrollIntoView({ behavior: getPreferredScrollBehavior(), block: 'start' });
-      }
-    }
-  };
-
   const initHomeCategoryNav = () => {
     const nav = document.querySelector('[data-home-category-nav]');
     if (!nav) return;
@@ -853,163 +1028,46 @@
     }
   };
 
+  // El panel de Productos (escritorio y móvil) lo pinta js/products-menu.js, que
+  // es su único dueño: el mismo markup para las dos superficies. index-head.js lo
+  // carga antes que este fichero. No reimplantes el render aquí — la copia
+  // paralela que había es justo lo que hacía que escritorio y móvil divergieran.
   const renderSharedProductMenus = (root = document) => {
-    const menuCategories = getMenuCategories();
-    const hasManyCategories = menuCategories.length > 1;
-
-    $all('[data-products-desktop-root]', root).forEach((host) => {
-      const categoriesMarkup = menuCategories.map((category) => {
-        const groups = (category.series || []).map((series) => {
-          const links = series.items.map((item) => '<a href="' + esc(item.href) + '" role="menuitem">' + esc(item.label) + '</a>').join('');
-          return '<section class="pc-products-group" aria-label="' + esc(series.label) + '"><button class="pc-series-toggle" type="button" aria-expanded="false" aria-controls="pc-series-' + esc(category.key + '-' + series.key) + '"><span>' + esc(series.label) + '</span><i class="fa-solid fa-chevron-down pc-products-caret" aria-hidden="true"></i></button><div class="pc-series-list" id="pc-series-' + esc(category.key + '-' + series.key) + '" hidden>' + links + '</div></section>';
-        }).join('');
-
-        if (!hasManyCategories) return '<div class="pc-products-groups">' + groups + '</div>';
-        return '<section class="pc-products-category" aria-label="' + esc(category.label) + '"><div class="pc-products-category-title">' + esc(category.label) + '</div><div class="pc-products-groups">' + groups + '</div></section>';
-      }).join('');
-
-      host.innerHTML = '<button class="pc-products-trigger" type="button" aria-expanded="false" aria-controls="pcProductsPanel"><i class="fa-solid fa-cart-shopping nav-icon" aria-hidden="true"></i>Productos</button><div class="pc-products-panel" id="pcProductsPanel" role="menu" aria-label="Submenu de productos" hidden><div class="pc-products-title">' + (hasManyCategories ? 'Categorías' : 'Series') + '</div>' + categoriesMarkup + '</div>';
-    });
-
-    $all('[data-products-mobile-root]', root).forEach((menuRoot) => {
-      const groups = menuCategories.map((category) => {
-        const seriesMarkup = (category.series || []).map((series) => {
-          const links = series.items.map((item) => '<a class="mm-sub2-link" href="' + esc(item.href) + '">' + esc(item.label) + '</a>').join('');
-          return '<button class="mm-sub-link" data-series="' + esc(category.key + '-' + series.key) + '" type="button"><span>' + esc(series.label.toUpperCase()) + '</span><i class="fa-solid fa-chevron-down mm-chevron-sm"></i></button><div class="mm-sub2" data-series-content="' + esc(category.key + '-' + series.key) + '">' + links + '</div>';
-        }).join('');
-
-        if (!hasManyCategories) return '<div class="mm-sub-category-card">' + seriesMarkup + '</div>';
-        return '<section class="mm-sub-category-card mm-sub-category" aria-label="' + esc(category.label) + '"><div class="mm-sub-category-title mm-sub-category-title--compact">' + esc(category.label) + '</div>' + seriesMarkup + '</section>';
-      }).join('');
-
-      menuRoot.innerHTML = '<div class="mm-sub-shell"><div class="mm-sub-title">' + (hasManyCategories ? 'CATEGORIAS' : 'SERIES') + '</div>' + groups + '</div>';
-    });
+    const api = window.SS_PRODUCT_MENUS;
+    return !!(api && api.render(root));
   };
 
   const initDesktopProductsMenu = () => {
-    $all('[data-products-desktop-root]').forEach((host) => {
-      host.dataset.bound = 'false';
-    });
-
-    $all('[data-products-desktop-root]').forEach((host) => {
-      if (host.dataset.bound === 'true') return;
-      const trigger = host.querySelector('.pc-products-trigger');
-      const panel = host.querySelector('.pc-products-panel');
-      const toggles = $all('.pc-series-toggle', host);
-      if (!trigger || !panel) return;
-
-      const closeHost = () => {
-        host.classList.remove('is-open');
-        trigger.setAttribute('aria-expanded', 'false');
-        panel.hidden = true;
-        toggles.forEach((toggle) => {
-          const list = document.getElementById(toggle.getAttribute('aria-controls'));
-          toggle.setAttribute('aria-expanded', 'false');
-          toggle.parentElement.classList.remove('is-open');
-          if (list) list.hidden = true;
-        });
-      };
-
-      trigger.addEventListener('click', (event) => {
-        event.preventDefault();
-        const willOpen = panel.hidden;
-        $all('[data-products-desktop-root]').forEach((otherHost) => {
-          if (otherHost === host) return;
-          const otherTrigger = otherHost.querySelector('.pc-products-trigger');
-          const otherPanel = otherHost.querySelector('.pc-products-panel');
-          if (!otherTrigger || !otherPanel) return;
-          otherHost.classList.remove('is-open');
-          otherTrigger.setAttribute('aria-expanded', 'false');
-          otherPanel.hidden = true;
-          $all('.pc-series-toggle', otherHost).forEach((otherToggle) => {
-            const list = document.getElementById(otherToggle.getAttribute('aria-controls'));
-            otherToggle.setAttribute('aria-expanded', 'false');
-            otherToggle.parentElement.classList.remove('is-open');
-            if (list) list.hidden = true;
-          });
-        });
-        host.classList.toggle('is-open', willOpen);
-        trigger.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
-        panel.hidden = !willOpen;
-        if (!willOpen) closeHost();
-      });
-
-      toggles.forEach((toggle) => {
-        toggle.addEventListener('click', () => {
-          const list = document.getElementById(toggle.getAttribute('aria-controls'));
-          if (!list) return;
-          const willOpen = list.hidden;
-          toggles.forEach((otherToggle) => {
-            const otherList = document.getElementById(otherToggle.getAttribute('aria-controls'));
-            otherToggle.setAttribute('aria-expanded', 'false');
-            otherToggle.parentElement.classList.remove('is-open');
-            if (otherList) otherList.hidden = true;
-          });
-          toggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
-          toggle.parentElement.classList.toggle('is-open', willOpen);
-          list.hidden = !willOpen;
-        });
-      });
-
-      $all('.pc-series-list a', host).forEach((link) => {
-        link.addEventListener('click', () => closeHost());
-      });
-
-      host.dataset.bound = 'true';
-    });
-
-    if (document.documentElement.dataset.pcProductsMenuBound === 'true') return;
-
-    document.addEventListener('click', (event) => {
-      $all('[data-products-desktop-root].is-open').forEach((host) => {
-        if (host.contains(event.target)) return;
-        const trigger = host.querySelector('.pc-products-trigger');
-        const panel = host.querySelector('.pc-products-panel');
-        if (trigger) trigger.setAttribute('aria-expanded', 'false');
-        if (panel) panel.hidden = true;
-        host.classList.remove('is-open');
-        $all('.pc-series-toggle', host).forEach((toggle) => {
-          const list = document.getElementById(toggle.getAttribute('aria-controls'));
-          toggle.setAttribute('aria-expanded', 'false');
-          toggle.parentElement.classList.remove('is-open');
-          if (list) list.hidden = true;
-        });
-      });
-    });
-
-    document.addEventListener('keydown', (event) => {
-      if (event.key !== 'Escape') return;
-      $all('[data-products-desktop-root].is-open').forEach((host) => {
-        const trigger = host.querySelector('.pc-products-trigger');
-        const panel = host.querySelector('.pc-products-panel');
-        if (trigger) trigger.setAttribute('aria-expanded', 'false');
-        if (panel) panel.hidden = true;
-        host.classList.remove('is-open');
-        $all('.pc-series-toggle', host).forEach((toggle) => {
-          const list = document.getElementById(toggle.getAttribute('aria-controls'));
-          toggle.setAttribute('aria-expanded', 'false');
-          toggle.parentElement.classList.remove('is-open');
-          if (list) list.hidden = true;
-        });
-      });
-    });
-
-    document.documentElement.dataset.pcProductsMenuBound = 'true';
+    const api = window.SS_PRODUCT_MENUS;
+    if (api) api.initDesktop();
   };
 
 
 
   const initCardReveal = () => {
-    const cards = $all('.grid > .card');
+    const cards = [];
+    // Escalonar por COLUMNA real de cada grid (responsive), no por índice global:
+    // así el orden de aparición sigue las filas y no se ve desordenado.
+    $all('.grid').forEach((grid) => {
+      const gridCards = Array.prototype.slice.call(grid.querySelectorAll(':scope > .card'));
+      if (!gridCards.length) return;
+      let cols = 1;
+      try {
+        const tpl = getComputedStyle(grid).gridTemplateColumns;
+        cols = Math.max(1, (tpl || '').split(' ').filter(Boolean).length);
+      } catch (_) {}
+      gridCards.forEach((card, i) => {
+        card.classList.add('reveal-ready');
+        card.style.setProperty('--reveal-delay', `${(i % cols) * 45}ms`);
+        cards.push(card);
+      });
+    });
     if (!cards.length) return;
     const finishReveal = (card) => {
       card.classList.remove('reveal-ready', 'reveal-visible');
       card.style.removeProperty('--reveal-delay');
+      card.style.removeProperty('will-change');
     };
-    cards.forEach((card, idx) => {
-      card.classList.add('reveal-ready');
-      card.style.setProperty('--reveal-delay', `${Math.min(idx % 4, 3) * 70}ms`);
-    });
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     if (reduceMotion.matches || !('IntersectionObserver' in window)) {
       cards.forEach((card) => finishReveal(card));
@@ -1019,6 +1077,9 @@
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
         const card = entry.target;
+        // Promover a capa de composición SOLO durante la animación → sin
+        // repintar la sombra en cada frame (elimina el jank de bajos FPS).
+        card.style.willChange = 'transform, opacity';
         card.classList.add('reveal-visible');
         const onRevealEnd = (ev) => {
           if (ev.propertyName !== 'opacity' && ev.propertyName !== 'transform') return;
@@ -1028,201 +1089,10 @@
         observer.unobserve(entry.target);
       });
     }, {
-      threshold: 0.12,
-      rootMargin: '0px 0px -8% 0px'
+      threshold: 0.1,
+      rootMargin: '0px 0px -5% 0px'
     });
     cards.forEach((card) => observer.observe(card));
-  };
-
-  const initCarousels = () => {
-    const mq = window.matchMedia('(min-width: 992px)');
-    const maxDotCount = 3;
-    const dotCount = (slidesLen) => Math.min(maxDotCount, slidesLen);
-    const activeDotIndex = (i, slidesLen) => {
-      const nDots = dotCount(slidesLen);
-      if (nDots <= 1) return 0;
-      return i % nDots;
-    };
-
-    $all('[data-carousel]').forEach((c) => {
-      const track = c.querySelector('.carousel-track');
-      if (!track) return;
-      const cardEl = c.closest('.card');
-      const slides = Array.from(track.children);
-      if (!slides.length) return;
-      const loadSlideMedia = (idx) => {
-        const slide = slides[(idx + slides.length) % slides.length];
-        if (!slide) return;
-        if (slide.dataset.mediaLoaded === 'true') return;
-        const nextSrc = slide.getAttribute('data-src');
-        const nextSrcset = slide.getAttribute('data-srcset');
-        if (nextSrc) {
-          slide.setAttribute('src', nextSrc);
-          slide.removeAttribute('data-src');
-        }
-        if (nextSrcset) {
-          slide.setAttribute('srcset', nextSrcset);
-          slide.removeAttribute('data-srcset');
-        }
-        slide.dataset.mediaLoaded = 'true';
-      };
-
-      slides.forEach((slide) => {
-        if (slide.getAttribute('src') || slide.getAttribute('srcset')) {
-          slide.dataset.mediaLoaded = 'true';
-        }
-      });
-
-      const dotsWrap = c.parentElement ? c.parentElement.querySelector('.carousel-dots') : null;
-      let dots = [];
-      let i = 0;
-
-      const buildDots = () => {
-        if (!dotsWrap) return;
-        dotsWrap.innerHTML = '';
-        dots = [];
-        const nDots = dotCount(slides.length);
-        for (let di = 0; di < nDots; di++) {
-          const b = document.createElement('button');
-          b.type = 'button';
-          b.className = 'dot';
-          b.setAttribute('aria-label', `Ir a seccion ${di + 1} de ${nDots}`);
-          b.addEventListener('click', (ev) => {
-            ev.stopPropagation();
-            let target = di;
-            if (slides.length > nDots) {
-              const forwardOffset = (di - (i % nDots) + nDots) % nDots;
-              target = (i + forwardOffset) % slides.length;
-            }
-            go(target, true);
-          });
-          dotsWrap.appendChild(b);
-          dots.push(b);
-        }
-      };
-
-      const updateDots = () => {
-        if (!dots.length) return;
-        const a = activeDotIndex(i, slides.length);
-        dots.forEach((d, idx) => {
-          d.classList.toggle('active', idx === a);
-          d.setAttribute('aria-current', idx === a ? 'true' : 'false');
-        });
-      };
-
-      const go = (idx, animate) => {
-        i = (idx + slides.length) % slides.length;
-        loadSlideMedia(i);
-        if (!animate) track.style.transition = 'none';
-        track.style.transform = `translateX(${-i * 100}%)`;
-        if (!animate) requestAnimationFrame(() => { track.style.transition = 'transform .3s ease'; });
-        updateDots();
-      };
-
-      buildDots();
-      go(0, false);
-
-      const threshold = () => Math.max(40, c.clientWidth * 0.12);
-      let dragging = false;
-      let moved = false;
-      let startX = 0;
-      let currentX = 0;
-      let startTime = 0;
-      let interactionTimer = 0;
-      let lastWheelAt = 0;
-      c.dataset.dragging = '0';
-
-      const setInteracting = () => {
-        if (!cardEl) return;
-        if (interactionTimer) {
-          clearTimeout(interactionTimer);
-          interactionTimer = 0;
-        }
-        cardEl.classList.add('is-carousel-interacting');
-      };
-
-      const clearInteracting = () => {
-        if (!cardEl) return;
-        if (interactionTimer) clearTimeout(interactionTimer);
-        interactionTimer = setTimeout(() => {
-          cardEl.classList.remove('is-carousel-interacting');
-          interactionTimer = 0;
-        }, 180);
-      };
-
-      const onStart = (x) => {
-        dragging = true;
-        moved = false;
-        c.dataset.dragging = '0';
-        setInteracting();
-        startX = currentX = x;
-        startTime = performance.now();
-        track.classList.add('dragging');
-      };
-
-      const onMove = (x) => {
-        if (!dragging) return;
-        setInteracting();
-        currentX = x;
-        const dx = currentX - startX;
-        if (Math.abs(dx) > 6) {
-          moved = true;
-          c.dataset.dragging = '1';
-        }
-        track.style.transform = `translateX(calc(${-i * 100}% + ${dx}px))`;
-      };
-
-      const onEnd = () => {
-        if (!dragging) return;
-        dragging = false;
-        track.classList.remove('dragging');
-        const dx = currentX - startX;
-        const dt = performance.now() - startTime;
-        const swipe = (Math.abs(dx) > threshold()) || (Math.abs(dx) > 30 && dt < 220);
-        if (swipe) i += (dx < 0 ? 1 : -1);
-        go(i, true);
-        if (swipe || moved) {
-          c.dataset.dragging = '1';
-          setTimeout(() => { c.dataset.dragging = '0'; }, 120);
-        } else {
-          c.dataset.dragging = '0';
-        }
-        clearInteracting();
-      };
-
-      c.addEventListener('click', (e) => {
-        if (c.dataset.dragging === '1') {
-          e.preventDefault();
-          e.stopPropagation();
-        }
-      });
-      c.addEventListener('dragstart', (e) => {
-        e.preventDefault();
-      });
-      c.addEventListener('selectstart', (e) => {
-        if (dragging) e.preventDefault();
-      });
-      c.addEventListener('pointerdown', (e) => {
-        if (e.button !== 0) return;
-        c.setPointerCapture(e.pointerId);
-        onStart(e.clientX);
-      });
-      c.addEventListener('pointermove', (e) => onMove(e.clientX));
-      c.addEventListener('pointerup', (e) => { try { c.releasePointerCapture(e.pointerId); } catch (_) {} onEnd(); });
-      c.addEventListener('pointercancel', (e) => { try { c.releasePointerCapture(e.pointerId); } catch (_) {} onEnd(); });
-
-
-      const rebuild = () => {
-        buildDots();
-        updateDots();
-        go(i, false);
-      };
-
-      if (mq.addEventListener) mq.addEventListener('change', rebuild);
-      else if (mq.addListener) mq.addListener(rebuild);
-
-      window.addEventListener('resize', rebuild, { passive:true });
-    });
   };
 
   const initHeroCarousel = () => {
@@ -1246,15 +1116,13 @@
     let hoverPause = false;
     let focusPause = false;
     let pointerPause = false;
+    // El hero mide ~150px en móvil: en cuanto se baja un poco queda fuera de
+    // pantalla, pero el autoplay seguía cambiando de portada cada 3 s durante
+    // toda la sesión, animando transforms que nadie ve. Ya se pausaba con la
+    // pestaña oculta, con el ratón encima y con el foco, pero no al salir del
+    // viewport.
+    let offscreenPause = false;
     const autoplayMs = 3000;
-
-    const getBehavior = () => {
-      try {
-        return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
-      } catch (_) {
-        return 'smooth';
-      }
-    };
 
     const clampIndex = (idx) => {
       const len = slides.length;
@@ -1288,15 +1156,10 @@
       }
     };
 
-    const maxHeroDots = 5;
     let dots = [];
     let dotTargets = [];
-    const getDotTargets = () => {
-      if (slides.length <= maxHeroDots) return slides.map((_, idx) => idx);
-      const maxStart = slides.length - maxHeroDots;
-      const start = Math.max(0, Math.min(active - Math.floor(maxHeroDots / 2), maxStart));
-      return Array.from({ length: maxHeroDots }, (_, idx) => start + idx);
-    };
+    // Un punto por portada: la cantidad de puntos siempre coincide con el nº de imágenes.
+    const getDotTargets = () => slides.map((_, idx) => idx);
 
     const buildDots = () => {
       if (!dotsWrap) return;
@@ -1364,7 +1227,7 @@
     };
 
     const syncAutoplayPause = () => {
-      pauseAuto = hoverPause || focusPause || pointerPause;
+      pauseAuto = hoverPause || focusPause || pointerPause || offscreenPause;
       if (pauseAuto) {
         stopAutoplay();
       } else {
@@ -1439,6 +1302,18 @@
         startAutoplay();
       }
     });
+
+    // Detiene el autoplay mientras el hero no esté a la vista. Mismo patrón de
+    // IntersectionObserver que ya usan el rail de series y las categorías.
+    // Sin soporte, se queda como estaba (siempre activo).
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          offscreenPause = !entry.isIntersecting;
+          syncAutoplayPause();
+        });
+      }, { threshold: 0 }).observe(root);
+    }
 
     root.addEventListener('keydown', (event) => {
       if (event.key === 'ArrowLeft') {
@@ -1651,10 +1526,50 @@
         }
       }
 
+      /* El botón de añadir con variantes NO se enlaza aquí: lo escucha por
+         delegación js/variant-pop.js, el mismo módulo que atiende la caja "Añade
+         algo más" de las fichas. Aquí solo hay que asegurarse de que el archivo
+         esté pedido. */
+      if (card.querySelector('[data-open-variants]')) ensureVariantPop();
+
+      // Hover sobre la tarjeta: la segunda vista del producto entra con un
+      // fundido + escala. Se superpone en una capa aparte, sin tocar la foto de
+      // portada que hay debajo.
+      const hoverImage = card.dataset.hoverImage
+        || (product && (product.gallery || [])[1] && product.gallery[1].src)
+        || '';
+      if (hoverImage && CAN_HOVER) {
+        /* Si la burbuja de variantes está abierta desde ESTA tarjeta manda ella: la
+           foto del acabado que se está mirando no debe quedar tapada por la vista
+           alternativa. Se mira por el aria-expanded del propio botón, que es lo que
+           deja puesto el módulo, en vez de por una variable suya: así el home no
+           depende de sus interioridades. */
+        const bubbleOwnsCard = () => !!card.querySelector('[data-open-variants][aria-expanded="true"]');
+        // Retardo de intención: al recorrer la parrilla se rozan muchas tarjetas
+        // de paso. Sin esperar, cada una descargaría su segunda foto (~62 KB de
+        // media; 2 MB si se pasan las 34). 110 ms distinguen "pasar de largo" de
+        // "pararse a mirar" y no se notan al hacer hover a propósito.
+        let hoverTimer = 0;
+        card.addEventListener('mouseenter', () => {
+          if (bubbleOwnsCard()) return;
+          hoverTimer = window.setTimeout(() => {
+            hoverTimer = 0;
+            showColorPreview(card, hoverImage);
+          }, 110);
+        });
+        card.addEventListener('mouseleave', () => {
+          if (hoverTimer) { window.clearTimeout(hoverTimer); hoverTimer = 0; }
+          if (bubbleOwnsCard()) return;
+          hideColorPreview(card);
+        });
+      }
+
       if (link) {
         card.addEventListener('click', (e) => {
           if (e.target.closest('.dgt-tooltip')) return;
           if (e.target.closest('[data-add-to-cart]')) return;
+          // Sin esto, abrir el cuadro de opciones navegaría a la ficha del producto.
+          if (e.target.closest('[data-open-variants]')) return;
           window.location.href = link;
         });
         card.addEventListener('keydown', (e) => {
@@ -1677,9 +1592,15 @@
     buildCardMarkup: (product, productIndex) => buildCardMarkup(product, Number(productIndex) || 0),
     hydrate: () => {
       initCards();
-      initCarousels();
       initDgtTooltips();
-    }
+    },
+    /* Las usa js/variant-pop.js: al elegir un acabado en la burbuja abierta desde una
+       tarjeta, se enseña la foto de ese acabado sobre la portada, que es lo que hacía
+       la paleta antigua al pasar el ratón por un color. Se exponen desde aquí porque
+       el fundido son dos capas propias del home (.card-color-preview) y su montaje no
+       tiene por qué salir de este archivo. */
+    previewColor: (card, src) => showColorPreview(card, src),
+    clearPreview: (card) => hideColorPreview(card)
   };
 
   const updateHomeStructuredData = () => {
@@ -1744,7 +1665,7 @@
       catch (_) { window.scrollTo(0, y); }
     };
 
-    // ¿Llegamos con un ancla? (p. ej. /#ubicacion al pulsar el menú desde /cuenta)
+    // ¿Llegamos con un ancla? (p. ej. /#faq al pulsar el menú desde /cuenta)
     let hashTarget = null;
     const rawHash = (window.location.hash || '').slice(1);
     if (rawHash) {
@@ -1758,7 +1679,7 @@
 
     if (hashTarget) {
       // El ancla tiene PRIORIDAD sobre la restauración: si no, al cargar la home
-      // con #ubicacion la restauración de ss_scrollY nos dejaría en otra posición
+      // con #faq la restauración de ss_scrollY nos dejaría en otra posición
       // (y el scroll nativo cae mal porque el catálogo lo pinta JS). Se calcula tras
       // renderizar el catálogo, descontando la cabecera fija, y de forma instantánea.
       sessionStorage.removeItem('ss_scrollY');
@@ -1827,7 +1748,6 @@
     setVh();
     window.addEventListener('resize', setVh, { passive:true });
     window.addEventListener('orientationchange', setVh, { passive:true });
-    initDeferredMapEmbeds();
 
     const hydrateAfterPaint = () => {
       initHeroCarousel();
@@ -1835,7 +1755,6 @@
       runIdle(() => {
         updateHomeStructuredData();
         if (!isBack) initCardReveal();
-        initCarousels();
         initDgtTooltips();
         initSeriesRail();
         initHomeCategorySpy();

@@ -213,6 +213,12 @@ function ensure_schema(PDO $pdo): void {
     'product_image_url' => "VARCHAR(255) NULL",
     'product_color' => "VARCHAR(64) NULL",
     'product_color_label' => "VARCHAR(128) NULL",
+    // Atributos con nombre de la compra directa: { "model": "vmp" }. `product_color`
+    // se queda porque es la identidad histórica de miles de pedidos vivos, pero lo que
+    // significa cada valor ya no se deduce: viene declarado.
+    'product_attrs_json' => "VARCHAR(512) NULL",
+    // Lo que el cliente leyó al comprar ("Modelo: G2 PRO VMP"), escrito por el núcleo.
+    'product_variant_text' => "VARCHAR(255) NULL",
     'cart_items_json' => "LONGTEXT NULL",
     'tracking' => "VARCHAR(128) NULL",
     'message' => "TEXT NULL",
@@ -234,6 +240,7 @@ function ensure_schema(PDO $pdo): void {
     'subtotal_amount' => "DECIMAL(10,2) NULL",
     'total_amount' => "DECIMAL(10,2) NULL",
     'payment_fee_amount' => "DECIMAL(10,2) NULL",
+    'stripe_fee_amount' => "DECIMAL(10,2) NULL",
     'shipping_amount' => "DECIMAL(10,2) NULL",
     'receipt_url' => "VARCHAR(255) NULL",
     'admin_notes' => "TEXT NULL",
@@ -804,7 +811,7 @@ function customer_link_orders_by_email(PDO $pdo, int $userId, string $email): vo
 function customer_orders_for_identity(PDO $pdo, int $userId, string $email, int $limit = 50): array {
   $limit = max(1, min(200, $limit));
   $email = strtolower(trim($email));
-  $baseSql = "SELECT id, sku, name, status, user_id, ship_name, ship_email, payer_name, payer_email, amount, currency, payment_method, tracking, product_url, product_image_url, product_color, product_color_label, discount_code, discount_type, discount_value, discount_amount, subtotal_amount, total_amount, payment_fee_amount, shipping_amount, updated_at, created_at FROM orders";
+  $baseSql = "SELECT id, token, sku, name, status, user_id, ship_name, ship_email, payer_name, payer_email, amount, currency, payment_method, tracking, product_url, product_image_url, product_color, product_color_label, product_attrs_json, product_variant_text, discount_code, discount_type, discount_value, discount_amount, subtotal_amount, total_amount, payment_fee_amount, shipping_amount, updated_at, created_at FROM orders";
   $where = [];
   $params = [];
 
@@ -1817,7 +1824,9 @@ function stripe_fetch_checkout_session(string $secretKey, string $sessionId): ar
 
 function stripe_fetch_payment_intent(string $secretKey, string $paymentIntentId): array {
   $response = stripe_api_request($secretKey, '/payment_intents/' . rawurlencode($paymentIntentId), [
-    'expand[0]' => 'latest_charge',
+    // latest_charge.balance_transaction expande también el charge (con payment_method_details),
+    // necesario para leer el método real y la comisión real de Stripe.
+    'expand[0]' => 'latest_charge.balance_transaction',
     'expand[1]' => 'charges.data.balance_transaction',
   ], 'GET');
 
@@ -1826,6 +1835,98 @@ function stripe_fetch_payment_intent(string $secretKey, string $paymentIntentId)
   }
 
   return $response['body'];
+}
+
+/**
+ * Mapea el tipo de método real de Stripe (payment_method_details.type) a nuestras
+ * etiquetas internas (card|bizum|klarna|paypal|transfer). Desconocido → tipo crudo.
+ */
+function map_stripe_method_to_label(string $type): string {
+  $t = strtolower(trim($type));
+  $map = [
+    'card'             => 'card',
+    'link'             => 'card',
+    'bizum'            => 'bizum',
+    'klarna'           => 'klarna',
+    'scalapay'         => 'scalapay',
+    'paypal'           => 'paypal',
+    'sepa_debit'       => 'transfer',
+    'customer_balance' => 'transfer',
+  ];
+  return $map[$t] ?? $t;
+}
+
+/**
+ * Extrae del PaymentIntent los "hechos" reales del pago:
+ *  - method: etiqueta interna del método realmente usado (o null)
+ *  - fee:    comisión real de Stripe en EUR string '0.00' (balance_transaction.fee, céntimos) o null
+ *  - amount: importe realmente cobrado en céntimos (int) o null
+ */
+function stripe_payment_facts_from_intent(array $paymentIntent): array {
+  $charge = [];
+  if (isset($paymentIntent['latest_charge']) && is_array($paymentIntent['latest_charge'])) {
+    $charge = $paymentIntent['latest_charge'];
+  } elseif (isset($paymentIntent['charges']['data'][0]) && is_array($paymentIntent['charges']['data'][0])) {
+    $charge = $paymentIntent['charges']['data'][0];
+  }
+
+  $type = '';
+  if (isset($charge['payment_method_details']) && is_array($charge['payment_method_details'])) {
+    $type = trim((string)($charge['payment_method_details']['type'] ?? ''));
+  }
+  if ($type === '' && isset($paymentIntent['payment_method_types'][0])) {
+    $type = trim((string)$paymentIntent['payment_method_types'][0]);
+  }
+  $method = $type !== '' ? map_stripe_method_to_label($type) : null;
+
+  $fee = null;
+  if (isset($charge['balance_transaction']) && is_array($charge['balance_transaction']) && isset($charge['balance_transaction']['fee'])) {
+    $fee = number_format(((int)$charge['balance_transaction']['fee']) / 100.0, 2, '.', '');
+  }
+
+  $amount = null;
+  if (isset($paymentIntent['amount_received'])) {
+    $amount = (int)$paymentIntent['amount_received'];
+  } elseif (isset($charge['amount_captured'])) {
+    $amount = (int)$charge['amount_captured'];
+  } elseif (isset($paymentIntent['amount'])) {
+    $amount = (int)$paymentIntent['amount'];
+  }
+
+  return ['method' => $method, 'fee' => $fee, 'amount' => $amount];
+}
+
+/**
+ * Reconstruye un desglose coherente anclado en el importe REALMENTE cobrado y el
+ * método real, usando la misma fórmula de recargo (gross-up) que calc_discount_engine.
+ * subtotal - descuento + recargo + envío = total.
+ */
+function reconstruct_breakdown_for_method(float $totalPaid, float $shipping, float $discount, string $methodLabel): array {
+  $feesKey = $methodLabel === 'bank' ? 'transfer' : $methodLabel;
+  $fees = BACKEND_PAYMENT_FEES[$feesKey] ?? [0.0, 0.0];
+  $pct = (float)$fees[0];
+  $fixed = (float)$fees[1];
+
+  $totalWithFee = round($totalPaid - $shipping, 2);
+  if ($totalWithFee < 0) $totalWithFee = 0.0;
+
+  if ($pct > 0.0 || $fixed > 0.0) {
+    // Inverso del gross-up: totalWithFee = (afterDiscount + fixed) / (1 - pct)
+    $afterDiscount = round($totalWithFee * (1.0 - $pct) - $fixed, 2);
+    if ($afterDiscount < 0) $afterDiscount = 0.0;
+    $fee = round($totalWithFee - $afterDiscount, 2);
+  } else {
+    $afterDiscount = $totalWithFee;
+    $fee = 0.0;
+  }
+  $subtotal = round($afterDiscount + $discount, 2);
+
+  return [
+    'subtotal_amount'    => number_format($subtotal, 2, '.', ''),
+    'payment_fee_amount' => number_format($fee, 2, '.', ''),
+    'shipping_amount'    => number_format($shipping, 2, '.', ''),
+    'total_amount'       => number_format($totalPaid, 2, '.', ''),
+  ];
 }
 
 function reconcile_paid_stripe_order(PDO $pdo, array $CFG, array $data): void {
@@ -1846,7 +1947,7 @@ function reconcile_paid_stripe_order(PDO $pdo, array $CFG, array $data): void {
   $productNameInput = trim((string)($data['productName'] ?? ''));
   $productSkuInput = trim((string)($data['sku'] ?? ''));
 
-  $stOrder = $pdo->prepare("SELECT status, payer_email, ship_email, name, sku, product_url, product_image_url, product_color, product_color_label, cart_items_json FROM orders WHERE id = :id LIMIT 1");
+  $stOrder = $pdo->prepare("SELECT status, payer_email, ship_email, name, sku, product_url, product_image_url, product_color, product_color_label, product_attrs_json, product_variant_text, cart_items_json, payment_method, subtotal_amount, shipping_amount, payment_fee_amount, discount_amount, total_amount, amount FROM orders WHERE id = :id LIMIT 1");
   $stOrder->execute([':id' => $orderId]);
   $existingOrder = $stOrder->fetch() ?: [];
   $previousStatus = (string)($existingOrder['status'] ?? '');
@@ -1873,13 +1974,67 @@ function reconcile_paid_stripe_order(PDO $pdo, array $CFG, array $data): void {
     ':id' => $orderId,
   ]);
 
+  // ── Sincronizar método y comisiones REALES desde Stripe ──────────────────────
+  // El método/desglose guardado en checkout puede quedar obsoleto (el pedido de
+  // sesión se reutiliza al cambiar de pestaña de pago). Aquí lo corregimos con lo
+  // que Stripe reporta de verdad y guardamos la comisión real de Stripe.
+  $realMethod = trim((string)($data['realPaymentMethod'] ?? ''));
+  $stripeFee = (isset($data['stripeFeeAmount']) && $data['stripeFeeAmount'] !== null && $data['stripeFeeAmount'] !== '')
+    ? (string)$data['stripeFeeAmount']
+    : null;
+  if ($provider === 'stripe' && ($realMethod !== '' || $stripeFee !== null)) {
+    try {
+      $sets = [];
+      $params = [':id' => $orderId];
+
+      if ($realMethod !== '') {
+        $sets[] = 'payment_method = :pm';
+        $params[':pm'] = $realMethod;
+
+        $existingMethod = trim((string)($existingOrder['payment_method'] ?? ''));
+        $existingSubtotal = $existingOrder['subtotal_amount'] ?? null;
+        $subtotalMissing = ($existingSubtotal === null || $existingSubtotal === '' || (float)$existingSubtotal <= 0);
+        $methodChanged = ($existingMethod !== $realMethod);
+
+        // Solo reconstruimos el desglose si el método cambió o falta el subtotal,
+        // para no introducir descuadres de céntimos en pedidos ya coherentes.
+        if ($methodChanged || $subtotalMissing) {
+          $totalPaid = $amountTotal > 0
+            ? ($amountTotal / 100.0)
+            : (float)($existingOrder['total_amount'] ?? ($existingOrder['amount'] ?? 0));
+          $shipping = (float)($existingOrder['shipping_amount'] ?? 0);
+          $discount = (float)($existingOrder['discount_amount'] ?? 0);
+          if ($totalPaid > 0) {
+            $bd = reconstruct_breakdown_for_method($totalPaid, $shipping, $discount, $realMethod);
+            $sets[] = 'subtotal_amount = :sub';    $params[':sub'] = $bd['subtotal_amount'];
+            $sets[] = 'payment_fee_amount = :fee'; $params[':fee'] = $bd['payment_fee_amount'];
+            $sets[] = 'shipping_amount = :shp';    $params[':shp'] = $bd['shipping_amount'];
+            $sets[] = 'total_amount = :tot';       $params[':tot'] = $bd['total_amount'];
+          }
+        }
+      }
+
+      if ($stripeFee !== null) {
+        $sets[] = 'stripe_fee_amount = :sfee';
+        $params[':sfee'] = $stripeFee;
+      }
+
+      if (!empty($sets)) {
+        $pdo->prepare('UPDATE orders SET ' . implode(', ', $sets) . ' WHERE id = :id')->execute($params);
+      }
+    } catch (Throwable $e) {
+      error_log('reconcile_paid_stripe_order facts sync failed for ' . $orderId . ': ' . $e->getMessage());
+    }
+  }
+
   $shouldSendPaidEmail = ($resolvedEmail !== '') && (
     $previousStatus !== 'paid' ||
     $previousPayerEmail === ''
   );
 
+  $paidEmailSent = false;
   if ($shouldSendPaidEmail) {
-    send_paid_email($CFG, $resolvedEmail, $orderId, [
+    $paidEmailSent = send_paid_email($CFG, $resolvedEmail, $orderId, [
       'provider' => $provider,
       'triggerSource' => $provider === 'stripe' ? ('stripe_' . ($sourceType !== '' ? $sourceType : 'reconcile')) : 'system',
       'payerName' => $payerName,
@@ -1897,8 +2052,17 @@ function reconcile_paid_stripe_order(PDO $pdo, array $CFG, array $data): void {
       'orderUrl' => $productUrl,
       'productImageUrl' => $productImageUrl,
       'orderItems' => build_order_items_from_order_row($existingOrder),
+      'subtotal_amount' => (string)($existingOrder['subtotal_amount'] ?? ''),
+      'shipping_amount' => (string)($existingOrder['shipping_amount'] ?? ''),
+      'payment_fee_amount' => (string)($existingOrder['payment_fee_amount'] ?? ''),
+      'total_amount' => (string)($existingOrder['total_amount'] ?? ''),
     ]);
   }
+
+  // El pago automático (webhook/retorno Stripe) no dejaba rastro en order_history:
+  // el timeline solo mostraba cambios manuales. Registramos aquí la transición a
+  // pagado y el correo enviado para que el historial refleje SIEMPRE el aviso.
+  log_status_email_history($pdo, $orderId, $previousStatus, 'paid', $resolvedEmail, $paidEmailSent, $provider !== '' ? $provider : 'system');
 }
 
 function stripe_session_order_id(array $session): string {
@@ -2097,6 +2261,18 @@ function reconcile_paid_stripe_session(PDO $pdo, array $CFG, array $session): vo
       // No-fatal: si falla la reconstrucción, el reconcile/UPDATE simplemente no afectará filas.
     }
 
+    // Método y comisión reales desde el PaymentIntent de la sesión.
+    $facts = ['method' => null, 'fee' => null, 'amount' => null];
+    $piId = stripe_session_payment_intent_id($session);
+    if ($piId !== '') {
+      try {
+        $pi = stripe_fetch_payment_intent($CFG['stripe_secret_key'], $piId);
+        $facts = stripe_payment_facts_from_intent($pi);
+      } catch (Throwable $e) {
+        error_log('reconcile_paid_stripe_session facts fetch failed for ' . $piId . ': ' . $e->getMessage());
+      }
+    }
+
     reconcile_paid_stripe_order($pdo, $CFG, [
       'orderId' => $orderId,
       'payerEmail' => $resolvedEmail,
@@ -2112,6 +2288,8 @@ function reconcile_paid_stripe_session(PDO $pdo, array $CFG, array $session): vo
       'sku' => $productSku,
       'productUrl' => (string)($existingOrder['product_url'] ?? $sessionUrls['productUrl']),
       'productImageUrl' => (string)($existingOrder['product_image_url'] ?? $sessionUrls['productImageUrl']),
+      'realPaymentMethod' => $facts['method'] ?? '',
+      'stripeFeeAmount' => $facts['fee'],
     ]);
 
     return;
@@ -2335,6 +2513,8 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
       'image' => $productImageUrl,
       'color' => trim((string)($context['productColor'] ?? '')),
       'color_label' => trim((string)($context['productColorLabel'] ?? '')),
+      'attrs' => normalize_attrs_input($context['productAttrs'] ?? ($context['product_attrs_json'] ?? null)) ?: null,
+      'variant_text' => trim((string)($context['productVariantText'] ?? ($context['product_variant_text'] ?? ''))),
     ]];
   }
 
@@ -2380,6 +2560,7 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
 
   $subtotal = null;
   $shipping = null;
+  $paymentFee = null;
   $total = null;
 
   $subtotalRaw = $context['subtotal_amount'] ?? $context['subtotalAmount'] ?? null;
@@ -2389,6 +2570,10 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
   $shippingRaw = $context['shipping_amount'] ?? $context['shippingAmount'] ?? null;
   if ($shippingRaw !== null && $shippingRaw !== '') {
     $shipping = (float)$shippingRaw;
+  }
+  $paymentFeeRaw = $context['payment_fee_amount'] ?? $context['paymentFeeAmount'] ?? null;
+  if ($paymentFeeRaw !== null && $paymentFeeRaw !== '') {
+    $paymentFee = (float)$paymentFeeRaw;
   }
   $totalRaw = $context['total_amount'] ?? $context['totalAmount'] ?? $context['amount'] ?? null;
   if ($totalRaw !== null && $totalRaw !== '') {
@@ -2414,15 +2599,17 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
   }
   if ($total === null) {
     if ($subtotal !== null) {
-      $total = $subtotal + $shipping;
+      $total = $subtotal + $shipping + (($paymentFee !== null && $paymentFee > 0) ? $paymentFee : 0.0);
     } else {
       $total = 0.0;
     }
   }
 
   $showAmountSummary = ($subtotal !== null && $subtotal > 0) || $total > 0;
+  $showPaymentFee = ($paymentFee !== null && $paymentFee > 0);
   $subtotalLabel = $subtotal !== null ? email_money_eur($subtotal) : '---';
   $shippingLabel = ($shipping <= 0.0001) ? 'Gratis' : email_money_eur($shipping);
+  $paymentFeeLabel = $showPaymentFee ? email_money_eur($paymentFee) : '---';
   $totalLabel = $total > 0 ? email_money_eur($total) : ($subtotal !== null ? email_money_eur($subtotal) : '---');
 
   $trackingParams = [
@@ -2514,7 +2701,13 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
       $itemSku = trim((string)($item['sku'] ?? ''));
       $itemQty = max(1, (int)($item['qty'] ?? 1));
       $itemImage = trim((string)($item['image'] ?? ''));
-      $itemColorLabel = trim((string)($item['color_label'] ?? ''));
+      /* El texto de variantes viene ya escrito: de fábrica en los pedidos nuevos —lo
+         redactó el núcleo cuando el cliente compró— y resuelto en un único sitio para
+         los antiguos. Aquí NO se decide qué es ese valor: el email ponía "Color:"
+         pasara lo que pasara, así que un patinete elegido por MODELO llegaba al buzón
+         del cliente como si fuera un color. */
+      $itemVariantText = trim((string)($item['variant_text'] ?? ''));
+      if ($itemVariantText === '' && is_array($item)) $itemVariantText = order_item_variant_text($item);
       $itemLineTotalLabel = '';
       $itemPrice = trim((string)($item['price'] ?? ''));
       if ($itemPrice !== '') {
@@ -2524,7 +2717,7 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
         }
       }
       if ($itemLineTotalLabel === '' && $orderItemsCount === 1) {
-        $singleItemFallback = ($total > 0) ? $total : (($subtotal !== null && $subtotal > 0) ? $subtotal : 0.0);
+        $singleItemFallback = ($subtotal !== null && $subtotal > 0) ? $subtotal : (($total > 0) ? $total : 0.0);
         if ($singleItemFallback > 0) {
           $itemLineTotalLabel = number_format($singleItemFallback, 2, '.', '') . ' €';
         }
@@ -2554,9 +2747,9 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
           . '<span style="display:inline-block;padding:4px 9px;border-radius:999px;background:rgba(17,19,21,.045);font-family:\'Plus Jakarta Sans\',Arial,Helvetica,sans-serif;font-size:11.52px;font-weight:800;line-height:1.2;color:#6b7280 !important;letter-spacing:0;text-transform:none;">Ref: ' . email_html_escape($itemSku) . '</span>'
           . '</p>';
       }
-      if ($itemColorLabel !== '') {
+      if ($itemVariantText !== '') {
         $itemsHtml .= '<p style="margin:0 0 1px 0;">'
-          . '<span style="display:inline-block;padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.82);box-shadow:0 8px 18px rgba(15,23,42,.06);font-family:\'Plus Jakarta Sans\',Arial,Helvetica,sans-serif;font-size:11.52px;font-weight:800;line-height:1.2;color:#667085 !important;letter-spacing:.06em;text-transform:uppercase;">Color: ' . email_html_escape($itemColorLabel) . '</span>'
+          . '<span style="display:inline-block;padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.82);box-shadow:0 8px 18px rgba(15,23,42,.06);font-family:\'Plus Jakarta Sans\',Arial,Helvetica,sans-serif;font-size:11.52px;font-weight:800;line-height:1.2;color:#667085 !important;letter-spacing:.06em;text-transform:uppercase;">' . email_html_escape($itemVariantText) . '</span>'
           . '</p>';
       }
       $itemsHtml .= '<p style="margin:0;font-family:\'Plus Jakarta Sans\',Arial,Helvetica,sans-serif;font-size:11.52px;font-weight:800;line-height:1.2;color:#6b7280 !important;display:none;">Precio: ' . email_html_escape(number_format((float)$itemPrice, 2, '.', '')) . ' €</p>';
@@ -2603,6 +2796,7 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
       . '<table role="presentation" class="amount-box" width="100%" cellspacing="0" cellpadding="0" style="width:100%;border:1px solid ' . $summaryLineColor . ';border-radius:14px;background:#f8fbff;">'
       . '<tr><td class="amount-label" style="padding:10px 12px;border-bottom:1px solid ' . $summaryLineColor . ';font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;line-height:1.4;color:' . $summaryLabelColor . ' !important;-webkit-text-fill-color:' . $summaryLabelColor . ' !important;">Subtotal</td><td class="amount-value" align="right" style="padding:10px 12px;border-bottom:1px solid ' . $summaryLineColor . ';font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:800;line-height:1.4;color:' . $summaryValueColor . ' !important;-webkit-text-fill-color:' . $summaryValueColor . ' !important;"><span style="color:' . $summaryValueColor . ' !important;-webkit-text-fill-color:' . $summaryValueColor . ' !important;">' . email_html_escape($subtotalLabel) . '</span></td></tr>'
       . '<tr><td class="amount-label" style="padding:10px 12px;border-bottom:1px solid ' . $summaryLineColor . ';font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;line-height:1.4;color:' . $summaryLabelColor . ' !important;-webkit-text-fill-color:' . $summaryLabelColor . ' !important;">Envio</td><td class="amount-value" align="right" style="padding:10px 12px;border-bottom:1px solid ' . $summaryLineColor . ';font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:800;line-height:1.4;color:' . $summaryValueColor . ' !important;-webkit-text-fill-color:' . $summaryValueColor . ' !important;"><span style="color:' . $summaryValueColor . ' !important;-webkit-text-fill-color:' . $summaryValueColor . ' !important;">' . email_html_escape($shippingLabel) . '</span></td></tr>'
+      . ($showPaymentFee ? ('<tr><td class="amount-label" style="padding:10px 12px;border-bottom:1px solid ' . $summaryLineColor . ';font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;line-height:1.4;color:' . $summaryLabelColor . ' !important;-webkit-text-fill-color:' . $summaryLabelColor . ' !important;">Comision de pago</td><td class="amount-value" align="right" style="padding:10px 12px;border-bottom:1px solid ' . $summaryLineColor . ';font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:800;line-height:1.4;color:' . $summaryValueColor . ' !important;-webkit-text-fill-color:' . $summaryValueColor . ' !important;"><span style="color:' . $summaryValueColor . ' !important;-webkit-text-fill-color:' . $summaryValueColor . ' !important;">' . email_html_escape($paymentFeeLabel) . '</span></td></tr>') : '')
       . '<tr><td class="amount-total-label" style="padding:10px 12px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:800;line-height:1.4;color:' . $summaryTotalColor . ' !important;-webkit-text-fill-color:' . $summaryTotalColor . ' !important;">Total</td><td class="amount-total-value" align="right" style="padding:10px 12px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:900;line-height:1.35;color:' . $summaryTotalColor . ' !important;-webkit-text-fill-color:' . $summaryTotalColor . ' !important;"><span style="color:' . $summaryTotalColor . ' !important;-webkit-text-fill-color:' . $summaryTotalColor . ' !important;">' . email_html_escape($totalLabel) . '</span></td></tr>'
       . '</table>'
       . '</td></tr>';
@@ -2631,7 +2825,7 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
     . '<span style="color:#111111 !important;-webkit-text-fill-color:#111111 !important;text-decoration:none !important;display:inline-block;-webkit-text-stroke:0.45px rgba(255,255,255,.28);text-shadow:0 1px 0 rgba(255,255,255,.34),0 0 1px rgba(0,0,0,.35);">' . email_html_escape($ctaLabel) . '</span>'
     . '</a>'
     . '</td>'
-    . '<td style="padding:0;vertical-align:middle;white-space:nowrap;">'
+    . '<td style="padding:0 0 0 16px;vertical-align:middle;white-space:nowrap;">'
     . '<a href="' . email_html_escape($supportUrl) . '" style="display:inline-block;white-space:nowrap;min-height:46px;line-height:46px;padding:0 16px;border:1px solid #4b5563;border-radius:999px;background-color:#1f2937;background:#1f2937;font-family:\'Plus Jakarta Sans\',Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;letter-spacing:.01em;color:#ffffff !important;-webkit-text-fill-color:#ffffff !important;text-decoration:none !important;text-align:center;">'
     . '<span style="color:#ffffff !important;-webkit-text-fill-color:#ffffff !important;text-decoration:none !important;display:inline-block;">Soporte WhatsApp</span>'
     . '</a>'
@@ -2654,7 +2848,7 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
   $greeting = $customerName !== '' ? 'Hola ' . email_html_escape($customerName) . ',' : 'Hola,';
 
   return '<!DOCTYPE html>'
-    . '<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><style>body{-webkit-text-size-adjust:100% !important;-ms-text-size-adjust:100% !important;}a[x-apple-data-detectors]{color:inherit !important;text-decoration:none !important;}@media screen and (max-width:760px){.mail-wrap{padding:10px 4px !important;}.mail-card{border-radius:20px !important;}.hero-pad{padding:18px 16px 12px 16px !important;}.pad-x{padding-left:16px !important;padding-right:16px !important;}.title{font-size:30px !important;line-height:1.1 !important;}.lead{font-size:16px !important;line-height:1.6 !important;}.copy{font-size:16px !important;line-height:1.62 !important;}.small{font-size:16px !important;line-height:1.64 !important;}.section-kicker{font-size:13px !important;line-height:1.35 !important;letter-spacing:.12em !important;}.detail-key{font-size:13px !important;line-height:1.38 !important;}.detail-val{font-size:16px !important;line-height:1.55 !important;}.stack-col{display:block !important;width:100% !important;padding-left:0 !important;padding-right:0 !important;}.stack-gap{display:none !important;width:0 !important;}.stack-pad{padding-right:0 !important;padding-left:0 !important;padding-bottom:12px !important;}.details-panel,.actions-panel{border-radius:0 !important;}.details-panel td,.actions-panel td{padding:0 !important;}.stack-cta{width:auto !important;border-spacing:8px 0 !important;}.stack-cta td{display:inline-block !important;width:auto !important;padding:0 !important;vertical-align:middle !important;}.stack-cta a{display:inline-block !important;width:auto !important;min-height:46px !important;line-height:46px !important;padding:0 16px !important;font-size:13.5px !important;text-align:center !important;}.amount-box td{padding:12px 14px !important;}.amount-label{font-size:15px !important;color:#4b5563 !important;-webkit-text-fill-color:#4b5563 !important;}.amount-value{font-size:16px !important;color:#0f172a !important;-webkit-text-fill-color:#0f172a !important;}.amount-total-label{font-size:16px !important;color:#0b1220 !important;-webkit-text-fill-color:#0b1220 !important;}.amount-total-value{font-size:18px !important;color:#0b1220 !important;-webkit-text-fill-color:#0b1220 !important;}}</style></head>'
+    . '<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>' . email_html_escape($title) . ' &middot; SCOOT SHOP</title><style>:root{color-scheme:light;supported-color-schemes:light;}body{-webkit-text-size-adjust:100% !important;-ms-text-size-adjust:100% !important;}a[x-apple-data-detectors]{color:inherit !important;text-decoration:none !important;}@media screen and (max-width:760px){.mail-wrap{padding:10px 4px !important;}.mail-card{border-radius:20px !important;}.hero-pad{padding:18px 16px 12px 16px !important;}.pad-x{padding-left:16px !important;padding-right:16px !important;}.title{font-size:30px !important;line-height:1.1 !important;}.lead{font-size:16px !important;line-height:1.6 !important;}.copy{font-size:16px !important;line-height:1.62 !important;}.small{font-size:16px !important;line-height:1.64 !important;}.section-kicker{font-size:13px !important;line-height:1.35 !important;letter-spacing:.12em !important;}.detail-key{font-size:13px !important;line-height:1.38 !important;}.detail-val{font-size:16px !important;line-height:1.55 !important;}.stack-col{display:block !important;width:100% !important;padding-left:0 !important;padding-right:0 !important;}.stack-gap{display:none !important;width:0 !important;}.stack-pad{padding-right:0 !important;padding-left:0 !important;padding-bottom:12px !important;}.details-panel,.actions-panel{border-radius:0 !important;}.details-panel td,.actions-panel td{padding:0 !important;}.stack-cta{width:auto !important;border-spacing:14px 0 !important;}.stack-cta td{display:inline-block !important;width:auto !important;padding:0 !important;vertical-align:middle !important;}.stack-cta a{display:inline-block !important;width:auto !important;min-height:46px !important;line-height:46px !important;padding:0 16px !important;font-size:13.5px !important;text-align:center !important;}.amount-box td{padding:12px 14px !important;}.amount-label{font-size:15px !important;color:#4b5563 !important;-webkit-text-fill-color:#4b5563 !important;}.amount-value{font-size:16px !important;color:#0f172a !important;-webkit-text-fill-color:#0f172a !important;}.amount-total-label{font-size:16px !important;color:#0b1220 !important;-webkit-text-fill-color:#0b1220 !important;}.amount-total-value{font-size:18px !important;color:#0b1220 !important;-webkit-text-fill-color:#0b1220 !important;}}</style></head>'
     . '<body style="margin:0;padding:0;background:' . $bg . ';">'
     . '<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">' . email_html_escape($preheader) . '</div>'
     . '<table role="presentation" class="mail-wrap" width="100%" cellspacing="0" cellpadding="0" style="width:100%;background:' . $bg . ';padding:22px 12px;">'
@@ -2795,6 +2989,47 @@ function build_order_status_email_content(array $CFG, string $orderId, string $s
   foreach ($paragraphs as $paragraph) {
     $body .= $paragraph . "\n\n";
   }
+
+  // Resumen del pedido en texto (espeja el resumen económico del HTML)
+  $txtItems = is_array($context['orderItems'] ?? null) ? $context['orderItems'] : [];
+  $itemLines = [];
+  foreach ($txtItems as $it) {
+    if (!is_array($it)) continue;
+    $itName = trim((string)($it['name'] ?? ($it['sku'] ?? 'Producto')));
+    $itQty = max(1, (int)($it['qty'] ?? 1));
+    $itPrice = (float)($it['price'] ?? 0);
+    $itLine = "- {$itName} x{$itQty}";
+    if ($itPrice > 0) {
+      $itLine .= ' - ' . email_money_eur($itPrice * $itQty);
+    }
+    $itemLines[] = $itLine;
+  }
+  if (!empty($itemLines)) {
+    $body .= "Resumen del pedido:\n" . implode("\n", $itemLines) . "\n\n";
+  }
+
+  $amountTxtLines = [];
+  $subTxt = $context['subtotal_amount'] ?? $context['subtotalAmount'] ?? '';
+  if ($subTxt !== '' && $subTxt !== null) {
+    $amountTxtLines[] = 'Subtotal: ' . email_money_eur((float)$subTxt);
+  }
+  $shipTxt = $context['shipping_amount'] ?? $context['shippingAmount'] ?? '';
+  if ($shipTxt !== '' && $shipTxt !== null) {
+    $shipTxtF = (float)$shipTxt;
+    $amountTxtLines[] = 'Envío: ' . ($shipTxtF <= 0.0001 ? 'Gratis' : email_money_eur($shipTxtF));
+  }
+  $feeTxt = $context['payment_fee_amount'] ?? $context['paymentFeeAmount'] ?? '';
+  if ($feeTxt !== '' && $feeTxt !== null && (float)$feeTxt > 0) {
+    $amountTxtLines[] = 'Comisión de pago: ' . email_money_eur((float)$feeTxt);
+  }
+  $totTxt = $context['total_amount'] ?? $context['totalAmount'] ?? ($context['amount'] ?? '');
+  if ($totTxt !== '' && $totTxt !== null) {
+    $amountTxtLines[] = 'Total: ' . email_money_eur((float)$totTxt);
+  }
+  if (!empty($amountTxtLines)) {
+    $body .= implode("\n", $amountTxtLines) . "\n\n";
+  }
+
   if ($customMessage !== '') {
     $body .= "Mensaje adicional: {$customMessage}\n\n";
   }
@@ -2978,8 +3213,28 @@ function send_order_status_email(array $CFG, string $recipientEmail, string $ord
   );
 }
 
-function send_paid_email(array $CFG, string $payerEmail, string $orderId, array $context = []): void {
-  send_order_status_email($CFG, $payerEmail, $orderId, 'paid', $context);
+function send_paid_email(array $CFG, string $payerEmail, string $orderId, array $context = []): bool {
+  return send_order_status_email($CFG, $payerEmail, $orderId, 'paid', $context);
+}
+
+// Registra en order_history (timeline admin) el envío automático del correo de un
+// estado, para que el historial refleje SIEMPRE los avisos que se disparan solos
+// (pago por webhook/retorno Stripe, IPN de PayPal), no solo los cambios manuales.
+function log_status_email_history(PDO $pdo, string $orderId, string $previousStatus, string $newStatus, string $recipientEmail, bool $emailSent, string $changedBy = 'system'): void {
+  if ($orderId === '') return;
+  try {
+    $now = date('Y-m-d H:i:s');
+    if ($previousStatus !== $newStatus) {
+      $pdo->prepare("INSERT INTO order_history (order_id, field_name, old_value, new_value, changed_by, created_at) VALUES (:oid, 'status', :oldv, :newv, :by, :ts)")
+        ->execute([':oid' => $orderId, ':oldv' => ($previousStatus !== '' ? $previousStatus : null), ':newv' => $newStatus, ':by' => $changedBy, ':ts' => $now]);
+    }
+    if ($emailSent && $recipientEmail !== '') {
+      $pdo->prepare("INSERT INTO order_history (order_id, field_name, old_value, new_value, changed_by, created_at) VALUES (:oid, 'email_sent', :status, :email, :by, :ts)")
+        ->execute([':oid' => $orderId, ':status' => $newStatus, ':email' => $recipientEmail, ':by' => $changedBy, ':ts' => $now]);
+    }
+  } catch (Throwable $e) {
+    error_log('log_status_email_history failed for ' . $orderId . ': ' . $e->getMessage());
+  }
 }
 
 function email_event_trigger_source(array $context): string {
@@ -3166,9 +3421,17 @@ function find_recent_manual_email_event(PDO $pdo, string $orderId, string $recip
  * Formato: [pct_decimal, fixed_eur]
  * En Fase 2+ esto será la fuente de verdad y pago.html lo leerá del backend.
  */
+// Tarifas = coste real de la pasarela (break-even: recargo con gross-up para que,
+// tras la comisión de Stripe, el comercio neteé el precio base; ni gana ni pierde).
+// Tarjeta = tarifa estándar Stripe España (tarjetas EEA): 1,5% + 0,25 €.
+// bizum/transfer = 0 (métodos manuales, sin coste de pasarela).
+/** Tope de direcciones guardadas por cliente. /cuenta lo pinta como "X/5". */
+const CUSTOMER_ADDRESS_MAX = 5;
+
 const BACKEND_PAYMENT_FEES = [
-  'card'     => [0.009,   0.15],
-  'klarna'   => [0.0359,  0.15],
+  'card'     => [0.015,   0.25],
+  'klarna'   => [0.05,    0.40],
+  'scalapay' => [0.05,    0.30],
   'paypal'   => [0.0209,  0.29],
   'bizum'    => [0.0,     0.0],
   'transfer' => [0.0,     0.0],
@@ -3290,6 +3553,7 @@ function ensure_discount_schema_safe(PDO $pdo): bool {
       'subtotal_amount'    => 'DECIMAL(12,2) NULL',
       'shipping_amount'    => 'DECIMAL(12,2) NULL',
       'payment_fee_amount' => 'DECIMAL(12,2) NULL',
+      'stripe_fee_amount'  => 'DECIMAL(12,2) NULL',
       'discount_code'      => 'VARCHAR(64) NULL',
       'discount_id'        => 'BIGINT UNSIGNED NULL',
       'discount_type'      => "ENUM('percent','amount') NULL",
@@ -3392,10 +3656,29 @@ function lookup_product_price_by_sku(string $sku, string $productsFile): ?array 
 
 /**
  * Busca datos de catálogo por SKU para enriquecer pedidos legacy sin metadatos.
- * Devuelve href/image (y color_label si existe en colorVariants) o null.
+ * Devuelve href/image o null.
+ *
+ * OJO: el color NO se deduce del catálogo. Antes se rellenaba con la primera
+ * variante de colorVariants, así que todo lo añadido sin elegir color (p. ej.
+ * desde el home) acababa guardado como "Blanco". Si el cliente no eligió
+ * variante, el pedido debe quedarse sin color.
  */
+/* La ruta y la foto de un producto por SKU. PRIMERO el índice de atributos, que se
+   genera ejecutando el catálogo real; solo si el SKU no está —un producto creado desde
+   el panel después de la última generación— se cae al rastreo del propio products.js.
+   Antes esto rastreaba DOS ficheros: products.js y un espejo, data/products-server.js,
+   que había que mantener sincronizado a base de expresiones regulares desde el panel.
+   Ese espejo ya no existe. */
 function lookup_product_media_by_sku(string $sku, string $productsFile): ?array {
   if ($sku === '') return null;
+
+  $enIndice = attributes_index()['products'][$sku] ?? null;
+  if (is_array($enIndice)) {
+    $url = trim((string)($enIndice['href'] ?? ''));
+    $image = trim((string)($enIndice['image'] ?? ''));
+    if ($url !== '' || $image !== '') return ['url' => $url, 'image' => $image];
+  }
+
   if (!is_file($productsFile) || !is_readable($productsFile)) return null;
 
   $js = file_get_contents($productsFile);
@@ -3409,17 +3692,171 @@ function lookup_product_media_by_sku(string $sku, string $productsFile): ?array 
   $image = trim((string)($m[2] ?? ''));
   if ($href === '' && $image === '') return null;
 
-  $colorLabel = '';
-  $colorPattern = '/sku:\s*[\'\"]' . $skuEscaped . '[\'\"][\s\S]{0,12000}?colorVariants:\s*\[[\s\S]{0,6000}?label:\s*[\'\"]([^\'\"]+)[\'\"]/i';
-  if (preg_match($colorPattern, $js, $cm)) {
-    $colorLabel = trim((string)($cm[1] ?? ''));
-  }
-
   return [
     'url' => $href,
     'image' => $image,
-    'color_label' => $colorLabel,
   ];
+}
+
+/* ── VARIANTES EN EL SERVIDOR ──────────────────────────────────────────────────
+   El servidor NO interpreta ejes. Un pedido nuevo llega con `variant_text` ya escrito
+   por el núcleo del cliente (js/product-attributes.js) y aquí solo se guarda y se
+   devuelve: por eso un email no puede volver a llamar "Color" a un modelo.
+
+   Lo de abajo existe únicamente para PEDIDOS HISTÓRICOS, los anteriores a que la línea
+   llevara `attrs`/`variant_text`. Y aun para esos no hay reglas escritas a mano: se
+   leen de data/attributes-index.json, que genera scripts/build-attributes-index.js
+   EJECUTANDO el catálogo real contra el núcleo real. Si algún día no quedan pedidos
+   antiguos que pintar, esto se borra entero sin tocar nada más. */
+function attributes_index(): array {
+  static $indice = null;
+  if ($indice !== null) return $indice;
+  $indice = ['labels' => [], 'products' => [], 'byHref' => []];
+  $file = __DIR__ . '/../data/attributes-index.json';
+  if (is_file($file) && is_readable($file)) {
+    $raw = @file_get_contents($file);
+    $parsed = is_string($raw) ? json_decode($raw, true) : null;
+    if (is_array($parsed)) {
+      $indice = [
+        'labels' => is_array($parsed['labels'] ?? null) ? $parsed['labels'] : [],
+        'products' => is_array($parsed['products'] ?? null) ? $parsed['products'] : [],
+        'byHref' => is_array($parsed['byHref'] ?? null) ? $parsed['byHref'] : [],
+      ];
+    }
+  }
+  return $indice;
+}
+
+/** Los ejes declarados por el producto de una línea (por SKU y, si no, por ruta). */
+function attributes_axes_for_item(array $item): array {
+  $indice = attributes_index();
+  $sku = trim((string)($item['sku'] ?? ''));
+  if ($sku !== '' && isset($indice['products'][$sku]['axes'])) {
+    return (array)$indice['products'][$sku]['axes'];
+  }
+  $url = rtrim(trim((string)($item['url'] ?? $item['href'] ?? '')), '/');
+  if ($url !== '') {
+    $path = parse_url($url, PHP_URL_PATH);
+    if (is_string($path) && $path !== '') $url = rtrim($path, '/');
+    $skuPorRuta = (string)($indice['byHref'][$url] ?? '');
+    if ($skuPorRuta !== '' && isset($indice['products'][$skuPorRuta]['axes'])) {
+      return (array)$indice['products'][$skuPorRuta]['axes'];
+    }
+  }
+  return [];
+}
+
+/** Misma comparación laxa que el núcleo: por clave o por etiqueta, sin acentos ni signos. */
+function attributes_comparable(string $v): string {
+  $t = strtolower(trim($v));
+  $t = strtr($t, ['á'=>'a','é'=>'e','í'=>'i','ó'=>'o','ú'=>'u','ü'=>'u','ñ'=>'n']);
+  return preg_replace('/[^a-z0-9]/', '', $t) ?? '';
+}
+
+/**
+ * El texto de variantes de una línea de pedido. Una sola regla, la misma que el cliente:
+ *   1. lo que el cliente vio al comprar (`variant_text`)
+ *   2. los atributos nombrados, traducidos con el catálogo
+ *   3. formato antiguo: el valor guardado, rescatado contra los ejes reales del producto
+ *   4. el valor guardado tal cual
+ * Devuelve '' si la línea no tiene variantes: quien pinta decide si eso es "Único".
+ */
+function order_item_variant_text(array $item): string {
+  $guardado = trim((string)($item['variant_text'] ?? $item['variantText'] ?? ''));
+  if ($guardado !== '') return $guardado;
+
+  $indice = attributes_index();
+  $ejes = attributes_axes_for_item($item);
+  $etiquetaDeEje = static function (string $clave) use ($ejes, $indice): string {
+    foreach ($ejes as $eje) {
+      if ((string)($eje['key'] ?? '') === $clave) return (string)($eje['label'] ?? $clave);
+    }
+    if (isset($indice['labels'][$clave])) return (string)$indice['labels'][$clave];
+    return ucfirst(str_replace(['_', '-'], ' ', $clave));
+  };
+
+  $attrs = $item['attrs'] ?? null;
+  if (is_string($attrs) && trim($attrs) !== '') {
+    $decoded = json_decode($attrs, true);
+    $attrs = is_array($decoded) ? $decoded : null;
+  }
+
+  if (is_array($attrs) && $attrs) {
+    /* Mismo ORDEN que el cliente: el que declara el catálogo, no aquel en que se
+       escribieron los atributos. Si no, el mismo pedido se leería "Medida · Color" en
+       el navegador y "Color · Medida" en el email. */
+    $ordenados = [];
+    foreach ($ejes as $ejeOrden) {
+      $claveEje = (string)($ejeOrden['key'] ?? '');
+      if ($claveEje !== '' && array_key_exists($claveEje, $attrs)) $ordenados[$claveEje] = $attrs[$claveEje];
+    }
+    foreach ($attrs as $claveResto => $valorResto) {
+      if (!array_key_exists($claveResto, $ordenados)) $ordenados[$claveResto] = $valorResto;
+    }
+    $attrs = $ordenados;
+
+    $partes = [];
+    foreach ($attrs as $clave => $valor) {
+      $clave = trim((string)$clave);
+      $valor = trim((string)$valor);
+      if ($clave === '' || $valor === '') continue;
+      $etiquetaOpcion = $valor;
+      foreach ($ejes as $eje) {
+        if ((string)($eje['key'] ?? '') !== $clave) continue;
+        $opciones = (array)($eje['options'] ?? []);
+        if (isset($opciones[$valor])) $etiquetaOpcion = (string)$opciones[$valor];
+      }
+      $partes[] = $etiquetaDeEje($clave) . ': ' . $etiquetaOpcion;
+    }
+    if ($partes) return implode(' · ', $partes);
+  }
+
+  // Formato antiguo: un único valor que no dice de qué eje es.
+  $colorLabel = trim((string)($item['color_label'] ?? $item['colorLabel'] ?? ''));
+  $color = trim((string)($item['color'] ?? ''));
+  $valor = $color !== '' ? $color : $colorLabel;
+  if ($valor === '' && $colorLabel === '') return '';
+
+  $tieneEjeColor = false;
+  foreach ($ejes as $eje) if ((string)($eje['key'] ?? '') === 'color') $tieneEjeColor = true;
+
+  if (!$tieneEjeColor && $ejes) {
+    foreach ([$valor, $colorLabel] as $candidato) {
+      $buscado = attributes_comparable((string)$candidato);
+      if ($buscado === '') continue;
+      foreach ($ejes as $eje) {
+        foreach ((array)($eje['options'] ?? []) as $opKey => $opLabel) {
+          if (attributes_comparable((string)$opKey) === $buscado ||
+              attributes_comparable((string)$opLabel) === $buscado) {
+            return (string)($eje['label'] ?? $eje['key']) . ': ' . $opLabel;
+          }
+        }
+      }
+    }
+  }
+
+  $mostrado = $colorLabel !== '' ? $colorLabel : $valor;
+  return $mostrado !== '' ? ((string)$etiquetaDeEje('color') . ': ' . $mostrado) : '';
+}
+
+/** Atributos con nombre de una línea, ya normalizados a { clave: valor } de texto. */
+function normalize_attrs_input($raw): array {
+  if (is_string($raw) && trim($raw) !== '') {
+    $decoded = json_decode($raw, true);
+    $raw = is_array($decoded) ? $decoded : null;
+  }
+  if (!is_array($raw)) return [];
+  $out = [];
+  foreach ($raw as $k => $v) {
+    $clave = trim((string)$k);
+    if ($clave === '' || is_array($v) || is_object($v)) continue;
+    $valor = trim((string)$v);
+    if ($valor === '') continue;
+    if (strlen($clave) > 40 || strlen($valor) > 80) continue;
+    $out[$clave] = $valor;
+    if (count($out) >= 8) break;
+  }
+  return $out;
 }
 
 function normalize_order_items_input(array $itemsRaw, string $publicBase = ''): array {
@@ -3454,6 +3891,10 @@ function normalize_order_items_input(array $itemsRaw, string $publicBase = ''): 
       if ($image !== '') $image = absolute_url($publicBase, $image);
     }
 
+    $attrs = normalize_attrs_input($row['attrs'] ?? $row['attributes'] ?? ($product['attrs'] ?? null));
+    $variantText = trim((string)($row['variant_text'] ?? $row['variantText'] ?? ''));
+    if (strlen($variantText) > 255) $variantText = substr($variantText, 0, 255);
+
     $items[] = [
       'sku' => $sku,
       'name' => $name,
@@ -3463,6 +3904,9 @@ function normalize_order_items_input(array $itemsRaw, string $publicBase = ''): 
       'image' => $image,
       'color' => $color,
       'color_label' => $colorLabel,
+      // Verdad estructurada + lo que vio el cliente. Ver order_item_variant_text().
+      'attrs' => $attrs ?: null,
+      'variant_text' => $variantText,
     ];
   }
 
@@ -3501,6 +3945,129 @@ function decode_order_items_json(?string $raw): array {
   return normalize_order_items_input($itemsRaw);
 }
 
+/** Abre una imagen local con GD según su extensión. null si no se puede. */
+function collage_load_image(string $file) {
+  $ext = strtolower((string)pathinfo($file, PATHINFO_EXTENSION));
+  $img = null;
+  if ($ext === 'webp' && function_exists('imagecreatefromwebp')) {
+    $img = @imagecreatefromwebp($file);
+  } elseif (($ext === 'jpg' || $ext === 'jpeg') && function_exists('imagecreatefromjpeg')) {
+    $img = @imagecreatefromjpeg($file);
+  } elseif ($ext === 'png' && function_exists('imagecreatefrompng')) {
+    $img = @imagecreatefrompng($file);
+  } elseif ($ext === 'gif' && function_exists('imagecreatefromgif')) {
+    $img = @imagecreatefromgif($file);
+  }
+  return $img ?: null;
+}
+
+/**
+ * Collage de los productos del carrito para la miniatura del Checkout de Stripe.
+ * Stripe solo muestra UNA imagen por línea y el carrito viaja como una sola línea,
+ * así que con varios productos se compone un mosaico (2 en fila, 3-4 en rejilla 2x2).
+ *
+ * Devuelve la ruta pública ('/img/cart-collage/<hash>.jpg') o '' si no procede:
+ * menos de dos imágenes, GD ausente, o cualquier fallo. Nunca lanza — quien llama
+ * se queda con la imagen del primer producto, que es el comportamiento anterior.
+ */
+function cart_collage_path(array $items): string {
+  if (!function_exists('imagecreatetruecolor') || !function_exists('imagejpeg')) return '';
+
+  $root = realpath(__DIR__ . '/..');
+  if ($root === false) return '';
+
+  // Hasta 4 imágenes locales distintas, en el orden del carrito.
+  $paths = [];
+  foreach ($items as $item) {
+    if (count($paths) >= 4) break;
+    if (!is_array($item)) continue;
+    $rel = trim((string)($item['image'] ?? ''));
+    if ($rel === '') continue;
+    if (preg_match('~^https?://~i', $rel)) {
+      $parsed = parse_url($rel);
+      $rel = (string)($parsed['path'] ?? '');
+    }
+    $rel = urldecode((string)strtok($rel, '?'));
+    if ($rel === '' || strpos($rel, '..') !== false) continue;
+
+    // Variante ligera del srcset si existe: menos memoria y sobra resolución.
+    $candidates = [];
+    $small = preg_replace('/\.(webp|jpe?g|png)$/i', '-400.$1', $rel);
+    if (is_string($small) && $small !== $rel) $candidates[] = $small;
+    $candidates[] = $rel;
+
+    foreach ($candidates as $cand) {
+      $real = realpath($root . '/' . ltrim($cand, '/'));
+      if ($real === false || strpos($real, $root) !== 0 || !is_file($real)) continue;
+      if (!in_array($real, $paths, true)) $paths[] = $real;
+      break;
+    }
+  }
+
+  if (count($paths) < 2) return '';
+
+  $key = sha1(implode('|', $paths) . '|v1');
+  $dirRel  = '/img/cart-collage';
+  $fileRel = $dirRel . '/' . $key . '.jpg';
+  $dirAbs  = $root . $dirRel;
+  $fileAbs = $root . $fileRel;
+
+  if (is_file($fileAbs) && filesize($fileAbs) > 0) return $fileRel;
+  if (!is_dir($dirAbs) && !@mkdir($dirAbs, 0755, true) && !is_dir($dirAbs)) return '';
+
+  $size   = 600;
+  $canvas = @imagecreatetruecolor($size, $size);
+  if ($canvas === false) return '';
+  $white = imagecolorallocate($canvas, 255, 255, 255);
+  imagefilledrectangle($canvas, 0, 0, $size, $size, $white);
+
+  $count = count($paths);
+  $cols  = 2;
+  $rows  = $count <= 2 ? 1 : 2;
+  $cellW = intdiv($size, $cols);
+  $cellH = intdiv($size, $rows);
+  $pad   = 16;
+  $drawn = 0;
+
+  foreach ($paths as $i => $file) {
+    $src = collage_load_image($file);
+    if ($src === null) continue;
+    $sw = imagesx($src);
+    $sh = imagesy($src);
+    if ($sw > 0 && $sh > 0) {
+      $scale = min(($cellW - $pad * 2) / $sw, ($cellH - $pad * 2) / $sh);
+      $dw = max(1, (int)round($sw * $scale));
+      $dh = max(1, (int)round($sh * $scale));
+      $col = $i % $cols;
+      $row = intdiv($i, $cols);
+      $dx = $col * $cellW + intdiv($cellW - $dw, 2);
+      $dy = $row * $cellH + intdiv($cellH - $dh, 2);
+      imagecopyresampled($canvas, $src, $dx, $dy, 0, 0, $dw, $dh, $sw, $sh);
+      $drawn++;
+    }
+    imagedestroy($src);
+  }
+
+  if ($drawn < 2) { imagedestroy($canvas); return ''; }
+
+  $saved = @imagejpeg($canvas, $fileAbs, 82);
+  imagedestroy($canvas);
+  if (!$saved) return '';
+
+  cart_collage_prune($dirAbs);
+  return $fileRel;
+}
+
+/** Poda simple: si la carpeta pasa de 400 collages, borra los de más de 30 días. */
+function cart_collage_prune(string $dirAbs): void {
+  $files = @glob($dirAbs . '/*.jpg');
+  if (!is_array($files) || count($files) <= 400) return;
+  $limit = time() - 30 * 86400;
+  foreach ($files as $f) {
+    if (@filemtime($f) < $limit) @unlink($f);
+  }
+}
+
 function build_order_items_from_order_row(array $order): array {
   $fromJson = decode_order_items_json((string)($order['cart_items_json'] ?? ''));
   if (!empty($fromJson)) {
@@ -3508,8 +4075,10 @@ function build_order_items_from_order_row(array $order): array {
     $fallbackColor = trim((string)($order['product_color'] ?? ''));
     $fallbackColorLabel = trim((string)($order['product_color_label'] ?? ''));
     $publicBase = rtrim((string)(getenv('PUBLIC_BASE') ?: 'https://scootshop.co'), '/');
+    // Un solo catálogo. El espejo de servidor (data/products-server.js) se eliminó:
+    // era una copia del mismo catálogo que había que resincronizar a mano desde el
+    // panel, con su propio riesgo de quedarse atrás. Ver lookup_product_media_by_sku().
     $productsFiles = [
-      __DIR__ . '/../data/products-server.js',
       __DIR__ . '/../data/products.js',
     ];
     $mediaCache = [];
@@ -3523,10 +4092,13 @@ function build_order_items_from_order_row(array $order): array {
       $itemColor = trim((string)($item['color'] ?? ''));
       $itemColorLabel = trim((string)($item['color_label'] ?? ''));
 
-      if ($itemSku !== '' && ($itemUrl === '' || $itemImage === '' || ($itemColorLabel === '' && $itemColor === ''))) {
+      // Solo se resuelven url e imagen. El color se respeta tal cual venga:
+      // si el cliente no eligió variante, se queda vacío y la ficha del pedido
+      // muestra "Único" en vez de inventarse un color.
+      if ($itemSku !== '' && ($itemUrl === '' || $itemImage === '')) {
         if (!array_key_exists($itemSku, $mediaCache)) {
           $mediaCache[$itemSku] = null;
-          $mergedMedia = ['url' => '', 'image' => '', 'color_label' => ''];
+          $mergedMedia = ['url' => '', 'image' => ''];
           foreach ($productsFiles as $pf) {
             $media = lookup_product_media_by_sku($itemSku, $pf);
             if ($media !== null) {
@@ -3536,15 +4108,12 @@ function build_order_items_from_order_row(array $order): array {
               if ($mergedMedia['image'] === '' && trim((string)($media['image'] ?? '')) !== '') {
                 $mergedMedia['image'] = trim((string)$media['image']);
               }
-              if ($mergedMedia['color_label'] === '' && trim((string)($media['color_label'] ?? '')) !== '') {
-                $mergedMedia['color_label'] = trim((string)$media['color_label']);
-              }
-              if ($mergedMedia['url'] !== '' && $mergedMedia['image'] !== '' && $mergedMedia['color_label'] !== '') {
+              if ($mergedMedia['url'] !== '' && $mergedMedia['image'] !== '') {
                 break;
               }
             }
           }
-          if ($mergedMedia['url'] !== '' || $mergedMedia['image'] !== '' || $mergedMedia['color_label'] !== '') {
+          if ($mergedMedia['url'] !== '' || $mergedMedia['image'] !== '') {
             $mediaCache[$itemSku] = $mergedMedia;
           }
         }
@@ -3555,9 +4124,6 @@ function build_order_items_from_order_row(array $order): array {
           }
           if ($itemImage === '' && trim((string)($media['image'] ?? '')) !== '') {
             $itemImage = trim((string)$media['image']);
-          }
-          if ($itemColorLabel === '' && $itemColor === '' && trim((string)($media['color_label'] ?? '')) !== '') {
-            $itemColorLabel = trim((string)$media['color_label']);
           }
         }
       }
@@ -3600,6 +4166,24 @@ function build_order_items_from_order_row(array $order): array {
       $fromJson[0]['color_label'] = trim((string)$fromJson[0]['color']);
     }
 
+    /* Toda línea sale de aquí ya descrita. Los pedidos nuevos traen su `variant_text`
+       de fábrica y esto no los toca; los antiguos lo reciben aquí, UNA vez y en un
+       solo sitio, para que ningún consumidor —email, admin, /cuenta, /pedido— tenga
+       que volver a decidir qué es ese valor. */
+    if (count($fromJson) === 1) {
+      if (empty($fromJson[0]['attrs']) && !empty($order['product_attrs_json'])) {
+        $fromJson[0]['attrs'] = normalize_attrs_input($order['product_attrs_json']) ?: null;
+      }
+      if (trim((string)($fromJson[0]['variant_text'] ?? '')) === '' && trim((string)($order['product_variant_text'] ?? '')) !== '') {
+        $fromJson[0]['variant_text'] = trim((string)$order['product_variant_text']);
+      }
+    }
+    foreach ($fromJson as &$linea) {
+      if (!is_array($linea)) continue;
+      $linea['variant_text'] = order_item_variant_text($linea);
+    }
+    unset($linea);
+
     return $fromJson;
   }
 
@@ -3607,7 +4191,7 @@ function build_order_items_from_order_row(array $order): array {
   $fallbackSku = trim((string)($order['sku'] ?? ''));
   if ($fallbackName === '' && $fallbackSku === '') return [];
 
-  return [[
+  $unica = [
     'sku' => $fallbackSku,
     'name' => $fallbackName !== '' ? $fallbackName : $fallbackSku,
     'qty' => 1,
@@ -3616,7 +4200,11 @@ function build_order_items_from_order_row(array $order): array {
     'image' => trim((string)($order['product_image_url'] ?? '')),
     'color' => trim((string)($order['product_color'] ?? '')),
     'color_label' => trim((string)($order['product_color_label'] ?? '')),
-  ]];
+    'attrs' => normalize_attrs_input($order['product_attrs_json'] ?? null) ?: null,
+    'variant_text' => trim((string)($order['product_variant_text'] ?? '')),
+  ];
+  $unica['variant_text'] = order_item_variant_text($unica);
+  return [$unica];
 }
 
 function order_items_display_name(array $items, string $fallbackName): string {
@@ -3700,6 +4288,33 @@ function calc_discount_engine(
  * Resuelve el pricing real de un pedido desde backend.
  * No aplica redenciones definitivas: solo snapshot para orders.
  */
+/**
+ * Envío guardado de un pedido pendiente de pago.
+ *
+ * El subtotal siempre lo manda el catálogo, así que un ajuste manual del importe
+ * (p. ej. recargo por envío internacional hecho desde admin) solo puede vivir en
+ * `shipping_amount`. El frontend manda '0.00' por defecto, de modo que si nos
+ * fiáramos de él el recargo se perdería en cuanto el cliente reabriera el pago.
+ * La BD manda: este helper devuelve el envío almacenado para que el recálculo
+ * lo conserve. Devuelve null si el pedido no existe o ya no está pendiente.
+ */
+function pending_order_shipping_override(PDO $pdo, string $orderId): ?string {
+  $orderId = trim($orderId);
+  if ($orderId === '' || !preg_match('/^SS-\d{8}-[A-F0-9]{6}$/', $orderId)) return null;
+  try {
+    $st = $pdo->prepare("SELECT shipping_amount FROM orders WHERE id = :id AND status = 'pending_payment' LIMIT 1");
+    $st->execute([':id' => $orderId]);
+    $row = $st->fetch();
+    if (!$row) return null;
+    $shipping = $row['shipping_amount'];
+    if ($shipping === null || $shipping === '') return null;
+    if ((float)$shipping <= 0) return null;
+    return number_format((float)$shipping, 2, '.', '');
+  } catch (Throwable $e) {
+    return null;
+  }
+}
+
 function resolve_order_pricing(array $input): array {
   global $CFG;
 
@@ -4035,6 +4650,8 @@ switch ($route) {
       'google_configured' => $CFG['google_client_id'] !== '',
       'paypal_configured' => $CFG['paypal_client_id'] !== '',
       'stripe_configured' => $CFG['stripe_secret_key'] !== '' && $CFG['stripe_publishable_key'] !== '',
+      // Necesario para el collage del carrito en la miniatura de Stripe.
+      'collage_ready' => function_exists('imagecreatetruecolor') && function_exists('imagejpeg') && function_exists('imagecreatefromwebp'),
     ]);
     break;
   }
@@ -4212,7 +4829,7 @@ switch ($route) {
     }
 
     $pdo = get_pdo($CFG);
-    $st = $pdo->prepare("SELECT id, sku, name, status, user_id, ship_name, ship_email, payer_name, payer_email, amount, currency, payment_method, tracking, product_url, product_image_url, product_color, product_color_label, cart_items_json, discount_code, discount_type, discount_value, discount_amount, subtotal_amount, total_amount, payment_fee_amount, shipping_amount, receipt_url, updated_at, created_at FROM orders WHERE user_id = :user_id ORDER BY created_at DESC LIMIT 50");
+    $st = $pdo->prepare("SELECT id, sku, name, status, user_id, ship_name, ship_email, payer_name, payer_email, amount, currency, payment_method, tracking, product_url, product_image_url, product_color, product_color_label, product_attrs_json, product_variant_text, cart_items_json, discount_code, discount_type, discount_value, discount_amount, subtotal_amount, total_amount, payment_fee_amount, shipping_amount, receipt_url, updated_at, created_at FROM orders WHERE user_id = :user_id ORDER BY created_at DESC LIMIT 50");
     $st->execute([':user_id' => (int)$user['id']]);
     $rows = $st->fetchAll();
 
@@ -4273,6 +4890,7 @@ switch ($route) {
         'product_image_url' => $r['product_image_url'] ?? '',
         'product_color' => $r['product_color'] ?? '',
         'product_color_label' => $r['product_color_label'] ?? '',
+        'product_variant_text' => $r['product_variant_text'] ?? '',
         'receipt_url' => $r['receipt_url'] ?? '',
         'items_count' => $itemsCount,
         'cart_items' => $cartItems,
@@ -4329,6 +4947,7 @@ switch ($route) {
         'picture' => (string)($row['picture'] ?? ''),
       ],
       'addresses' => $addresses,
+      'addresses_max' => CUSTOMER_ADDRESS_MAX,
     ]);
     break;
   }
@@ -4405,6 +5024,12 @@ switch ($route) {
       $st = $pdo->prepare("UPDATE customer_addresses SET label=:label, name=:name, phone=:phone, address=:address, address2=:address2, city=:city, province=:province, postal=:postal, country=:country, is_default=:isdef, updated_at=:now WHERE id=:id AND user_id=:uid");
       $st->execute(array_merge($fields, [':isdef' => $isDefault, ':now' => $now, ':id' => $addrId, ':uid' => $uid]));
     } else {
+      // Máximo 5 direcciones por cliente (el panel de /cuenta lo muestra como "X/5").
+      $cntSt = $pdo->prepare("SELECT COUNT(*) FROM customer_addresses WHERE user_id = :uid");
+      $cntSt->execute([':uid' => $uid]);
+      if ((int)$cntSt->fetchColumn() >= CUSTOMER_ADDRESS_MAX) {
+        json_out(['ok' => false, 'error' => 'address_limit', 'max' => CUSTOMER_ADDRESS_MAX], 409);
+      }
       $st = $pdo->prepare("INSERT INTO customer_addresses (user_id, label, name, phone, address, address2, city, province, postal, country, is_default) VALUES (:uid, :label, :name, :phone, :address, :address2, :city, :province, :postal, :country, :isdef)");
       $st->execute(array_merge($fields, [':uid' => $uid, ':isdef' => $isDefault]));
       $addrId = (int)$pdo->lastInsertId();
@@ -4454,7 +5079,7 @@ switch ($route) {
     }
 
     $pdo = get_pdo($CFG);
-    $st = $pdo->prepare("SELECT id, token, sku, name, status, user_id, ship_name, ship_email, payer_name, payer_email, amount, currency, payment_method, tracking, message, product_url, product_image_url, product_color, product_color_label, cart_items_json, discount_code, discount_type, discount_value, discount_amount, subtotal_amount, total_amount, payment_fee_amount, shipping_amount, receipt_url, updated_at, created_at, ship_phone, ship_address, ship_address2, ship_city, ship_province, ship_postal, ship_country, ship_notes FROM orders WHERE id = :id LIMIT 1");
+    $st = $pdo->prepare("SELECT id, token, sku, name, status, user_id, ship_name, ship_email, payer_name, payer_email, amount, currency, payment_method, tracking, message, product_url, product_image_url, product_color, product_color_label, product_attrs_json, product_variant_text, cart_items_json, discount_code, discount_type, discount_value, discount_amount, subtotal_amount, total_amount, payment_fee_amount, shipping_amount, receipt_url, updated_at, created_at, ship_phone, ship_address, ship_address2, ship_city, ship_province, ship_postal, ship_country, ship_notes FROM orders WHERE id = :id LIMIT 1");
     $st->execute([':id' => $orderId]);
     $order = $st->fetch();
 
@@ -4482,6 +5107,24 @@ switch ($route) {
     if ($customerEmail === '') $customerEmail = trim((string)($order['payer_email'] ?? ''));
     if ($customerEmail === '') $customerEmail = trim((string)($user['email'] ?? ''));
 
+    // Fecha del último aviso ENTREGADO al cliente. Solo 'sent': al cliente no
+    // se le muestran los fallos de envío (no puede hacer nada con eso y solo
+    // genera alarma). Va en try/catch porque email_events puede no existir.
+    $lastEmailAt = '';
+    $lastEmailType = '';
+    try {
+      $emSt = $pdo->prepare("SELECT COALESCE(sent_at, created_at) AS at, event_type FROM email_events WHERE order_id = :oid AND delivery_status = 'sent' ORDER BY COALESCE(sent_at, created_at) DESC, id DESC LIMIT 1");
+      $emSt->execute([':oid' => (string)($order['id'] ?? '')]);
+      $emRow = $emSt->fetch();
+      if ($emRow && !empty($emRow['at'])) {
+        $lastEmailAt = (string)$emRow['at'];
+        $lastEmailType = (string)($emRow['event_type'] ?? '');
+      }
+    } catch (Throwable $e) {
+      $lastEmailAt = '';
+      $lastEmailType = '';
+    }
+
     json_out([
       'ok' => true,
       'user' => $hasUserSession ? customer_session_payload($user) : null,
@@ -4508,10 +5151,13 @@ switch ($route) {
         'total_amount' => $order['total_amount'] ?? null,
         'payment_fee_amount' => $order['payment_fee_amount'] ?? null,
         'shipping_amount' => $order['shipping_amount'] ?? null,
+        'last_email_at' => $lastEmailAt,
+        'last_email_type' => $lastEmailType,
         'product_url' => $order['product_url'] ?? '',
         'product_image_url' => $order['product_image_url'] ?? '',
         'product_color' => $order['product_color'] ?? '',
         'product_color_label' => $order['product_color_label'] ?? '',
+        'product_variant_text' => $order['product_variant_text'] ?? '',
         'receipt_url' => $order['receipt_url'] ?? '',
         'order_items' => build_order_items_from_order_row($order),
         'shipping' => [
@@ -4612,13 +5258,22 @@ switch ($route) {
     $productImageUrl = trim((string)($b['productImageUrl'] ?? ''));
     $productColor = trim((string)($b['productColor'] ?? ''));
     $productColorLabel = trim((string)($b['productColorLabel'] ?? ''));
+    // Compra directa: atributos con nombre + el texto que vio el cliente. Ver
+    // order_item_variant_text(). El pedido deja de depender de que "color" signifique
+    // color: si el eje es MODELO, aqui llega { "model": "vmp" }.
+    $productAttrs = normalize_attrs_input($b['productAttrs'] ?? null);
+    $productAttrsJson = $productAttrs ? json_encode($productAttrs, JSON_UNESCAPED_UNICODE) : null;
+    $productVariantText = mb_substr(trim((string)($b['productVariantText'] ?? '')), 0, 255);
     $checkoutPath = trim((string)($b['checkoutPath'] ?? '/pago?method=card'));
     $paymentMethodMode = strtolower(trim((string)($b['paymentMethodMode'] ?? 'dynamic')));
     $paymentUiMode = strtolower(trim((string)($b['paymentUiMode'] ?? 'embedded')));
-    $paymentMethod = in_array($paymentMethodMode, ['klarna', 'paypal'], true) ? $paymentMethodMode : 'card';
+    $paymentMethod = in_array($paymentMethodMode, ['klarna', 'paypal', 'scalapay'], true) ? $paymentMethodMode : 'card';
     $discountCode = strtoupper(trim((string)($b['discount_code'] ?? '')));
     $frontendBaseAmount = trim((string)($b['frontend_base_amount'] ?? $amount));
     $shippingAmount = trim((string)($b['shipping_amount'] ?? '0.00'));
+    // Si se reanuda un pedido pendiente, su envío guardado manda sobre el del frontend.
+    $storedShipping = pending_order_shipping_override(get_pdo($CFG), (string)($b['existingOrderId'] ?? ''));
+    if ($storedShipping !== null) $shippingAmount = $storedShipping;
     $cartItems = is_array($b['cart_items'] ?? null) ? $b['cart_items'] : [];
     $orderItems = normalize_order_items_input($cartItems, $CFG['public_base']);
     $orderItemsJson = !empty($orderItems) ? json_encode($orderItems, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : null;
@@ -4709,6 +5364,7 @@ switch ($route) {
             product_url = :product_url, product_image_url = :product_image_url,
             cart_items_json = :cart_items_json,
             product_color = :product_color, product_color_label = :product_color_label,
+            product_attrs_json = :product_attrs_json, product_variant_text = :product_variant_text,
             payment_method = :payment_method,
             user_id = COALESCE(:user_id, user_id),
             payer_email = COALESCE(NULLIF(:payer_email, ''), payer_email),
@@ -4738,6 +5394,8 @@ switch ($route) {
           ':product_image_url' => $productImageUrl !== '' ? absolute_url($CFG['public_base'], $productImageUrl) : null,
           ':cart_items_json' => $orderItemsJson,
           ':product_color' => $productColor !== '' ? $productColor : null,
+          ':product_attrs_json' => $productAttrsJson,
+          ':product_variant_text' => $productVariantText !== '' ? $productVariantText : null,
           ':product_color_label' => $productColorLabel !== '' ? $productColorLabel : null,
           ':payment_method' => $paymentMethod,
           ':user_id' => $customerUserId > 0 ? $customerUserId : null,
@@ -4767,14 +5425,14 @@ switch ($route) {
           subtotal_amount, shipping_amount, payment_fee_amount,
           discount_code, discount_id, discount_type, discount_value, discount_amount, total_amount, pricing_source, pricing_version,
           product_url, product_image_url, cart_items_json,
-          product_color, product_color_label,
+          product_color, product_color_label, product_attrs_json, product_variant_text,
           ship_name, ship_email, ship_phone, ship_address, ship_address2, ship_city, ship_province, ship_postal, ship_country, ship_notes,
           created_at, updated_at)
         VALUES (:id, :token, :sku, :name, :amount, :currency, 'pending_payment', :payment_method, :user_id, :payer_email,
           :subtotal_amount, :shipping_amount, :payment_fee_amount,
           :discount_code, :discount_id, :discount_type, :discount_value, :discount_amount, :total_amount, :pricing_source, :pricing_version,
           :product_url, :product_image_url, :cart_items_json,
-          :product_color, :product_color_label,
+          :product_color, :product_color_label, :product_attrs_json, :product_variant_text,
           :ship_name, :ship_email, :ship_phone, :ship_address, :ship_address2, :ship_city, :ship_province, :ship_postal, :ship_country, :ship_notes,
           :created_at, :updated_at)
       ");
@@ -4803,6 +5461,8 @@ switch ($route) {
         ':product_image_url' => $productImageUrl !== '' ? absolute_url($CFG['public_base'], $productImageUrl) : null,
         ':cart_items_json' => $orderItemsJson,
         ':product_color' => $productColor !== '' ? $productColor : null,
+        ':product_attrs_json' => $productAttrsJson,
+        ':product_variant_text' => $productVariantText !== '' ? $productVariantText : null,
         ':product_color_label' => $productColorLabel !== '' ? $productColorLabel : null,
         ':ship_name' => $shipName !== '' ? $shipName : null,
         ':ship_email' => $shipEmail !== '' ? $shipEmail : null,
@@ -4893,7 +5553,7 @@ switch ($route) {
       }
 
       if ($paymentUiMode === 'hosted') {
-        $methodKey = $paymentMethodMode === 'klarna' ? 'klarna' : ($paymentMethodMode === 'paypal' ? 'paypal' : 'card');
+        $methodKey = in_array($paymentMethodMode, ['klarna', 'paypal', 'scalapay'], true) ? $paymentMethodMode : 'card';
         $cancelBase = $checkoutPath !== '' ? $checkoutPath : '/pago?method=' . $methodKey;
         $cancelGlue = strpos($cancelBase, '?') === false ? '?' : '&';
         if (strpos($cancelBase, 'method=') === false) {
@@ -4920,9 +5580,14 @@ switch ($route) {
         $payload['payment_method_types[0]'] = 'klarna';
       } elseif ($paymentMethodMode === 'paypal') {
         $payload['payment_method_types[0]'] = 'paypal';
+      } elseif ($paymentMethodMode === 'scalapay') {
+        $payload['payment_method_types[0]'] = 'scalapay';
       } else {
+        // "Pago online" (tarjeta/dinámico): excluir BNPL para que no se cuele un método
+        // de coste alto sin su recargo (Klarna/PayPal/Scalapay tienen su propia pestaña).
         $payload['excluded_payment_method_types[0]'] = 'klarna';
         $payload['excluded_payment_method_types[1]'] = 'paypal';
+        $payload['excluded_payment_method_types[2]'] = 'scalapay';
       }
 
       if ($ref !== '') {
@@ -4933,8 +5598,20 @@ switch ($route) {
         $payload['metadata[product_url]'] = absolute_url($CFG['public_base'], $productUrl);
       }
 
-      if ($productImageUrl !== '') {
-        $payload['line_items[0][price_data][product_data][images][0]'] = absolute_url($CFG['public_base'], $productImageUrl);
+      // Carrito con varios productos: la miniatura del Checkout es un collage de
+      // todos ellos en vez de la foto del primero. Si falla, se usa la de siempre.
+      $checkoutImageUrl = $productImageUrl;
+      if (count($orderItems) > 1) {
+        try {
+          $collage = cart_collage_path($orderItems);
+          if ($collage !== '') $checkoutImageUrl = $collage;
+        } catch (Throwable $e) {
+          // sin collage: se mantiene la imagen del primer producto
+        }
+      }
+
+      if ($checkoutImageUrl !== '') {
+        $payload['line_items[0][price_data][product_data][images][0]'] = absolute_url($CFG['public_base'], $checkoutImageUrl);
       }
 
       $stripe = stripe_api_request($CFG['stripe_secret_key'], '/checkout/sessions', $payload);
@@ -4989,10 +5666,19 @@ switch ($route) {
     $productImageUrl = trim((string)($b['productImageUrl'] ?? ''));
     $productColor = trim((string)($b['productColor'] ?? ''));
     $productColorLabel = trim((string)($b['productColorLabel'] ?? ''));
+    // Compra directa: atributos con nombre + el texto que vio el cliente. Ver
+    // order_item_variant_text(). El pedido deja de depender de que "color" signifique
+    // color: si el eje es MODELO, aqui llega { "model": "vmp" }.
+    $productAttrs = normalize_attrs_input($b['productAttrs'] ?? null);
+    $productAttrsJson = $productAttrs ? json_encode($productAttrs, JSON_UNESCAPED_UNICODE) : null;
+    $productVariantText = mb_substr(trim((string)($b['productVariantText'] ?? '')), 0, 255);
     $paymentMethod = strtolower(trim((string)($b['paymentMethod'] ?? '')));
     $discountCode = strtoupper(trim((string)($b['discount_code'] ?? '')));
     $frontendBaseAmount = trim((string)($b['frontend_base_amount'] ?? $amount));
     $shippingAmount = trim((string)($b['shipping_amount'] ?? '0.00'));
+    // Si se reanuda un pedido pendiente, su envío guardado manda sobre el del frontend.
+    $storedShipping = pending_order_shipping_override(get_pdo($CFG), (string)($b['existingOrderId'] ?? ''));
+    if ($storedShipping !== null) $shippingAmount = $storedShipping;
     $cartItems = is_array($b['cart_items'] ?? null) ? $b['cart_items'] : [];
     $orderItems = normalize_order_items_input($cartItems, $CFG['public_base']);
     $orderItemsJson = !empty($orderItems) ? json_encode($orderItems, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : null;
@@ -5087,6 +5773,7 @@ switch ($route) {
             product_url = :product_url, product_image_url = :product_image_url,
             cart_items_json = :cart_items_json,
             product_color = :product_color, product_color_label = :product_color_label,
+            product_attrs_json = :product_attrs_json, product_variant_text = :product_variant_text,
             payment_method = :payment_method,
             user_id = COALESCE(:user_id, user_id),
             payer_email = COALESCE(NULLIF(:payer_email, ''), payer_email),
@@ -5116,6 +5803,8 @@ switch ($route) {
           ':product_image_url' => $productImageUrl !== '' ? absolute_url($CFG['public_base'], $productImageUrl) : null,
           ':cart_items_json' => $orderItemsJson,
           ':product_color' => $productColor !== '' ? $productColor : null,
+          ':product_attrs_json' => $productAttrsJson,
+          ':product_variant_text' => $productVariantText !== '' ? $productVariantText : null,
           ':product_color_label' => $productColorLabel !== '' ? $productColorLabel : null,
           ':payment_method' => $paymentMethod,
           ':user_id' => $customerUserId > 0 ? $customerUserId : null,
@@ -5144,13 +5833,13 @@ switch ($route) {
         INSERT INTO orders (id, token, sku, name, amount, currency, status, payment_method, user_id, payer_email,
           subtotal_amount, shipping_amount, payment_fee_amount,
           discount_code, discount_id, discount_type, discount_value, discount_amount, total_amount, pricing_source, pricing_version,
-          product_url, product_image_url, product_color, product_color_label, cart_items_json,
+          product_url, product_image_url, product_color, product_color_label, product_attrs_json, product_variant_text, cart_items_json,
           ship_name, ship_email, ship_phone, ship_address, ship_address2, ship_city, ship_province, ship_postal, ship_country, ship_notes,
           created_at, updated_at)
         VALUES (:id, :token, :sku, :name, :amount, :currency, 'pending_payment', :payment_method, :user_id, :payer_email,
           :subtotal_amount, :shipping_amount, :payment_fee_amount,
           :discount_code, :discount_id, :discount_type, :discount_value, :discount_amount, :total_amount, :pricing_source, :pricing_version,
-          :product_url, :product_image_url, :product_color, :product_color_label, :cart_items_json,
+          :product_url, :product_image_url, :product_color, :product_color_label, :product_attrs_json, :product_variant_text, :cart_items_json,
           :ship_name, :ship_email, :ship_phone, :ship_address, :ship_address2, :ship_city, :ship_province, :ship_postal, :ship_country, :ship_notes,
           :created_at, :updated_at)
       ");
@@ -5179,6 +5868,8 @@ switch ($route) {
         ':product_image_url' => $productImageUrl !== '' ? absolute_url($CFG['public_base'], $productImageUrl) : null,
         ':cart_items_json' => $orderItemsJson,
         ':product_color' => $productColor !== '' ? $productColor : null,
+        ':product_attrs_json' => $productAttrsJson,
+        ':product_variant_text' => $productVariantText !== '' ? $productVariantText : null,
         ':product_color_label' => $productColorLabel !== '' ? $productColorLabel : null,
         ':ship_name' => $shipName !== '' ? $shipName : null,
         ':ship_email' => $shipEmail !== '' ? $shipEmail : null,
@@ -5305,6 +5996,23 @@ switch ($route) {
         if ($isPaidCharge) {
           $orderId = trim((string)($object['metadata']['order_id'] ?? ''));
           if ($orderId !== '') {
+            // Método y comisión reales: el payload del charge no expande la
+            // balance_transaction, así que traemos el PaymentIntent completo.
+            $facts = ['method' => null, 'fee' => null, 'amount' => null];
+            $chargePiId = trim((string)($object['payment_intent'] ?? ''));
+            if ($chargePiId !== '') {
+              try {
+                $chargePi = stripe_fetch_payment_intent($CFG['stripe_secret_key'], $chargePiId);
+                $facts = stripe_payment_facts_from_intent($chargePi);
+              } catch (Throwable $e) {
+                error_log('stripe_webhook charge facts fetch failed for ' . $chargePiId . ': ' . $e->getMessage());
+              }
+            }
+            if (($facts['method'] ?? null) === null) {
+              $chargeType = trim((string)($object['payment_method_details']['type'] ?? ''));
+              if ($chargeType !== '') $facts['method'] = map_stripe_method_to_label($chargeType);
+            }
+
             reconcile_paid_stripe_order(get_pdo($CFG), $CFG, [
               'orderId' => $orderId,
               'payerEmail' => trim((string)($object['billing_details']['email'] ?? $object['receipt_email'] ?? '')),
@@ -5318,6 +6026,8 @@ switch ($route) {
               'sourceType' => 'charge',
               'productName' => trim((string)($object['metadata']['sku'] ?? '')),
               'sku' => trim((string)($object['metadata']['sku'] ?? '')),
+              'realPaymentMethod' => $facts['method'] ?? '',
+              'stripeFeeAmount' => $facts['fee'],
             ]);
           }
         }
@@ -5345,6 +6055,8 @@ switch ($route) {
             $latestCharge = $paymentIntent['charges']['data'][0];
           }
 
+          $facts = stripe_payment_facts_from_intent($paymentIntent);
+
           reconcile_paid_stripe_order(get_pdo($CFG), $CFG, [
             'orderId' => $orderId,
             'payerEmail' => trim((string)($paymentIntent['receipt_email'] ?? $latestCharge['billing_details']['email'] ?? '')),
@@ -5358,6 +6070,8 @@ switch ($route) {
             'sourceType' => 'payment_intent',
             'productName' => trim((string)($paymentIntent['metadata']['sku'] ?? '')),
             'sku' => trim((string)($paymentIntent['metadata']['sku'] ?? '')),
+            'realPaymentMethod' => $facts['method'] ?? '',
+            'stripeFeeAmount' => $facts['fee'],
           ]);
         }
       }
@@ -5403,7 +6117,7 @@ switch ($route) {
     }
 
     $pdo = get_pdo($CFG);
-    $st = $pdo->prepare("SELECT id, token, sku, name, status, user_id, ship_name, ship_email, payer_email, amount, currency, payment_method, product_url, product_image_url, product_color, product_color_label, cart_items_json, discount_code, subtotal_amount, total_amount, shipping_amount, ship_phone, ship_address, ship_address2, ship_city, ship_province, ship_postal, ship_country, ship_notes FROM orders WHERE id = :id LIMIT 1");
+    $st = $pdo->prepare("SELECT id, token, sku, name, status, user_id, ship_name, ship_email, payer_email, amount, currency, payment_method, product_url, product_image_url, product_color, product_color_label, product_attrs_json, product_variant_text, cart_items_json, discount_code, subtotal_amount, total_amount, shipping_amount, ship_phone, ship_address, ship_address2, ship_city, ship_province, ship_postal, ship_country, ship_notes FROM orders WHERE id = :id LIMIT 1");
     $st->execute([':id' => $orderId]);
     $order = $st->fetch();
 
@@ -5705,6 +6419,7 @@ switch ($route) {
             'orderItems' => build_order_items_from_order_row($order),
             'subtotal_amount' => (string)($order['subtotal_amount'] ?? ''),
             'shipping_amount' => (string)($order['shipping_amount'] ?? ''),
+            'payment_fee_amount' => (string)($order['payment_fee_amount'] ?? ''),
             'total_amount' => (string)($order['total_amount'] ?? ''),
             'amount' => (string)($order['amount'] ?? ''),
             'currency' => (string)($order['currency'] ?? 'EUR'),
@@ -6022,6 +6737,7 @@ switch ($route) {
     foreach ($ordersRows as $row) {
       $orders[] = [
         'id' => $row['id'] ?? '',
+        'token' => $row['token'] ?? '',
         'sku' => $row['sku'] ?? '',
         'product' => $row['name'] ?? '',
         'status' => $row['status'] ?? '',
@@ -6160,11 +6876,12 @@ switch ($route) {
     $total = (int)$countSt->fetchColumn();
 
     // Fetch page
-    $st = $pdo->prepare("SELECT id, sku, name, status, user_id, ship_name, ship_email, ship_phone, ship_address, ship_address2, ship_city, ship_province, ship_postal, ship_country, payer_name, payer_email, amount, currency, payment_method, tracking, product_image_url, cart_items_json, product_color, product_color_label, updated_at, created_at FROM orders {$whereSql} ORDER BY created_at DESC LIMIT {$perPage} OFFSET {$offset}");
+    $st = $pdo->prepare("SELECT id, sku, name, status, user_id, ship_name, ship_email, ship_phone, ship_address, ship_address2, ship_city, ship_province, ship_postal, ship_country, payer_name, payer_email, amount, currency, payment_method, tracking, product_image_url, cart_items_json, product_color, product_color_label, product_attrs_json, product_variant_text, updated_at, created_at FROM orders {$whereSql} ORDER BY created_at DESC LIMIT {$perPage} OFFSET {$offset}");
     $st->execute($params);
     $rows = $st->fetchAll();
 
     $list = [];
+    $orderIds = [];
     foreach ($rows as $r) {
       $customerName = trim((string)($r['ship_name'] ?? ''));
       if ($customerName === '') $customerName = trim((string)($r['payer_name'] ?? ''));
@@ -6173,6 +6890,7 @@ switch ($route) {
       $email = trim((string)($r['ship_email'] ?? ''));
       if ($email === '') $email = trim((string)($r['payer_email'] ?? ''));
 
+      $orderIds[] = (string)$r['id'];
       $list[] = [
         'id' => $r['id'],
         'sku' => $r['sku'] ?? '',
@@ -6201,9 +6919,40 @@ switch ($route) {
         'product_image_url' => $r['product_image_url'] ?? '',
         'product_color' => $r['product_color'] ?? '',
         'product_color_label' => $r['product_color_label'] ?? '',
+        'product_variant_text' => $r['product_variant_text'] ?? '',
         'updated_at' => $r['updated_at'] ?? '',
         'created_at' => $r['created_at'] ?? '',
+        'email_count' => 0,
+        'email_last_at' => '',
       ];
+    }
+
+    // Resumen de emails por pedido: cualquier email registrado en email_events
+    // (pago, envio, entrega, reenvios manuales). Permite pintar "enviado/no enviado"
+    // en la lista sin abrir pedido por pedido. Tolerante a tabla ausente.
+    if ($orderIds) {
+      try {
+        $ph = implode(',', array_fill(0, count($orderIds), '?'));
+        $emSt = $pdo->prepare("SELECT order_id, COUNT(*) AS cnt, MAX(created_at) AS last_at FROM email_events WHERE order_id IN ($ph) GROUP BY order_id");
+        $emSt->execute($orderIds);
+        $emMap = [];
+        foreach ($emSt->fetchAll() as $em) {
+          $emMap[(string)$em['order_id']] = [
+            'cnt' => (int)($em['cnt'] ?? 0),
+            'last_at' => (string)($em['last_at'] ?? ''),
+          ];
+        }
+        foreach ($list as &$item) {
+          $oid = (string)$item['id'];
+          if (isset($emMap[$oid])) {
+            $item['email_count'] = $emMap[$oid]['cnt'];
+            $item['email_last_at'] = $emMap[$oid]['last_at'];
+          }
+        }
+        unset($item);
+      } catch (Throwable $e) {
+        error_log('admin_orders_list email summary error: ' . $e->getMessage());
+      }
     }
 
     json_out([
@@ -6258,6 +7007,15 @@ switch ($route) {
         'status'=>$o['status'] ?? '',
         'user_id'=>(int)($o['user_id'] ?? 0),
         'payment_method'=>$o['payment_method'] ?? '',
+        'subtotal_amount'=>$o['subtotal_amount'] ?? null,
+        'discount_code'=>$o['discount_code'] ?? '',
+        'discount_type'=>$o['discount_type'] ?? '',
+        'discount_value'=>$o['discount_value'] ?? null,
+        'discount_amount'=>$o['discount_amount'] ?? null,
+        'payment_fee_amount'=>$o['payment_fee_amount'] ?? null,
+        'stripe_fee_amount'=>$o['stripe_fee_amount'] ?? null,
+        'shipping_amount'=>$o['shipping_amount'] ?? null,
+        'total_amount'=>$o['total_amount'] ?? null,
         'payer_email'=>$o['payer_email'] ?? '',
         'payer_name'=>$o['payer_name'] ?? '',
         'txn_id'=>$o['txn_id'] ?? '',
@@ -6267,6 +7025,7 @@ switch ($route) {
         'cart_items' => build_order_items_from_order_row($o),
         'product_color'=>$o['product_color'] ?? '',
         'product_color_label'=>$o['product_color_label'] ?? '',
+        'product_variant_text'=>$o['product_variant_text'] ?? '',
         'receipt_url'=>$o['receipt_url'] ?? '',
         'admin_notes'=>$o['admin_notes'] ?? '',
         'created_at'=>$o['created_at'] ?? '',
@@ -6296,6 +7055,250 @@ switch ($route) {
           'notes'=>$o['bill_notes'] ?? '',
         ],
         'history' => $history,
+      ],
+    ]);
+    break;
+  }
+
+  case 'admin_backfill_payment_facts': {
+    // Backfill puntual: relee de Stripe los pedidos pagados y corrige método real,
+    // recargo coherente y comisión real de Stripe. Dry-run por defecto; apply=1 escribe.
+    $key = header_get('x-admin-key');
+    if ($CFG['admin_key'] === '' || !hash_equals($CFG['admin_key'], $key)) json_out(['ok'=>false,'error'=>'unauthorized'], 401);
+    if ($CFG['stripe_secret_key'] === '') json_out(['ok'=>false,'error'=>'stripe_not_configured'], 503);
+
+    $apply = (($_GET['apply'] ?? '') === '1');
+    $limit = (int)($_GET['limit'] ?? 200);
+    if ($limit < 1) $limit = 1;
+    if ($limit > 1000) $limit = 1000;
+    $singleId = trim((string)($_GET['id'] ?? ''));
+
+    $pdo = get_pdo($CFG);
+    $cols = "id, txn_id, payment_method, subtotal_amount, shipping_amount, discount_amount, payment_fee_amount, stripe_fee_amount, total_amount, amount";
+    if ($singleId !== '') {
+      $st = $pdo->prepare("SELECT {$cols} FROM orders WHERE id = :id LIMIT 1");
+      $st->execute([':id' => $singleId]);
+    } else {
+      $st = $pdo->prepare("SELECT {$cols} FROM orders WHERE status = 'paid' AND (txn_id LIKE 'pi_%' OR txn_id LIKE 'cs_%') AND stripe_fee_amount IS NULL ORDER BY created_at DESC LIMIT {$limit}");
+      $st->execute();
+    }
+    $rows = $st->fetchAll();
+
+    $scanned = 0; $changed = []; $errors = [];
+    foreach ($rows as $o) {
+      $scanned++;
+      $oid = (string)$o['id'];
+      $txn = trim((string)($o['txn_id'] ?? ''));
+      $piId = '';
+      try {
+        if (strpos($txn, 'pi_') === 0) {
+          $piId = $txn;
+        } elseif (strpos($txn, 'cs_') === 0) {
+          $sess = stripe_fetch_checkout_session($CFG['stripe_secret_key'], $txn);
+          $piId = stripe_session_payment_intent_id($sess);
+        }
+        if ($piId === '') { $errors[] = ['id'=>$oid, 'error'=>'no_payment_intent']; continue; }
+        $pi = stripe_fetch_payment_intent($CFG['stripe_secret_key'], $piId);
+        $facts = stripe_payment_facts_from_intent($pi);
+      } catch (Throwable $e) {
+        $errors[] = ['id'=>$oid, 'error'=>$e->getMessage()];
+        continue;
+      }
+
+      $realMethod = (string)($facts['method'] ?? '');
+      $stripeFee = $facts['fee'];
+      if ($realMethod === '' && $stripeFee === null) continue;
+
+      $existingMethod = trim((string)($o['payment_method'] ?? ''));
+      $entry = ['id'=>$oid, 'from_method'=>$existingMethod, 'to_method'=>$realMethod, 'stripe_fee'=>$stripeFee, 'applied'=>false];
+
+      $sets = []; $params = [':id'=>$oid];
+      if ($realMethod !== '') {
+        $sets[] = 'payment_method = :pm'; $params[':pm'] = $realMethod;
+        $existingSubtotal = $o['subtotal_amount'] ?? null;
+        $subtotalMissing = ($existingSubtotal === null || $existingSubtotal === '' || (float)$existingSubtotal <= 0);
+        if ($existingMethod !== $realMethod || $subtotalMissing) {
+          $totalPaid = (int)($facts['amount'] ?? 0) > 0
+            ? ((int)$facts['amount'] / 100.0)
+            : (float)($o['total_amount'] ?? ($o['amount'] ?? 0));
+          $shipping = (float)($o['shipping_amount'] ?? 0);
+          $discount = (float)($o['discount_amount'] ?? 0);
+          if ($totalPaid > 0) {
+            $bd = reconstruct_breakdown_for_method($totalPaid, $shipping, $discount, $realMethod);
+            $entry['breakdown'] = $bd;
+            $sets[] = 'subtotal_amount = :sub';    $params[':sub'] = $bd['subtotal_amount'];
+            $sets[] = 'payment_fee_amount = :fee'; $params[':fee'] = $bd['payment_fee_amount'];
+            $sets[] = 'shipping_amount = :shp';    $params[':shp'] = $bd['shipping_amount'];
+            $sets[] = 'total_amount = :tot';       $params[':tot'] = $bd['total_amount'];
+          }
+        }
+      }
+      if ($stripeFee !== null) { $sets[] = 'stripe_fee_amount = :sfee'; $params[':sfee'] = $stripeFee; }
+
+      if (!empty($sets)) {
+        if ($apply) {
+          try {
+            $pdo->prepare('UPDATE orders SET ' . implode(', ', $sets) . ' WHERE id = :id')->execute($params);
+            $entry['applied'] = true;
+          } catch (Throwable $e) {
+            $entry['error'] = $e->getMessage();
+          }
+        }
+        $changed[] = $entry;
+      }
+    }
+
+    json_out(['ok'=>true, 'apply'=>$apply, 'scanned'=>$scanned, 'changed_count'=>count($changed), 'changed'=>$changed, 'errors'=>$errors]);
+    break;
+  }
+
+  case 'admin_order_update_contact': {
+    $key = header_get('x-admin-key');
+    if ($CFG['admin_key'] === '' || !hash_equals($CFG['admin_key'], $key)) json_out(['ok'=>false,'error'=>'unauthorized'], 401);
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') json_out(['ok'=>false,'error'=>'method_not_allowed'], 405);
+
+    $b = get_json_body();
+    $id = trim((string)($b['id'] ?? ''));
+    if ($id === '') json_out(['ok'=>false,'error'=>'missing_id'], 400);
+
+    $pdo = get_pdo($CFG);
+    $st = $pdo->prepare("SELECT ship_name, ship_email, ship_phone, ship_address, ship_address2, ship_city, ship_province, ship_postal, ship_country, ship_notes FROM orders WHERE id = :id LIMIT 1");
+    $st->execute([':id' => $id]);
+    $cur = $st->fetch();
+    if (!$cur) json_out(['ok'=>false,'error'=>'not_found'], 404);
+
+    // Solo datos de contacto/envío (NO toca estado, importe, pago ni token).
+    $map = [
+      'name' => 'ship_name', 'email' => 'ship_email', 'phone' => 'ship_phone',
+      'address' => 'ship_address', 'address2' => 'ship_address2', 'city' => 'ship_city',
+      'province' => 'ship_province', 'postal' => 'ship_postal', 'country' => 'ship_country',
+      'notes' => 'ship_notes',
+    ];
+
+    $sets = [];
+    $params = [':id' => $id];
+    $changes = [];
+    foreach ($map as $k => $col) {
+      if (!array_key_exists($k, $b)) continue; // solo se actualizan los campos enviados
+      $new = trim((string)$b[$k]);
+      if ($k === 'email' && $new !== '' && !filter_var($new, FILTER_VALIDATE_EMAIL)) {
+        json_out(['ok'=>false,'error'=>'bad_email'], 400);
+      }
+      if (mb_strlen($new) > 255) $new = mb_substr($new, 0, 255);
+      $old = trim((string)($cur[$col] ?? ''));
+      $sets[] = "$col = :$col";
+      $params[":$col"] = ($new === '' ? null : $new);
+      if ($old !== $new) $changes[] = [$col, $old, $new];
+    }
+    if (!$sets) json_out(['ok'=>false,'error'=>'no_fields'], 400);
+
+    $now = date('Y-m-d H:i:s');
+    $sets[] = "updated_at = :updated_at";
+    $params[':updated_at'] = $now;
+    $sql = "UPDATE orders SET " . implode(', ', $sets) . " WHERE id = :id";
+    $pdo->prepare($sql)->execute($params);
+
+    if ($changes) {
+      $histSt = $pdo->prepare("INSERT INTO order_history (order_id, field_name, old_value, new_value, changed_by, created_at) VALUES (:oid, :field, :oldv, :newv, 'admin', :ts)");
+      foreach ($changes as $c) {
+        $histSt->execute([':oid' => $id, ':field' => $c[0], ':oldv' => $c[1], ':newv' => $c[2], ':ts' => $now]);
+      }
+    }
+
+    json_out(['ok' => true, 'changed' => count($changes)]);
+    break;
+  }
+
+  case 'admin_order_amounts': {
+    // Ajuste manual del importe de un pedido (p. ej. recargo de envío internacional).
+    //
+    // OJO: admin_status solo escribe `amount`, pero el /pedido del cliente, el correo
+    // y el enlace de pago leen `total_amount` primero. Editar solo `amount` deja el
+    // pedido descuadrado y el cliente sigue viendo/pagando el importe viejo. Esta ruta
+    // escribe el desglose completo de forma coherente y deja rastro en order_history.
+    $key = header_get('x-admin-key');
+    if ($CFG['admin_key'] === '' || !hash_equals($CFG['admin_key'], $key)) json_out(['ok'=>false,'error'=>'unauthorized'], 401);
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') json_out(['ok'=>false,'error'=>'method_not_allowed'], 405);
+
+    $b = get_json_body();
+    $id = trim((string)($_GET['id'] ?? $b['id'] ?? ''));
+    if ($id === '') json_out(['ok'=>false,'error'=>'missing_id'], 400);
+
+    $pdo = get_pdo($CFG);
+    $st = $pdo->prepare("SELECT status, amount, subtotal_amount, shipping_amount, payment_fee_amount, discount_amount, total_amount FROM orders WHERE id = :id LIMIT 1");
+    $st->execute([':id' => $id]);
+    $cur = $st->fetch();
+    if (!$cur) json_out(['ok'=>false,'error'=>'not_found'], 404);
+
+    // Un pedido ya cobrado no se toca sin confirmación explícita: cambiar el total NO
+    // cobra la diferencia, solo descuadra lo registrado frente a lo que se cobró.
+    $status = trim((string)($cur['status'] ?? ''));
+    $settled = in_array($status, ['paid','preparing','shipped','delivered','refunded','dispute'], true);
+    if ($settled && empty($b['allow_settled'])) {
+      json_out(['ok'=>false,'error'=>'order_already_settled','status'=>$status], 409);
+    }
+
+    // Campos del desglose: se toma el valor enviado y, si no viene, el que ya tenía.
+    $money = function ($v) { return number_format((float)$v, 2, '.', ''); };
+    $pick = function (string $k, $fallback) use ($b) {
+      if (!array_key_exists($k, $b) || $b[$k] === null || $b[$k] === '') return $fallback;
+      return trim((string)$b[$k]);
+    };
+
+    $subtotal = $pick('subtotal_amount', $cur['subtotal_amount'] ?? '0.00');
+    $shipping = $pick('shipping_amount', $cur['shipping_amount'] ?? '0.00');
+    $fee      = $pick('payment_fee_amount', $cur['payment_fee_amount'] ?? '0.00');
+    $discount = $pick('discount_amount', $cur['discount_amount'] ?? '0.00');
+    $total    = $pick('total_amount', null);
+
+    foreach (['subtotal_amount'=>$subtotal,'shipping_amount'=>$shipping,'payment_fee_amount'=>$fee,'discount_amount'=>$discount,'total_amount'=>$total] as $label => $val) {
+      if ($val === null || !preg_match('/^\d+(\.\d{1,2})?$/', (string)$val)) {
+        json_out(['ok'=>false,'error'=>'bad_amount','field'=>$label], 400);
+      }
+    }
+
+    $subtotal = $money($subtotal); $shipping = $money($shipping);
+    $fee = $money($fee); $discount = $money($discount); $total = $money($total);
+
+    // El desglose debe cuadrar con el total (tolerancia de 1 céntimo por redondeos).
+    $expected = (float)$subtotal + (float)$shipping + (float)$fee - (float)$discount;
+    if (abs($expected - (float)$total) > 0.011) {
+      json_out([
+        'ok'=>false,'error'=>'breakdown_mismatch',
+        'expected_total'=>$money($expected),'received_total'=>$total,
+      ], 400);
+    }
+
+    $now = date('Y-m-d H:i:s');
+    // `amount` se mantiene sincronizado con `total_amount` a propósito.
+    $up = $pdo->prepare("UPDATE orders SET amount = :amount, subtotal_amount = :sub, shipping_amount = :shp, payment_fee_amount = :fee, discount_amount = :dis, total_amount = :tot, updated_at = :now WHERE id = :id");
+    $up->execute([
+      ':amount'=>$total, ':sub'=>$subtotal, ':shp'=>$shipping, ':fee'=>$fee,
+      ':dis'=>$discount, ':tot'=>$total, ':now'=>$now, ':id'=>$id,
+    ]);
+
+    $fields = [
+      'amount' => [$cur['amount'] ?? '', $total],
+      'subtotal_amount' => [$cur['subtotal_amount'] ?? '', $subtotal],
+      'shipping_amount' => [$cur['shipping_amount'] ?? '', $shipping],
+      'payment_fee_amount' => [$cur['payment_fee_amount'] ?? '', $fee],
+      'discount_amount' => [$cur['discount_amount'] ?? '', $discount],
+      'total_amount' => [$cur['total_amount'] ?? '', $total],
+    ];
+    $changes = [];
+    $histSt = $pdo->prepare("INSERT INTO order_history (order_id, field_name, old_value, new_value, changed_by, created_at) VALUES (:oid, :field, :oldv, :newv, 'admin', :ts)");
+    foreach ($fields as $col => $pair) {
+      $old = trim((string)$pair[0]);
+      if ($old !== '' && $money($old) === $pair[1]) continue;
+      $histSt->execute([':oid'=>$id, ':field'=>$col, ':oldv'=>$old, ':newv'=>$pair[1], ':ts'=>$now]);
+      $changes[] = $col;
+    }
+
+    json_out([
+      'ok'=>true, 'id'=>$id, 'status'=>$status, 'changed'=>$changes,
+      'breakdown'=>[
+        'subtotal_amount'=>$subtotal, 'shipping_amount'=>$shipping,
+        'payment_fee_amount'=>$fee, 'discount_amount'=>$discount, 'total_amount'=>$total,
       ],
     ]);
     break;
@@ -6373,6 +7376,7 @@ switch ($route) {
       'orderItems' => build_order_items_from_order_row($order),
       'subtotal_amount' => (string)($order['subtotal_amount'] ?? ''),
       'shipping_amount' => (string)($order['shipping_amount'] ?? ''),
+      'payment_fee_amount' => (string)($order['payment_fee_amount'] ?? ''),
       'total_amount' => (string)($order['total_amount'] ?? ''),
       'amount' => (string)($order['amount'] ?? ''),
       'currency' => (string)($order['currency'] ?? 'EUR'),
@@ -6481,6 +7485,10 @@ switch ($route) {
     elseif ($ps === 'DENIED' || $ps === 'FAILED') $newStatus = 'canceled';
 
     if ($orderId && $newStatus) {
+      $stPrev = $pdo->prepare("SELECT status FROM orders WHERE id = :id LIMIT 1");
+      $stPrev->execute([':id' => $orderId]);
+      $ipnPrevStatus = (string)($stPrev->fetchColumn() ?: '');
+
       $payer_email = (string)($ipn['payer_email'] ?? '');
       $first = (string)($ipn['first_name'] ?? '');
       $last  = (string)($ipn['last_name'] ?? '');
@@ -6514,7 +7522,7 @@ switch ($route) {
         $orderMailSt = $pdo->prepare("SELECT * FROM orders WHERE id = :id LIMIT 1");
         $orderMailSt->execute([':id' => $orderId]);
         $orderForMail = $orderMailSt->fetch() ?: [];
-        send_paid_email($CFG, $payer_email, $orderId, [
+        $ipnPaidEmailSent = send_paid_email($CFG, $payer_email, $orderId, [
           'provider' => 'paypal',
           'triggerSource' => 'paypal_ipn',
           'payerName' => $payer_name,
@@ -6528,7 +7536,12 @@ switch ($route) {
           'orderUrl' => (string)($orderForMail['product_url'] ?? ''),
           'productImageUrl' => (string)($orderForMail['product_image_url'] ?? ''),
           'orderItems' => build_order_items_from_order_row($orderForMail),
+          'subtotal_amount' => (string)($orderForMail['subtotal_amount'] ?? ''),
+          'shipping_amount' => (string)($orderForMail['shipping_amount'] ?? ''),
+          'payment_fee_amount' => (string)($orderForMail['payment_fee_amount'] ?? ''),
+          'total_amount' => (string)($orderForMail['total_amount'] ?? ''),
         ]);
+        log_status_email_history($pdo, $orderId, $ipnPrevStatus, 'paid', $payer_email, $ipnPaidEmailSent, 'paypal');
       }
     }
 
@@ -6873,10 +7886,15 @@ switch ($route) {
     // Extract each product block by matching id + relevant fields
     if (preg_match_all('/\{\s*\n\s*id:\s*[\'"]([^\'"]+)[\'"].*?sku:\s*[\'"]([^\'"]+)[\'"].*?name:\s*[\'"]([^\'"]+)[\'"].*?series:\s*[\'"]([^\'"]+)[\'"].*?categoryKey:\s*[\'"]([^\'"]+)[\'"].*?priceText:\s*[\'"]([^\'"]*)[\'"].*?compareAtPriceText:\s*[\'"]([^\'"]*)[\'"].*?stock:\s*[\'"]([^\'"]+)[\'"].*?href:\s*[\'"]([^\'"]+)[\'"].*?image:\s*[\'"]([^\'"]+)[\'"]/s', $js, $matches, PREG_SET_ORDER)) {
       foreach ($matches as $m) {
+        /* Cuántas opciones de variante tiene el producto. Antes se contaban a golpe de
+           expresión regular sobre `colorVariants`, que ya no existe: hoy salen del
+           índice de atributos, que se genera EJECUTANDO el catálogo real
+           (scripts/build-attributes-index.js). Así cuenta cualquier eje —color, modelo,
+           medida o el que aparezca mañana— en vez de solo los colores. */
         $variantCount = 0;
-        if (preg_match('/id:\s*[\'\"]' . preg_quote($m[1], '/') . '[\'\"].*?colorVariants:\s*\[(.*?)\]\s*,\s*specs:/s', $js, $vm)) {
-          preg_match_all('/\bkey:\s*[\'\"][^\'\"]+[\'\"]/', (string)$vm[1], $vk);
-          $variantCount = count($vk[0] ?? []);
+        $ejesProducto = attributes_index()['products'][$m[2]]['axes'] ?? [];
+        foreach ($ejesProducto as $ejeProducto) {
+          $variantCount += count((array)($ejeProducto['options'] ?? []));
         }
         $stock = (string)$m[8];
         $hasHref = trim((string)$m[9]) !== '';
@@ -7022,21 +8040,21 @@ switch ($route) {
     if ($count === 0) json_out(['ok'=>false,'error'=>'product_not_found'], 404);
 
     // Replace compareAtPriceText if provided
+    $patternCompare = '/(id:\s*[\'"]' . preg_quote($productId, '/') . '[\'"].*?compareAtPriceText:\s*[\'"])[^\'"]*([\'"])/s';
     if ($newCompare !== '') {
-      $patternCompare = '/(id:\s*[\'"]' . preg_quote($productId, '/') . '[\'"].*?compareAtPriceText:\s*[\'"])[^\'"]*([\'"])/s';
       $js = preg_replace($patternCompare, '${1}' . $escapeReplacement($newCompare) . '${2}', $js, 1);
     }
 
     file_put_contents($productsFile, $js, LOCK_EX);
 
-    try {
-      $pdo = get_pdo($CFG);
-      $compareLabel = $newCompare !== '' ? (' / compare ' . $newCompare) : '';
-      log_admin_activity($pdo, 'PRODUCT:' . $productId, 'admin_product_price', $oldPriceText, $newPrice . $compareLabel, true, 'ok');
-    } catch (Throwable $e) {}
+    // El espejo de servidor (data/products-server.js) ya no existe: el backend lee el
+    // mismo catálogo que el cliente, así que un precio cambiado aquí no puede quedarse
+    // viejo en una segunda copia.
 
     // ── Also update the individual product HTML page ──
     // Extract href for this product from products.js
+    $pageUpdated = false;
+    $pageFields = [];
     $hrefPattern = '/id:\s*[\'"]' . preg_quote($productId, '/') . '[\'"].*?href:\s*[\'"]([^\'"]+)[\'"]/s';
     if (preg_match($hrefPattern, $js, $hrefMatch)) {
       $productHref = $hrefMatch[1]; // e.g. /patinetes/series-ix/ix8/
@@ -7053,43 +8071,88 @@ switch ($route) {
         }
 
         // 1. Update visible price: <span class="price-now">XXX €</span>
-        $displayPrice = $newPrice;
+        $displayPrice = $escapeReplacement($newPrice);
+        $n = 0;
         $html = preg_replace(
           '/(<span\s+class="price-now">)[^<]*(<\/span>)/i',
           '${1}' . $displayPrice . '${2}',
-          $html
+          $html, -1, $n
         );
+        $pageFields['price_now'] = $n;
 
         // 2. Update compare/old price: <span class="price-was">XXX €</span>
         if ($newCompare !== '') {
-          $displayCompare = $newCompare;
+          $displayCompare = $escapeReplacement($newCompare);
+          $n = 0;
           $html = preg_replace(
             '/(<span\s+class="price-was">)[^<]*(<\/span>)/i',
             '${1}' . $displayCompare . '${2}',
-            $html
+            $html, -1, $n
           );
+          $pageFields['price_was'] = $n;
         }
 
         // 3. Update checkout URL price= parameter
         if ($numericPrice !== '') {
+          $n = 0;
           $html = preg_replace(
             '/(href="\/checkout\?[^"]*?)price=[\d.]+/',
             '${1}price=' . $numericPrice,
-            $html
+            $html, -1, $n
           );
+          $pageFields['checkout_url'] = $n;
         }
 
         // 4. Update JSON-LD "price":"X.XX"
         if ($numericPrice !== '') {
+          $n = 0;
           $html = preg_replace(
             '/("price"\s*:\s*")[^"]*(")/i',
             '${1}' . $numericPrice . '${2}',
-            $html
+            $html, -1, $n
           );
+          $pageFields['json_ld'] = $n;
         }
 
+        // 5. data-price del botón "Añadir al carrito".
+        //    js/global-assets-app.js lo reescribe desde el catálogo al cargar la ficha,
+        //    así que el carrito no llega a cobrar el precio viejo, pero dejarlo correcto
+        //    en el HTML estático cierra la ventana entre el primer pintado y ese sync.
+        $n = 0;
+        $html = preg_replace(
+          '/(data-price=")[^"]*(")/i',
+          '${1}' . $displayPrice . '${2}',
+          $html, -1, $n
+        );
+        $pageFields['data_price'] = $n;
+
+        // 6. Fila "Precio" de la ficha técnica. Ni esta ruta ni el sync de runtime la
+        //    tocaban: se quedaba con el precio viejo de forma permanente y visible.
+        $n = 0;
+        $html = preg_replace(
+          '/(<div class="spec-row"><div class="spec-label">Precio<\/div><div class="spec-value">)[^<]*(<\/div>)/iu',
+          '${1}' . $displayPrice . '${2}',
+          $html, -1, $n
+        );
+        $pageFields['spec_row'] = $n;
+
         file_put_contents($htmlFile, $html, LOCK_EX);
+        $pageUpdated = true;
       }
+    }
+
+    // El log de actividad va DESPUÉS de escribir los ficheros y se conecta a mano:
+    // get_pdo() no lanza, hace json_out(500) y aborta la petición, así que un fallo de
+    // BD dejaba el catálogo ya guardado y la ficha sin parchear (estado a medias).
+    $activityLogged = false;
+    try {
+      $pdoLog = pdo_conn($CFG);
+      ensure_schema($pdoLog);
+      $compareLabel = $newCompare !== '' ? (' / compare ' . $newCompare) : '';
+      log_admin_activity($pdoLog, 'PRODUCT:' . $productId, 'admin_product_price', $oldPriceText, $newPrice . $compareLabel, true, 'ok');
+      $activityLogged = true;
+    } catch (Throwable $e) {
+      error_log('admin_product_price: log_admin_activity failed: ' . $e->getMessage());
     }
 
     // Auto-bump asset version + update index.html meta tag
@@ -7098,8 +8161,24 @@ switch ($route) {
     // Purge LiteSpeed cache
     header('X-LiteSpeed-Purge: /data/products.js');
     header('X-LiteSpeed-Purge: ' . trim($productId, '/') . '/');
+    if (isset($productHref) && $productHref !== '') header('X-LiteSpeed-Purge: ' . $productHref);
 
-    json_out(['ok'=>true, 'id'=>$productId, 'priceText'=>$newPrice, 'compareAtPriceText'=>$newCompare, 'version'=>$newVersion]);
+    json_out([
+      'ok'=>true,
+      'id'=>$productId,
+      'priceText'=>$newPrice,
+      'compareAtPriceText'=>$newCompare,
+      'version'=>$newVersion,
+      // Informe de qué se tocó realmente: el panel lo muestra para que un fallo
+      // silencioso (ficha no encontrada, markup distinto) no pase por "guardado OK".
+      'updated'=>[
+        'catalog'=>true,
+        'page'=>$pageUpdated,
+        'page_href'=>(isset($productHref) ? $productHref : ''),
+        'page_fields'=>$pageFields,
+        'activity_logged'=>$activityLogged,
+      ],
+    ]);
     break;
   }
 
@@ -7588,26 +8667,7 @@ switch ($route) {
 
     file_put_contents($productsFile, $updatedJs, LOCK_EX);
 
-    // Best effort: keep products-server.js in sync if present
-    $productsServerFile = __DIR__ . '/../data/products-server.js';
-    $serverCatalogUpdated = false;
-    if (is_file($productsServerFile)) {
-      $js2 = file_get_contents($productsServerFile);
-      if (is_string($js2) && $js2 !== '' && preg_match('/var products = \[(.*)\]\s*;/s', $js2, $m2)) {
-        $block2 = $m2[1];
-        $newBlock2 = preg_replace($pattern, '', $block2, 1, $count2);
-        if ($count2 > 0) {
-          $newBlock2 = preg_replace('/,\s*,/', ',', $newBlock2);
-          $newBlock2 = preg_replace('/,\s*\]/', ']', $newBlock2);
-          $newBlock2 = preg_replace('/\[\s*,/', '[', $newBlock2);
-          $updatedJs2 = preg_replace('/var products = \[(.*)\]\s*;/s', 'var products = [' . $newBlock2 . '];', $js2, 1, $rc2);
-          if ($rc2 === 1 && is_string($updatedJs2) && $updatedJs2 !== '') {
-            file_put_contents($productsServerFile, $updatedJs2, LOCK_EX);
-            $serverCatalogUpdated = true;
-          }
-        }
-      }
-    }
+    // Sin espejo de servidor que sincronizar: un solo catálogo.
 
     // Delete static page folder and images based on href
     $folderDeleted = false;
@@ -7628,7 +8688,6 @@ switch ($route) {
 
     // Purge LiteSpeed cache
     header('X-LiteSpeed-Purge: /data/products.js');
-    header('X-LiteSpeed-Purge: /data/products-server.js');
     header('X-LiteSpeed-Purge: /sitemap.xml');
     if ($href !== '') header('X-LiteSpeed-Purge: ' . $href);
 
@@ -7648,7 +8707,6 @@ switch ($route) {
       'version'=>$version,
       'purged' => [
         'catalog' => true,
-        'catalogServer' => $serverCatalogUpdated,
         'sitemap' => $sitemapUpdated,
         'pageFolder' => $folderDeleted,
       ],
@@ -7866,6 +8924,7 @@ switch ($route) {
     $discountCode  = strtoupper(trim((string)($b['discount_code'] ?? '')));
     $customerEmail = strtolower(trim((string)($b['customer_email'] ?? '')));
     $category      = trim((string)($b['category'] ?? ''));
+    $previewOrderId = trim((string)($b['order_id'] ?? ''));
 
     if ($sku === '')    json_out(['ok'=>false,'error'=>'INVALID_REQUEST','detail'=>'missing_sku'], 400);
     if ($currency !== 'EUR') json_out(['ok'=>false,'error'=>'INVALID_REQUEST','detail'=>'CURRENCY_NOT_SUPPORTED'], 400);
@@ -7883,9 +8942,18 @@ switch ($route) {
 
     $backendBaseAmt = $catalogEntry['price'];
 
+    // Envío guardado del pedido que se está reanudando (recargo manual de admin).
+    // Sin esto el resumen mostraría el precio de catálogo y el cliente vería un
+    // importe distinto al que se le va a cobrar.
+    $previewShipping = '0.00';
+    if ($previewOrderId !== '') {
+      $override = pending_order_shipping_override(get_pdo($CFG), $previewOrderId);
+      if ($override !== null) $previewShipping = $override;
+    }
+
     // ── Sin código: breakdown base ────────────────────────────────────────────
     if ($discountCode === '') {
-      $breakdown = calc_discount_engine($backendBaseAmt, null, null, $paymentMethod);
+      $breakdown = calc_discount_engine($backendBaseAmt, null, null, $paymentMethod, $previewShipping);
       json_out([
         'ok'              => true,
         'discount_valid'  => null,
@@ -7916,9 +8984,13 @@ switch ($route) {
     $stmt->execute([':code' => $discountCode]);
     $dc = $stmt->fetch();
 
-    if (!$dc || $dc['ends_at'] < $now) {
+    // OJO con el NULL: sin fecha de fin, `null < $now` es TRUE en PHP 8 (null se
+    // castea a "") y el código se daba por caducado. Todo descuento sin caducidad
+    // quedaba inservible en el checkout. Hay que comprobar el null explícitamente,
+    // igual que en resolve_order_pricing() y discount_validate.
+    if (!$dc || ($dc['ends_at'] !== null && $dc['ends_at'] < $now)) {
       // Código inválido/caducado: devolver breakdown sin descuento
-      $breakdown = calc_discount_engine($backendBaseAmt, null, null, $paymentMethod);
+      $breakdown = calc_discount_engine($backendBaseAmt, null, null, $paymentMethod, $previewShipping);
       json_out([
         'ok'              => true,
         'discount_valid'  => false,
@@ -7935,7 +9007,7 @@ switch ($route) {
 
     // Verificar starts_at
     if ($dc['starts_at'] !== null && $dc['starts_at'] > $now) {
-      $breakdown = calc_discount_engine($backendBaseAmt, null, null, $paymentMethod);
+      $breakdown = calc_discount_engine($backendBaseAmt, null, null, $paymentMethod, $previewShipping);
       json_out([
         'ok'              => true,
         'discount_valid'  => false,
@@ -7967,7 +9039,7 @@ switch ($route) {
       }
 
       if (!$eligible) {
-        $breakdown = calc_discount_engine($backendBaseAmt, null, null, $paymentMethod);
+        $breakdown = calc_discount_engine($backendBaseAmt, null, null, $paymentMethod, $previewShipping);
         json_out([
           'ok'              => true,
           'discount_valid'  => false,
@@ -7987,7 +9059,8 @@ switch ($route) {
       $backendBaseAmt,
       $dc['discount_type'],
       (string)$dc['discount_value'],
-      $paymentMethod
+      $paymentMethod,
+      $previewShipping
     );
 
     json_out([

@@ -141,6 +141,17 @@
       homeAriaLabel: 'Lista de accesorios'
     }
     ,{
+      key: 'acc-limit',
+      label: 'Limitadores',
+      categoryKey: 'accessories',
+      menuOrder: 2,
+      homeOrder: 2,
+      homeSectionId: 'series-limitadores',
+      homeTitle: 'Limitadores',
+      homeDescription: 'Mandos para alternar entre el modo homologado de 25 km/h y el modo libre de uso privado.',
+      homeAriaLabel: 'Lista de limitadores y deslimitadores'
+    }
+    ,{
       key: 'b',
       label: 'Bicicletas — Serie B',
       categoryKey: 'electric-bikes',
@@ -172,7 +183,7 @@
       sku: 'M41TANK',
       name: 'M41 Tank Ultimate 1000W',
       menuLabel: 'M41 Tank Ultimate',
-      badgeText: 'M41 TANK',
+      badgeText: 'Ecoxtrem M41 Tank Ultimate 1000W',
       brand: 'Ecoxtrem',
       series: 'ecoxtrem',
       productType: 'electric-scooter',
@@ -185,30 +196,50 @@
       href: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/',
       image: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/1.webp',
       alt: 'Patinete eléctrico Ecoxtrem M41 Tank Ultimate 1000W',
-      colorVariants: [
+      attributes: [
         {
-          key: 'negro',
-          label: 'Negro',
-          swatch: '#111111',
-          range: [1, 3],
-          default: true
-        },
-        {
-          key: 'verde',
-          label: 'Verde - Fluor',
-          swatch: '#d9ff43',
-          range: [4, 6]
-        },
-        {
-          key: 'rojo',
-          label: 'Rojo',
-          swatch: '#c91f2c',
-          range: [7, 9]
+          key: 'color',
+          label: 'Color',
+          type: 'swatch',
+          options: [
+            {
+              key: 'negro',
+              label: 'Negro',
+              swatch: '#111111',
+              range: [1, 3],
+              default: true
+            },
+            {
+              key: 'verde',
+              label: 'Verde - Fluor',
+              swatch: '#d9ff43',
+              range: [4, 6]
+            },
+            {
+              key: 'rojo',
+              label: 'Rojo',
+              swatch: '#c91f2c',
+              range: [7, 9]
+            },
+            {
+              key: 'azul',
+              label: 'Azul',
+              swatch: '#1d4ed8',
+              range: [10, 13]
+            },
+            {
+              key: 'verde-negro',
+              label: 'Verde y Negro',
+              swatch: 'linear-gradient(135deg, #d9ff43 50%, #111111 50%)',
+              range: [14, 17]
+            }
+                      ]
         }
       ],
-      specs: ['1000 W', 'Homologado DGT', '60-65 km'],
+      specs: ['1000 W', 'Homologado DGT', '50 km'],
+      compatibleSkus: ['ACC-LIMIT-M41', 'ACC-BAR-WAKE', 'ACC-BAR-WAKE-DH', 'ACC-BAR-UNO', 'ACC-BAR-NANLIO', 'ACC-BAR-KOCEVLO', 'ACC-BAR-LUNJE'],
       homeOrder: 1,
-      homeTitle: 'Ecoxtrem M41 — Tank Ultimate 1000W',
+      homeTitle: 'Ecoxtrem M41 Tank Ultimate 1000W',
       homeAriaLabel: 'Ecoxtrem M41 — Tank Ultimate 1000W',
       priceAriaLabel: 'Precio M41 — Tank Ultimate',
       dgtCertified: true,
@@ -222,7 +253,15 @@
         { src: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/6.webp', alt: 'Ecoxtrem M41 Tank vista 6' },
         { src: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/7.webp', alt: 'Ecoxtrem M41 Tank vista 7' },
         { src: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/8.webp', alt: 'Ecoxtrem M41 Tank vista 8' },
-        { src: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/9.webp', alt: 'Ecoxtrem M41 Tank vista 9' }
+        { src: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/9.webp', alt: 'Ecoxtrem M41 Tank vista 9' },
+        { src: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/10.webp', alt: 'Ecoxtrem M41 Tank azul vista 10' },
+        { src: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/11.webp', alt: 'Ecoxtrem M41 Tank azul vista 11' },
+        { src: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/12.webp', alt: 'Ecoxtrem M41 Tank azul vista 12' },
+        { src: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/13.webp', alt: 'Ecoxtrem M41 Tank azul vista 13' },
+        { src: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/14.webp', alt: 'Ecoxtrem M41 Tank verde y negro vista 14' },
+        { src: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/15.webp', alt: 'Ecoxtrem M41 Tank verde y negro vista 15' },
+        { src: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/16.webp', alt: 'Ecoxtrem M41 Tank verde y negro vista 16' },
+        { src: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/17.webp', alt: 'Ecoxtrem M41 Tank verde y negro vista 17' }
       ]
     },
     {
@@ -230,7 +269,7 @@
       sku: 'BISONGT',
       name: 'Bison GT Carbon Design',
       menuLabel: 'Bison GT Carbon',
-      badgeText: 'BISON GT',
+      badgeText: 'Ecoxtrem Bison GT Carbon Design',
       brand: 'Ecoxtrem',
       series: 'ecoxtrem',
       productType: 'electric-scooter',
@@ -243,30 +282,37 @@
       href: '/patinetes/ecoxtrem/bison-gt-carbon-design/',
       image: '/patinetes/ecoxtrem/bison-gt-carbon-design/img/1.webp',
       alt: 'Patinete eléctrico Ecoxtrem Bison GT Carbon Design',
-      colorVariants: [
+      attributes: [
         {
-          key: 'rojo-negro',
-          label: 'Rojo/Negro',
-          swatch: 'linear-gradient(90deg, #c91f2c 50%, #111111 50%)',
-          range: [1, 3],
-          default: true
-        },
-        {
-          key: 'gris',
-          label: 'Gris',
-          swatch: '#8c9099',
-          range: [4, 6]
-        },
-        {
-          key: 'negro',
-          label: 'Negro',
-          swatch: '#111111',
-          range: [7, 9]
+          key: 'color',
+          label: 'Color',
+          type: 'swatch',
+          options: [
+            {
+              key: 'rojo-negro',
+              label: 'Rojo/Negro',
+              swatch: 'linear-gradient(135deg, #c91f2c 50%, #111111 50%)',
+              range: [1, 3],
+              default: true
+            },
+            {
+              key: 'gris',
+              label: 'Gris',
+              swatch: '#8c9099',
+              range: [4, 6]
+            },
+            {
+              key: 'negro',
+              label: 'Negro',
+              swatch: '#111111',
+              range: [7, 9]
+            }
+                      ]
         }
       ],
       specs: ['800 W', 'Homologado DGT', '40-50 km'],
       homeOrder: 2,
-      homeTitle: 'Ecoxtrem Bison — GT Carbon Design',
+      homeTitle: 'Ecoxtrem Bison GT Carbon Design',
       homeAriaLabel: 'Ecoxtrem Bison — GT Carbon Design',
       priceAriaLabel: 'Precio Bison — GT Carbon',
       dgtCertified: true,
@@ -286,9 +332,9 @@
     {
       id: 'ecoxtrem-m41-armored-dual',
       sku: 'M41DUAL',
-      name: 'M41 ARMORED DUAL',
-      menuLabel: 'M41 Armored Dual',
-      badgeText: 'M41 ARM DUAL',
+      name: 'M41 ARMORED DUAL (LR)',
+      menuLabel: 'M41 Armored Dual (LR)',
+      badgeText: 'Ecoxtrem M41 Armored Dual (LR)',
       brand: 'Ecoxtrem',
       series: 'ecoxtrem',
       productType: 'electric-scooter',
@@ -299,40 +345,63 @@
       stock: 'in_stock',
       paypalId: 'M41ARMOREDDUAL',
       href: '/patinetes/ecoxtrem/m41-armored-dual/',
-      image: '/patinetes/ecoxtrem/m41-armored-dual/img/1.webp',
-      alt: 'Patinete eléctrico Ecoxtrem M41 ARMORED DUAL',
-      colorVariants: [
+      image: '/patinetes/ecoxtrem/m41-armored-dual/img/8.webp',
+      alt: 'Patinete eléctrico Ecoxtrem M41 ARMORED DUAL (LR)',
+      attributes: [
         {
-          key: 'blanco',
-          label: 'BLANCO',
-          swatch: '#f8fafc',
-          range: [1, 4],
-          default: true
-        },
-        {
-          key: 'gris-amarillo',
-          label: 'Gris y Amarillo',
-          swatch: 'linear-gradient(90deg, #8c9099 50%, #eab308 50%)',
-          range: [8, 12]
-        },
-        {
-          key: 'azul',
-          label: 'Azul',
-          swatch: '#0a1f66',
-          range: [13, 16]
-        },
-        {
-          key: 'granate',
-          label: 'Granate',
-          swatch: '#7f1d1d',
-          range: [17, 21]
+          key: 'color',
+          label: 'Color',
+          type: 'swatch',
+          options: [
+            {
+              key: 'blanco',
+              label: 'BLANCO',
+              swatch: '#f8fafc',
+              range: [1, 4],
+              // Sin stock (2026-07-31): js/index.js lo excluye de la paleta del home y en la
+              // ficha su botón va deshabilitado en el markup estático.
+              available: false
+            },
+            {
+              key: 'gris-amarillo',
+              label: 'Gris y Amarillo',
+              swatch: 'linear-gradient(135deg, #8c9099 50%, #eab308 50%)',
+              range: [8, 12],
+              default: true
+            },
+            {
+              key: 'azul',
+              label: 'Azul',
+              swatch: '#0a1f66',
+              range: [13, 16]
+            },
+            {
+              key: 'granate',
+              label: 'Granate',
+              swatch: '#7f1d1d',
+              range: [17, 21]
+            },
+            {
+              key: 'verde',
+              label: 'Verde',
+              swatch: '#7cb518',
+              range: [23, 23]
+            },
+            {
+              key: 'amarillo',
+              label: 'Amarillo',
+              swatch: '#f0c000',
+              range: [24, 24]
+            }
+                      ]
         }
       ],
       specs: ['2 x 1000 W', '60 V 24 Ah', '80-90 km'],
+      compatibleSkus: ['ACC-LIMIT-M41-AD', 'ACC-BAR-WAKE', 'ACC-BAR-WAKE-DH', 'ACC-BAR-UNO', 'ACC-BAR-NANLIO', 'ACC-BAR-KOCEVLO', 'ACC-BAR-LUNJE'],
       homeOrder: 3,
-      homeTitle: 'Ecoxtrem M41 — Armored Dual',
-      homeAriaLabel: 'Ecoxtrem M41 — Armored Dual',
-      priceAriaLabel: 'Precio M41 — Armored Dual',
+      homeTitle: 'Ecoxtrem M41 Armored Dual (LR)',
+      homeAriaLabel: 'Ecoxtrem M41 — Armored Dual (LR)',
+      priceAriaLabel: 'Precio M41 — Armored Dual (LR)',
       dgtCertified: true,
       dgtTooltipText: dgtTooltipText,
       gallery: [
@@ -358,7 +427,118 @@
         { src: '/patinetes/ecoxtrem/m41-armored-dual/img/20.webp', alt: 'Ecoxtrem M41 Armored Dual vista 20' },
         { src: '/patinetes/ecoxtrem/m41-armored-dual/img/21.webp', alt: 'Ecoxtrem M41 Armored Dual vista 21' },
         { src: '/patinetes/ecoxtrem/m41-armored-dual/img/22.webp', alt: 'Ecoxtrem M41 Armored Dual vista 22' },
-        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/23.webp', alt: 'Ecoxtrem M41 Armored Dual vista 23' }
+        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/23.webp', alt: 'Ecoxtrem M41 Armored Dual vista 23' },
+        { src: '/patinetes/ecoxtrem/m41-armored-dual/img/24.webp', alt: 'Ecoxtrem M41 Armored Dual vista 24' }
+      ]
+    },
+    {
+      id: 'ecoxtrem-m41-armored-one',
+      sku: 'M41ONE',
+      name: 'M41 ARMORED ONE PRO',
+      menuLabel: 'M41 Armored One Pro',
+      badgeText: 'Ecoxtrem M41 Armored One Pro',
+      brand: 'Ecoxtrem',
+      series: 'ecoxtrem',
+      productType: 'electric-scooter',
+      catalogType: 'vehicle',
+      categoryKey: 'electric-scooters',
+      priceText: '639 €',
+      compareAtPriceText: '759 €',
+      stock: 'in_stock',
+      href: '/patinetes/ecoxtrem/m41-armored-one/',
+      image: '/patinetes/ecoxtrem/m41-armored-one/img/1.webp',
+      alt: 'Patinete eléctrico Ecoxtrem M41 ARMORED ONE PRO',
+      attributes: [
+        {
+          key: 'color',
+          label: 'Color',
+          type: 'swatch',
+          options: [
+            { key: 'naranja', label: 'Naranja', swatch: '#ea580c', range: [1, 5], default: true },
+            { key: 'azul-oscuro', label: 'Azul oscuro', swatch: '#0b1b3a', range: [6, 9] },
+            { key: 'blanco', label: 'Blanco', swatch: '#f8fafc', range: [10, 15] },
+            { key: 'rojo-rosa', label: 'Rojo rosa', swatch: '#f43f5e', range: [16, 16] },
+            { key: 'verde-militar', label: 'Verde militar', swatch: '#4b5320', range: [17, 17] }
+                      ]
+        }
+      ],
+      specs: ['1000 W', '52 V 20 Ah', 'Hasta 65 km'],
+      compatibleSkus: ['ACC-LIMIT-M41-AO', 'ACC-BAR-WAKE', 'ACC-BAR-WAKE-DH', 'ACC-BAR-UNO', 'ACC-BAR-NANLIO', 'ACC-BAR-KOCEVLO', 'ACC-BAR-LUNJE'],
+      homeOrder: 4,
+      homeTitle: 'Ecoxtrem M41 Armored One Pro',
+      homeAriaLabel: 'Ecoxtrem M41 — Armored One Pro',
+      priceAriaLabel: 'Precio M41 — Armored One Pro',
+      dgtCertified: true,
+      dgtTooltipText: dgtTooltipText,
+      gallery: [
+        { src: '/patinetes/ecoxtrem/m41-armored-one/img/1.webp', alt: 'Ecoxtrem M41 Armored One Pro vista 1' },
+        { src: '/patinetes/ecoxtrem/m41-armored-one/img/2.webp', alt: 'Ecoxtrem M41 Armored One Pro vista 2' },
+        { src: '/patinetes/ecoxtrem/m41-armored-one/img/3.webp', alt: 'Ecoxtrem M41 Armored One Pro vista 3' },
+        { src: '/patinetes/ecoxtrem/m41-armored-one/img/4.webp', alt: 'Ecoxtrem M41 Armored One Pro vista 4' },
+        { src: '/patinetes/ecoxtrem/m41-armored-one/img/5.webp', alt: 'Ecoxtrem M41 Armored One Pro vista 5' },
+        { src: '/patinetes/ecoxtrem/m41-armored-one/img/6.webp', alt: 'Ecoxtrem M41 Armored One Pro vista 6' },
+        { src: '/patinetes/ecoxtrem/m41-armored-one/img/7.webp', alt: 'Ecoxtrem M41 Armored One Pro vista 7' },
+        { src: '/patinetes/ecoxtrem/m41-armored-one/img/8.webp', alt: 'Ecoxtrem M41 Armored One Pro vista 8' },
+        { src: '/patinetes/ecoxtrem/m41-armored-one/img/9.webp', alt: 'Ecoxtrem M41 Armored One Pro vista 9' },
+        { src: '/patinetes/ecoxtrem/m41-armored-one/img/10.webp', alt: 'Ecoxtrem M41 Armored One Pro vista 10' },
+        { src: '/patinetes/ecoxtrem/m41-armored-one/img/11.webp', alt: 'Ecoxtrem M41 Armored One Pro vista 11' },
+        { src: '/patinetes/ecoxtrem/m41-armored-one/img/12.webp', alt: 'Ecoxtrem M41 Armored One Pro vista 12' },
+        { src: '/patinetes/ecoxtrem/m41-armored-one/img/13.webp', alt: 'Ecoxtrem M41 Armored One Pro vista 13' },
+        { src: '/patinetes/ecoxtrem/m41-armored-one/img/14.webp', alt: 'Ecoxtrem M41 Armored One Pro vista 14' },
+        { src: '/patinetes/ecoxtrem/m41-armored-one/img/15.webp', alt: 'Ecoxtrem M41 Armored One Pro vista 15' },
+        { src: '/patinetes/ecoxtrem/m41-armored-one/img/16.webp', alt: 'Ecoxtrem M41 Armored One Pro vista 16' },
+        { src: '/patinetes/ecoxtrem/m41-armored-one/img/17.webp', alt: 'Ecoxtrem M41 Armored One Pro vista 17' }
+      ]
+    },
+    {
+      id: 'ecoxtrem-m41-tank-dual',
+      sku: 'M41TANKDUAL',
+      name: 'M41 TANK DUAL',
+      menuLabel: 'M41 Tank Dual',
+      badgeText: 'Ecoxtrem M41 Tank Dual',
+      brand: 'Ecoxtrem',
+      series: 'ecoxtrem',
+      productType: 'electric-scooter',
+      catalogType: 'vehicle',
+      categoryKey: 'electric-scooters',
+      priceText: '725 €',
+      compareAtPriceText: '849 €',
+      stock: 'in_stock',
+      href: '/patinetes/ecoxtrem/m41-tank-dual/',
+      image: '/patinetes/ecoxtrem/m41-tank-dual/img/1.webp',
+      alt: 'Patinete eléctrico Ecoxtrem M41 TANK DUAL',
+      attributes: [
+        {
+          key: 'color',
+          label: 'Color',
+          type: 'swatch',
+          options: [
+            { key: 'gris-amarillo', label: 'Gris y Amarillo', swatch: 'linear-gradient(135deg, #8c9099 50%, #eab308 50%)', range: [1, 4], default: true },
+            { key: 'gris-rojo', label: 'Gris y Rojo', swatch: 'linear-gradient(135deg, #8c9099 50%, #dc2626 50%)', range: [5, 8] },
+            { key: 'gris-azul', label: 'Gris y Azul', swatch: 'linear-gradient(135deg, #8c9099 50%, #1d4ed8 50%)', range: [9, 9] },
+            { key: 'gris-verde', label: 'Gris y Verde', swatch: 'linear-gradient(135deg, #8c9099 50%, #16a34a 50%)', range: [10, 10] }
+                      ]
+        }
+      ],
+      specs: ['2 x 1000 W', '52 V 20 Ah', '65-70 km'],
+      compatibleSkus: ['ACC-LIMIT-M41-TD', 'ACC-BAR-WAKE', 'ACC-BAR-WAKE-DH', 'ACC-BAR-UNO', 'ACC-BAR-NANLIO', 'ACC-BAR-KOCEVLO', 'ACC-BAR-LUNJE'],
+      homeOrder: 5,
+      homeTitle: 'Ecoxtrem M41 Tank Dual',
+      homeAriaLabel: 'Ecoxtrem M41 — Tank Dual',
+      priceAriaLabel: 'Precio M41 — Tank Dual',
+      dgtCertified: true,
+      dgtTooltipText: dgtTooltipText,
+      gallery: [
+        { src: '/patinetes/ecoxtrem/m41-tank-dual/img/1.webp', alt: 'Ecoxtrem M41 Tank Dual vista 1' },
+        { src: '/patinetes/ecoxtrem/m41-tank-dual/img/2.webp', alt: 'Ecoxtrem M41 Tank Dual vista 2' },
+        { src: '/patinetes/ecoxtrem/m41-tank-dual/img/3.webp', alt: 'Ecoxtrem M41 Tank Dual vista 3' },
+        { src: '/patinetes/ecoxtrem/m41-tank-dual/img/4.webp', alt: 'Ecoxtrem M41 Tank Dual vista 4' },
+        { src: '/patinetes/ecoxtrem/m41-tank-dual/img/5.webp', alt: 'Ecoxtrem M41 Tank Dual vista 5' },
+        { src: '/patinetes/ecoxtrem/m41-tank-dual/img/6.webp', alt: 'Ecoxtrem M41 Tank Dual vista 6' },
+        { src: '/patinetes/ecoxtrem/m41-tank-dual/img/7.webp', alt: 'Ecoxtrem M41 Tank Dual vista 7' },
+        { src: '/patinetes/ecoxtrem/m41-tank-dual/img/8.webp', alt: 'Ecoxtrem M41 Tank Dual vista 8' },
+        { src: '/patinetes/ecoxtrem/m41-tank-dual/img/9.webp', alt: 'Ecoxtrem M41 Tank Dual vista 9' },
+        { src: '/patinetes/ecoxtrem/m41-tank-dual/img/10.webp', alt: 'Ecoxtrem M41 Tank Dual vista 10' }
       ]
     },
     {
@@ -366,7 +546,7 @@
       sku: 'G2PRO',
       name: 'KUKIRIN G2 PRO',
       menuLabel: 'KUKIRIN G2 PRO',
-      badgeText: 'G2 PRO',
+      badgeText: 'KUKIRIN G2 PRO',
       brand: 'KUKIRIN',
       series: 'k',
       productType: 'electric-scooter',
@@ -381,7 +561,7 @@
       alt: 'Patinete eléctrico KUKIRIN G2 PRO',
       specs: ['600 W', 'Hasta 58 km', '48 V 15 Ah'],
       homeOrder: 1,
-      homeTitle: 'KUKIRIN G2 PRO — Homologado por la DGT',
+      homeTitle: 'KUKIRIN G2 PRO',
       homeAriaLabel: 'KUKIRIN G2 PRO — 600 W, 45 km/h y hasta 58 km',
       priceAriaLabel: 'Estado KUKIRIN G2 PRO',
       dgtCertified: true,
@@ -394,8 +574,43 @@
         { src: '/patinetes/series-k/g2-pro/img/5.webp', alt: 'KUKIRIN G2 PRO vista 5' },
         { src: '/patinetes/series-k/g2-pro/img/6.webp', alt: 'KUKIRIN G2 PRO vista 6' },
         { src: '/patinetes/series-k/g2-pro/img/7.webp', alt: 'KUKIRIN G2 PRO vista 7' },
-        { src: '/patinetes/series-k/g2-pro/img/8.webp', alt: 'KUKIRIN G2 PRO vista 8' },
-        { src: '/patinetes/series-k/g2-pro/img/9.webp', alt: 'KUKIRIN G2 PRO vista 9' }
+        { src: '/patinetes/series-k/g2-pro/img/8.webp', alt: 'KUKIRIN G2 PRO (Normal) con asiento vista 8' },
+        { src: '/patinetes/series-k/g2-pro/img/9.webp', alt: 'KUKIRIN G2 PRO (Normal) con asiento vista 9' },
+        { src: '/patinetes/series-k/g2-pro/img/10.webp', alt: 'KUKIRIN G2 PRO (Normal) con asiento vista 10' },
+        { src: '/patinetes/series-k/g2-pro/img/11.webp', alt: 'KUKIRIN G2 PRO (Normal) con asiento vista 11' },
+        { src: '/patinetes/series-k/g2-pro/img/12.webp', alt: 'KUKIRIN G2 PRO (Normal) con asiento vista 12' }
+      ],
+      /* Eje de MODELO, declarado como tal. Esto es lo único que hace falta para que
+         Home, ficha, ACC POP y carrito lo traten como modelo: el rótulo, el tipo de
+         selector y las fotos salen de aquí.
+
+         Antes eran `colorVariants` con el comentario "dos configuraciones bajo el
+         formato de color", y la ficha las disfrazaba a mano de píldora con una clase
+         CSS extra. El Home no podía saberlo y las pintaba como círculos de color.
+         Ver js/product-attributes.js. */
+      attributes: [
+        {
+          key: 'model',
+          label: 'Modelo',
+          type: 'pill',
+          options: [
+            {
+              key: 'vmp',
+              label: 'G2 PRO VMP',
+              images: [1, 2, 3, 4, 5, 6, 7],
+              default: true,
+              dgt: true,
+              desc: '<strong>KUKIRIN G2 PRO</strong> en versión VMP: homologado por la DGT y limitado a 25 km/h. Motor brushless de 600 W, batería de 48 V 15 Ah y hasta 65 km de autonomía.'
+            },
+            {
+              key: 'normal',
+              label: 'G2 PRO Normal',
+              images: [8, 9, 10, 11, 12],
+              dgt: false,
+              desc: '<strong>KUKIRIN G2 PRO</strong> en versión Normal: deslimitado, con motor brushless de 600 W, batería de 48 V 15 Ah, punta de 45 km/h y hasta 65 km de autonomía. <strong>Sin homologación DGT</strong>: solo para circuito o recinto privado.'
+            }
+          ]
+        }
       ]
     },
     {
@@ -403,7 +618,7 @@
       sku: 'KG2',
       name: 'KUKIRIN G2',
       menuLabel: 'KUKIRIN G2',
-      badgeText: 'G2',
+      badgeText: 'KUKIRIN G2',
       brand: 'KUKIRIN',
       series: 'k',
       productType: 'electric-scooter',
@@ -417,7 +632,7 @@
       alt: 'Patinete eléctrico KUKIRIN G2',
       specs: ['800 W', 'Hasta 55 km', '48 V 15 Ah'],
       homeOrder: 2,
-      homeTitle: 'KUKIRIN G2 — 800 W todoterreno',
+      homeTitle: 'KUKIRIN G2',
       homeAriaLabel: 'KUKIRIN G2 — 800 W, 45 km/h y hasta 55 km',
       priceAriaLabel: 'Estado KUKIRIN G2',
       gallery: [
@@ -449,8 +664,9 @@
       image: '/patinetes/series-n/n7/img/1.webp',
       alt: 'Patinete eléctrico N7PRO',
       specs: ['350 W', '25-30 km', '8.5" honeycomb'],
+      compatibleSkus: ['ACC-REFLECT'],
       homeOrder: 1,
-      homeTitle: 'N7PRO — Patinete eléctrico urbano',
+      homeTitle: 'N7PRO',
       homeAriaLabel: 'N7PRO — Patinete eléctrico urbano',
       priceAriaLabel: 'Precio N7PRO',
       gallery: [
@@ -467,7 +683,7 @@
       sku: 'S4',
       name: 'ZWheel MASCOOTER S4',
       menuLabel: 'S4',
-      badgeText: 'S4',
+      badgeText: 'ZWheel MASCOOTER S4',
       brand: 'MASCOOTER',
       series: 'n',
       productType: 'electric-scooter',
@@ -482,7 +698,7 @@
       alt: 'Patinete eléctrico ZWheel MASCOOTER S4',
       specs: ['300 W (600 W max.)', 'Hasta 25 km', '10" tubeless'],
       homeOrder: 2,
-      homeTitle: 'MASCOOTER S4 — Homologado por la DGT',
+      homeTitle: 'ZWheel MASCOOTER S4',
       homeAriaLabel: 'ZWheel MASCOOTER S4 — Homologado DGT',
       priceAriaLabel: 'Precio S4',
       dgtCertified: true,
@@ -515,7 +731,7 @@
       alt: 'Patinete eléctrico S3-11',
       specs: ['6000 W dual motor', '100-120 km', '11" off-road tubeless'],
       homeOrder: 3,
-      homeTitle: 'S3-11 — 6000W dual motor',
+      homeTitle: 'S3-11',
       homeAriaLabel: 'S3-11 — Dual motor en stock',
       priceAriaLabel: 'Estado S3',
       gallery: [
@@ -550,7 +766,7 @@
       alt: 'Patinete eléctrico VS6',
       specs: ['1000 W', 'Hasta 65 km', '48 V 18,2 Ah'],
       homeOrder: 4,
-      homeTitle: 'VS6 — Patinete eléctrico (Serie N)',
+      homeTitle: 'VS6',
       homeAriaLabel: 'VS6 — Serie N',
       priceAriaLabel: 'Precio VS6',
       gallery: [
@@ -567,7 +783,7 @@
       sku: 'V70',
       name: 'Cecotec Bongo V70 Connected',
       menuLabel: 'Bongo V70',
-      badgeText: 'V70 CONNECTED',
+      badgeText: 'Cecotec Bongo V70 Connected',
       brand: 'CECOTEC',
       series: 'n',
       productType: 'electric-scooter',
@@ -581,7 +797,7 @@
       alt: 'Patinete electrico Cecotec Bongo V70 Connected',
       specs: ['1500 W max.', 'Hasta 70 km', '48 V 15 Ah'],
       homeOrder: 5,
-      homeTitle: 'Bongo V70 Connected — Homologado DGT',
+      homeTitle: 'Cecotec Bongo V70 Connected',
       homeAriaLabel: 'Cecotec Bongo V70 Connected — 1500 W maximos y hasta 70 km',
       priceAriaLabel: 'Precio Bongo V70 Connected',
       dgtCertified: true,
@@ -614,7 +830,7 @@
       alt: 'Patinete eléctrico D6',
       specs: ['800 W', 'Hasta 45 km', '48 V 13 Ah'],
       homeOrder: 6,
-      homeTitle: 'D6 — Patinete eléctrico (Serie N)',
+      homeTitle: 'D6',
       homeAriaLabel: 'D6 — Serie N',
       priceAriaLabel: 'Precio D6',
       gallery: [
@@ -648,7 +864,7 @@
       alt: 'Patinete eléctrico Cecotec Bongo D20E Connected',
       specs: ['250 W (500 W max)', 'Hasta 20 km', '36 V 5,2 Ah'],
       homeOrder: 7,
-      homeTitle: 'D20 — Cecotec Bongo D20E Connected (Serie N)',
+      homeTitle: 'D20',
       homeAriaLabel: 'D20 — Serie N',
       priceAriaLabel: 'Precio D20',
       dgtCertified: true,
@@ -666,7 +882,7 @@
       sku: 'IES1',
       name: 'iENYRID iE-S1',
       menuLabel: 'iE-S1',
-      badgeText: 'iE-S1',
+      badgeText: 'iENYRID iE-S1',
       brand: 'iENYRID',
       series: 'n',
       productType: 'electric-scooter',
@@ -680,7 +896,7 @@
       alt: 'Patinete eléctrico iENYRID iE-S1',
       specs: ['800 W', 'Hasta 40 km', '48 V 15 Ah'],
       homeOrder: 8,
-      homeTitle: 'iE-S1 — iENYRID iE-S1 (Serie N)',
+      homeTitle: 'iENYRID iE-S1',
       homeAriaLabel: 'iE-S1 — Serie N',
       priceAriaLabel: 'Precio iE-S1',
       gallery: [
@@ -713,7 +929,7 @@
       alt: 'Patinete eléctrico G2',
       specs: ['500 W', 'Hasta 45 km', '48 V 10.4 Ah'],
       homeOrder: 1,
-      homeTitle: 'G2 — Patinete eléctrico de alta potencia',
+      homeTitle: 'G2',
       homeAriaLabel: 'G2 — Patinete eléctrico de alta potencia',
       priceAriaLabel: 'Precio G2',
       gallery: [
@@ -743,7 +959,7 @@
       alt: 'Patinete eléctrico T10',
       specs: ['1000 W', '55-60 km', '48 V 13 Ah'],
       homeOrder: 2,
-      homeTitle: 'T10 — Patinete eléctrico Ultra',
+      homeTitle: 'T10',
       homeAriaLabel: 'T10 — Patinete eléctrico Ultra',
       priceAriaLabel: 'Precio T10',
       gallery: [
@@ -763,7 +979,7 @@
       sku: 'T10DUAL',
       name: 'JOYOR T10 DUAL',
       menuLabel: 'T10 DUAL',
-      badgeText: 'T10 DUAL',
+      badgeText: 'JOYOR T10 DUAL',
       brand: 'JOYOR',
       series: 'gt',
       productType: 'electric-scooter',
@@ -777,7 +993,7 @@
       alt: 'Patinete eléctrico JOYOR T10 DUAL',
       specs: ['2×1000 W', 'Hasta 75 km', '60V 18Ah'],
       homeOrder: 3,
-      homeTitle: 'JOYOR T10 DUAL — Doble motor todoterreno',
+      homeTitle: 'JOYOR T10 DUAL',
       homeAriaLabel: 'JOYOR T10 DUAL — 2×1000 W, 60 km/h y hasta 75 km',
       priceAriaLabel: 'Precio JOYOR T10 DUAL',
       gallery: [
@@ -810,7 +1026,7 @@
       alt: 'Patinete eléctrico TF3',
       specs: ['1000 W', '40-45 km', '48 V 13 Ah'],
       homeOrder: 4,
-      homeTitle: 'TF3 — Patinete eléctrico Top',
+      homeTitle: 'TF3',
       homeAriaLabel: 'TF3 — Patinete eléctrico Top',
       priceAriaLabel: 'Precio TF3',
       gallery: [
@@ -840,7 +1056,7 @@
       alt: 'Patinete eléctrico T30',
       specs: ['3200 W', '90-100 km', '60 V 31.2 Ah'],
       homeOrder: 5,
-      homeTitle: 'T30 — Patinete eléctrico Essential',
+      homeTitle: 'T30',
       homeAriaLabel: 'T30 — Patinete eléctrico Essential',
       priceAriaLabel: 'Precio T30',
       gallery: [
@@ -870,7 +1086,7 @@
       alt: 'Patinete eléctrico GT9',
       specs: ['7000 W', '95-110 km', '12"'],
       homeOrder: 6,
-      homeTitle: 'FENGQS GT9 — Patinete eléctrico',
+      homeTitle: 'GT9',
       homeAriaLabel: 'GT9 — Patinete eléctrico',
       priceAriaLabel: 'Precio GT9',
       gallery: [
@@ -885,7 +1101,7 @@
       sku: 'IX3',
       name: 'iScooter IX3',
       menuLabel: 'IX3',
-      badgeText: 'IX3',
+      badgeText: 'iScooter IX3',
       brand: 'ISCOOTER',
       series: 'ix',
       productType: 'electric-scooter',
@@ -900,7 +1116,7 @@
       alt: 'Patinete eléctrico iScooter IX3',
       specs: ['800 W', '40-45 km', '48 V 10 Ah'],
       homeOrder: 1,
-      homeTitle: 'IX3 — Patinete eléctrico Serie IX',
+      homeTitle: 'iScooter IX3',
       homeAriaLabel: 'IX3 — Patinete eléctrico Serie IX',
       priceAriaLabel: 'Precio IX3',
       gallery: [
@@ -932,7 +1148,7 @@
       alt: 'Patinete eléctrico W9',
       specs: ['1000 W', '45-50 km', '48 V 14 Ah'],
       homeOrder: 2,
-      homeTitle: 'W9 — Patinete eléctrico Serie IX',
+      homeTitle: 'W9',
       homeAriaLabel: 'W9 — Patinete eléctrico Serie IX',
       priceAriaLabel: 'Precio W9',
       gallery: [
@@ -945,9 +1161,9 @@
     ,{
       id: 'acc-storage-bag',
       sku: 'ACC-BAG',
-      name: 'Bolsa de almacenamiento para scooter y bicicleta',
+      name: 'Bolsa de almacenamiento',
       menuLabel: 'Bolsa de almacenamiento',
-      badgeText: 'BOLSA',
+      badgeText: 'Bolsa de almacenamiento',
       brand: 'ROCKBROS',
       series: 'acc',
       productType: 'accessory',
@@ -961,14 +1177,14 @@
       alt: 'Bolsa de almacenamiento impermeable para patinete o bicicleta',
       specs: ['Impermeable', '25 × 12 × 10 cm', 'Para patinete y bici'],
       homeOrder: 1,
-      homeTitle: 'Bolsa de almacenamiento impermeable',
+      homeTitle: 'Bolsa de almacenamiento',
       homeAriaLabel: 'Bolsa de almacenamiento para patinete o bicicleta',
       priceAriaLabel: 'Precio bolsa de almacenamiento',
       gallery: [
         { src: '/accesorios/bolsa-almacenamiento/img/1.webp', alt: 'Bolsa de almacenamiento impermeable' },
-        { src: '/accesorios/bolsa-almacenamiento/img/2.webp', alt: 'Bolsa de almacenamiento montada en el manillar' },
-        { src: '/accesorios/bolsa-almacenamiento/img/3.webp', alt: 'Bolsa de almacenamiento – interior' },
-        { src: '/accesorios/bolsa-almacenamiento/img/4.webp', alt: 'Bolsa de almacenamiento – vista lateral' }
+        { src: '/accesorios/bolsa-almacenamiento/img/2.webp', alt: 'Bolsa de almacenamiento con sus correas y montada en el patinete' },
+        { src: '/accesorios/bolsa-almacenamiento/img/3.webp', alt: 'Bolsa de almacenamiento montada en el manillar del patinete' },
+        { src: '/accesorios/bolsa-almacenamiento/img/4.webp', alt: 'Bolsa de almacenamiento – vista en ángulo con las correas' }
       ]
     }
     ,{
@@ -976,7 +1192,7 @@
       sku: 'ACC-HOLDER',
       name: 'Soporte móvil antivibración para patinete',
       menuLabel: 'Soporte móvil',
-      badgeText: 'SOPORTE',
+      badgeText: 'Soporte móvil antivibración para patinete',
       brand: 'MOGGAM',
       series: 'acc',
       productType: 'accessory',
@@ -1004,7 +1220,7 @@
       sku: 'ACC-BEAST',
       name: 'Pegatinas THE BEAST',
       menuLabel: 'Pegatina THE BEAST',
-      badgeText: 'THE BEAST',
+      badgeText: 'Pegatinas THE BEAST',
       brand: 'TWOWHEEL ODYSSEY',
       series: 'acc',
       productType: 'accessory',
@@ -1018,7 +1234,7 @@
       alt: 'Pegatinas THE BEAST impermeables de vinilo',
       specs: ['2 uds.', 'PVC impermeable', '18 × 3,3 cm'],
       homeOrder: 3,
-      homeTitle: 'Pegatinas decorativas THE BEAST',
+      homeTitle: 'Pegatinas THE BEAST',
       homeAriaLabel: 'Pegatinas THE BEAST para casco o patinete',
       priceAriaLabel: 'Precio pegatinas THE BEAST',
       gallery: [
@@ -1031,9 +1247,9 @@
     ,{
       id: 'acc-reflective-stickers',
       sku: 'ACC-REFLECT',
-      name: 'Pegatinas reflectantes de seguridad',
+      name: 'Pegatinas reflectantes',
       menuLabel: 'Pegatinas reflectantes',
-      badgeText: 'REFLECT',
+      badgeText: 'Pegatinas reflectantes',
       brand: 'UNIVERSAL',
       series: 'acc',
       productType: 'accessory',
@@ -1047,8 +1263,8 @@
       alt: 'Pegatinas reflectantes para patinete eléctrico o bicicleta',
       specs: ['Efecto fluorescente', 'Para Xiaomi/Ninebot', 'Mayor visibilidad'],
       homeOrder: 4,
-      homeTitle: 'Pegatinas reflectantes para patinete',
-      homeAriaLabel: 'Pegatinas reflectantes de seguridad',
+      homeTitle: 'Pegatinas reflectantes',
+      homeAriaLabel: 'Pegatinas reflectantes',
       priceAriaLabel: 'Precio pegatinas reflectantes',
       gallery: [
         { src: '/accesorios/pegatinas-reflectantes/img/1.webp', alt: 'Pegatinas reflectantes para patinete' },
@@ -1062,7 +1278,7 @@
       sku: 'ACC-RGB',
       name: 'Luces estroboscópicas LED RGB para patinete y bicicleta',
       menuLabel: 'Luces LED RGB',
-      badgeText: 'LED RGB',
+      badgeText: 'Luces LED RGB estroboscópicas',
       brand: 'UNIVERSAL',
       series: 'acc',
       productType: 'accessory',
@@ -1086,6 +1302,877 @@
       ]
     }
     ,{
+      id: 'acc-handlebar-wake',
+      sku: 'ACC-BAR-WAKE',
+      name: 'Manillar WAKE 720mm/780mm',
+      menuLabel: 'Manillar WAKE 720/780',
+      badgeText: 'Manillar WAKE 720mm/780mm',
+      brand: 'WAKE',
+      series: 'acc',
+      productType: 'accessory',
+      catalogType: 'accessory',
+      categoryKey: 'accessories',
+      priceText: '39,99 €',
+      compareAtPriceText: '',
+      stock: 'in_stock',
+      variantHint: 'color y medida',
+      rotationGroup: 'manillar',
+      href: '/accesorios/manillar-wake/',
+      accessoryCategory: 'handlebars',
+      attributes: [
+        {
+          key: 'size',
+          label: 'Medida',
+          type: 'pill',
+          options: [
+            {
+              key: '720',
+              label: '720 mm'
+            },
+            {
+              key: '780',
+              default: true,
+              label: '780 mm'
+            }
+          ]
+        },
+        {
+          key: 'color',
+          label: 'Color',
+          type: 'swatch',
+          options: [
+            {
+              key: 'negro',
+              label: 'Negro',
+              swatch: '#111111',
+              imagesBy: {
+                '720': 12,
+                '780': 6
+              },
+              default: true
+            },
+            {
+              key: 'rojo',
+              label: 'Rojo',
+              swatch: '#b93f3a',
+              imagesBy: {
+                '720': 13,
+                '780': 7
+              }
+            },
+            {
+              key: 'azul',
+              label: 'Azul',
+              swatch: '#2f93b8',
+              imagesBy: {
+                '720': 14,
+                '780': 8
+              }
+            },
+            {
+              key: 'morado',
+              label: 'Morado',
+              swatch: '#ab5fac',
+              imagesBy: {
+                '720': 15,
+                '780': 9
+              }
+            },
+            {
+              key: 'dorado',
+              label: 'Dorado',
+              swatch: '#c49a2e',
+              imagesBy: {
+                '720': 16,
+                '780': 10
+              }
+            },
+            {
+              key: 'verde',
+              label: 'Verde',
+              swatch: '#a8a544',
+              imagesBy: {
+                '720': 17,
+                '780': 11
+              }
+            }
+          ]
+        }
+      ],
+      image: '/accesorios/manillar-wake/img/1.webp',
+      alt: 'Manillar elevador WAKE de aluminio 6061 para Ecoxtrem M41',
+      specs: ['Ø 31,8 mm', 'Aluminio 6061 · 330 g', '720/780 mm'],
+      homeOrder: 6,
+      homeTitle: 'Manillar WAKE 720mm/780mm',
+      homeAriaLabel: 'Manillar WAKE 720mm/780mm para Ecoxtrem M41',
+      priceAriaLabel: 'Precio manillar WAKE 720mm/780mm',
+      gallery: [
+        { src: '/accesorios/manillar-wake/img/1.webp', alt: 'Manillar elevador WAKE de aluminio en sus colores, en 720 y 780 mm' },
+        { src: '/accesorios/manillar-wake/img/2.webp', alt: 'Manillar WAKE – medidas: 720 mm (330 g) y 780 mm (365 g), abrazadera 31,8 mm y puños 22,2 mm' },
+        { src: '/accesorios/manillar-wake/img/3.webp', alt: 'Manillar WAKE – ficha del fabricante: aluminio 6061, ángulos 6° y 3°, rise 25 mm' },
+        { src: '/accesorios/manillar-wake/img/4.webp', alt: 'Manillar WAKE – acabado granallado y anodizado' },
+        { src: '/accesorios/manillar-wake/img/5.webp', alt: 'Manillar WAKE – detalle del tubo de aluminio en dorado, azul y rojo' },
+        { src: '/accesorios/manillar-wake/img/6.webp', alt: 'Manillar WAKE 780 mm en negro' },
+        { src: '/accesorios/manillar-wake/img/7.webp', alt: 'Manillar WAKE 780 mm en rojo' },
+        { src: '/accesorios/manillar-wake/img/8.webp', alt: 'Manillar WAKE 780 mm en azul' },
+        { src: '/accesorios/manillar-wake/img/9.webp', alt: 'Manillar WAKE 780 mm en morado' },
+        { src: '/accesorios/manillar-wake/img/10.webp', alt: 'Manillar WAKE 780 mm en dorado' },
+        { src: '/accesorios/manillar-wake/img/11.webp', alt: 'Manillar WAKE 780 mm en verde' },
+        { src: '/accesorios/manillar-wake/img/12.webp', alt: 'Manillar WAKE 720 mm en negro' },
+        { src: '/accesorios/manillar-wake/img/13.webp', alt: 'Manillar WAKE 720 mm en rojo' },
+        { src: '/accesorios/manillar-wake/img/14.webp', alt: 'Manillar WAKE 720 mm en azul' },
+        { src: '/accesorios/manillar-wake/img/15.webp', alt: 'Manillar WAKE 720 mm en morado' },
+        { src: '/accesorios/manillar-wake/img/16.webp', alt: 'Manillar WAKE 720 mm en dorado' },
+        { src: '/accesorios/manillar-wake/img/17.webp', alt: 'Manillar WAKE 720 mm en verde' }
+      ],
+      // El manillar tiene DOS ejes (color y longitud) pero el carrito solo admite uno,
+      // así que la medida viaja combinada dentro de la clave de color. Aquí quedan las
+      // claves de la medida por defecto (780 mm); el script de la ficha las recombina
+      // al cambiar de medida.
+      //
+      // `images` (lista explícita de índices) en vez de `range`: WAKE publica una foto
+      // limpia de cada color EN CADA MEDIDA, con el tamaño rotulado encima
+      // ("720mm handlebar black"). 6-11 son las de 780 mm y 12-17 las de 720 mm, en el
+      // mismo orden de color; 1-5 son las de marketing y sirven para las dos.
+      // Lo de aquí es el estado inicial (780 mm): el script de la ficha reescribe
+      // `images` al cambiar de medida y esconde las miniaturas de la otra.
+      // Negro es la excepción a propósito: abre con la 1 porque es la que ya pinta el
+      // HTML estático, y arrancar con otra provocaría un cambio de foto visible al
+      // hidratar (product-enhancements.js llama a renderGalleryForVariant con la
+      // variante por defecto en la carga inicial).
+    }
+    ,{
+      id: 'acc-handlebar-wake-dh',
+      sku: 'ACC-BAR-WAKE-DH',
+      name: 'Manillar WAKE Downhill 780mm',
+      menuLabel: 'Manillar WAKE Downhill',
+      badgeText: 'Manillar WAKE Downhill 780mm',
+      brand: 'WAKE',
+      series: 'acc',
+      productType: 'accessory',
+      catalogType: 'accessory',
+      categoryKey: 'accessories',
+      priceText: '42,99 €',
+      compareAtPriceText: '',
+      stock: 'in_stock',
+      rotationGroup: 'manillar',
+      href: '/accesorios/manillar-wake-downhill/',
+      accessoryCategory: 'handlebars',
+      attributes: [
+        {
+          key: 'color',
+          label: 'Color',
+          type: 'swatch',
+          options: [
+            {
+              key: 'negro-blanco',
+              label: 'Negro y blanco',
+              swatch: 'linear-gradient(135deg,#1a1a1a 0 50%,#e9edf0 50%)',
+              default: true
+            },
+            {
+              key: 'negro-rojo',
+              label: 'Negro y rojo',
+              swatch: 'linear-gradient(135deg,#1a1a1a 0 50%,#a8362f 50%)'
+            },
+            {
+              key: 'negro-morado',
+              label: 'Negro y morado',
+              swatch: 'linear-gradient(135deg,#1a1a1a 0 50%,#7b2f8e 50%)'
+            },
+            {
+              key: 'negro-verde',
+              label: 'Negro y verde',
+              swatch: 'linear-gradient(135deg,#1a1a1a 0 50%,#a5b938 50%)'
+            },
+            {
+              key: 'rojo',
+              label: 'Rojo',
+              swatch: '#b02a22'
+            },
+            {
+              key: 'dorado',
+              label: 'Dorado',
+              swatch: '#c9a92c'
+            },
+            {
+              key: 'azul',
+              label: 'Azul',
+              swatch: '#1987c0'
+            }
+                ]
+        }
+      ],
+      image: '/accesorios/manillar-wake-downhill/img/1.webp',
+      alt: 'Manillar de descenso WAKE de aluminio 6061 para Ecoxtrem M41',
+      specs: ['Ø 31,8 mm', 'Aluminio 6061 · alza 55 mm', '780 mm'],
+      homeOrder: 7,
+      homeTitle: 'Manillar WAKE Downhill 780mm',
+      homeAriaLabel: 'Manillar WAKE Downhill 780mm para Ecoxtrem M41',
+      priceAriaLabel: 'Precio manillar WAKE Downhill 780mm',
+      gallery: [
+        { src: '/accesorios/manillar-wake-downhill/img/1.webp', alt: 'Manillar WAKE Downhill de aluminio en sus siete colores' },
+        { src: '/accesorios/manillar-wake-downhill/img/2.webp', alt: 'Manillar WAKE Downhill – medidas: 780 mm de largo, 55 mm de alza, abrazadera 31,8 mm y puños 22,2 mm' },
+        { src: '/accesorios/manillar-wake-downhill/img/3.webp', alt: 'Manillar WAKE Downhill – los siete colores disponibles' },
+        { src: '/accesorios/manillar-wake-downhill/img/4.webp', alt: 'Manillar WAKE Downhill montado en una bicicleta' },
+        { src: '/accesorios/manillar-wake-downhill/img/5.webp', alt: 'Manillar WAKE Downhill – acabado granallado y anodizado' },
+        { src: '/accesorios/manillar-wake-downhill/img/6.webp', alt: 'Manillar WAKE Downhill – detalle del logo y del grabado' },
+        { src: '/accesorios/manillar-wake-downhill/img/7.webp', alt: 'Manillar WAKE Downhill en negro y blanco' },
+        { src: '/accesorios/manillar-wake-downhill/img/8.webp', alt: 'Manillar WAKE Downhill en negro y rojo' },
+        { src: '/accesorios/manillar-wake-downhill/img/9.webp', alt: 'Manillar WAKE Downhill en negro y morado' },
+        { src: '/accesorios/manillar-wake-downhill/img/10.webp', alt: 'Manillar WAKE Downhill en negro y verde' },
+        { src: '/accesorios/manillar-wake-downhill/img/11.webp', alt: 'Manillar WAKE Downhill en rojo' },
+        { src: '/accesorios/manillar-wake-downhill/img/12.webp', alt: 'Manillar WAKE Downhill en dorado' },
+        { src: '/accesorios/manillar-wake-downhill/img/13.webp', alt: 'Manillar WAKE Downhill en azul' }
+      ],
+      // Una sola medida (780 mm), así que el eje de variante es solo el color y las
+      // claves NO van combinadas: aquí no hace falta el script de medidas del
+      // WAKE 720/780. `images` da a cada color su foto limpia (7-13) y detrás
+      // las de marketing. Negro y blanco es la excepción a propósito: abre con la 1
+      // porque es la que ya pinta el HTML estático, y arrancar con otra provocaría un
+      // cambio de foto visible al hidratar.
+    }
+    ,{
+      id: 'acc-handlebar-uno',
+      sku: 'ACC-BAR-UNO',
+      name: 'Manillar UNO 640-800mm',
+      menuLabel: 'Manillar UNO 640-800',
+      badgeText: 'Manillar UNO 640-800mm',
+      brand: 'UNO',
+      series: 'acc',
+      productType: 'accessory',
+      catalogType: 'accessory',
+      categoryKey: 'accessories',
+      priceText: '39,99 €',
+      compareAtPriceText: '',
+      stock: 'in_stock',
+      // Dos ejes (modelo y medida) y ningun color: el selector de circulos no aplica,
+      // asi que esta entrada NO lleva colorVariants y el script de la ficha es el unico
+      // que construye la clave de variante. `variantHint` es lo que hace que en
+      // "Anade algo mas" se enlace a la ficha en vez de anadirse de un clic.
+      variantHint: 'modelo y medida',
+      rotationGroup: 'manillar',
+      href: '/accesorios/manillar-uno/',
+      accessoryCategory: 'handlebars',
+      attributes: [
+        {
+          key: 'model',
+          label: 'Modelo',
+          type: 'pill',
+          options: [
+            {
+              key: 'rb12',
+              label: 'RB12 elevador',
+              allows: {
+                size: [
+                  '640',
+                  '680',
+                  '720',
+                  '740',
+                  '760',
+                  '780',
+                  '800'
+                ]
+              },
+              images: [
+                2
+              ],
+              default: true
+            },
+            {
+              key: 'fb12',
+              label: 'FB12 plano',
+              allows: {
+                size: [
+                  '640',
+                  '680',
+                  '720'
+                ]
+              },
+              images: [
+                3
+              ]
+            }
+          ]
+        },
+        {
+          key: 'size',
+          label: 'Medida',
+          type: 'pill',
+          options: [
+            {
+              key: '640',
+              label: '640 mm'
+            },
+            {
+              key: '680',
+              label: '680 mm'
+            },
+            {
+              key: '720',
+              default: true,
+              label: '720 mm'
+            },
+            {
+              key: '740',
+              label: '740 mm'
+            },
+            {
+              key: '760',
+              label: '760 mm'
+            },
+            {
+              key: '780',
+              label: '780 mm'
+            },
+            {
+              key: '800',
+              label: '800 mm'
+            }
+          ]
+        }
+      ],
+      image: '/accesorios/manillar-uno/img/1.webp',
+      alt: 'Manillar UNO de aluminio pulido para Ecoxtrem M41',
+      specs: ['Ø 31,8 mm', 'Aluminio pulido', '640–800 mm'],
+      homeOrder: 8,
+      homeTitle: 'Manillar UNO 640-800mm',
+      homeAriaLabel: 'Manillar UNO 640-800mm para Ecoxtrem M41',
+      priceAriaLabel: 'Precio manillar UNO 640-800mm',
+      gallery: [
+        { src: '/accesorios/manillar-uno/img/1.webp', alt: 'Manillar UNO de aluminio pulido, versión plana y elevadora, de 640 a 800 mm' },
+        { src: '/accesorios/manillar-uno/img/2.webp', alt: 'Manillar UNO RB12 elevador' },
+        { src: '/accesorios/manillar-uno/img/3.webp', alt: 'Manillar UNO FB12 plano' },
+        { src: '/accesorios/manillar-uno/img/4.webp', alt: 'Manillar UNO RB12 – varias medidas del modelo elevador' },
+        { src: '/accesorios/manillar-uno/img/5.webp', alt: 'Manillar UNO FB12 – varias medidas del modelo plano' },
+        { src: '/accesorios/manillar-uno/img/6.webp', alt: 'Manillar UNO – vista frontal y detalle de la abrazadera de 31,8 mm' },
+        { src: '/accesorios/manillar-uno/img/7.webp', alt: 'Manillar UNO – detalle de la abrazadera y el grabado' },
+        { src: '/accesorios/manillar-uno/img/8.webp', alt: 'Manillar UNO montado en una bicicleta' },
+        { src: '/accesorios/manillar-uno/img/9.webp', alt: 'Manillar UNO – detalle del acabado pulido' }
+      ]
+    }
+    ,{
+      id: 'acc-handlebar-nanlio',
+      sku: 'ACC-BAR-NANLIO',
+      name: 'Manillar NANLIO Tornasol 780mm',
+      menuLabel: 'Manillar NANLIO Tornasol',
+      badgeText: 'Manillar NANLIO Tornasol 780mm',
+      brand: 'NANLIO',
+      series: 'acc',
+      productType: 'accessory',
+      catalogType: 'accessory',
+      categoryKey: 'accessories',
+      priceText: '44,99 €',
+      compareAtPriceText: '',
+      stock: 'in_stock',
+      variantHint: 'acabado',
+      rotationGroup: 'manillar',
+      href: '/accesorios/manillar-nanlio/',
+      accessoryCategory: 'handlebars',
+      attributes: [
+        {
+          key: 'color',
+          label: 'Acabado',
+          type: 'swatch',
+          options: [
+            {
+              key: 'tornasol-negro',
+              label: 'Tornasol negro · alza 25 mm',
+              swatch: 'linear-gradient(135deg,#a855f7 0%,#3b82f6 28%,#06b6d4 50%,#111111 50%)',
+              default: true
+            },
+            {
+              key: 'tornasol-blanco',
+              label: 'Tornasol blanco · alza 25 mm',
+              swatch: 'linear-gradient(135deg,#a855f7 0%,#3b82f6 28%,#06b6d4 50%,#f8fafc 50%)'
+            },
+            {
+              key: 'tornasol-freedom',
+              label: 'Tornasol Freedom · alza 25 mm',
+              swatch: 'linear-gradient(135deg,#a855f7 0%,#3b82f6 38%,#06b6d4 68%,#22c55e 100%)'
+            },
+            {
+              key: 'tornasol-024-negro',
+              label: 'Tornasol 024 negro · alza 50 mm',
+              swatch: 'linear-gradient(135deg,#22c55e 0%,#0ea5e9 28%,#7c3aed 50%,#111111 50%)'
+            },
+            {
+              key: 'tornasol-024-blanco',
+              label: 'Tornasol 024 blanco · alza 50 mm',
+              swatch: 'linear-gradient(135deg,#22c55e 0%,#0ea5e9 28%,#7c3aed 50%,#f8fafc 50%)'
+            }
+          ]
+        }
+      ],
+      image: '/accesorios/manillar-nanlio/img/1.webp',
+      alt: 'Manillar NANLIO tornasol de aluminio 6061 para Ecoxtrem M41',
+      specs: ['Ø 31,8 mm', 'Aluminio 6061 · tornasol', '780 mm'],
+      homeOrder: 9,
+      homeTitle: 'Manillar NANLIO Tornasol 780mm',
+      homeAriaLabel: 'Manillar NANLIO Tornasol 780mm para Ecoxtrem M41',
+      priceAriaLabel: 'Precio manillar NANLIO Tornasol 780mm',
+      gallery: [
+        { src: '/accesorios/manillar-nanlio/img/1.webp', alt: 'Manillar NANLIO tornasol de 780 mm en sus distintos acabados' },
+        { src: '/accesorios/manillar-nanlio/img/2.webp', alt: 'Manillar NANLIO – medidas: 780 mm, alza 25 mm, abrazadera 31,8 mm y 399 g' },
+        { src: '/accesorios/manillar-nanlio/img/3.webp', alt: 'Manillar NANLIO – los cinco acabados alineados' },
+        { src: '/accesorios/manillar-nanlio/img/4.webp', alt: 'Manillar NANLIO 024 – la versión de alza 50 mm' },
+        { src: '/accesorios/manillar-nanlio/img/5.webp', alt: 'Manillar NANLIO tornasol negro, alza 25 mm' },
+        { src: '/accesorios/manillar-nanlio/img/6.webp', alt: 'Manillar NANLIO tornasol blanco, alza 25 mm' },
+        { src: '/accesorios/manillar-nanlio/img/7.webp', alt: 'Manillar NANLIO tornasol Freedom, alza 25 mm' },
+        { src: '/accesorios/manillar-nanlio/img/8.webp', alt: 'Manillar NANLIO tornasol 024 negro, alza 50 mm' },
+        { src: '/accesorios/manillar-nanlio/img/9.webp', alt: 'Manillar NANLIO tornasol 024 blanco, alza 50 mm' },
+        { src: '/accesorios/manillar-nanlio/img/10.webp', alt: 'Manillar NANLIO – detalle del acabado tornasol' },
+        { src: '/accesorios/manillar-nanlio/img/11.webp', alt: 'Manillar NANLIO – detalle del grabado' }
+      ],
+      // Un solo eje (el acabado): los cinco son de 780 mm. Pero el ALZA cambia con el
+      // acabado (25 mm los tres primeros, 50 mm los dos "024"), asi que cada variante
+      // trae su propio `desc` y product-enhancements.js reescribe la descripcion al
+      // elegir, igual que el KUKIRIN G2 PRO con VMP/Normal. Los dos textos miden lo
+      // mismo a proposito para que el cambio no de un salto.
+      // `images`: cada acabado abre con su foto (5-9) y detras van las de marketing.
+      // El negro es la excepcion a proposito: abre con la 1 porque es la que ya pinta
+      // el HTML estatico, y arrancar con otra provocaria un cambio visible al hidratar.
+    }
+    ,{
+      id: 'acc-handlebar-kocevlo',
+      sku: 'ACC-BAR-KOCEVLO',
+      name: 'Manillar KOCEVLO Carbono 680-760mm',
+      menuLabel: 'Manillar KOCEVLO Carbono',
+      badgeText: 'Manillar KOCEVLO Carbono 680-760mm',
+      brand: 'KOCEVLO',
+      series: 'acc',
+      productType: 'accessory',
+      catalogType: 'accessory',
+      categoryKey: 'accessories',
+      priceText: '44,99 €',
+      compareAtPriceText: '',
+      stock: 'in_stock',
+      // Dos ejes (modelo y medida) y un solo acabado: sin colorVariants, igual que el
+      // manillar UNO. `variantHint` es lo que hace que en "Anade algo mas" se enlace a
+      // la ficha en vez de anadirse de un clic sin decir cual.
+      variantHint: 'modelo y medida',
+      rotationGroup: 'manillar',
+      href: '/accesorios/manillar-kocevlo/',
+      accessoryCategory: 'handlebars',
+      attributes: [
+        {
+          key: 'model',
+          label: 'Modelo',
+          type: 'pill',
+          options: [
+            {
+              key: 'rise',
+              label: 'Rise elevador',
+              allows: {
+                size: [
+                  '680',
+                  '700',
+                  '720',
+                  '740',
+                  '760'
+                ]
+              },
+              images: [
+                2
+              ],
+              default: true
+            },
+            {
+              key: 'flat',
+              label: 'Flat plano',
+              allows: {
+                size: [
+                  '680',
+                  '700',
+                  '720',
+                  '740',
+                  '760'
+                ]
+              },
+              images: [
+                3
+              ]
+            }
+          ]
+        },
+        {
+          key: 'size',
+          label: 'Medida',
+          type: 'pill',
+          options: [
+            {
+              key: '680',
+              label: '680 mm'
+            },
+            {
+              key: '700',
+              label: '700 mm'
+            },
+            {
+              key: '720',
+              default: true,
+              label: '720 mm'
+            },
+            {
+              key: '740',
+              label: '740 mm'
+            },
+            {
+              key: '760',
+              label: '760 mm'
+            }
+          ]
+        }
+      ],
+      image: '/accesorios/manillar-kocevlo/img/1.webp',
+      alt: 'Manillar KOCEVLO de fibra de carbono 3K para Ecoxtrem M41',
+      specs: ['Ø 31,8 mm', 'Carbono 3K mate', '680–760 mm'],
+      homeOrder: 10,
+      homeTitle: 'Manillar KOCEVLO Carbono 680-760mm',
+      homeAriaLabel: 'Manillar KOCEVLO Carbono 680-760mm para Ecoxtrem M41',
+      priceAriaLabel: 'Precio manillar KOCEVLO Carbono 680-760mm',
+      gallery: [
+        { src: '/accesorios/manillar-kocevlo/img/1.webp', alt: 'Manillar KOCEVLO de carbono 3K, versión plana y elevadora, de 680 a 760 mm' },
+        { src: '/accesorios/manillar-kocevlo/img/2.webp', alt: 'Manillar KOCEVLO Rise – la versión elevadora' },
+        { src: '/accesorios/manillar-kocevlo/img/3.webp', alt: 'Manillar KOCEVLO Flat – la versión plana' },
+        { src: '/accesorios/manillar-kocevlo/img/4.webp', alt: 'Manillar KOCEVLO – las dos versiones juntas' },
+        { src: '/accesorios/manillar-kocevlo/img/5.webp', alt: 'Manillar KOCEVLO – abrazadera de 31,8 mm con el par de apriete de 5 N·m grabado' },
+        { src: '/accesorios/manillar-kocevlo/img/6.webp', alt: 'Manillar KOCEVLO – tejido de carbono 3K' },
+        { src: '/accesorios/manillar-kocevlo/img/7.webp', alt: 'Manillar KOCEVLO – detalle del logotipo' },
+        { src: '/accesorios/manillar-kocevlo/img/8.webp', alt: 'Manillar KOCEVLO – detalle de las dos versiones' }
+      ]
+    }
+    ,{
+      id: 'acc-handlebar-lunje',
+      sku: 'ACC-BAR-LUNJE',
+      name: 'Manillar LUNJE 720mm/780mm',
+      menuLabel: 'Manillar LUNJE 720/780',
+      badgeText: 'Manillar LUNJE 720mm/780mm',
+      brand: 'LUNJE',
+      series: 'acc',
+      productType: 'accessory',
+      catalogType: 'accessory',
+      categoryKey: 'accessories',
+      priceText: '42,99 €',
+      compareAtPriceText: '',
+      stock: 'in_stock',
+      variantHint: 'acabado y medida',
+      rotationGroup: 'manillar',
+      href: '/accesorios/manillar-lunje/',
+      accessoryCategory: 'handlebars',
+      attributes: [
+        {
+          key: 'size',
+          label: 'Medida',
+          type: 'pill',
+          options: [
+            {
+              key: '720',
+              label: '720 mm'
+            },
+            {
+              key: '780',
+              default: true,
+              label: '780 mm'
+            }
+          ]
+        },
+        {
+          key: 'color',
+          label: 'Color',
+          type: 'swatch',
+          options: [
+            {
+              key: 'negro-blanco',
+              label: 'Negro y blanco',
+              swatch: 'linear-gradient(135deg,#141414 50%,#f1f5f9 50%)',
+              images: [
+                8
+              ],
+              allows: {
+                size: [
+                  '720',
+                  '780'
+                ]
+              },
+              default: true
+            },
+            {
+              key: 'negro-rosa',
+              label: 'Negro y rosa',
+              swatch: 'linear-gradient(135deg,#141414 50%,#ec2f8a 50%)',
+              images: [
+                9
+              ],
+              allows: {
+                size: [
+                  '720',
+                  '780'
+                ]
+              }
+            },
+            {
+              key: 'negro-amarillo',
+              label: 'Negro y amarillo',
+              swatch: 'linear-gradient(135deg,#141414 50%,#d3e021 50%)',
+              images: [
+                10
+              ],
+              allows: {
+                size: [
+                  '720',
+                  '780'
+                ]
+              }
+            },
+            {
+              key: 'rojo',
+              label: 'Rojo',
+              swatch: '#c2352c',
+              images: [
+                11
+              ],
+              allows: {
+                size: [
+                  '720',
+                  '780'
+                ]
+              }
+            },
+            {
+              key: 'azul',
+              label: 'Azul',
+              swatch: '#2a7fb8',
+              images: [
+                12
+              ],
+              allows: {
+                size: [
+                  '720',
+                  '780'
+                ]
+              }
+            },
+            {
+              key: 'morado',
+              label: 'Morado',
+              swatch: '#8e44ad',
+              images: [
+                13
+              ],
+              allows: {
+                size: [
+                  '720',
+                  '780'
+                ]
+              }
+            },
+            {
+              key: 'dorado',
+              label: 'Dorado',
+              swatch: '#c8952c',
+              images: [
+                14
+              ],
+              allows: {
+                size: [
+                  '720',
+                  '780'
+                ]
+              }
+            },
+            {
+              key: 'tornasol-blanco',
+              label: 'Tornasol blanco',
+              swatch: 'linear-gradient(135deg,#a855f7 0%,#3b82f6 28%,#06b6d4 50%,#f8fafc 50%)',
+              images: [
+                15
+              ],
+              allows: {
+                size: [
+                  '780'
+                ]
+              }
+            },
+            {
+              key: 'tornasol-rosa',
+              label: 'Tornasol rosa',
+              swatch: 'linear-gradient(135deg,#a855f7 0%,#3b82f6 28%,#06b6d4 50%,#ec2f8a 50%)',
+              images: [
+                16
+              ],
+              allows: {
+                size: [
+                  '720',
+                  '780'
+                ]
+              }
+            },
+            {
+              key: 'tornasol-amarillo',
+              label: 'Tornasol amarillo',
+              swatch: 'linear-gradient(135deg,#a855f7 0%,#3b82f6 28%,#06b6d4 50%,#e8d21f 50%)',
+              images: [
+                17
+              ],
+              allows: {
+                size: [
+                  '720',
+                  '780'
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      image: '/accesorios/manillar-lunje/img/1.webp',
+      alt: 'Manillar LUNJE de aluminio 6061 para Ecoxtrem M41',
+      specs: ['Ø 31,8 mm', 'Aluminio 6061 · alza 35 mm', '720/780 mm'],
+      homeOrder: 11,
+      homeTitle: 'Manillar LUNJE 720mm/780mm',
+      homeAriaLabel: 'Manillar LUNJE 720mm/780mm para Ecoxtrem M41',
+      priceAriaLabel: 'Precio manillar LUNJE 720mm/780mm',
+      gallery: [
+        { src: '/accesorios/manillar-lunje/img/1.webp', alt: 'Manillar LUNJE de aluminio 6061 en sus acabados, montado y en detalle' },
+        { src: '/accesorios/manillar-lunje/img/2.webp', alt: 'Manillar LUNJE – medidas: 720 y 780 mm, alza 35 mm, abrazadera 31,8 mm y puños 22,2 mm' },
+        { src: '/accesorios/manillar-lunje/img/3.webp', alt: 'Manillar LUNJE – cinco acabados sobre roca' },
+        { src: '/accesorios/manillar-lunje/img/4.webp', alt: 'Manillar LUNJE montado en una bicicleta de montaña' },
+        { src: '/accesorios/manillar-lunje/img/5.webp', alt: 'Manillar LUNJE – informe de ensayo SGS según ISO 4210-2:2023' },
+        { src: '/accesorios/manillar-lunje/img/6.webp', alt: 'Manillar LUNJE – dos vistas del acabado azul' },
+        { src: '/accesorios/manillar-lunje/img/7.webp', alt: 'Manillar LUNJE – detalle de los puños de 22,2 mm' },
+        { src: '/accesorios/manillar-lunje/img/8.webp', alt: 'Manillar LUNJE en negro y blanco' },
+        { src: '/accesorios/manillar-lunje/img/9.webp', alt: 'Manillar LUNJE en negro y rosa' },
+        { src: '/accesorios/manillar-lunje/img/10.webp', alt: 'Manillar LUNJE en negro y amarillo' },
+        { src: '/accesorios/manillar-lunje/img/11.webp', alt: 'Manillar LUNJE en rojo' },
+        { src: '/accesorios/manillar-lunje/img/12.webp', alt: 'Manillar LUNJE en azul' },
+        { src: '/accesorios/manillar-lunje/img/13.webp', alt: 'Manillar LUNJE en morado' },
+        { src: '/accesorios/manillar-lunje/img/14.webp', alt: 'Manillar LUNJE en dorado' },
+        { src: '/accesorios/manillar-lunje/img/15.webp', alt: 'Manillar LUNJE en tornasol blanco' },
+        { src: '/accesorios/manillar-lunje/img/16.webp', alt: 'Manillar LUNJE en tornasol rosa' },
+        { src: '/accesorios/manillar-lunje/img/17.webp', alt: 'Manillar LUNJE en tornasol amarillo' }
+      ],
+      // Dos ejes (acabado y medida) con la medida combinada en la clave de color, igual
+      // que el WAKE 720/780. La diferencia: aqui la foto depende SOLO del acabado (es la
+      // misma barra en 720 y en 780), y el tornasol blanco unicamente se fabrica en 780,
+      // asi que el script de la ficha lo apaga al elegir 720.
+    }
+    ,{
+      id: 'acc-speed-limiter-m41',
+      sku: 'ACC-LIMIT-M41',
+      name: 'Mando limitador — M41 Tank',
+      menuLabel: 'Mando limitador — M41 Tank',
+      badgeText: 'Mando limitador — M41 Tank',
+      brand: 'ECOXTREM',
+      series: 'acc-limit',
+      productType: 'accessory',
+      catalogType: 'accessory',
+      categoryKey: 'accessories',
+      priceText: '58,99 €',
+      compareAtPriceText: '',
+      stock: 'in_stock',
+      href: '/accesorios/mando-limitador-m41-tank/',
+      image: '/accesorios/mando-limitador-m41-tank/img/1.webp',
+      alt: 'Mando limitador — M41 Tank para Ecoxtrem M41 Tank Ultimate 1000W',
+      specs: ['25 ↔ 55 km/h', 'Mando llavero RF', 'Plug & play'],
+      homeOrder: 1,
+      homeTitle: 'Mando limitador — M41 Tank',
+      homeAriaLabel: 'Mando limitador — M41 Tank',
+      priceAriaLabel: 'Precio Mando limitador — M41 Tank',
+      gallery: [
+        { src: '/accesorios/mando-limitador-m41-tank/img/1.webp', alt: 'Mando limitador — M41 Tank' },
+        { src: '/img/limitadores/conjunto.webp', alt: 'Mando limitador — M41 Tank – cableado con conectores estancos' },
+        { src: '/img/limitadores/mando-4-vistas.webp', alt: 'Mando limitador — M41 Tank – mando llavero en cuatro vistas' },
+        { src: '/img/limitadores/conjunto-blanco.webp', alt: 'Mando limitador — M41 Tank – conjunto completo sobre fondo blanco' }
+      ]
+    }
+    ,{
+      id: 'acc-speed-limiter-m41-tank-dual',
+      sku: 'ACC-LIMIT-M41-TD',
+      name: 'Mando limitador — M41 Tank Dual',
+      menuLabel: 'Mando limitador — M41 Tank Dual',
+      badgeText: 'Mando limitador — M41 Tank Dual',
+      brand: 'ECOXTREM',
+      series: 'acc-limit',
+      productType: 'accessory',
+      catalogType: 'accessory',
+      categoryKey: 'accessories',
+      priceText: '58,99 €',
+      compareAtPriceText: '',
+      stock: 'in_stock',
+      href: '/accesorios/mando-limitador-m41-tank-dual/',
+      image: '/accesorios/mando-limitador-m41-tank-dual/img/1.webp',
+      alt: 'Mando limitador — M41 Tank Dual para Ecoxtrem M41 Tank Dual',
+      specs: ['25 ↔ 70 km/h', 'Mando llavero RF', 'Plug & play'],
+      homeOrder: 2,
+      homeTitle: 'Mando limitador — M41 Tank Dual',
+      homeAriaLabel: 'Mando limitador — M41 Tank Dual',
+      priceAriaLabel: 'Precio Mando limitador — M41 Tank Dual',
+      gallery: [
+        { src: '/accesorios/mando-limitador-m41-tank-dual/img/1.webp', alt: 'Mando limitador — M41 Tank Dual' },
+        { src: '/img/limitadores/conjunto.webp', alt: 'Mando limitador — M41 Tank Dual – cableado con conectores estancos' },
+        { src: '/img/limitadores/mando-4-vistas.webp', alt: 'Mando limitador — M41 Tank Dual – mando llavero en cuatro vistas' },
+        { src: '/img/limitadores/conjunto-blanco.webp', alt: 'Mando limitador — M41 Tank Dual – conjunto completo sobre fondo blanco' }
+      ]
+    }
+    ,{
+      id: 'acc-speed-limiter-m41-armored-one',
+      sku: 'ACC-LIMIT-M41-AO',
+      name: 'Mando limitador — M41 Armored One',
+      menuLabel: 'Mando limitador — M41 Armored One',
+      badgeText: 'Mando limitador — M41 Armored One',
+      brand: 'ECOXTREM',
+      series: 'acc-limit',
+      productType: 'accessory',
+      catalogType: 'accessory',
+      categoryKey: 'accessories',
+      priceText: '58,99 €',
+      compareAtPriceText: '',
+      stock: 'in_stock',
+      href: '/accesorios/mando-limitador-m41-armored-one/',
+      image: '/accesorios/mando-limitador-m41-armored-one/img/1.webp',
+      alt: 'Mando limitador — M41 Armored One para Ecoxtrem M41 Armored One Pro',
+      specs: ['25 ↔ 60 km/h', 'Mando llavero RF', 'Plug & play'],
+      homeOrder: 3,
+      homeTitle: 'Mando limitador — M41 Armored One',
+      homeAriaLabel: 'Mando limitador — M41 Armored One',
+      priceAriaLabel: 'Precio Mando limitador — M41 Armored One',
+      gallery: [
+        { src: '/accesorios/mando-limitador-m41-armored-one/img/1.webp', alt: 'Mando limitador — M41 Armored One' },
+        { src: '/img/limitadores/conjunto.webp', alt: 'Mando limitador — M41 Armored One – cableado con conectores estancos' },
+        { src: '/img/limitadores/mando-4-vistas.webp', alt: 'Mando limitador — M41 Armored One – mando llavero en cuatro vistas' },
+        { src: '/img/limitadores/conjunto-blanco.webp', alt: 'Mando limitador — M41 Armored One – conjunto completo sobre fondo blanco' }
+      ]
+    }
+    ,{
+      id: 'acc-speed-limiter-m41-armored-dual',
+      sku: 'ACC-LIMIT-M41-AD',
+      name: 'Mando limitador — M41 Armored Dual',
+      menuLabel: 'Mando limitador — M41 Armored Dual',
+      badgeText: 'Mando limitador — M41 Armored Dual',
+      brand: 'ECOXTREM',
+      series: 'acc-limit',
+      productType: 'accessory',
+      catalogType: 'accessory',
+      categoryKey: 'accessories',
+      priceText: '58,99 €',
+      compareAtPriceText: '',
+      stock: 'in_stock',
+      href: '/accesorios/mando-limitador-m41-armored-dual/',
+      image: '/accesorios/mando-limitador-m41-armored-dual/img/1.webp',
+      alt: 'Mando limitador — M41 Armored Dual para Ecoxtrem M41 Armored Dual (LR)',
+      specs: ['25 ↔ 83 km/h', 'Mando llavero RF', 'Plug & play'],
+      homeOrder: 4,
+      homeTitle: 'Mando limitador — M41 Armored Dual',
+      homeAriaLabel: 'Mando limitador — M41 Armored Dual',
+      priceAriaLabel: 'Precio Mando limitador — M41 Armored Dual',
+      gallery: [
+        { src: '/accesorios/mando-limitador-m41-armored-dual/img/1.webp', alt: 'Mando limitador — M41 Armored Dual' },
+        { src: '/img/limitadores/conjunto.webp', alt: 'Mando limitador — M41 Armored Dual – cableado con conectores estancos' },
+        { src: '/img/limitadores/mando-4-vistas.webp', alt: 'Mando limitador — M41 Armored Dual – mando llavero en cuatro vistas' },
+        { src: '/img/limitadores/conjunto-blanco.webp', alt: 'Mando limitador — M41 Armored Dual – conjunto completo sobre fondo blanco' }
+      ]
+    }
+    ,{
       id: 'b-g73',
       sku: 'G73',
       name: 'G73',
@@ -1105,7 +2192,7 @@
       alt: 'Bicicleta eléctrica G73',
       specs: ['250 W', '48 V 13 Ah', 'Autonomía 45–55 km', 'Frenos delanteros y traseros', '26" ruedas', 'Velocidad máxima 30 km/h'],
       homeOrder: 1,
-      homeTitle: 'G73 — Bicicleta eléctrica urbana',
+      homeTitle: 'G73',
       homeAriaLabel: 'G73 — Bicicleta eléctrica urbana',
       priceAriaLabel: 'Precio G73',
       gallery: [
@@ -1121,7 +2208,7 @@
       sku: 'GT900',
       name: 'Aairsk GT900',
       menuLabel: 'Aairsk GT900',
-      badgeText: 'GT900',
+      badgeText: 'Aairsk GT900',
       brand: 'Aairsk',
       series: 'b',
       productType: 'electric-bike',
@@ -1136,7 +2223,7 @@
       alt: 'Bicicleta eléctrica de montaña Aairsk GT900',
       specs: ['250 W', 'Hasta 65 km', '36V', 'Shimano 7 vel.', 'Frenos de disco', '26"'],
       homeOrder: 2,
-      homeTitle: 'Aairsk GT900 — Bicicleta eléctrica de montaña',
+      homeTitle: 'Aairsk GT900',
       homeAriaLabel: 'Aairsk GT900 — Bicicleta eléctrica de montaña',
       priceAriaLabel: 'Precio Aairsk GT900',
       gallery: [
@@ -1156,7 +2243,7 @@
       sku: 'EV12MPRO',
       name: 'EVERCROSS EV12M PRO',
       menuLabel: 'EVERCROSS EV12M PRO',
-      badgeText: 'EV12M PRO',
+      badgeText: 'EVERCROSS EV12M PRO',
       brand: 'EVERCROSS',
       series: 'motos',
       productType: 'electric-motorcycle',
@@ -1170,7 +2257,7 @@
       alt: 'Moto eléctrica infantil EVERCROSS EV12M PRO',
       specs: ['300 W', 'Hasta 15 km', '36 V 4 Ah'],
       homeOrder: 1,
-      homeTitle: 'EVERCROSS EV12M PRO — Moto eléctrica infantil',
+      homeTitle: 'EVERCROSS EV12M PRO',
       homeAriaLabel: 'EVERCROSS EV12M PRO — 300 W, 25 km/h y hasta 15 km',
       priceAriaLabel: 'Estado EVERCROSS EV12M PRO',
       gallery: [
@@ -1190,7 +2277,7 @@
       sku: 'EV05M',
       name: 'EVERCROSS EV05M',
       menuLabel: 'EVERCROSS EV05M',
-      badgeText: 'EV05M',
+      badgeText: 'EVERCROSS EV05M',
       brand: 'EVERCROSS',
       series: 'motos',
       productType: 'electric-motorcycle',
@@ -1204,7 +2291,7 @@
       alt: 'Moto eléctrica infantil EVERCROSS EV05M',
       specs: ['150 W', 'Hasta 10 km', '14.4 V 5.2 Ah'],
       homeOrder: 2,
-      homeTitle: 'EVERCROSS EV05M — Moto eléctrica infantil',
+      homeTitle: 'EVERCROSS EV05M',
       homeAriaLabel: 'EVERCROSS EV05M — 150 W, 16 km/h y hasta 10 km',
       priceAriaLabel: 'Estado EVERCROSS EV05M',
       gallery: [
@@ -1238,7 +2325,7 @@
       alt: 'Moto eléctrica infantil CHALLENGER12',
       specs: ['160 W', 'Hasta 15 km', '24 V 5.2 Ah'],
       homeOrder: 3,
-      homeTitle: 'CHALLENGER12 — Moto eléctrica infantil',
+      homeTitle: 'CHALLENGER12',
       homeAriaLabel: 'CHALLENGER12 — 160 W, 20 km/h y hasta 15 km',
       priceAriaLabel: 'Estado CHALLENGER12',
       gallery: [
@@ -1259,7 +2346,7 @@
       sku: 'IX8',
       name: 'iScooter IX8',
       menuLabel: 'IX8',
-      badgeText: 'IX8',
+      badgeText: 'iScooter IX8',
       brand: 'ISCOOTER',
       series: 'ix',
       productType: 'electric-scooter',
@@ -1273,7 +2360,7 @@
       alt: 'Patinete electrico iScooter IX8 todoterreno',
       specs: ['2400 W', '65-70 km', '48 V 20 Ah'],
       homeOrder: 3,
-      homeTitle: 'IX8 - Patinete electrico dual motor',
+      homeTitle: 'iScooter IX8',
       homeAriaLabel: 'IX8 - 2400 W y hasta 70 km',
       priceAriaLabel: 'Precio IX8',
       gallery: [
@@ -1292,20 +2379,25 @@
     }) : [];
   }
 
-  function cloneColorVariants(colorVariants) {
-    return Array.isArray(colorVariants) ? colorVariants.map(function (variant) {
-      var copy = Object.assign({}, variant);
-      if (Array.isArray(variant.images)) copy.images = variant.images.slice();
-      if (Array.isArray(variant.range)) copy.range = variant.range.slice();
-      return copy;
-    }) : [];
+  function cloneAttributes(attrs) {
+    return (attrs || []).map(function (eje) {
+      var copia = Object.assign({}, eje);
+      copia.options = (eje.options || []).map(function (op) {
+        var o = Object.assign({}, op);
+        if (Array.isArray(op.images)) o.images = op.images.slice();
+        if (op.allows) o.allows = Object.assign({}, op.allows);
+        if (op.imagesBy) o.imagesBy = Object.assign({}, op.imagesBy);
+        return o;
+      });
+      return copia;
+    });
   }
 
   function cloneProducts() {
     return products.map(function (product) {
       var copy = Object.assign({}, product);
       copy.gallery = cloneGallery(product.gallery);
-      copy.colorVariants = cloneColorVariants(product.colorVariants);
+      if (Array.isArray(product.attributes)) copy.attributes = cloneAttributes(product.attributes);
       return copy;
     });
   }
@@ -1351,6 +2443,51 @@
       });
   }
 
+  /* Accesorios declarados como compatibles con un producto. La relacion vive
+     SOLO en el vehiculo (compatibleSkus); la inversa se deriva aqui para no
+     tener dos verdades que se desincronicen. Devuelve el producto entero, en
+     el orden en que estan declarados, y descarta el SKU que no exista o este
+     agotado: la ficha nunca debe ofrecer algo que no se puede comprar. */
+  /* Accesorios que se ofrecen en TODA una categoria sin declararlos uno a uno
+     en cada entrada del catalogo. La clave es el categoryKey del producto, asi
+     que un accesorio puede valer para patinetes y no para motos o bicis.
+     Anadir uno nuevo es anadir su SKU a la categoria que toque. */
+  var UNIVERSAL_ACCESSORIES_BY_CATEGORY = {
+    'electric-scooters': ['ACC-BAG'],
+    'electric-bikes': ['ACC-BAG']
+  };
+
+  function getCompatibleAccessories(sku) {
+    var todos = cloneProducts();
+    var origen = null;
+    for (var i = 0; i < todos.length; i++) {
+      if (todos[i].sku === sku) { origen = todos[i]; break; }
+    }
+    if (!origen) return [];
+
+    var porSku = {};
+    for (var j = 0; j < todos.length; j++) porSku[todos[j].sku] = todos[j];
+
+    /* Primero los declarados por el producto (el limitador de SU modelo, lo mas
+       relevante) y despues los universales. */
+    var universales = UNIVERSAL_ACCESSORIES_BY_CATEGORY[origen.categoryKey] || [];
+    var pedidos = (Array.isArray(origen.compatibleSkus) ? origen.compatibleSkus : [])
+      .concat(universales);
+
+    var salida = [];
+    var vistos = {};
+    for (var k = 0; k < pedidos.length; k++) {
+      var candidatoSku = pedidos[k];
+      /* Nunca ofrecerse a si mismo: en la ficha de la bolsa, la bolsa no sale. */
+      if (candidatoSku === sku || vistos[candidatoSku]) continue;
+      var candidato = porSku[candidatoSku];
+      if (!candidato || candidato.stock === 'out_of_stock') continue;
+      vistos[candidatoSku] = true;
+      salida.push(candidato);
+    }
+    return salida;
+  }
+
   function getSeriesProducts(seriesKey) {
     return cloneProducts()
       .filter(function (product) { return product.series === seriesKey; })
@@ -1394,6 +2531,10 @@
             return {
               key: series.key,
               label: series.label,
+              // Destino de la serie en la portada. El menú móvil enlaza aquí en
+              // vez de desplegar los modelos; el mismo id que usa la home para
+              // pintar <section id="..."> y el raíl de series.
+              homeSectionId: series.homeSectionId || ('series-' + series.key),
               items: series.items.map(function (product) {
                 return {
                   label: product.menuLabel || product.name,
@@ -1492,6 +2633,12 @@
     return indexes;
   }
 
+  /* Validacion del catalogo: se comprueban los EJES declarados, sean del tipo que
+     sean. Antes esto solo miraba `colorVariants`, asi que un producto que se eligiera
+     por modelo o por medida no se validaba en absoluto: podia tener dos opciones con
+     la misma clave —lo que funde dos lineas distintas en el carrito— sin que saltara
+     nada. Se exige lo mismo que exige el nucleo: clave unica por eje, imagenes que
+     existan en la galeria y una sola opcion por defecto. */
   function validateCatalogColors(productsList) {
     var warnings = [];
     var errors = [];
@@ -1500,56 +2647,63 @@
     list.forEach(function (product) {
       var productId = product.id || product.sku || product.name || 'producto-sin-id';
       var gallery = Array.isArray(product.gallery) ? product.gallery : [];
-      var variants = Array.isArray(product.colorVariants) ? product.colorVariants : [];
-
-      if (!variants.length) return;
+      var ejes = Array.isArray(product.attributes) ? product.attributes : [];
+      if (!ejes.length) return;
 
       if (!gallery.length) {
-        errors.push('[' + productId + '] Tiene colorVariants pero no tiene gallery.');
+        errors.push('[' + productId + '] Declara atributos pero no tiene gallery.');
         return;
       }
 
-      var defaultCount = variants.filter(function (variant) {
-        return variant && (variant.default === true || variant.defaultColor === true);
-      }).length;
-
-      if (defaultCount === 0) {
-        warnings.push('[' + productId + '] Sin variante default/defaultColor. Se usara la primera.');
-      } else if (defaultCount > 1) {
-        warnings.push('[' + productId + '] Tiene ' + defaultCount + ' variantes marcadas como default.');
-      }
-
-      var seenKeys = Object.create(null);
-      var usedIndexes = Object.create(null);
-
-      variants.forEach(function (variant) {
-        var label = (variant && (variant.label || variant.name || variant.key)) || 'variante-sin-nombre';
-        var key = compactKey(variant && variant.key);
-
-        if (!key) {
-          errors.push('[' + productId + '] Variante "' + label + '" sin key.');
-        } else if (seenKeys[key]) {
-          errors.push('[' + productId + '] key duplicada en colorVariants: "' + key + '".');
-        } else {
-          seenKeys[key] = true;
-        }
-
-        var indexes = toVariantIndexes(variant, gallery.length);
-        if (!indexes.length) {
-          errors.push('[' + productId + '] Variante "' + label + '" no resuelve imagenes validas (1-' + gallery.length + ').');
+      ejes.forEach(function (eje) {
+        var ejeId = (eje && eje.key) || 'eje-sin-key';
+        var opciones = (eje && Array.isArray(eje.options)) ? eje.options : [];
+        if (!opciones.length) {
+          errors.push('[' + productId + '/' + ejeId + '] Eje sin opciones.');
           return;
         }
 
-        indexes.forEach(function (idx) {
-          var media = gallery[idx - 1];
-          if (!media || !media.src) {
-            errors.push('[' + productId + '] Variante "' + label + '" referencia indice ' + idx + ' sin src valido.');
+        var defaultCount = opciones.filter(function (op) {
+          return op && (op.default === true || op.defaultColor === true);
+        }).length;
+        if (defaultCount === 0) {
+          warnings.push('[' + productId + '/' + ejeId + '] Sin opcion por defecto. Se usara la primera.');
+        } else if (defaultCount > 1) {
+          warnings.push('[' + productId + '/' + ejeId + '] Tiene ' + defaultCount + ' opciones por defecto.');
+        }
+
+        var seenKeys = Object.create(null);
+        opciones.forEach(function (op) {
+          var label = (op && (op.label || op.name || op.key)) || 'opcion-sin-nombre';
+          var key = compactKey(op && op.key);
+
+          if (!key) {
+            errors.push('[' + productId + '/' + ejeId + '] Opcion "' + label + '" sin key.');
+          } else if (seenKeys[key]) {
+            errors.push('[' + productId + '/' + ejeId + '] key duplicada: "' + key + '".');
+          } else {
+            seenKeys[key] = true;
           }
 
-          if (usedIndexes[idx]) {
-            warnings.push('[' + productId + '] Solape de indice ' + idx + ' entre variantes de color.');
+          /* Las imagenes son indices de la galeria. Un eje puede no tener foto propia
+             —la medida de un manillar no cambia la foto— y eso NO es un error. */
+          var indexes = toVariantIndexes(op, gallery.length);
+          indexes.forEach(function (idx) {
+            var media = gallery[idx - 1];
+            if (!media || !media.src) {
+              errors.push('[' + productId + '/' + ejeId + '] "' + label + '" referencia indice ' + idx + ' sin src valido.');
+            }
+          });
+
+          if (op && op.imagesBy) {
+            for (var comb in op.imagesBy) {
+              if (!Object.prototype.hasOwnProperty.call(op.imagesBy, comb)) continue;
+              var idxComb = parseInt(op.imagesBy[comb], 10);
+              if (!(idxComb >= 1 && idxComb <= gallery.length)) {
+                errors.push('[' + productId + '/' + ejeId + '] "' + label + '" imagesBy[' + comb + '] fuera de galeria.');
+              }
+            }
           }
-          usedIndexes[idx] = true;
         });
       });
     });
@@ -1577,6 +2731,7 @@
   window.SCOOTSHOP_getCategoryProducts = getCategoryProducts;
   window.SCOOTSHOP_getCategorySeries = getCategorySeries;
   window.SCOOTSHOP_getSeriesProducts = getSeriesProducts;
+  window.SCOOTSHOP_getCompatibleAccessories = getCompatibleAccessories;
   window.SCOOTSHOP_validateCatalogColors = function () {
     var report = validateCatalogColors(window.SCOOTSHOP_PRODUCTS || []);
     return report;

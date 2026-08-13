@@ -13,7 +13,7 @@
 
   <link rel="canonical" href="https://scootshop.co/" />
 
-  <meta name="asset-version" content="20260620-2" />
+  <meta name="asset-version" content="20260813-9" />
 
   <!-- Restauración de scroll sin flash: si volvemos con posición guardada, ocultamos
        el contenido hasta que boot() restaure el scroll, para que la página aparezca
@@ -22,19 +22,22 @@
   <style>html.ss-restoring{background:#f3f4f6}html.ss-restoring body{visibility:hidden}</style>
   <script>(function(){try{if('scrollRestoration' in history)history.scrollRestoration='manual';if(sessionStorage.getItem('ss_scrollY')){var d=document.documentElement;d.classList.add('ss-restoring');setTimeout(function(){d.classList.remove('ss-restoring');},1500);}}catch(e){}})();</script>
 
-  <link rel="icon" href="/favicon.ico?v=20260620-2" sizes="any" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=20260620-2" />
-  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png?v=20260620-2" />
-  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png?v=20260620-2" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=20260620-2" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=20260620-2" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=20260620-2" />
-  <link rel="manifest" href="/site.webmanifest?v=20260620-2" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest?v=20260813-9" />
   <link rel="alternate" href="https://scootshop.co/" hreflang="es" />
   <meta name="apple-mobile-web-app-title" content="SCOOT SHOP" />
   <meta name="application-name" content="SCOOT SHOP" />
 
-  <link rel="preload" as="image" href="/img/portada_4.webp?v=20260620-2" fetchpriority="high" />
+  <!-- La precarga DEBE declarar el mismo srcset/sizes que el <img> del hero: si
+       solo se precargara el original, el navegador se traería esa foto y además
+       la variante que elija el srcset (descarga doble del LCP en móvil). -->
+  <link rel="preload" as="image" href="/img/portada_4.webp" imagesrcset="/img/portada_4-480.webp 480w, /img/portada_4-800.webp 800w, /img/portada_4-1200.webp 1200w, /img/portada_4.webp 1400w" imagesizes="(max-width:1380px) 94vw, 1296px" fetchpriority="high" />
 
   <meta property="og:url" content="https://scootshop.co/" />
   <meta property="og:title" content="Patinetes eléctricos | SCOOT SHOP" />
@@ -61,14 +64,14 @@
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" /></noscript>
 
   <!-- Font Awesome: subset local (solo iconos usados) -->
-  <link rel="stylesheet" href="/css/icons.css?v=20260620-2" />
+  <link rel="stylesheet" href="/css/icons.css?v=20260813-9" />
 
-  <link rel="stylesheet" href="/css/main.css?v=20260620-2" />
-  <link rel="stylesheet" href="/css/partials.mobile-menu.css?v=20260620-2" />
-  <link rel="stylesheet" href="/css/index.css?v=20260620-2" />
+  <link rel="stylesheet" href="/css/main.css?v=20260813-9" />
+  <link rel="stylesheet" href="/css/partials.mobile-menu.css?v=20260813-9" />
+  <link rel="stylesheet" href="/css/index.css?v=20260813-9" />
 
   <script src="/js/index-head.js?v=20260605-2" defer></script>
-  <script src="/js/cart-runtime.js?v=20260620-2" defer></script>
+  <script src="/js/cart-runtime.js?r=20260813-5&v=20260813-9" defer></script>
 
   <script type="application/ld+json">
   {
@@ -197,7 +200,7 @@
     <div class="container nav">
       <div class="brand">
         <a href="#inicio" aria-label="Ir al inicio">
-          <img src="/img/0-removebg-preview.webp?v=20260620-2" alt="SCOOT SHOP logo" decoding="async" fetchpriority="high" width="400" height="400" />
+          <img src="/img/0-removebg-preview.webp" alt="SCOOT SHOP logo" decoding="async" fetchpriority="high" width="400" height="400" />
           <span>Versátil</span>
         </a>
       </div>
@@ -208,7 +211,6 @@
           <a href="#comprar"><i class="fa-solid fa-cart-shopping nav-icon" aria-hidden="true"></i>Productos</a>
         </div>
         <a href="#faq"><i class="fa-solid fa-circle-question nav-icon" aria-hidden="true"></i>Preguntas</a>
-        <a href="#ubicacion"><i class="fa-solid fa-location-dot nav-icon" aria-hidden="true"></i>Ubicación</a>
         <a href="/#legal"><i class="fa-solid fa-scale-balanced nav-icon" aria-hidden="true"></i>Legal</a>
         <a href="https://www.instagram.com/scootshopping" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
         <a href="https://www.facebook.com/61579248524907" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook" aria-hidden="true"></i></a>
@@ -246,7 +248,14 @@
 
     <nav class="mm-panel" id="mobileMenu" role="dialog" aria-modal="true" aria-label="Menú móvil">
       <div class="mm-head">
-        <span class="mm-head-title">Menú</span>
+        <div class="mm-head-left">
+          <!-- Solo visible dentro de Productos (lo enseña .mm-viewport.mm-drilled).
+               Antes el único camino de vuelta era el gesto de deslizar. -->
+          <button class="mm-back" id="mmBack" aria-label="Volver al menú" type="button">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          <span class="mm-head-title" id="mmHeadTitle">Menú</span>
+        </div>
         <button class="mm-close" id="mmClose" aria-label="Cerrar menú" type="button">
           <i class="fa-solid fa-xmark"></i>
         </button>
@@ -258,15 +267,12 @@
             <a class="mm-link" href="/#inicio">
               <span class="mm-link-content"><i class="fa-solid fa-house mm-ico" aria-hidden="true"></i>Inicio</span>
             </a>
-            <button class="mm-link mm-link--products" id="mmProductsToggle" type="button" aria-expanded="false">
+            <button class="mm-link" id="mmProductsToggle" type="button" aria-expanded="false">
               <span class="mm-link-content"><i class="fa-solid fa-cart-shopping mm-ico" aria-hidden="true"></i>Productos</span>
               <i class="fa-solid fa-chevron-right mm-arrow" aria-hidden="true"></i>
             </button>
             <a class="mm-link" href="/#faq">
               <span class="mm-link-content"><i class="fa-solid fa-circle-question mm-ico" aria-hidden="true"></i>Preguntas</span>
-            </a>
-            <a class="mm-link" href="/#ubicacion">
-              <span class="mm-link-content"><i class="fa-solid fa-location-dot mm-ico" aria-hidden="true"></i>Ubicación</span>
             </a>
             <a class="mm-link" href="/#legal">
               <span class="mm-link-content"><i class="fa-solid fa-scale-balanced mm-ico" aria-hidden="true"></i>Legal</span>
@@ -298,16 +304,16 @@
           <div class="hero-viewport" data-hero-viewport>
             <div class="hero-track" data-hero-track>
               <a class="hero-slide is-active" href="#comprar" aria-label="Ver catálogo de productos">
-                <img src="/img/portada_4.webp?v=20260620-2" alt="Portada Scoot Shop M41 Armored Dual" loading="eager" fetchpriority="high" decoding="async" width="2400" height="500" style="object-position:50% 50%;" />
+                <img src="/img/portada_4.webp" srcset="/img/portada_4-480.webp 480w, /img/portada_4-800.webp 800w, /img/portada_4-1200.webp 1200w, /img/portada_4.webp 1400w" sizes="(max-width:1380px) 94vw, 1296px" alt="Portada Scoot Shop M41 Armored Dual" loading="eager" fetchpriority="high" decoding="async" width="2400" height="500" style="object-position:50% 50%;" />
               </a>
               <a class="hero-slide" href="#comprar" aria-label="Ver catálogo de productos">
-                <img src="/img/portada_2.webp?v=20260620-2" alt="Portada Scoot Shop" loading="lazy" decoding="async" width="2400" height="500" style="object-position:50% 50%;" />
+                <img src="/img/portada_2.webp" srcset="/img/portada_2-480.webp 480w, /img/portada_2-800.webp 800w, /img/portada_2-1200.webp 1200w, /img/portada_2.webp 1400w" sizes="(max-width:1380px) 94vw, 1296px" alt="Portada Scoot Shop" loading="lazy" decoding="async" width="2400" height="500" style="object-position:50% 50%;" />
               </a>
               <a class="hero-slide" href="#comprar" aria-label="Ver catálogo de productos">
-                <img src="/img/portada_3.webp?v=20260620-2" alt="Patinete eléctrico en tienda SCOOT SHOP" loading="lazy" fetchpriority="low" decoding="async" width="2400" height="500" style="object-position:50% 50%;" />
+                <img src="/img/portada_3.webp" srcset="/img/portada_3-480.webp 480w, /img/portada_3-800.webp 800w, /img/portada_3-1200.webp 1200w, /img/portada_3.webp 1400w" sizes="(max-width:1380px) 94vw, 1296px" alt="Patinete eléctrico en tienda SCOOT SHOP" loading="lazy" fetchpriority="low" decoding="async" width="2400" height="500" style="object-position:50% 50%;" />
               </a>
               <a class="hero-slide" href="#comprar" aria-label="Ver catálogo de productos">
-                <img src="/img/portada.webp?v=20260620-2" alt="Portada Scoot Shop" loading="lazy" fetchpriority="low" decoding="async" width="2400" height="500" style="object-position:50% 50%;" />
+                <img src="/img/portada.webp" srcset="/img/portada-480.webp 480w, /img/portada-800.webp 800w, /img/portada-1200.webp 1200w, /img/portada.webp 1400w" sizes="(max-width:1380px) 94vw, 1296px" alt="Portada Scoot Shop" loading="lazy" fetchpriority="low" decoding="async" width="2400" height="500" style="object-position:50% 50%;" />
               </a>
             </div>
           </div>
@@ -463,40 +469,6 @@
       </div>
     </section>
 
-    <section id="ubicacion" class="container deferred-section">
-      <h2>Ubicación</h2>
-
-      <div class="location-grid">
-        <div class="location-info">
-          <div class="location-item">
-            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
-            <div>
-              <strong>Dirección</strong>
-              <span>Passeig de l'Albereda, 16 — 46460 Silla, Valencia</span>
-            </div>
-          </div>
-          <div class="location-item">
-            <i class="fab fa-whatsapp" aria-hidden="true"></i>
-            <div>
-              <strong>Contacto</strong>
-              <span><a href="https://wa.me/34666318747" target="_blank" rel="noopener">666 318 747</a> · <a href="mailto:info@scootshop.co">info@scootshop.co</a></span>
-            </div>
-          </div>
-          <div class="location-item">
-            <i class="fa-solid fa-clock" aria-hidden="true"></i>
-            <div>
-              <strong>Horario</strong>
-              <span>Lunes a viernes · Con cita previa</span>
-            </div>
-          </div>
-        </div>
-
-        <iframe class="map-embed is-pending" title="Mapa de ubicación (Silla, Valencia)"
-          src="about:blank"
-          data-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d771.1893269921486!2d-0.4151716714419005!3d39.361732198219364!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd604daa840ea491%3A0xa695c38a2bd2eb5!2sPasseig%20de%20l&#39;Albereda%2C%2016%2C%2046460%20Silla%2C%20Val%C3%A8ncia!5e0!3m2!1ses!2ses!4v1769089746902!5m2!1ses!2ses"
-          loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-      </div>
-    </section>
 
     <section id="legal" class="legal deferred-section">
       <div class="container">
@@ -578,7 +550,6 @@
               <a href="/#inicio">Inicio</a>
               <a href="/#comprar">Productos</a>
               <a href="/#faq">Preguntas frecuentes</a>
-              <a href="/#ubicacion">Ubicación</a>
             </div>
             <div class="footer-col">
               <p class="footer-heading">Legal</p>
@@ -605,6 +576,226 @@
   </main>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

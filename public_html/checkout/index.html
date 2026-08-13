@@ -8,21 +8,21 @@
   <meta name="description" content="Completa tus datos de envío antes del pago seguro en SCOOT SHOP." />
   <meta name="robots" content="noindex,nofollow" />
   <meta name="theme-color" content="#ffffff" />
-  <meta name="asset-version" content="20260813-8" />
+  <meta name="asset-version" content="20260813-9" />
 
   <link rel="canonical" href="https://scootshop.co/checkout" />
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-  <link rel="manifest" href="/site.webmanifest?v=20260813-8" />
+  <link rel="manifest" href="/site.webmanifest?v=20260813-9" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" /></noscript>
-  <link rel="stylesheet" href="/css/icons.css?v=20260813-8" />
-  <link rel="stylesheet" href="/css/main.css?v=20260813-8" />
+  <link rel="stylesheet" href="/css/icons.css?v=20260813-9" />
+  <link rel="stylesheet" href="/css/main.css?v=20260813-9" />
   <script src="/js/asset-sync.js?v=20260605-2" defer></script>
   <script src="/js/global-assets.js?v=20260605-2" defer></script>
 
@@ -1602,7 +1602,14 @@
 
       function resolveColorMetaFromProduct(product){
         if (!product) return null;
-        var variants = Array.isArray(product.colorVariants) ? product.colorVariants : [];
+        /* Las opciones salen del NUCLEO: da igual que el eje sea color, modelo o medida,
+           y da igual como las declare el catalogo. Antes se leia `colorVariants`, que
+           solo existia si el eje era de color. */
+        var variants = [];
+        if (window.SS_ATTRS) {
+          var ejesProd = window.SS_ATTRS.ejes(product);
+          for (var ep = 0; ep < ejesProd.length; ep++) variants = variants.concat(ejesProd[ep].options);
+        }
         var gallery = Array.isArray(product.gallery) ? product.gallery : [];
         if (!variants.length || !gallery.length) return null;
 
@@ -2198,17 +2205,12 @@
       }
 
       try {
-        if (window.SS_ATTRS && window.SS_ATTRS.ready && window.SS_ATTRS.ready.then) {
-          window.SS_ATTRS.ready.then(repintarVariantes);
-        } else {
-          document.addEventListener('ss:attrs', function(){
-            if (window.SS_ATTRS && window.SS_ATTRS.ready && window.SS_ATTRS.ready.then) {
-              window.SS_ATTRS.ready.then(repintarVariantes);
-            } else {
-              repintarVariantes();
-            }
-          }, { once: true });
+        /* La promesa se coge o se crea: esta página puede correr antes que el núcleo. */
+        if (!window.SS_READY && typeof Promise === 'function') {
+          window.SS_READY = new Promise(function (res) { window.__ssResolverReady = res; });
         }
+        if (window.SS_READY) window.SS_READY.then(repintarVariantes);
+        else repintarVariantes();
       } catch (_) {}
 
       if (!isCartMode) {
@@ -3022,6 +3024,7 @@
   </script>
 </body>
 </html>
+
 
 
 

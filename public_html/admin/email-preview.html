@@ -520,7 +520,7 @@
       display:flex;
       flex-wrap:nowrap;
       align-items:center;
-      gap:10px;
+      gap:24px;
     }
     .cta{
       display:inline-block;
@@ -632,12 +632,12 @@
       .email-summary-shell .order-summary__product-title{ font-size:.96rem; }
       .email-summary-shell .order-summary__product-meta{ font-size:.78rem; }
       .email-summary-shell .order-summary__product-line-total{ font-size:1.04rem; }
-      .cta-wrap{ gap:8px; }
+      .cta-wrap{ gap:16px; }
       .cta{ min-height:44px; line-height:44px; padding:0 16px; font-size:.74rem; }
       .cta-secondary{ min-height:44px; line-height:44px; padding:0 14px; font-size:11px; }
     }
   </style>
-  <meta name="asset-version" content="20260620-2" />
+  <meta name="asset-version" content="20260813-9" />
 </head>
 <body>
   <div class="shell">
@@ -790,7 +790,8 @@
       supportUrl: 'https://wa.me/34612654818?text=Hola%20SCOOT%20SHOP%2C%20necesito%20ayuda%20con%20mi%20pedido%20SS-20260530-9D4156',
       subtotalAmount: 3017.9,
       shippingAmount: 0,
-      totalAmount: 3017.9,
+      paymentFeeAmount: 45.27,
+      totalAmount: 3063.17,
       orderItems: [
         {
           name: 'M41 Tank Ultimate 1000W',
@@ -905,8 +906,13 @@
 
       const subtotal = Number(previewContext.subtotalAmount || 0);
       const shipping = Number(previewContext.shippingAmount || 0);
-      const total = Number(previewContext.totalAmount || subtotal + shipping || 0);
+      const paymentFee = Number(previewContext.paymentFeeAmount || 0);
+      const showPaymentFee = paymentFee > 0;
+      const total = Number(previewContext.totalAmount || subtotal + shipping + (showPaymentFee ? paymentFee : 0) || 0);
       const showAmountSummary = subtotal > 0 || total > 0;
+      const paymentFeeRow = showPaymentFee
+        ? '<div class="amount-row"><span>Comision de pago</span><strong>' + esc(money(paymentFee) || '---') + '</strong></div>'
+        : '';
       const amountSummaryBlock = showAmountSummary
         ? '<section class="amount-summary">' +
             '<div class="card-head">' +
@@ -916,6 +922,7 @@
             '<div class="amount-summary-card">' +
               '<div class="amount-row"><span>Subtotal</span><strong>' + esc(money(subtotal) || '---') + '</strong></div>' +
               '<div class="amount-row"><span>Envio</span><strong>' + esc(shipping <= 0 ? 'Gratis' : (money(shipping) || '---')) + '</strong></div>' +
+              paymentFeeRow +
               '<div class="amount-row amount-row--total"><span>Total</span><strong>' + esc(money(total) || '---') + '</strong></div>' +
             '</div>' +
           '</section>'
@@ -947,8 +954,10 @@
         const lineTotalText = money(Number(item.price || 0) * qty);
         const itemName = esc(item.name || 'Producto');
         const itemRef = item.sku ? ('<span class="order-summary__product-meta order-summary__product-meta--ref">Ref: ' + esc(item.sku) + '</span>') : '';
-        const itemColorText = item.color || '';
-        const itemColor = itemColorText ? ('<span class="order-summary__product-meta order-summary__product-meta--color">Color: ' + esc(itemColorText) + '</span>') : '';
+        // Igual que el email real: el texto de variantes viene escrito en la línea.
+        // Si esta vista se inventara el rótulo, dejaría de servir para revisar el email.
+        const itemVariantText = item.variant_text || (item.color ? ('Color: ' + item.color) : '');
+        const itemColor = itemVariantText ? ('<span class="order-summary__product-meta order-summary__product-meta--color">' + esc(itemVariantText) + '</span>') : '';
         const itemUnitPrice = '<span class="order-summary__product-meta order-summary__product-meta--price">Precio: ' + money(item.price) + '</span>';
         const itemQty = qty > 1 ? ('<span class="order-summary__product-meta order-summary__product-meta--qty">Cant: ' + qty + '</span>') : '';
         const itemImage = item.image
@@ -1070,6 +1079,226 @@
   </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

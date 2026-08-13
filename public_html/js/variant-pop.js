@@ -70,166 +70,17 @@
     return null;
   }
 
-  /* ── Lectura de la ficha del accesorio ─────────────────────────────────── */
-  /* LECTOR LEGACY — lee los ejes del HTML de la ficha.
-   *
-   * Es la arquitectura vieja y tiene fecha de caducidad: mientras un producto no
-   * declare `attributes` en el catálogo, sus ejes solo existen escritos en su ficha.
-   * Se conserva únicamente para los accesorios pendientes de migrar (etapa 4); en
-   * cuanto no quede ninguno, esta función y el parseo con DOMParser desaparecen.
-   *
-   * IMPORTANTE: ya NO devuelve los tres cubos fijos (modelos/medidas/colores). Emite
-   * la MISMA forma que el núcleo —una lista de ejes con key/label/type/options— para
-   * que el resto del archivo sea genérico y no exista un segundo modelo interno. */
-  function leerEjes(doc) {
-    var ejes = [];
-
-    function añadirEje(key, label, opciones) {
-      if (!opciones.length) return;
-      var ya = null;
-      for (var i = 0; i < ejes.length; i++) if (ejes[i].key === key) ya = ejes[i];
-      if (ya) { ya.options = ya.options.concat(opciones); if (label) ya.label = label; return; }
-      ejes.push({
-        key: key,
-        label: label || (window.SS_ATTRS ? window.SS_ATTRS.ETIQUETAS[key] : '') || key,
-        type: key === 'color' ? 'swatch' : 'pill',
-        options: opciones
-      });
-    }
-
-    var secciones = doc.querySelectorAll('.size-variants');
-    for (var s = 0; s < secciones.length; s++) {
-      var seccion = secciones[s];
-      var etiqueta = seccion.querySelector('.color-variants-label');
-      var texto = etiqueta ? etiqueta.textContent.replace(/:\s*$/, '').trim() : '';
-      var modelos = seccion.querySelectorAll('[data-model-key]');
-      var medidas = seccion.querySelectorAll('[data-size-key]');
-      var b, i, lista;
-
-      lista = [];
-      for (i = 0; i < modelos.length; i++) {
-        b = modelos[i];
-        var admite = String(b.getAttribute('data-model-sizes') || '').split(',').filter(Boolean);
-        lista.push({
-          key: b.getAttribute('data-model-key'),
-          label: b.getAttribute('data-model-label') || b.textContent.trim(),
-          // "qué medidas admite este modelo" pasa a ser el `allows` del núcleo.
-          allows: admite.length ? { size: admite } : null,
-          activo: b.classList.contains('is-active'),
-          img: b.getAttribute('data-model-img') || '',
-          disabled: b.hasAttribute('disabled')
-        });
-      }
-      añadirEje('model', texto, lista);
-
-      lista = [];
-      for (i = 0; i < medidas.length; i++) {
-        b = medidas[i];
-        lista.push({
-          key: b.getAttribute('data-size-key'),
-          label: b.getAttribute('data-size-label') || b.textContent.trim(),
-          allows: null,
-          activo: b.classList.contains('is-active'),
-          disabled: b.hasAttribute('disabled')
-        });
-      }
-      añadirEje('size', texto, lista);
-    }
-
-    var listaColores = [];
-    var colores = doc.querySelectorAll('.color-variants .color-variant');
-    for (var c = 0; c < colores.length; c++) {
-      var col = colores[c];
-      var base = col.getAttribute('data-color-base');
-      /* Los accesorios de DOS ejes (WAKE, LUNJE…) no declaran `data-img`: llevan una
-         foto por medida (`data-img-720`, `data-img-780`), porque el mismo acabado se
-         fotografía aparte en cada largo. Se recogen todas y fotoElegida() escoge según
-         la medida; los de un solo eje siguen con `data-img` a secas. Sin esto, esas
-         fichas caían al genérico y la línea del carrito de un "Azul · 780 mm" se
-         quedaba con la foto de familia en vez de con la del acabado. */
-      var porMedida = {};
-      for (var a = 0; a < col.attributes.length; a++) {
-        var casa = /^data-img-(.+)$/.exec(col.attributes[a].name);
-        if (casa) porMedida[casa[1]] = col.attributes[a].value;
-      }
-      var soloEn = String(col.getAttribute('data-sizes') || '').split(',').filter(Boolean);
-      listaColores.push({
-        imagesBy: porMedida,
-        // Sin data-color-base la ficha no combina nada: la clave ya es definitiva.
-        key: base || col.getAttribute('data-color-key') || '',
-        combinada: !base,
-        label: col.getAttribute('data-color-base-label') || col.getAttribute('aria-label') || '',
-        swatch: (col.getAttribute('style') || '').replace(/^.*--variant-swatch:\s*/, '').replace(/;?\s*$/, ''),
-        // "este acabado solo existe en estas medidas" es también un `allows`.
-        allows: soloEn.length ? { size: soloEn } : null,
-        img: col.getAttribute('data-img') || '',
-        disabled: col.hasAttribute('disabled') || col.getAttribute('aria-disabled') === 'true',
-        activo: col.classList.contains('is-active')
-      });
-    }
-    var etiquetaColor = doc.querySelector('.color-variants .color-variants-label');
-    añadirEje('color', etiquetaColor ? etiquetaColor.textContent.replace(/:\s*$/, '').trim() : '', listaColores);
-
-    return ejes;
-  }
-
-  /* Las fichas de PATINETE no traen la clave del color en el HTML: sus botones solo
-     llevan `aria-label` y el swatch, y es global-assets-app.js quien les pone el
-     `data-color-key` EN CALIENTE leyéndolo del catálogo. Aquí la ficha se lee con
-     DOMParser, que no ejecuta scripts, así que esos colores llegaban sin clave y la
-     línea entraba al carrito con el color vacío y la foto genérica.
-
-     Se completa con el catálogo, que es de donde salen esos datos de todas formas:
-     se casa por etiqueta y, si no, por posición (la parrilla de la ficha se genera en
-     el orden de `colorVariants`). Las fichas de accesorio no pasan por aquí porque sus
-     botones sí traen la clave escrita. */
-  function completarDesdeCatalogo(ejes, producto) {
-    var variantes = (producto && Array.isArray(producto.colorVariants)) ? producto.colorVariants : [];
-    if (!variantes.length) return ejes;
-
-    var ejeColor = null;
-    for (var e = 0; e < ejes.length; e++) if (ejes[e].key === 'color') ejeColor = ejes[e];
-    if (!ejeColor) return ejes;
-
-    var porEtiqueta = {};
-    variantes.forEach(function (v) {
-      if (v && v.label) porEtiqueta[String(v.label).trim().toLowerCase()] = v;
-    });
-
-    ejeColor.options.forEach(function (color, i) {
-      if (color.key) return;   // la ficha ya la traía: manda ella
-      var v = porEtiqueta[String(color.label || '').trim().toLowerCase()] || variantes[i];
-      if (!v || !v.key) return;
-      color.key = v.key;
-      color.combinada = true;
-      if (!color.label) color.label = v.label || v.key;
-      /* La foto del color: `range:[desde,hasta]` son los índices de sus fotos en la
-         galería, así que la primera es {href}/img/{desde}.webp. Mismo criterio que
-         usaba la paleta del home y que usa la propia ficha para el carrito. */
-      if (!color.img && Array.isArray(v.range) && Number(v.range[0])) color.img = String(v.range[0]);
-      if (v.available === false) color.disabled = true;
-    });
-    return ejes;
-  }
-
-  /* Los ejes de un producto. PRIMERO el catálogo —la fuente de verdad— y solo si no
-     los declara se cae al lector del HTML de su ficha, que es la vía legacy. */
+  /* Los ejes de un producto: del CATALOGO y de ningun otro sitio.
+     Aqui vivia un lector del HTML de la ficha —se descargaba la pagina entera y se
+     parseaba con DOMParser— porque los ejes de un accesorio solo existian escritos en
+     su ficha. Ya no: los 12 productos con variantes los declaran en `attributes`, asi
+     que ese lector (142 lineas), su `completarDesdeCatalogo` y la peticion de red se
+     han borrado. Un producto nuevo funciona aqui sin ficha que parsear. */
   function pedirEjes(href, producto) {
     if (cache[href]) return Promise.resolve(cache[href]);
     var prod = producto || productoPorHref(href);
-
-    if (window.SS_ATTRS && prod && Array.isArray(prod.attributes) && prod.attributes.length) {
-      cache[href] = window.SS_ATTRS.ejes(prod);
-      return Promise.resolve(cache[href]);
-    }
-
-    return fetch(href, { credentials: 'same-origin' })
-      .then(function (r) { return r.ok ? r.text() : Promise.reject(new Error('http ' + r.status)); })
-      .then(function (html) {
-        var doc = new DOMParser().parseFromString(html, 'text/html');
-        cache[href] = completarDesdeCatalogo(leerEjes(doc), prod);
-        return cache[href];
-      });
+    cache[href] = (window.SS_ATTRS && prod) ? window.SS_ATTRS.ejes(prod) : [];
+    return Promise.resolve(cache[href]);
   }
 
   /* ── Estado elegido ──────────────────────────────────────────────────────

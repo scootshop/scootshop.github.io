@@ -2,17 +2,77 @@
 (function () {
   'use strict';
 
+  /* La promesa se COGE o se CREA: quien llegue primero la publica. Hace falta porque
+     el orden real de carga cambia según la página —las fichas enlazan este archivo con
+     una etiqueta sin `defer`, así que corre ANTES que el cargador— y dar por hecho que
+     ya existe significaba arrancar sin catálogo y construir el selector vacío. */
+  function ssListo() {
+    if (!window.SS_READY && typeof Promise === 'function') {
+      window.SS_READY = new Promise(function (res) { window.__ssResolverReady = res; });
+    }
+    return window.SS_READY || { then: function (fn) { fn(); } };
+  }
+
+
   /* ── Solo ejecutar en páginas de producto ── */
   var gallery = document.querySelector('.gallery');
   var panel   = document.querySelector('.panel');
   if (!gallery || !panel) return;
 
-  var ver = window.ASSET_VER || '1';
+  // La versión se lee EN CADA USO, no una vez al cargar el módulo.
+  // Antes era `var ver = window.ASSET_VER || '1'` evaluado aquí: si asset-sync.js
+  // aún no había asignado window.ASSET_VER —es asíncrono, o sea una carrera—
+  // `ver` se quedaba en '1' para toda la sesión. Y `?v=1` es una constante que
+  // NINGÚN bump invalida: la foto quedaba cacheada un año con la versión vieja.
+  // Eso explicaba que la 23.webp del Armored Dual saliera antigua solo A VECES.
+  // El <meta name="asset-version"> siempre está en el HTML con la versión
+  // publicada, así que sirve de respaldo de verdad.
+  function assetVersion() {
+    if (window.ASSET_VER) return String(window.ASSET_VER).trim();
+    var meta = document.querySelector('meta[name="asset-version"]');
+    var fromMeta = meta ? String(meta.getAttribute('content') || '').trim() : '';
+    return fromMeta || '1';
+  }
 
   function normalizePath(path) {
     var clean = String(path || '').split('?')[0].split('#')[0];
     if (clean && clean.charAt(clean.length - 1) !== '/') clean += '/';
     return clean;
+  }
+
+  /* ── La rueda del ratón también desliza los carriles horizontales ──────────
+     Un ratón normal solo manda deltaY, y el navegador NO lo traduce a movimiento
+     horizontal: con el puntero sobre los colores la rueda movía la página y el
+     carril se quedaba quieto. Aquí se traduce a mano.
+
+     La página NO se bloquea: solo se consume la rueda mientras quede carril por
+     recorrer. Al llegar al tope, el gesto sigue su camino y la página baja como
+     siempre, que es lo que uno espera al pasar el ratón por encima de una fila
+     de colores mientras lee.
+
+     passive:false es obligatorio: sin él preventDefault() no tiene efecto y se
+     movería el carril Y la página a la vez. */
+  function conectarRuedaHorizontal(carril) {
+    if (!carril || carril.dataset.ruedaBound === 'true') return;
+    carril.dataset.ruedaBound = 'true';
+    carril.addEventListener('wheel', function (ev) {
+      var max = carril.scrollWidth - carril.clientWidth;
+      if (max <= 1) return;                     // cabe todo: no hay nada que deslizar
+
+      // deltaMode: 0 píxeles, 1 líneas (ruedas de muescas), 2 páginas.
+      var unidad = ev.deltaMode === 1 ? 16 : (ev.deltaMode === 2 ? carril.clientWidth : 1);
+      var dx = ev.deltaX * unidad;
+      var dy = ev.deltaY * unidad;
+      // Trackpads y ruedas inclinables mandan deltaX; el ratón de siempre, deltaY.
+      var delta = Math.abs(dx) > Math.abs(dy) ? dx : dy;
+      if (!delta) return;
+
+      var antes = carril.scrollLeft;
+      var destino = Math.max(0, Math.min(max, antes + delta));
+      if (destino === antes) return;            // en el tope: que siga la página
+      carril.scrollLeft = destino;
+      ev.preventDefault();
+    }, { passive: false });
   }
 
   function getCurrentProduct() {
@@ -31,9 +91,14 @@
     return null;
   }
 
+  /* Devuelve la URL TAL CUAL. Antes le colgaba '?v=' + versión, y desde que las fotos
+     dejaron de versionarse eso fabricaba una segunda URL para el MISMO archivo: el
+     HTML y el catálogo dicen /img/1.webp y esto pedía /img/1.webp?v=…-14, así que el
+     navegador se bajaba la foto dos veces y la galería parpadeaba al cambiar de color.
+     Se conserva la función —y no se borran las llamadas— porque es el sitio donde
+     explicar por qué las imágenes NO llevan versión. */
   function withVersion(src) {
-    if (!src) return '';
-    return src.indexOf('?') === -1 ? src + '?v=' + ver : src;
+    return src || '';
   }
 
   function getThumbItems() {
@@ -70,7 +135,6 @@
      así que al pulsar una miniatura la versión completa debe estar ya cacheada
      para que el cambio sea instantáneo. No bloquea la carga inicial. */
   function prefetchFullGalleryImages() {
-    var ver = window.ASSET_VER || '1';
     var thumbs = gallery.querySelectorAll('.thumb[data-img]');
     var sources = [];
     var seen = {};
@@ -78,9 +142,30 @@
       var src = thumbs[i].getAttribute('data-img');
       if (!src || seen[src]) continue;
       seen[src] = true;
-      sources.push(src.indexOf('?') === -1 ? src + '?v=' + ver : src);
+      /* La URL va TAL CUAL. Añadirle '?v=' era contraproducente justo aquí: esto
+         precalienta la caché para que pulsar una miniatura sea instantáneo, y al
+         pedirla con una query que la foto del DOM no lleva, lo que se calentaba era
+         una URL que nadie iba a usar — descarga duplicada y ni un pulsado más rápido. */
+      sources.push(src);
     }
     if (!sources.length) return;
+
+    // Precarga ACOTADA. Antes se traia la galeria entera en segundo plano: en la
+    // ficha del M41 Armored son 23 fotos a tamano completo, medido en 2,73 MB
+    // por visita en movil, para unas fotos que la mayoria de clientes no llega a
+    // abrir. Adelantamos solo las primeras —que son las que se pulsan— y el
+    // resto se descarga al pulsarlas, que es cuando hacen falta.
+    var PRELOAD_MAX = 4;
+
+    // Respeta el ahorro de datos y las redes muy lentas. Es la API estandar
+    // (navigator.connection), no deteccion por user agent.
+    var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (conn) {
+      if (conn.saveData) return;
+      if (/^(slow-)?2g$/.test(String(conn.effectiveType || ''))) return;
+    }
+
+    sources = sources.slice(0, PRELOAD_MAX);
 
     var index = 0;
     function loadNext() {
@@ -101,32 +186,28 @@
   }
 
   function updateCheckoutLinksColorParams(colorKey, colorLabel, variantImage) {
-    var btnMain = panel.querySelector('.btn-main');
-    var stickyBtn = document.querySelector('.sticky-buy-btn');
+    var link = panel.querySelector('.btn-main');
+    if (!link) return;
+    var href = link.getAttribute('href');
+    if (!href) return;
 
-    [btnMain, stickyBtn].forEach(function (link) {
-      if (!link) return;
-      var href = link.getAttribute('href');
-      if (!href) return;
+    try {
+      var parsed = new URL(href, window.location.origin);
+      parsed.searchParams.set('color', colorKey || 'default');
+      parsed.searchParams.set('colorLabel', colorLabel || 'Color');
+      if (variantImage) parsed.searchParams.set('image', variantImage);
 
-      try {
-        var parsed = new URL(href, window.location.origin);
-        parsed.searchParams.set('color', colorKey || 'default');
-        parsed.searchParams.set('colorLabel', colorLabel || 'Color');
-        if (variantImage) parsed.searchParams.set('image', variantImage);
+      var nextHref = /^https?:\/\//i.test(href)
+        ? parsed.toString()
+        : (parsed.pathname + parsed.search + parsed.hash);
 
-        var nextHref = /^https?:\/\//i.test(href)
-          ? parsed.toString()
-          : (parsed.pathname + parsed.search + parsed.hash);
-
-        link.setAttribute('href', nextHref);
-      } catch (_) {
-        var base = href.split('&color=')[0].split('&colorLabel=')[0];
-        var fallbackHref = base + '&color=' + encodeURIComponent(colorKey || 'default') + '&colorLabel=' + encodeURIComponent(colorLabel || 'Color');
-        if (variantImage) fallbackHref += '&image=' + encodeURIComponent(variantImage);
-        link.setAttribute('href', fallbackHref);
-      }
-    });
+      link.setAttribute('href', nextHref);
+    } catch (_) {
+      var base = href.split('&color=')[0].split('&colorLabel=')[0];
+      var fallbackHref = base + '&color=' + encodeURIComponent(colorKey || 'default') + '&colorLabel=' + encodeURIComponent(colorLabel || 'Color');
+      if (variantImage) fallbackHref += '&image=' + encodeURIComponent(variantImage);
+      link.setAttribute('href', fallbackHref);
+    }
   }
 
   function ensureDefaultColorFromDom() {
@@ -175,12 +256,6 @@
       text = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     } catch (_) {}
     return text.replace(/\s+/g, ' ').trim();
-  }
-
-  function sentenceCase(value) {
-    var text = String(value || '').trim();
-    if (!text) return '';
-    return text.charAt(0).toUpperCase() + text.slice(1);
   }
 
   function uniqueList(items) {
@@ -235,184 +310,6 @@
     }
     return '';
   }
-
-  function detectCategory() {
-    var path = normalizeText(window.location.pathname || '');
-    if (path.indexOf('/patinetes/') !== -1) return 'patinete';
-    if (path.indexOf('/bicicletas/') !== -1) return 'bicicleta';
-    if (path.indexOf('/motos/') !== -1) return 'moto';
-    if (path.indexOf('/accesorios/') !== -1) return 'accesorio';
-    return 'producto';
-  }
-
-  function detectDesignHook(name, subtitle, specData) {
-    var full = normalizeText([name, subtitle, specData.pairs.map(function (p) { return p.label + ' ' + p.value; }).join(' ')].join(' '));
-
-    if (full.indexOf('carbon') !== -1) return 'acabado Carbon Design';
-    if (full.indexOf('armored') !== -1) return 'chasis reforzado Armored';
-    if (full.indexOf('ultimate') !== -1) return 'configuracion Ultimate';
-    if (full.indexOf('dual') !== -1) return 'plataforma de doble traccion';
-    if (full.indexOf('connected') !== -1) return 'enfoque Connected con conectividad integrada';
-    if (full.indexOf('chopper') !== -1) return 'estetica chopper de presencia marcada';
-    if (full.indexOf('homologado dgt') !== -1 || full.indexOf('dgt') !== -1) return 'homologacion DGT para uso urbano';
-    if (full.indexOf('plegable') !== -1) return 'diseno plegable para uso diario';
-    if (full.indexOf('antivibracion') !== -1) return 'sistema antivibracion';
-    if (full.indexOf('reflectante') !== -1) return 'acabado reflectante de alta visibilidad';
-
-    var material = findSpecValue(specData, ['material', 'chasis', 'cuadro']);
-    if (material) return material.toLowerCase().indexOf('alumin') !== -1 ? 'estructura ligera de aluminio' : 'acabado tecnico orientado a durabilidad';
-
-    return '';
-  }
-
-  function buildFactHighlights(category, specData) {
-    var facts = [];
-    var motor = findSpecValue(specData, ['motor', 'potencia']);
-    var battery = findSpecValue(specData, ['bateria']);
-    var autonomy = findSpecValue(specData, ['autonomia']);
-    var speed = findSpecValue(specData, ['velocidad']);
-    var slope = findSpecValue(specData, ['pendiente']);
-    var wheels = findSpecValue(specData, ['ruedas']);
-    var brakes = findSpecValue(specData, ['frenos']);
-    var suspension = findSpecValue(specData, ['suspension']);
-    var compatibility = findSpecValue(specData, ['compatibilidad', 'compat.']);
-    var kit = findSpecValue(specData, ['contenido', 'kit', 'pack']);
-    var material = findSpecValue(specData, ['material']);
-
-    if (category === 'accesorio') {
-      if (compatibility) facts.push('compatibilidad ' + compatibility);
-      if (material) facts.push('material ' + material);
-      if (kit) facts.push('contenido ' + kit);
-      if (!facts.length) {
-        var usage = findSpecValue(specData, ['uso', 'tipo', 'sistema', 'montaje']);
-        if (usage) facts.push(usage);
-      }
-      return uniqueList(facts).slice(0, 3);
-    }
-
-    if (motor) facts.push('motor ' + motor);
-    if (battery) facts.push('bateria ' + battery);
-    if (autonomy) facts.push('autonomia ' + autonomy);
-    if (speed) facts.push('velocidad maxima ' + speed);
-    if (slope) facts.push('pendiente ' + slope);
-    if (wheels) facts.push('ruedas ' + wheels);
-    if (brakes) facts.push('frenos ' + brakes);
-    if (suspension) facts.push('suspension ' + suspension);
-
-    return uniqueList(facts).slice(0, 4);
-  }
-
-  function buildInterestingDetail(category, specData) {
-    var battery = findSpecValue(specData, ['bateria']);
-    var autonomy = findSpecValue(specData, ['autonomia']);
-    var wheels = findSpecValue(specData, ['ruedas']);
-    var brakes = findSpecValue(specData, ['frenos']);
-    var suspension = findSpecValue(specData, ['suspension']);
-    var loading = findSpecValue(specData, ['carga maxima', 'carga max.', 'carga']);
-    var extras = findSpecValue(specData, ['extras', 'bluetooth']);
-    var age = findSpecValue(specData, ['edad recomendada']);
-    var full = normalizeText(specData.pairs.map(function (p) { return p.label + ' ' + p.value; }).join(' '));
-
-    if (category === 'accesorio') {
-      var mount = findSpecValue(specData, ['montaje', 'fijacion']);
-      if (mount) return 'Como detalle util, su sistema de montaje (' + mount + ') permite instalarlo y retirarlo en poco tiempo.';
-      if (full.indexOf('impermeable') !== -1) return 'Detalle de valor: el acabado impermeable ayuda a mantener rendimiento y aspecto con uso diario.';
-      return 'Su propuesta destaca por resolver una necesidad concreta del dia a dia sin complicar la instalacion.';
-    }
-
-    if (extras) return 'Como detalle diferencial, incorpora ' + extras + ', un extra poco habitual en su rango.';
-    if (suspension) return 'Un punto interesante es su configuracion de suspension (' + suspension + '), pensada para mejorar confort y control en firme irregular.';
-    if (wheels) return 'Dato interesante: las ruedas de ' + wheels + ' mejoran estabilidad y absorcion frente a irregularidades urbanas.';
-    if (brakes) return 'En seguridad, el sistema de frenos (' + brakes + ') aporta una respuesta mas progresiva y controlada.';
-    if (battery && autonomy) return 'En uso real, la combinacion de bateria ' + battery + ' y autonomia ' + autonomy + ' esta equilibrada para recorridos cotidianos.';
-    if (loading) return 'Como valor practico, admite una carga maxima de ' + loading + ', ofreciendo mayor versatilidad de uso.';
-    if (age) return 'Su configuracion esta pensada para una franja de edad de ' + age + ', priorizando control y comodidad.';
-    if (full.indexOf('dgt') !== -1) return 'A nivel legal y practico, la homologacion DGT mejora la tranquilidad de uso en entorno urbano.';
-
-    return 'Su configuracion tecnica prioriza equilibrio entre rendimiento, control y durabilidad para un uso constante.';
-  }
-
-  function buildSubtitleClaims(category, specData, designHook) {
-    var claims = [];
-    if (designHook) claims.push(sentenceCase(designHook));
-
-    var autonomy = findSpecValue(specData, ['autonomia']);
-    var motor = findSpecValue(specData, ['motor', 'potencia']);
-    var battery = findSpecValue(specData, ['bateria']);
-    var compatibility = findSpecValue(specData, ['compatibilidad', 'compat.']);
-    var full = normalizeText(specData.pairs.map(function (p) { return p.label + ' ' + p.value; }).join(' '));
-
-    if (category === 'accesorio') {
-      if (compatibility) claims.push('Compatibilidad ' + compatibility);
-      if (claims.length < 2) {
-        var material = findSpecValue(specData, ['material']);
-        if (material) claims.push('Material ' + material);
-      }
-    } else {
-      if (motor) claims.push('Motor ' + motor);
-      if (battery && claims.length < 2) claims.push('Bateria ' + battery);
-      if (autonomy && claims.length < 2) claims.push('Autonomia ' + autonomy);
-      if (claims.length < 2 && full.indexOf('dgt') !== -1) claims.push('Homologado DGT');
-    }
-
-    claims = uniqueList(claims);
-    if (!claims.length) return '';
-    return claims.slice(0, 2).join(' · ');
-  }
-
-  (function editorialCopyRefresh() {
-    var titleEl = document.querySelector('.page-title h1, .title-left h1');
-    var subtitleEl = document.querySelector('.page-title .subtitle, .title-left .subtitle');
-    var descEl = panel.querySelector('.panel-inner .desc');
-    if (!titleEl || (!subtitleEl && !descEl)) return;
-
-    if (descEl && descEl.hasAttribute('data-copy-lock')) return;
-
-    var productName = String(titleEl.textContent || '').trim();
-    if (!productName) return;
-
-    var oldSubtitle = subtitleEl ? String(subtitleEl.textContent || '').trim() : '';
-    var specData = collectSpecData();
-    var category = detectCategory();
-    var designHook = detectDesignHook(productName, oldSubtitle, specData);
-    var facts = buildFactHighlights(category, specData);
-    var interestingDetail = buildInterestingDetail(category, specData);
-
-    if (subtitleEl) {
-      var nextSubtitle = buildSubtitleClaims(category, specData, designHook);
-      if (nextSubtitle) subtitleEl.textContent = nextSubtitle;
-    }
-
-    if (!descEl) return;
-
-    var intro;
-    if (category === 'patinete') {
-      var isArmoredDual = /m41\s+armored\s+dual/i.test(productName) || window.location.pathname.indexOf('/m41-armored-dual/') !== -1;
-      if (isArmoredDual) {
-        intro = 'El ' + productName + ' es la version mas contundente de la gama Ecoxtrem para riders que buscan aceleracion inmediata, traccion y control incluso en uso exigente.';
-      } else {
-        intro = 'El ' + productName + ' esta planteado para movilidad urbana eficiente, con una configuracion enfocada en estabilidad y control.';
-      }
-    } else if (category === 'bicicleta') {
-      intro = 'La ' + productName + ' combina asistencia electrica y geometria orientada a confort para trayectos diarios y escapadas de fin de semana.';
-    } else if (category === 'moto') {
-      intro = 'La ' + productName + ' prioriza una conduccion segura y progresiva, con enfoque practico para uso recreativo y controlado.';
-    } else if (category === 'accesorio') {
-      intro = 'El ' + productName + ' aporta una mejora funcional real para el uso diario, con un planteamiento orientado a practicidad y durabilidad.';
-    } else {
-      intro = 'El ' + productName + ' destaca por un planteamiento tecnico equilibrado, pensado para uso continuo y experiencia fiable.';
-    }
-
-    if (designHook) {
-      intro += ' A nivel de diseno, sobresale por su ' + designHook + '.';
-    }
-
-    var factsSentence = facts.length
-      ? 'En prestaciones, ofrece ' + joinNatural(facts) + '.'
-      : '';
-
-    descEl.textContent = [intro, factsSentence, interestingDetail].filter(Boolean).join(' ');
-  })();
 
   /* ─────────────────────────────────────────────────────────────
      SINCRONIZACIÓN DE METADATOS (fuente única = ficha técnica visible)
@@ -529,8 +426,36 @@
     return indexes;
   }
 
-  function createColorVariantSelector(product) {
-    var variants = Array.isArray(product.colorVariants) ? product.colorVariants : [];
+  /* Selector de variantes de la ficha. El eje —qué es, cómo se llama y cómo se
+     representa— sale del NÚCLEO (js/product-attributes.js), no de `colorVariants` ni
+     de las clases del HTML. Antes esta función se llamaba createColorVariantSelector,
+     leía `product.colorVariants` y escribía "COLOR:" a fuego: por eso el G2 PRO tenía
+     que disfrazar su eje de modelo con una clase extra puesta a mano en su ficha. */
+  function createVariantSelector(product) {
+    var ejes = (window.SS_ATTRS ? window.SS_ATTRS.ejes(product) : []);
+    if (!ejes.length) return;
+
+    /* QUÉ EJE PINTA ESTA FUNCIÓN.
+       El contenedor `.color-variants` es el de los círculos. En un producto de varios
+       ejes (los manillares: medida + color, o modelo + medida) el primero del catálogo
+       NO tiene por qué ser el color, y escribir ahí el eje equivocado rotulaba los
+       círculos con "720 mm". Así que se empareja por contenedor: si existe un eje de
+       tipo swatch, es el suyo; si no, el primero. Las secciones `.size-variants` de
+       esas fichas las gobierna su propio script inline hasta la etapa 4. */
+    var eje = null;
+    for (var ie = 0; ie < ejes.length; ie++) {
+      if (ejes[ie].type === 'swatch') { eje = ejes[ie]; break; }
+    }
+    if (!eje) {
+      /* Sin eje de color: si la ficha ya trae secciones `.size-variants` escritas
+         —los manillares de modelo+medida—, esos ejes ya están pintados y los gobierna
+         su script inline. Crear aquí otro selector los DUPLICABA: la ficha del UNO
+         salía con "MODELO:" dos veces. Se deja para cuando esas secciones también se
+         generen desde el catálogo. */
+      if (panel.querySelector('.size-variants')) return;
+      eje = ejes[0];
+    }
+    var variants = eje.options;
     if (!variants.length) return;
 
     var panelInner = panel.querySelector('.panel-inner');
@@ -556,7 +481,7 @@
     } else {
       selector = document.createElement('section');
       selector.className = 'color-variants';
-      selector.setAttribute('aria-label', 'Colores disponibles');
+      selector.setAttribute('aria-label', eje.label + ': opciones disponibles');
     }
 
     var header, activeColorLabel, grid;
@@ -565,17 +490,26 @@
       header = selector.querySelector('.color-variants-head');
       activeColorLabel = selector.querySelector('[data-active-color-label]');
       grid = selector.querySelector('.color-variants-grid');
+      /* El rótulo lo manda el CATÁLOGO, también sobre markup estático. Así una ficha
+         no puede volver a decir "MODELOS:" mientras su dato dice otra cosa —que es
+         justo la contradicción que hacía que el Home y la ficha no coincidieran. */
+      var etiquetaEstatica = selector.querySelector('.color-variants-label');
+      if (etiquetaEstatica) etiquetaEstatica.textContent = eje.label.toUpperCase() + ':';
+      selector.setAttribute('aria-label', eje.label + ': opciones disponibles');
     } else {
+      var dynBox = document.createElement('div');
+      dynBox.className = 'color-variants-box';
       header = document.createElement('div');
       header.className = 'color-variants-head';
       header.innerHTML =
-        '<span class="color-variants-label">COLOR:</span>' +
+        '<span class="color-variants-label">' + eje.label.toUpperCase() + ':</span>' +
         '<span class="color-variants-list" data-active-color-label></span>';
-      selector.appendChild(header);
+      dynBox.appendChild(header);
       activeColorLabel = header.querySelector('[data-active-color-label]');
       grid = document.createElement('div');
       grid.className = 'color-variants-grid';
-      selector.appendChild(grid);
+      dynBox.appendChild(grid);
+      selector.appendChild(dynBox);
     }
 
     var buttons = [];
@@ -586,19 +520,6 @@
         text = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
       } catch (_) {}
       return text.trim();
-    }
-
-    function buildAccentFill(colors) {
-      if (!Array.isArray(colors) || !colors.length) return '';
-      if (colors.length === 1) return colors[0];
-      var steps = [];
-      var total = colors.length;
-      for (var i = 0; i < total; i++) {
-        var from = (i * 100) / total;
-        var to = ((i + 1) * 100) / total;
-        steps.push(colors[i] + ' ' + from + '% ' + to + '%');
-      }
-      return 'linear-gradient(90deg, ' + steps.join(', ') + ')';
     }
 
     function findNamedColors(text) {
@@ -668,60 +589,226 @@
       return [raw];
     }
 
+    // Croma (vivacidad) de un hex: 0 para grises/blancos/negros, alto para colores saturados.
+    function hexChroma(hex) {
+      var h = String(hex || '').trim().replace(/^#/, '');
+      if (h.length === 3 || h.length === 4) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+      if (h.length < 6) return -1;
+      var r = parseInt(h.slice(0, 2), 16), g = parseInt(h.slice(2, 4), 16), b = parseInt(h.slice(4, 6), 16);
+      if (isNaN(r) || isNaN(g) || isNaN(b)) return -1;
+      return Math.max(r, g, b) - Math.min(r, g, b);
+    }
+
+    // De una lista de hex devuelve el más vivo (mayor croma). Para swatches bicolor
+    // (p. ej. "gris y amarillo") elige el color distintivo (amarillo), no el gris.
+    function pickVividHex(hexes) {
+      if (!Array.isArray(hexes) || !hexes.length) return '';
+      var best = hexes[0], bestChroma = hexChroma(hexes[0]);
+      for (var i = 1; i < hexes.length; i++) {
+        var c = hexChroma(hexes[i]);
+        if (c > bestChroma) { best = hexes[i]; bestChroma = c; }
+      }
+      return best;
+    }
+
+    function collectHexes(value) {
+      return String(value || '').match(/#[0-9a-fA-F]{3,8}/g) || [];
+    }
+
+    // Saca el par [izquierda, derecha] EN EL ORDEN del swatch, para que la línea sea
+    // bicolor igual que el círculo de color.
+    function accentPair(colors) {
+      var hexes = [];
+      colors.forEach(function (c) { hexes = hexes.concat(collectHexes(c)); });
+      if (hexes.length >= 2) return { a: hexes[0], b: hexes[hexes.length - 1] };
+      if (hexes.length === 1) return { a: hexes[0], b: hexes[0] };
+      if (colors.length >= 2) return { a: String(colors[0]).trim(), b: String(colors[colors.length - 1]).trim() };
+      if (colors.length === 1) return { a: String(colors[0]).trim(), b: String(colors[0]).trim() };
+      return null;
+    }
+
+    function finalizeAccent(pair) {
+      if (!pair || (!pair.a && !pair.b)) return null;
+      var vivid = pickVividHex([pair.a, pair.b].filter(function (x) { return /^#/.test(x); })) || pair.b || pair.a;
+      return { a: pair.a, b: pair.b, accent: vivid };
+    }
+
+    // La línea de acento es BICOLOR cuando el swatch lo es: dos mitades de color sólido
+    // (izquierda = primer color, derecha = segundo) pintadas en .price-row::before / ::after.
+    // Cada mitad transiciona suave (CSS interpola background-color, pero NO gradientes). Para
+    // swatch de un color, ambas mitades son iguales y se ve una sola línea. Regla general.
     function resolveVariantAccent(variant, button) {
       var directGradient = variant && (variant.accentGradient || variant.lineGradient || variant.accentLineGradient);
       if (directGradient) {
-        var gradientText = String(directGradient).trim();
-        var gradientHex = gradientText.match(/#[0-9a-fA-F]{3,8}/);
-        return { accent: gradientHex ? gradientHex[0] : '#d11c1c', fill: gradientText, mix: 1 };
+        var pg = finalizeAccent(accentPair([String(directGradient)]));
+        if (pg) return pg;
       }
 
       var explicitArray = variant && (variant.accentColors || variant.lineColors || variant.accentLineColors);
       if (Array.isArray(explicitArray) && explicitArray.length) {
         var filtered = explicitArray.map(function (item) { return String(item || '').trim(); }).filter(Boolean);
         if (filtered.length) {
-          return { accent: filtered[0], fill: buildAccentFill(filtered), mix: filtered.length > 1 ? 1 : 0 };
+          var pe = finalizeAccent(accentPair(filtered));
+          if (pe) return pe;
         }
       }
 
       var directValue = variant && (variant.accentLine || variant.accent || variant.swatch || variant.color || variant.hex);
       var directColors = parseDirectAccentColors(directValue);
       if (directColors.length) {
-        if (directColors.length === 1 && /^linear-gradient\(/i.test(directColors[0])) {
-          var firstHex = directColors[0].match(/#[0-9a-fA-F]{3,8}/);
-          return { accent: firstHex ? firstHex[0] : '#d11c1c', fill: directColors[0], mix: 1 };
-        }
-        return { accent: directColors[0], fill: buildAccentFill(directColors), mix: directColors.length > 1 ? 1 : 0 };
+        var pd = finalizeAccent(accentPair(directColors));
+        if (pd) return pd;
       }
 
       var labelColors = findNamedColors((variant && (variant.label || variant.name || variant.key)) || '');
       if (labelColors.length) {
-        return { accent: labelColors[0], fill: buildAccentFill(labelColors), mix: labelColors.length > 1 ? 1 : 0 };
+        var pl = finalizeAccent(accentPair(labelColors));
+        if (pl) return pl;
       }
 
       if (button && window.getComputedStyle) {
         var swatchVar = getComputedStyle(button).getPropertyValue('--variant-swatch');
         var fallback = swatchVar && String(swatchVar).trim();
-        if (!fallback) {
-          var buttonBg = getComputedStyle(button).backgroundColor;
-          if (buttonBg && buttonBg !== 'rgba(0, 0, 0, 0)' && buttonBg !== 'transparent') fallback = buttonBg;
+        if (fallback) {
+          var pf = finalizeAccent(accentPair([fallback]));
+          if (pf) return pf;
         }
-        if (fallback) return { accent: fallback, fill: fallback, mix: 0 };
+        var buttonBg = getComputedStyle(button).backgroundColor;
+        if (buttonBg && buttonBg !== 'rgba(0, 0, 0, 0)' && buttonBg !== 'transparent') {
+          return { a: buttonBg, b: buttonBg, accent: buttonBg };
+        }
       }
 
-      return { accent: '', fill: '', mix: 0 };
+      return { a: '', b: '', accent: '' };
     }
 
     function applySeriesAccentForVariant(variant, button) {
       var resolved = resolveVariantAccent(variant, button);
-      if (!resolved.accent && !resolved.fill) return;
+      if (!resolved.a && !resolved.b && !resolved.accent) return;
       if (resolved.accent) panel.style.setProperty('--series-accent', resolved.accent);
-      panel.style.setProperty('--series-accent-fill', resolved.fill || resolved.accent || '');
-      panel.style.setProperty('--series-accent-mix', String(resolved.mix ? 1 : 0));
+      panel.style.setProperty('--series-accent-a', resolved.a || resolved.accent || '');
+      panel.style.setProperty('--series-accent-b', resolved.b || resolved.a || resolved.accent || '');
+    }
+
+    // Cambio de foto al elegir color: entra fundiéndose y escalando desde un
+    // 103,5 %, igual que la previsualización de las tarjetas del home. Se pinta
+    // en una capa encima y, al terminar, la imagen real toma el relevo ya
+    // cargada; así el <img> principal nunca parpadea.
+    var VARIANT_FADE_MS = 190;
+    var variantFadeTimer = 0;
+
+    // La duración real la manda el CSS (190 ms en escritorio, 420 ms en móvil,
+    // 0 si el sistema pide reducir movimiento). Leerla de ahí evita que el
+    // relevo de la imagen se descuadre respecto a la transición: si el JS
+    // cambiara la foto antes de tiempo, se vería un corte a mitad del fundido.
+    function variantFadeMs(layer) {
+      try {
+        var ms = parseFloat(getComputedStyle(layer).transitionDuration) * 1000;
+        if (isFinite(ms) && ms >= 0) return ms;
+      } catch (_) {}
+      return VARIANT_FADE_MS;
+    }
+
+    // Mientras el <img> tenga srcset, el navegador elige de ahi e IGNORA el src:
+    // cambiar solo .src NO cambiaria la foto. El srcset inicial describe la
+    // portada del producto; en cuanto se navega a otra vista deja de aplicar.
+    function setMainImageSrc(src, alt) {
+      if (!mainImage || !src) return;
+      // Al arrancar, el render de la variante por defecto pide EXACTAMENTE la
+      // foto que ya esta puesta. Si no salieramos aqui, tirariamos el srcset
+      // responsive del HTML y forzariamos una segunda descarga del original
+      // en todas las fichas con selector de color.
+      // Comparamos SIN la query: el sufijo ?v= lo reescriben en caliente
+      // global-assets-app.js y asset-sync.js, asi que las cadenas completas casi
+      // nunca coinciden aunque sea la misma foto.
+      var samePath = function (a) { return String(a || '').split('?')[0]; };
+      var current = mainImage.getAttribute('src') || '';
+      if (samePath(current) === samePath(src)) {
+        if (alt) mainImage.alt = alt;
+        return;
+      }
+      mainImage.removeAttribute('srcset');
+      mainImage.removeAttribute('sizes');
+      mainImage.src = src;
+      if (alt) mainImage.alt = alt;
+    }
+
+    function swapMainImageAnimated(src, alt) {
+      var wrap = mainImage && mainImage.parentElement;
+      if (!wrap || !src) {
+        if (mainImage && src) { setMainImageSrc(src, alt); }
+        return;
+      }
+      var layer = wrap.querySelector('[data-variant-fade]');
+      if (!layer) {
+        layer = document.createElement('img');
+        layer.className = 'gallery-variant-fade';
+        layer.setAttribute('data-variant-fade', '');
+        layer.setAttribute('alt', '');
+        layer.setAttribute('aria-hidden', 'true');
+        layer.setAttribute('decoding', 'async');
+        wrap.appendChild(layer);
+      }
+
+      // La capa debe ocupar EXACTAMENTE el mismo recuadro que la foto real. No
+      // vale con inset:0: .gallery-main tiene padding (24px, 16px en móvil) y en
+      // escritorio la foto va limitada al 80%, así que una capa a inset:0 sale
+      // más grande y el patinete "encogía" de golpe al terminar el fundido.
+      // Medimos el rectángulo real y lo copiamos en píxeles: así da igual el
+      // breakpoint, el padding o el límite de anchura.
+      function pinToMainImage() {
+        var wrapRect = wrap.getBoundingClientRect();
+        var imgRect = mainImage.getBoundingClientRect();
+        if (!imgRect.width || !imgRect.height) return false;
+        layer.style.left = (imgRect.left - wrapRect.left) + 'px';
+        layer.style.top = (imgRect.top - wrapRect.top) + 'px';
+        layer.style.width = imgRect.width + 'px';
+        layer.style.height = imgRect.height + 'px';
+        return true;
+      }
+
+      var launched = false;
+      var run = function () {
+        if (launched) return;
+        launched = true;
+        if (!pinToMainImage()) {
+          setMainImageSrc(src, alt);
+          return;
+        }
+        // Doble rAF: el navegador debe registrar el estado inicial (opacidad 0
+        // y escala ampliada) antes de animar; si no, el cambio sería seco.
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            layer.classList.add('is-on');
+            variantFadeTimer = window.setTimeout(function () {
+              variantFadeTimer = 0;
+              setMainImageSrc(src, alt);
+              // Ocultar la capa sin transición: debajo ya está la misma foto,
+              // así que un segundo fundido solo añadiría un fantasma.
+              layer.style.transition = 'none';
+              layer.classList.remove('is-on');
+              void layer.offsetWidth;
+              layer.style.transition = '';
+            }, variantFadeMs(layer));
+          });
+        });
+      };
+
+      // Si el cliente cambia de color a media animación, el temporizador antiguo
+      // dejaría la foto del color anterior. Lo cancelamos antes de empezar.
+      if (variantFadeTimer) { window.clearTimeout(variantFadeTimer); variantFadeTimer = 0; }
+      layer.style.transition = 'none';
+      layer.classList.remove('is-on');
+      void layer.offsetWidth;
+      layer.style.transition = '';
+      layer.onload = run;
+      layer.src = src;
+      if (layer.complete) run();
     }
 
     function renderGalleryForVariant(variant, options) {
       var allowThumbScroll = !options || options.scrollThumb !== false;
+      var animate = !options || options.animate !== false;
       var indexes = toIndexList(variant, originalItems.length);
       var selectedItems = indexes.length
         ? indexes.map(function (index) { return originalItems[index - 1]; }).filter(Boolean)
@@ -729,28 +816,51 @@
 
       if (!selectedItems.length) return;
 
-      mainImage.src = withVersion(selectedItems[0].src);
-      if (selectedItems[0].alt) mainImage.alt = selectedItems[0].alt;
+      if (animate) {
+        swapMainImageAnimated(withVersion(selectedItems[0].src), selectedItems[0].alt);
+      } else {
+        setMainImageSrc(withVersion(selectedItems[0].src), selectedItems[0].alt);
+      }
 
       if (activeColorLabel) {
         activeColorLabel.textContent = variant.label || variant.name || 'Color';
       }
 
+      applyVariantContent(variant);
+
       var activeButton = selector.querySelector('.color-variant.is-active');
       applySeriesAccentForVariant(variant, activeButton);
 
+      // data-img se versiona EN CALIENTE (global-assets-app.js y asset-sync.js le
+      // añaden ?v=...), pero originalItems se leyó al arrancar, antes de esa
+      // pasada. Comparar las cadenas tal cual no coincidía nunca: al cambiar de
+      // color no se marcaba ninguna miniatura y, de paso, el centrado de abajo
+      // no llegaba a ejecutarse. Se comparan las rutas sin la query.
+      var sinVersion = function (value) { return String(value || '').split('?')[0]; };
+      var objetivo = sinVersion(selectedItems[0].src);
       var thumbButtons = thumbsWrap.querySelectorAll('.thumb');
       var activeThumb = null;
       for (var i = 0; i < thumbButtons.length; i++) {
         var thumbButton = thumbButtons[i];
-        var thumbSrc = thumbButton.getAttribute('data-img') || '';
-        var isActive = thumbSrc === selectedItems[0].src;
+        var isActive = sinVersion(thumbButton.getAttribute('data-img')) === objetivo;
         if (isActive) activeThumb = thumbButton;
         thumbButton.classList.toggle('active', isActive);
       }
 
-      if (allowThumbScroll && activeThumb && activeThumb.scrollIntoView) {
-        activeThumb.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+      if (allowThumbScroll && activeThumb && thumbsWrap.scrollTo) {
+        // No se usa scrollIntoView: arrastra también la PÁGINA cuando la tira de
+        // miniaturas queda fuera de pantalla —en móvil ocurre al bajar hasta el
+        // selector de color— y ese salto vertical molesta más de lo que aporta
+        // centrar la miniatura. Desplazando el contenedor, la página no se mueve.
+        // Se piden los dos ejes porque las miniaturas son horizontales en móvil
+        // y verticales en escritorio; el eje que no puede desplazarse se ignora.
+        var tRect = activeThumb.getBoundingClientRect();
+        var wRect = thumbsWrap.getBoundingClientRect();
+        thumbsWrap.scrollTo({
+          left: thumbsWrap.scrollLeft + (tRect.left - wRect.left) - (wRect.width - tRect.width) / 2,
+          top: thumbsWrap.scrollTop + (tRect.top - wRect.top) - (wRect.height - tRect.height) / 2,
+          behavior: 'smooth'
+        });
       }
     }
 
@@ -761,12 +871,97 @@
       return item && item.src ? item.src : '';
     }
 
-    // Si hay markup estático, usar los botones existentes; si no, crearlos
+    // Algunas variantes no cambian solo la foto sino la CONFIGURACIÓN del producto
+    // (p. ej. KUKIRIN G2 PRO: VMP homologado por la DGT vs Normal deslimitado). Si
+    // la variante trae `desc`, se reescribe la descripción; si trae `dgt` booleano,
+    // se muestra u oculta el badge de la DGT. En la carga inicial la variante por
+    // defecto coincide con el HTML estático, así que reasignar el mismo texto no
+    // provoca salto (mismo alto renderizado).
+    function applyVariantContent(variant) {
+      if (!variant) return;
+
+      if (typeof variant.desc === 'string' && variant.desc) {
+        var descEl = panel.querySelector('.desc');
+        if (descEl && descEl.innerHTML !== variant.desc) {
+          descEl.innerHTML = variant.desc;
+        }
+      }
+
+      if (typeof variant.dgt === 'boolean') {
+        var badge = panel.querySelector('.price-row .dgt-badge');
+        if (badge) {
+          var target = (badge.closest && badge.closest('.dgt-tooltip')) || badge;
+          target.style.display = variant.dgt ? '' : 'none';
+        }
+      }
+    }
+
+    /* ── Regla global de los swatches bicolor ────────────────────────────────
+       Un color partido SIEMPRE se enseña con el corte en DIAGONAL. Los patinetes
+       venían de 90deg (línea vertical) y los manillares se hicieron a 135deg, así
+       que el mismo concepto se veía de dos formas según la sección.
+
+       Se normaliza aquí, y no solo en el catálogo, para que la regla aguante:
+       da igual que el 90deg venga de products.js o escrito a mano en el HTML de
+       una ficha, sale diagonal igual. Solo se toca el ángulo; las paradas de
+       color se respetan tal cual. */
+    function swatchDiagonal(valor) {
+      var v = String(valor || '').trim();
+      if (!v) return v;
+      // 0/90/180/270deg son los cortes rectos (vertical u horizontal): a diagonal.
+      return v.replace(/^linear-gradient\(\s*(?:0|90|180|270)deg\s*,/i, 'linear-gradient(135deg,');
+    }
+
+    function aplicarSwatch(button, valor) {
+      button.style.setProperty('--variant-swatch', swatchDiagonal(valor));
+    }
+
+    /* EL CATÁLOGO MANDA SOBRE EL BOTÓN.
+       Una sola función para las DOS ramas —markup estático y dinámico—, para que el
+       HTML de una ficha no pueda contradecir al dato. Antes la rama estática se
+       limitaba a enganchar el clic y dejaba texto, swatch y clave tal y como
+       estuvieran escritos: por eso el G2 PRO rotulaba "KG2 PRO (VMP)" en su ficha
+       mientras su catálogo decía "G2 PRO VMP", y por eso la clase de píldora había
+       que ponerla a mano. Generalizado aquí, las 12 fichas pasan a ser consumidoras
+       de golpe y sin tratamiento especial para ninguna. */
+    function aplicarDatosAlBoton(button, variant, esPildora, isDefault, isUnavailable) {
+      var nombre = variant.label || variant.name || eje.label;
+      button.classList.toggle('size-variant', esPildora);
+      button.classList.toggle('is-active', !!isDefault);
+      button.classList.toggle('is-disabled', !!isUnavailable);
+      button.setAttribute('aria-pressed', isDefault ? 'true' : 'false');
+      // El nombre SIEMPRE accesible, también en el círculo: una opción no puede
+      // identificarse solo por su color.
+      button.setAttribute('aria-label', nombre);
+      button.title = nombre;
+      /* AQUÍ NO se toca `data-color-key`, y es deliberado. Esa clave es la identidad
+         de la línea en el carrito y en los pedidos YA guardados. Hoy sale de la
+         etiqueta ("Negro"); el catálogo la llama "negro". Escribirla desde el dato
+         cambiaría la identidad de las líneas a mitad de migración: el mismo color
+         entraría dos veces y los pedidos históricos dejarían de casar. El cambio a
+         atributos con nombre es la etapa 5, que sí lleva lectura compatible de lo
+         antiguo. Hasta entonces, quien la escribe sigue siendo quien la escribía. */
+      button.disabled = !!isUnavailable;
+      if (isUnavailable) button.setAttribute('aria-disabled', 'true');
+      else button.removeAttribute('aria-disabled');
+      // La píldora lleva el nombre DENTRO; el círculo, su muestra de color.
+      if (esPildora) button.textContent = nombre;
+      else aplicarSwatch(button, variant.swatch || variant.color || variant.hex || '#111');
+    }
+
+    // Si hay markup estático se REUTILIZAN sus nodos (evita el salto de maquetación
+    // de insertarlos), pero su contenido se reescribe desde el catálogo.
     if (isStaticMarkup && grid) {
       var existingButtons = grid.querySelectorAll('.color-variant');
       variants.forEach(function (variant, index) {
         var button = existingButtons[index];
         if (!button) return; // fallback: button count mismatch, skip
+        var indexesEst = toIndexList(variant, originalItems.length);
+        aplicarDatosAlBoton(
+          button, variant, eje.type === 'pill',
+          button.classList.contains('is-active'),
+          !indexesEst.length && !variant.images
+        );
         buttons.push(button);
         button.addEventListener('click', function () {
           if (button.disabled) return;
@@ -788,15 +983,10 @@
         var isDefault = variant.default === true || (variant.defaultColor === true) || (!buttons.length && !variants.some(function (item) { return item.default === true || item.defaultColor === true; }) && index === 0);
         var button = document.createElement('button');
         button.type = 'button';
-        button.className = 'color-variant' + (isDefault ? ' is-active' : '') + (isUnavailable ? ' is-disabled' : '');
-        button.setAttribute('aria-pressed', isDefault ? 'true' : 'false');
-        button.setAttribute('aria-label', variant.label || variant.name || 'Color');
-        button.title = variant.label || variant.name || 'Color';
-        if (isUnavailable) {
-          button.disabled = true;
-          button.setAttribute('aria-disabled', 'true');
-        }
-        button.style.setProperty('--variant-swatch', variant.swatch || variant.color || variant.hex || '#111');
+        button.className = 'color-variant';
+        // Misma función que la rama estática: una sola definición de "cómo se pinta
+        // una opción", que además decide píldora o círculo por el TIPO del eje.
+        aplicarDatosAlBoton(button, variant, eje.type === 'pill', isDefault, isUnavailable);
 
         button.addEventListener('click', function () {
           if (button.disabled) return;
@@ -825,80 +1015,69 @@
       var colorLabel = variant.label || variant.name || 'Color';
       var variantImage = getVariantPrimaryImage(variant);
       updateCheckoutLinksColorParams(colorKey, colorLabel, variantImage);
+
+      // Sincronizar el botón "Añadir" con la versión elegida. global-assets-app.js
+      // escribe el color por defecto en el botón al hidratar y NO lo actualiza al
+      // cambiar de versión; como cart-runtime, al ver que el botón ya trae data-color,
+      // ignora la selección activa, el carrito añadía SIEMPRE la versión por defecto.
+      // Reescribiendo aquí data-color en cada cambio, el botón refleja la versión real.
+      var cartBtn = panel.querySelector('[data-product-cart-btn="true"]');
+      if (cartBtn) {
+        var cartKey = variant.key || variant.label || '';
+        cartBtn.setAttribute('data-color-key', cartKey);
+        cartBtn.setAttribute('data-color', cartKey);
+        cartBtn.setAttribute('data-color-label', colorLabel);
+        if (variantImage) cartBtn.setAttribute('data-image', variantImage);
+        /* Y el atributo CON NOMBRE, que es lo que llega al pedido. `data-color` sigue
+           existiendo como identidad de línea (y en las fichas de dos ejes lleva la
+           clave combinada), pero quien dice qué eje es esto es el catálogo. */
+        if (window.SS_ATTRS && window.SS_ATTRS.marcarSeleccion && variant.key) {
+          var parcial = {};
+          parcial[eje.key] = variant.key;
+          window.SS_ATTRS.marcarSeleccion(cartBtn, parcial);
+        }
+      }
     }
 
     var defaultVariant = variants.find(function (variant) { return variant.default === true || variant.defaultColor === true; }) || variants[0];
     if (defaultVariant) {
-      renderGalleryForVariant(defaultVariant, { scrollThumb: false });
+      // Carga inicial: sin animación (no tiene sentido "cambiar" a la foto que
+      // ya se está pintando por primera vez).
+      renderGalleryForVariant(defaultVariant, { scrollThumb: false, animate: false });
       updateCheckoutUrlWithColor(defaultVariant);
       gallery.dataset.activeColor = defaultVariant.key || defaultVariant.label || 'default';
     }
   }
 
   /* ============================
-     1) STICKY BUY BAR (móvil)
-     ============================ */
-  (function stickyBar() {
-    if (window.matchMedia && !window.matchMedia('(max-width: 980px)').matches) return;
-
-    var btnMain = panel.querySelector('.btn-main');
-    if (!btnMain) return;
-
-    var priceNow = panel.querySelector('.price-now');
-    var h1 = document.querySelector('.page-title h1, .title-left h1');
-    var priceText = priceNow ? priceNow.textContent.trim() : '';
-    var nameText  = h1 ? h1.textContent.trim() : '';
-
-    var bar = document.createElement('div');
-    bar.className = 'sticky-buy-bar';
-    bar.setAttribute('aria-hidden', 'true');
-    bar.innerHTML =
-      '<div class="sticky-buy-inner">' +
-        '<div class="sticky-buy-info">' +
-          '<span class="sticky-buy-name">' + nameText + '</span>' +
-          '<span class="sticky-buy-price">' + priceText + '</span>' +
-        '</div>' +
-        '<div class="sticky-buy-actions">' +
-          '<a class="sticky-buy-btn" href="' + btnMain.getAttribute('href') + '">' +
-            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>' +
-            ' Comprar ahora' +
-          '</a>' +
-        '</div>' +
-      '</div>';
-
-    document.body.appendChild(bar);
-
-    var ctaCol = panel.querySelector('.cta-col');
-    if (!ctaCol) return;
-
-    var visible = false;
-    var ticking = false;
-
-    function checkScroll() {
-      var rect = ctaCol.getBoundingClientRect();
-      var shouldShow = rect.bottom < 0;
-      if (shouldShow !== visible) {
-        visible = shouldShow;
-        bar.classList.toggle('is-visible', visible);
-      }
-      ticking = false;
-    }
-
-    window.addEventListener('scroll', function () {
-      if (!ticking) { ticking = true; requestAnimationFrame(checkScroll); }
-    }, { passive: true });
-
-    checkScroll();
-  })();
-
-
-  /* ============================
-     2) BADGE DE DESCUENTO (%)
+     1) BADGE DE DESCUENTO (%)
      ============================ */
   (function discountBadge() {
+    var priceRow = panel.querySelector('.price-row');
     var priceNow = panel.querySelector('.price-now');
     var priceWas = panel.querySelector('.price-was');
-    if (!priceNow || !priceWas) return;
+    if (!priceRow || !priceNow || !priceWas) return;
+
+    // Normaliza la estructura: agrupa precio actual + precio anterior (+ badge)
+    // dentro de un wrapper .price-values. Muchas fichas no lo traen y, sin él,
+    // el badge quedaba descolocado o ni se inyectaba. Así TODAS las fichas
+    // comparten la misma estructura → misma posición y estilo.
+    var priceValues = priceRow.querySelector('.price-values');
+    if (!priceValues) {
+      priceValues = document.createElement('span');
+      priceValues.className = 'price-values';
+      priceNow.parentNode.insertBefore(priceValues, priceNow);
+      priceValues.appendChild(priceNow);
+      priceValues.appendChild(priceWas);
+    }
+
+    // Idempotente: si ya hay un badge estático en el HTML, reubícalo dentro del
+    // wrapper (para igualar posición) y no añadas otro.
+    var existing = priceRow.querySelector('.discount-badge');
+    if (existing) {
+      if (existing.parentNode !== priceValues) priceValues.appendChild(existing);
+      return;
+    }
 
     function parsePrice(el) {
       var text = el.textContent.replace(/[^\d,.]/g, '').replace(',', '.');
@@ -915,11 +1094,66 @@
     var badge = document.createElement('span');
     badge.className = 'discount-badge';
     badge.textContent = '-' + pct + '%';
+    priceValues.appendChild(badge);
+  })();
 
-    var priceValues = panel.querySelector('.price-values');
-    if (priceValues) {
-      priceValues.appendChild(badge);
-    }
+
+  /* ============================
+     2) FACADE DE VIDEO (carga diferida de YouTube)
+     ============================
+     El <iframe> de YouTube descarga ~1 MB del reproductor en cada visita
+     (incluso sin pulsar play, solo para mostrar el poster). Lo sustituimos por
+     una miniatura + boton; el reproductor real se carga SOLO al hacer clic.
+     Como este script corre al final del body y el video esta bajo el pliegue
+     (loading=lazy), reemplazamos el iframe antes de que el navegador lo baje.
+     El recuadro mantiene aspect-ratio 16/9 -> sin saltos de layout (CLS 0). */
+  (function youtubeFacade() {
+    var frames = document.querySelectorAll('.video-embed-frame');
+    if (!frames.length) return;
+
+    Array.prototype.forEach.call(frames, function (frame) {
+      var iframe = frame.querySelector('iframe');
+      if (!iframe) return;
+      var src = iframe.getAttribute('src') || '';
+      var m = src.match(/embed\/([A-Za-z0-9_-]{6,})/);
+      if (!m) return;
+      var id = m[1];
+      var title = iframe.getAttribute('title') || 'Reproducir vídeo';
+
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'yt-facade';
+      btn.setAttribute('aria-label', title);
+
+      var thumb = document.createElement('img');
+      thumb.className = 'yt-facade-thumb';
+      thumb.src = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg';
+      thumb.alt = '';
+      thumb.loading = 'lazy';
+      thumb.decoding = 'async';
+
+      var play = document.createElement('span');
+      play.className = 'yt-facade-play';
+      play.setAttribute('aria-hidden', 'true');
+
+      btn.appendChild(thumb);
+      btn.appendChild(play);
+
+      btn.addEventListener('click', function () {
+        var real = document.createElement('iframe');
+        real.src = 'https://www.youtube-nocookie.com/embed/' + id + '?rel=0&autoplay=1';
+        real.title = title;
+        real.setAttribute('loading', 'eager');
+        real.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+        real.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+        real.setAttribute('allowfullscreen', '');
+        frame.innerHTML = '';
+        frame.appendChild(real);
+      }, { once: true });
+
+      frame.innerHTML = '';
+      frame.appendChild(btn);
+    });
   })();
 
 
@@ -984,69 +1218,588 @@
   })();
 
 
-  /* ============================
-     4) PILL DE PESO (4° pill)
-     ============================ */
-  (function weightPill() {
-    var specRows = panel.querySelectorAll('.spec-row');
-    var weightValue = '';
+  /* ==========================================
+     4) ACCESORIO COMPATIBLE (añadir sin salir)
+     ==========================================
+     Ocupa el hueco que dejaron las .quick-specs, entre .desc y .cta-col.
+     Se pinta SOLO si el producto declara compatibleSkus en el catálogo, así
+     que las 35 fichas sin accesorio compatible quedan exactamente igual.
 
-    for (var i = 0; i < specRows.length; i++) {
-      var label = specRows[i].querySelector('.spec-label');
-      if (label && /^peso/i.test(label.textContent.trim())) {
-        var val = specRows[i].querySelector('.spec-value');
-        if (val) weightValue = val.textContent.trim();
-        break;
+     No registra ningún listener propio: los botones llevan el mismo contrato
+     data-* que el resto del sitio y cart-runtime.js los recoge por delegación
+     en document, incluido el "Añadido" temporal de data-added-label.
+
+     OJO: NO lleva data-product-cart-btn="true". Ese atributo significa "este
+     botón es dueño del selector de color de la ficha"; puesto aquí, el mando
+     limitador se añadiría con el color elegido para el patinete. */
+  (function compatibleAccessories() {
+    var panelInner = panel.querySelector('.panel-inner');
+    var desc = panelInner && panelInner.querySelector('.desc');
+    if (!panelInner || !desc) return;
+    if (typeof window.SCOOTSHOP_getCompatibleAccessories !== 'function') return;
+
+    var cartBtn = panel.querySelector('.btn-cart[data-sku]');
+    var sku = cartBtn && cartBtn.getAttribute('data-sku');
+    if (!sku) return;
+
+    var compatibles = window.SCOOTSHOP_getCompatibleAccessories(sku) || [];
+    if (!compatibles.length) return;
+
+    /* Los que ROTAN van al final de la lista, siempre las dos últimas filas. Los
+       demás (limitador, bolsa) están siempre en pantalla y son los que dan estabilidad
+       al bloque: si el carrusel queda en medio, lo que se mueve parte la lista en dos y
+       la fila de abajo parece descolgada. Con el relevo abajo, lo fijo se lee primero y
+       el movimiento queda contenido al final.
+       El orden dentro de cada mitad se respeta: es `sort` estable (Chrome, Safari y
+       Firefox lo garantizan desde 2019) y la clave es un simple 0/1, así que el orden
+       de `compatibleSkus` en el catálogo se mantiene. */
+    compatibles = compatibles.slice().sort(function (a, b) {
+      var ra = a && a.rotationGroup ? 1 : 0;
+      var rb = b && b.rotationGroup ? 1 : 0;
+      return ra - rb;
+    });
+
+    function esc(value) {
+      return String(value === null || value === undefined ? '' : value)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    var FLECHA_SVG = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>';
+
+    /* El recuadro es EL MISMO que el resumen del pedido de /checkout y /pago:
+       se reutilizan sus clases order-summary__product(--line) tal cual, que
+       viven en main.css —fichero que la ficha ya carga— en vez de imitar el
+       diseño con reglas propias. Si mañana cambia el resumen, esto cambia con
+       él y no se queda desincronizado. */
+    var filas = compatibles.map(function (acc) {
+      /* SIN ?v=, tal cual viene del catálogo. Las fotos ya no van con la versión
+         global (se sirven immutable y re-versionarlas las rebajaba enteras en cada
+         despliegue), así que colgarle aquí la versión actual solo conseguiría que
+         estas miniaturas se volvieran a bajar en cada bump. Y ya no hace falta
+         igualar nada: global-assets-app.js dejó de reescribir el src de las imágenes,
+         que era lo que partía la descarga en dos y hacía parpadear la fila. */
+      var img = (acc.gallery && acc.gallery[0] && acc.gallery[0].src) || acc.image || '';
+
+      /* Accesorios CON variantes (color, medida...) NO se pueden añadir desde aquí.
+         Este botón no lleva data-product-cart-btn a propósito —si no, heredaría el
+         color elegido para el patinete—, así que la línea entraría con color y
+         colorLabel vacíos y el pedido llegaría sin saber cuál de las combinaciones
+         hay que enviar. En su lugar se enlaza a la ficha, que es donde se eligen.
+         Los que no tienen variantes (limitador, bolsa) se siguen añadiendo de un clic. */
+      /* Que un accesorio tenga algo que elegir lo dicen sus EJES declarados, sean del
+         tipo que sean: color, medida, modelo o cualquiera que aparezca mañana. Antes se
+         miraba `colorVariants`, y por eso el manillar UNO —que se elige por modelo y
+         medida, y solo existe en plateado— podía añadirse de un clic sin decir cuál.
+         `variantHint` sigue contando para el caso en que el eje viva solo en la ficha. */
+      var ejesAcc = (window.SS_ATTRS ? window.SS_ATTRS.ejes(acc) : []);
+      var opcionesAcc = 0;
+      for (var ea = 0; ea < ejesAcc.length; ea++) opcionesAcc += ejesAcc[ea].options.length;
+      var tieneVariantes = ejesAcc.length > 1 || opcionesAcc > 1
+        || (typeof acc.variantHint === 'string' && !!acc.variantHint);
+
+      /* Qué hay que elegir en la ficha. Por defecto solo el color; los que además
+         llevan otro eje metido dentro de la clave de color (el WAKE 720/780, que
+         combina color y medida) lo declaran con `variantHint` en el catálogo. */
+      var pista = (typeof acc.variantHint === 'string' && acc.variantHint) ? acc.variantHint : 'color';
+
+      /* La variante se elige AQUÍ MISMO, en la burbuja (ver acc-pop más abajo),
+         con ratón y con el dedo. El cuadro mide 236 px, así que cabe de sobra en un
+         móvil de 320. Si el JS fallara, el <a> de reserva no existe: por eso la
+         burbuja se va a la ficha si no consigue leerla (ver abrir()). */
+      var accion = tieneVariantes
+        /* Botón con la MISMA clase .compat-add: hereda el círculo de 38 px, el borde
+           y el hover sin duplicar CSS. El icono va en SVG inline: css/icons.css es un
+           subset local de Font Awesome y no trae ni fa-plus ni fa-chevron. */
+        ? '<button type="button" class="compat-add" data-open-variants="' + esc(acc.href) + '"' +
+            ' aria-expanded="false" aria-haspopup="dialog"' +
+            ' title="Elegir ' + esc(pista) + '"' +
+            ' aria-label="Elegir ' + esc(pista) + ' de ' + esc(acc.name) + '">' +
+            FLECHA_SVG +
+          '</button>'
+        // Sin .btn-cart: ese es la píldora ancha del panel (sombra triple, sin
+        // borde). Este copia los botones circulares de la cabecera —carrito,
+        // menú y cuenta—, que son borde de 1px y fondo blanco sin sombra.
+        : '<button type="button" class="compat-add" data-add-to-cart="true" data-added-label="Añadido"' +
+            ' data-sku="' + esc(acc.sku) + '"' +
+            ' data-name="' + esc(acc.name) + '"' +
+            ' data-price="' + esc(acc.priceText) + '"' +
+            ' data-url="' + esc(acc.href) + '"' +
+            ' data-image="' + esc(img) + '"' +
+            ' data-stock="' + esc(acc.stock || 'in_stock') + '"' +
+            ' title="Añadir al carrito"' +
+            ' aria-label="Añadir al carrito ' + esc(acc.name) + '">' +
+            // "+" de texto, NO <i class="fa-plus">: css/icons.css es un subset
+            // local de Font Awesome y fa-plus no está incluido, así que el
+            // icono salía vacío y el botón se veía como una mancha negra.
+            '<span class="compat-add-plus" aria-hidden="true">+</span>' +
+          '</button>';
+
+      // La flecha por sí sola no explica por qué esta fila no se añade de un clic.
+      var meta = 'Ref: ' + esc(acc.sku) + (tieneVariantes ? ' · elige ' + esc(pista) : '');
+
+      /* Chip de color, igual que en el resumen del pedido de /checkout y /pago.
+         Se respeta la regla que ya sigue pago.js: lo que no tiene opción de color
+         pone "Único" en vez de quedarse sin chip, para que todas las filas pesen
+         lo mismo. Lo que sí tiene, "Por elegir", porque desde aquí no se elige.
+
+         El estilo de píldora va inline y no en un .css: la clase --color solo
+         tiene píldora dentro de .order-summary--checkout/--payment, y añadir
+         .compat-box a ese selector obligaría a bumpear el asset-version global y
+         redesplegar las 43 fichas por un chip que solo se ve en cuatro páginas.
+         Los valores son los MISMOS que usa ese chip en el resumen del pedido
+         (fondo blanco y sombra suave, no el gris del chip Ref), para que el
+         cliente vea la misma píldora aquí y luego en /checkout y /pago. */
+      var chipColor = 'padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.82);'
+        + 'color:#667085;box-shadow:0 8px 18px rgba(15,23,42,.06);'
+        + 'letter-spacing:.06em;text-transform:uppercase;margin-top:2px;';
+      /* El rótulo sale del PRIMER eje que declare el accesorio, no de un "Color:" fijo:
+         un manillar que se elige por medida dice "Medida: por elegir". Si no declara
+         ejes, "Único". Así el chip no contradice a la ficha ni al carrito. */
+      var ejeChip = ejesAcc.length ? ejesAcc[0] : null;
+      var textoChip = tieneVariantes
+        ? ((ejeChip ? ejeChip.label : 'Color') + ': Por elegir')
+        : 'Único';
+      var color = '<span class="order-summary__product-meta order-summary__product-meta--color"'
+        + ' style="' + chipColor + '">' + esc(textoChip) + '</span>';
+
+      /* Accesorios de la misma familia (los cinco manillares) se marcan con su grupo:
+         el bloque no los enseña todos a la vez, los va rotando de dos en dos. */
+      var grupo = (typeof acc.rotationGroup === 'string' && acc.rotationGroup)
+        ? ' data-rot-group="' + esc(acc.rotationGroup) + '"'
+        : '';
+
+      return '' +
+        '<div class="order-summary__product order-summary__product--line compat-row"' + grupo + '>' +
+          '<div class="order-summary__product-main">' +
+            '<img class="order-summary__product-image" src="' + esc(img) + '" alt="" loading="lazy" decoding="async" width="56" height="56">' +
+            '<div class="order-summary__product-info">' +
+              '<a class="order-summary__product-title compat-name" href="' + esc(acc.href) + '">' + esc(acc.name) + '</a>' +
+              '<span class="order-summary__product-meta order-summary__product-meta--ref">' + meta + '</span>' +
+              color +
+            '</div>' +
+          '</div>' +
+          '<div class="compat-buy">' +
+            '<span class="order-summary__product-line-total">' + esc(acc.priceText) + '</span>' +
+            accion +
+          '</div>' +
+        '</div>';
+    }).join('');
+
+    var bloque = document.createElement('div');
+    bloque.className = 'compat-box';
+    bloque.setAttribute('aria-label', 'Accesorios compatibles');
+    bloque.innerHTML =
+      '<div class="compat-head">' +
+        '<span class="compat-title">Añade algo más</span>' +
+        '<span class="compat-hint">Compatible con este modelo</span>' +
+      '</div>' +
+      '<div class="order-summary__product-list">' + filas + '</div>';
+
+    desc.parentNode.insertBefore(bloque, desc.nextSibling);
+
+    /* ── Rotación por familias ───────────────────────────────────────────────
+       Con cinco manillares compatibles el bloque se convertía en un muro y había
+       que bajar mucho para llegar al botón de comprar del patinete. En vez de
+       recortar el catálogo, se enseñan DOS y se cambian cada 4,5 s: el cliente
+       acaba viéndolos todos y el bloque no crece.
+
+       El relevo es un fundido en dos tiempos: primero se desvanecen las que salen
+       y, cuando han terminado, se intercambian y entran las nuevas apareciendo.
+       Nunca se solapan, así que el bloque no pega tirones ni cambia de alto.
+
+       El orden se baraja en cada visita (de ahí que no siempre salgan los mismos
+       primero) pero se recorre la lista entera, así que ninguno se queda sin
+       turno y no se repite uno dentro de la misma vuelta.
+
+       EL RELEVO ES POR FILA, no del bloque entero: la que tiene el ratón encima (o
+       el foco dentro) se queda quieta y la otra sigue su turno. Sin ese freno, la
+       fila podría cambiar en el instante entre que apuntas y pulsas y acabarías
+       abriendo un manillar que no era —que es lo que pide la WCAG 2.2.2 para
+       contenido que se actualiza solo—, pero congelar el bloque entero era pasarse:
+       bastaba con dejar el puntero en el título o en un hueco para que no rotara
+       nada. El reloj solo se para del todo con la pestaña en segundo plano o con la
+       burbuja de variantes abierta.
+
+       Las animaciones van con element.animate() en vez de CSS a propósito:
+       .compat-* vive en tarjetas.css, que cargan las 43 fichas, y añadir reglas
+       ahí obligaría a bumpear el asset-version global y redesplegarlas todas por
+       una animación que solo se ve en cuatro páginas. */
+    (function rotarFamilias() {
+      var VISIBLES = 2;
+      var CADA_MS = 4500;
+
+      var pool = [];
+      var todas = bloque.querySelectorAll('.compat-row[data-rot-group]');
+      for (var i = 0; i < todas.length; i++) pool.push(todas[i]);
+      if (pool.length <= VISIBLES) return;   // con dos o menos no hay nada que rotar
+
+      // Barajado Fisher-Yates. Solo cambia el orden en que se van mostrando; en
+      // pantalla siguen saliendo en el orden del DOM, entre el limitador y la bolsa.
+      for (var s = pool.length - 1; s > 0; s--) {
+        var r = Math.floor(Math.random() * (s + 1));
+        var tmp = pool[s]; pool[s] = pool[r]; pool[r] = tmp;
+      }
+
+      // display en el style del elemento, no el atributo [hidden]: las filas llevan
+      // un display de .compat-box en main.css que ganaría al del user-agent.
+      function ocultar(fila) { fila.style.display = 'none'; }
+      function ver(fila) { fila.style.display = ''; }
+
+      var suave = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+      var idx = 0;
+
+      // Las filas ocultas no descargan su foto (loading="lazy" + display:none), así
+      // que al aparecer saldrían un instante en blanco. Se adelanta la del turno
+      // siguiente, no las cinco: en la ficha de un patinete no toca gastar ahí.
+      function precargarSiguientes() {
+        for (var k = 0; k < VISIBLES; k++) {
+          // `idx` ya apunta a la siguiente candidata a entrar.
+          var f = pool[(idx + k) % pool.length];
+          var im = f && f.querySelector('img');
+          if (im && im.src) { var pre = new Image(); pre.decoding = 'async'; pre.src = im.src; }
+        }
+      }
+
+      // El fundido de salida se queda "pegado" a opacidad 0 (fill:forwards) para que
+      // la fila no reaparezca entre que acaba la animacion y se oculta. Al volver a
+      // mostrarla hay que cancelar esa animacion o entraria invisible.
+      function limpiarAnimaciones(fila) {
+        if (!fila.getAnimations) return;
+        var as = fila.getAnimations();
+        for (var i = 0; i < as.length; i++) as[i].cancel();
+      }
+
+      /* Las filas que hay AHORA en pantalla, por hueco. Se lleva a mano en vez de
+         deducirla del display porque los relevos ya no son en bloque: puede quedarse
+         una y cambiar solo la otra, así que hace falta saber QUÉ hueco se renueva. */
+      var visibles = [];
+
+      function mostrarPareja(desde) {
+        for (var i = 0; i < pool.length; i++) ocultar(pool[i]);
+        visibles = [];
+        for (var k = 0; k < VISIBLES; k++) {
+          var fila = pool[(desde + k) % pool.length];
+          limpiarAnimaciones(fila);
+          ver(fila);
+          visibles.push(fila);
+        }
+        return visibles.slice();
+      }
+
+      /* La siguiente del pool que no esté ya en pantalla: sin esto, al relevar un solo
+         hueco podía tocarle la fila que se está quedando y salir dos veces. */
+      function siguienteLibre() {
+        for (var intento = 0; intento < pool.length; intento++) {
+          var cand = pool[idx % pool.length];
+          idx = (idx + 1) % pool.length;
+          if (visibles.indexOf(cand) === -1) return cand;
+        }
+        return null;
+      }
+
+      /* Una fila se queda quieta si el cliente la está apuntando, tabulando dentro o
+         tiene SU burbuja de variantes abierta. Solo ESA: las demás siguen su turno.
+         Antes se paraba el bloque entero al entrar el ratón en cualquier punto de la
+         caja —incluidos el título y los huecos— y también con cualquier burbuja
+         abierta, así que configurar un manillar congelaba al otro.
+
+         La burbuja hay que mirarla por el `aria-expanded` de SU botón y no por si
+         existe una `.acc-pop` visible: el cuadro vive en <body>, fuera del bloque, y
+         mientras el ratón está dentro de él la fila no figura como `:hover`. Sin este
+         freno, la fila que se está configurando se esfumaría debajo y la burbuja se
+         quedaría colgada de un botón oculto. */
+      function apuntada(fila) {
+        if (!fila) return false;
+        if (fila.matches && fila.matches(':hover')) return true;
+        if (fila.querySelector('[data-open-variants][aria-expanded="true"]')) return true;
+        return !!(document.activeElement && fila.contains(document.activeElement));
+      }
+
+      function desvanecer(filas, cb) {
+        if (!suave || !filas.length || !filas[0].animate) { cb(); return; }
+        var pendientes = filas.length;
+        var fin = function () { if (--pendientes === 0) cb(); };
+        for (var i = 0; i < filas.length; i++) {
+          var an = filas[i].animate([{ opacity: 1 }, { opacity: 0 }],
+            { duration: 260, easing: 'ease-in', fill: 'forwards' });
+          an.onfinish = fin;
+          an.oncancel = fin;
+        }
+      }
+
+      function aparecer(filas) {
+        if (!suave) return;
+        for (var i = 0; i < filas.length; i++) {
+          if (!filas[i].animate) continue;
+          filas[i].animate([{ opacity: 0 }, { opacity: 1 }],
+            { duration: 340, easing: 'ease-out' });
+        }
+      }
+
+      var enRelevo = false;
+      function relevar() {
+        if (enRelevo) return;                 // no encadenar dos relevos a la vez
+
+        // Relevo POR FILA: salen solo las que nadie está mirando ni configurando.
+        var salen = [];
+        for (var i = 0; i < visibles.length; i++) {
+          if (!apuntada(visibles[i])) salen.push(visibles[i]);
+        }
+        if (!salen.length) return;            // las tiene todas apuntadas: quietas
+
+        enRelevo = true;
+        desvanecer(salen, function () {
+          /* La entrante se INSERTA en el sitio exacto de la saliente antes de ocultar
+             a esta. Es lo que mantiene quieta a la fila que se queda: las ocultas van
+             con display:none y no ocupan sitio, así que el hueco de cada una lo decide
+             el ORDEN entre las visibles, no su posición en el DOM. Si la entrante
+             cayera al otro lado de la que se queda, esa daría un salto de una fila
+             entera —y con una burbuja abierta anclada a ella, se quedaría flotando
+             lejos de su botón. */
+          var entran = [];
+          for (var h = 0; h < visibles.length; h++) {
+            if (salen.indexOf(visibles[h]) === -1) continue;
+            var saliente = visibles[h];
+            /* siguienteLibre() mira `visibles`, que todavía contiene a la saliente y a
+               la que se queda: así no se repite ninguna de las dos. */
+            var nueva = siguienteLibre();
+            if (!nueva) continue;
+            saliente.parentNode.insertBefore(nueva, saliente);
+            limpiarAnimaciones(nueva);
+            ver(nueva);
+            ocultar(saliente);
+            visibles[h] = nueva;
+            entran.push(nueva);
+          }
+          // Solo las que ENTRAN se funden: la que se queda no debe parpadear.
+          aparecer(entran);
+          precargarSiguientes();
+          enRelevo = false;
+        });
+      }
+
+      var timer = 0;
+      function arrancar() {
+        if (timer || document.hidden) return;
+        timer = window.setInterval(relevar, CADA_MS);
+      }
+      function parar() { if (timer) { window.clearInterval(timer); timer = 0; } }
+
+      /* El reloj ya NO se para al entrar el ratón en la caja: quien decide es cada
+         fila, en relevar(). Solo se para con la pestaña en segundo plano. */
+      // En segundo plano no se ve nada: seguir rotando solo gasta bateria.
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden) parar(); else arrancar();
+      });
+
+      mostrarPareja(0);     // primer par, sin animacion: nadie lo ha visto cambiar
+      idx = VISIBLES % pool.length;   // el cursor queda tras la pareja inicial
+      precargarSiguientes();
+      arrancar();
+    })();
+  })();
+
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     4b) BURBUJA DE VARIANTES → js/variant-pop.js
+     ──────────────────────────────────────────────────────────────────────────
+     Ya NO vive aquí. Se sacó a su propio archivo porque la comparten las fichas
+     y el HOME: la caja "Añade algo más" de arriba y las tarjetas del home abren
+     exactamente el mismo cuadro, así que un cambio vale para los dos sitios.
+     Este archivo solo pinta los botones con `data-open-variants`; de abrirlos se
+     encarga el módulo, que escucha por delegación en `document`.
+
+     Se pide una sola vez: el propio módulo se protege con `window.__ssVariantPop`
+     (en las fichas lo cargan index.js y este archivo a la vez) y aquí se evita
+     además el segundo <script>. */
+  (function cargarBurbujaDeVariantes() {
+    if (document.querySelector('script[data-variant-pop]')) return;
+    var s = document.createElement('script');
+    s.src = '/js/variant-pop.js?v=' + encodeURIComponent(assetVersion());
+    s.defer = true;
+    s.setAttribute('data-variant-pop', 'true');
+    document.head.appendChild(s);
+  })();
+
+
+  /* Aquí se inyectaban los SELLOS de confianza (Envío gratis / Garantía / Pago seguro).
+     Eliminados: el de envío repetía la primera línea del bloque de envío, que está justo
+     al lado con el mismo icono, y los otros dos no decían nada que no esté ya en la
+     ficha. Con ellos se fue su envoltorio .ship-trust, que solo existía para colocarlos
+     junto al envío. El bloque de envío vuelve a ser hijo directo de .panel-inner. */
+
+  (function variantSelector() {
+    function arrancar() {
+      var product = getCurrentProduct();
+      if (product) createVariantSelector(product);
+      ensureDefaultColorFromDom();
+    }
+    /* El núcleo puede no estar todavía: la ficha se enlaza con etiqueta estática y a
+       product-attributes.js lo añade global-assets.js de forma diferida. Si aún no
+       está, se espera a su aviso; sin esto el selector se quedaba sin construir y los
+       botones de la ficha dejaban de cambiar la foto. */
+    ssListo().then(arrancar);
+  })();
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     CARRIL DE COLORES — deslizar en horizontal cuando no caben en el recuadro
+     ──────────────────────────────────────────────────────────────────────────
+     La fila de círculos no se parte en dos líneas ni encoge (flex-wrap:nowrap en
+     tarjetas.css, a propósito), así que con muchos colores —el manillar LUNJE
+     tiene 10— se sale del recuadro. El deslizamiento lo pone el CSS
+     (overflow-x:auto en .color-variants-grid); aquí va solo lo que el CSS no
+     puede saber:
+
+       1) si el carril desborda DE VERDAD y por qué lado queda algo por ver, para
+          pintar el degradado del borde solo entonces (clases .is-rail*), y
+       2) que el color elegido esté a la vista. Sin esto, al abrir una ficha cuyo
+          color por defecto es el 8º se ven seis círculos, ninguno marcado, y
+          parece que no hay nada seleccionado.
+
+     Dos cosas que NO se pueden cambiar a la ligera:
+       · el desplazamiento se hace escribiendo scrollLeft del carril, NUNCA con
+         scrollIntoView(): ese arrastra también el scroll de la PÁGINA y las
+         fichas dependen de nacer arriba del todo.
+       · el carril solo se mueve si el círculo activo NO se ve entero, para no
+         pelear con el dedo del cliente cuando ya está deslizando.
+
+     Se recalcula al vuelo porque el carril cambia de sitio y de estado por su
+     cuenta: enforceProductActionOrder() (global-assets-app.js) recoloca la
+     sección ~1s después de cargar —y mover el nodo pone su scroll a cero— y el
+     color activo lo cambian tanto los botones como los scripts propios de cada
+     ficha (LUNJE recombina medida+color, G2 PRO alterna versión).
+     ══════════════════════════════════════════════════════════════════════════ */
+  (function carrilDeVariantes() {
+    var SLACK = 2;      // px de holgura: el scroll fraccionado nunca da el 0 exacto
+    var EDGE_PAD = 15;  // el padding lateral del carril (--rail-pad en tarjetas.css)
+    var frame = 0;
+
+    /* Los DOS carriles de la ficha, con el mismo trato: el de color y el de
+       medida/modelo de los manillares. Antes ese segundo se partía en dos filas
+       (flex-wrap:wrap) en vez de deslizarse; ahora comparte CSS y controlador, así
+       que un cambio aquí vale para los dos. */
+    function rails() {
+      return Array.prototype.slice.call(
+        document.querySelectorAll('.color-variants-grid, .size-variants-grid'));
+    }
+
+    function prefersReducedMotion() {
+      try {
+        return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+      } catch (_) {
+        return false;
       }
     }
 
-    if (!weightValue) return;
-
-    var quickSpecs = panel.querySelector('.quick-specs');
-    if (!quickSpecs) return;
-
-    var pill = document.createElement('div');
-    pill.className = 'pill';
-    pill.innerHTML =
-      '<span class="pill-label">Peso</span>' +
-      '<span class="pill-value">' + weightValue + '</span>';
-    quickSpecs.appendChild(pill);
-    quickSpecs.classList.add('quick-specs--4');
-  })();
-
-
-  /* ============================
-     5) TRUST BADGES
-     ============================ */
-  (function trustBadges() {
-    var shippingBox = panel.querySelector('.shipping-box');
-    if (!shippingBox) return;
-
-    var badges = document.createElement('div');
-    badges.className = 'trust-badges';
-    badges.innerHTML =
-      '<div class="trust-badge">' +
-        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5a2 2 0 01-2 2h-1"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>' +
-        '<span>Envío gratis</span>' +
-      '</div>' +
-      '<div class="trust-badge">' +
-        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>' +
-        '<span>Garantía</span>' +
-      '</div>' +
-      '<div class="trust-badge">' +
-        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>' +
-        '<span>Pago seguro</span>' +
-      '</div>';
-
-    shippingBox.parentNode.insertBefore(badges, shippingBox.nextSibling);
-  })();
-
-  (function colorVariants() {
-    var product = getCurrentProduct();
-    if (product) {
-      createColorVariantSelector(product);
+    // Qué bordes se difuminan: ninguno si cabe todo, y solo el lado por el que
+    // queda carril por recorrer cuando no cabe.
+    function syncEdges(rail) {
+      var max = rail.scrollWidth - rail.clientWidth;
+      var scrollable = max > SLACK;
+      rail.classList.toggle('is-rail', scrollable);
+      rail.classList.toggle('is-rail-start', scrollable && rail.scrollLeft <= SLACK);
+      rail.classList.toggle('is-rail-end', scrollable && rail.scrollLeft >= max - SLACK);
+      /* Si cabe entera, las píldoras se reparten el ancho en vez de dejar hueco
+         muerto a la derecha (el WAKE y el LUNJE solo tienen dos medidas). Mismo
+         gesto que la burbuja con .acc-pop-rail.is-fit. En el carril de colores la
+         clase no hace nada: allí los círculos no se estiran nunca. */
+      rail.classList.toggle('is-fit', !scrollable);
     }
-    ensureDefaultColorFromDom();
+
+    function revealActive(rail, smooth) {
+      var max = rail.scrollWidth - rail.clientWidth;
+      if (max <= SLACK) return;
+
+      // `.is-active` a secas: sirve igual para el círculo de color y para la píldora
+      // de medida/modelo, que ahora comparten carril.
+      var active = rail.querySelector('.is-active');
+      if (!active) return;
+
+      var railRect = rail.getBoundingClientRect();
+      var activeRect = active.getBoundingClientRect();
+      var visible = activeRect.left >= railRect.left + EDGE_PAD - 1 &&
+                    activeRect.right <= railRect.right - EDGE_PAD + 1;
+      if (visible) return;
+
+      // Centrado dentro de la ventana del carril: así se ven también los vecinos
+      // y se lee de un vistazo que la fila sigue a los dos lados.
+      var target = rail.scrollLeft + (activeRect.left - railRect.left) -
+                   (rail.clientWidth - activeRect.width) / 2;
+      target = Math.max(0, Math.min(max, Math.round(target)));
+      if (Math.abs(target - rail.scrollLeft) < 1) return;
+
+      if (smooth && !prefersReducedMotion() && typeof rail.scrollTo === 'function') {
+        try {
+          rail.scrollTo({ left: target, behavior: 'smooth' });
+          return;
+        } catch (_) {}
+      }
+      rail.scrollLeft = target;
+    }
+
+    function bind(rail) {
+      conectarRuedaHorizontal(rail);
+      if (rail.dataset.railBound === 'true') return;
+      rail.dataset.railBound = 'true';
+      rail.addEventListener('scroll', function () { syncEdges(rail); }, { passive: true });
+    }
+
+    /* motivo:
+         'inicio' → primera pasada, sin animación
+         'color'  → ha cambiado el círculo activo: se enseña siempre, deslizando
+         'layout' → algo ha movido o remedido el carril. Aquí NO se toca el scroll
+                    si el cliente lo había deslizado él (scrollLeft > 0): en móvil
+                    esconder la barra de direcciones dispara un resize por cada
+                    scroll de la página, y recolocar el carril en ese momento sería
+                    quitárselo de las manos. Cuando de verdad lo han movido de sitio
+                    —enforceProductActionOrder()— el scroll vuelve solo a cero, que
+                    es justo el caso que sí hay que recolocar. */
+    function schedule(motivo) {
+      if (frame) window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(function () {
+        frame = 0;
+        rails().forEach(function (rail) {
+          bind(rail);
+          if (motivo !== 'layout' || rail.scrollLeft <= SLACK) {
+            revealActive(rail, motivo === 'color');
+          }
+          syncEdges(rail);
+        });
+      });
+    }
+
+    schedule('inicio');
+
+    var panelInner = panel.querySelector('.panel-inner');
+    if (panelInner && window.MutationObserver) {
+      // Solo interesan dos cosas: que muevan la sección (childList) y que cambie el
+      // botón activo (class de un .color-variant). Las clases .is-rail* que escribe
+      // esta misma función van en el carril, no en un .color-variant, así que no se
+      // realimentan.
+      new MutationObserver(function (records) {
+        var motivo = '';
+        for (var i = 0; i < records.length; i++) {
+          var record = records[i];
+          var isActiveSwitch = record.type === 'attributes' &&
+                               record.target.classList &&
+                               (record.target.classList.contains('color-variant') ||
+                                record.target.classList.contains('size-variant'));
+          if (isActiveSwitch) { motivo = 'color'; break; }
+          if (record.type === 'childList') motivo = 'layout';
+        }
+        if (motivo) schedule(motivo);
+      }).observe(panelInner, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['class']
+      });
+    }
+
+    window.addEventListener('load', function () { schedule('layout'); });
+    window.addEventListener('resize', function () { schedule('layout'); }, { passive: true });
+    window.addEventListener('orientationchange', function () { schedule('layout'); });
   })();
 
   /* ============================
@@ -1067,14 +1820,19 @@
     img.className = 'dgt-badge';
     img.src = withVersion('/img/dgtchapa.svg');
     img.alt = 'Logo DGT';
-    img.loading = 'lazy';
+    // width/height + eager: reservan el hueco por aspect-ratio y lo cargan ya,
+    // para que no crezca el price-row al llegar (antes con lazy y sin dims saltaba
+    // ~19px hacia abajo). El SVG es 1254x1254; el CSS lo escala a 57px.
+    img.setAttribute('width', '1254');
+    img.setAttribute('height', '1254');
+    img.loading = 'eager';
     img.decoding = 'async';
     priceRow.appendChild(img);
   })();
 
 
   /* ============================
-     6) PRODUCTOS RELACIONADOS
+     5) PRODUCTOS RELACIONADOS
      ============================ */
   (function relatedProducts() {
     var products = window.SCOOTSHOP_PRODUCTS;
@@ -1168,7 +1926,7 @@
     var indexScript = document.querySelector('script[src*="/js/index.js"]');
     if (!indexScript) {
       indexScript = document.createElement('script');
-      indexScript.src = '/js/index.js?v=' + encodeURIComponent(ver);
+      indexScript.src = '/js/index.js?v=' + encodeURIComponent(assetVersion());
       indexScript.defer = true;
       indexScript.setAttribute('data-home-card-api-loader', 'true');
       document.head.appendChild(indexScript);

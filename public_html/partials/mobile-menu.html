@@ -4,7 +4,14 @@
 
 <nav class="mm-panel" id="mobileMenu" role="dialog" aria-modal="true" aria-label="Menú móvil">
   <div class="mm-head">
-    <span class="mm-head-title">Menú</span>
+    <div class="mm-head-left">
+      <!-- Solo visible dentro de Productos (lo enseña .mm-viewport.mm-drilled).
+           Antes el único camino de vuelta era el gesto de deslizar. -->
+      <button class="mm-back" id="mmBack" aria-label="Volver al menú" type="button">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <span class="mm-head-title" id="mmHeadTitle">Menú</span>
+    </div>
     <button class="mm-close" id="mmClose" aria-label="Cerrar menú" type="button">
       <i class="fa-solid fa-xmark"></i>
     </button>
@@ -17,15 +24,12 @@
         <a class="mm-link" href="/#inicio">
           <span class="mm-link-content"><i class="fa-solid fa-house mm-ico" aria-hidden="true"></i>Inicio</span>
         </a>
-        <button class="mm-link mm-link--products" id="mmProductsToggle" type="button" aria-expanded="false">
+        <button class="mm-link" id="mmProductsToggle" type="button" aria-expanded="false">
           <span class="mm-link-content"><i class="fa-solid fa-cart-shopping mm-ico" aria-hidden="true"></i>Productos</span>
           <i class="fa-solid fa-chevron-right mm-arrow" aria-hidden="true"></i>
         </button>
         <a class="mm-link" href="/#faq">
           <span class="mm-link-content"><i class="fa-solid fa-circle-question mm-ico" aria-hidden="true"></i>Preguntas</span>
-        </a>
-        <a class="mm-link" href="/#ubicacion">
-          <span class="mm-link-content"><i class="fa-solid fa-location-dot mm-ico" aria-hidden="true"></i>Ubicación</span>
         </a>
         <a class="mm-link" href="/#legal">
           <span class="mm-link-content"><i class="fa-solid fa-scale-balanced mm-ico" aria-hidden="true"></i>Legal</span>

@@ -1,0 +1,477 @@
+{
+  "labels": {
+    "color": "Color",
+    "model": "Modelo",
+    "size": "Medida",
+    "version": "Versión",
+    "power": "Potencia",
+    "range": "Autonomía",
+    "capacity": "Capacidad",
+    "material": "Material"
+  },
+  "products": {
+    "ACC-BAG": {
+      "href": "/accesorios/bolsa-almacenamiento/",
+      "image": "/accesorios/bolsa-almacenamiento/img/1.webp",
+      "axes": []
+    },
+    "ACC-BAR-KOCEVLO": {
+      "href": "/accesorios/manillar-kocevlo/",
+      "image": "/accesorios/manillar-kocevlo/img/1.webp",
+      "axes": [
+        {
+          "key": "model",
+          "label": "Modelo",
+          "type": "pill",
+          "options": {
+            "rise": "Rise elevador",
+            "flat": "Flat plano"
+          }
+        },
+        {
+          "key": "size",
+          "label": "Medida",
+          "type": "pill",
+          "options": {
+            "680": "680 mm",
+            "700": "700 mm",
+            "720": "720 mm",
+            "740": "740 mm",
+            "760": "760 mm"
+          }
+        }
+      ]
+    },
+    "ACC-BAR-LUNJE": {
+      "href": "/accesorios/manillar-lunje/",
+      "image": "/accesorios/manillar-lunje/img/1.webp",
+      "axes": [
+        {
+          "key": "size",
+          "label": "Medida",
+          "type": "pill",
+          "options": {
+            "720": "720 mm",
+            "780": "780 mm"
+          }
+        },
+        {
+          "key": "color",
+          "label": "Color",
+          "type": "swatch",
+          "options": {
+            "negro-blanco": "Negro y blanco",
+            "negro-rosa": "Negro y rosa",
+            "negro-amarillo": "Negro y amarillo",
+            "rojo": "Rojo",
+            "azul": "Azul",
+            "morado": "Morado",
+            "dorado": "Dorado",
+            "tornasol-blanco": "Tornasol blanco",
+            "tornasol-rosa": "Tornasol rosa",
+            "tornasol-amarillo": "Tornasol amarillo"
+          }
+        }
+      ]
+    },
+    "ACC-BAR-NANLIO": {
+      "href": "/accesorios/manillar-nanlio/",
+      "image": "/accesorios/manillar-nanlio/img/1.webp",
+      "axes": [
+        {
+          "key": "color",
+          "label": "Acabado",
+          "type": "swatch",
+          "options": {
+            "tornasol-negro": "Tornasol negro · alza 25 mm",
+            "tornasol-blanco": "Tornasol blanco · alza 25 mm",
+            "tornasol-freedom": "Tornasol Freedom · alza 25 mm",
+            "tornasol-024-negro": "Tornasol 024 negro · alza 50 mm",
+            "tornasol-024-blanco": "Tornasol 024 blanco · alza 50 mm"
+          }
+        }
+      ]
+    },
+    "ACC-BAR-UNO": {
+      "href": "/accesorios/manillar-uno/",
+      "image": "/accesorios/manillar-uno/img/1.webp",
+      "axes": [
+        {
+          "key": "model",
+          "label": "Modelo",
+          "type": "pill",
+          "options": {
+            "rb12": "RB12 elevador",
+            "fb12": "FB12 plano"
+          }
+        },
+        {
+          "key": "size",
+          "label": "Medida",
+          "type": "pill",
+          "options": {
+            "640": "640 mm",
+            "680": "680 mm",
+            "720": "720 mm",
+            "740": "740 mm",
+            "760": "760 mm",
+            "780": "780 mm",
+            "800": "800 mm"
+          }
+        }
+      ]
+    },
+    "ACC-BAR-WAKE": {
+      "href": "/accesorios/manillar-wake/",
+      "image": "/accesorios/manillar-wake/img/1.webp",
+      "axes": [
+        {
+          "key": "size",
+          "label": "Medida",
+          "type": "pill",
+          "options": {
+            "720": "720 mm",
+            "780": "780 mm"
+          }
+        },
+        {
+          "key": "color",
+          "label": "Color",
+          "type": "swatch",
+          "options": {
+            "negro": "Negro",
+            "rojo": "Rojo",
+            "azul": "Azul",
+            "morado": "Morado",
+            "dorado": "Dorado",
+            "verde": "Verde"
+          }
+        }
+      ]
+    },
+    "ACC-BAR-WAKE-DH": {
+      "href": "/accesorios/manillar-wake-downhill/",
+      "image": "/accesorios/manillar-wake-downhill/img/1.webp",
+      "axes": [
+        {
+          "key": "color",
+          "label": "Color",
+          "type": "swatch",
+          "options": {
+            "negro-blanco": "Negro y blanco",
+            "negro-rojo": "Negro y rojo",
+            "negro-morado": "Negro y morado",
+            "negro-verde": "Negro y verde",
+            "rojo": "Rojo",
+            "dorado": "Dorado",
+            "azul": "Azul"
+          }
+        }
+      ]
+    },
+    "ACC-BEAST": {
+      "href": "/accesorios/pegatina-the-beast/",
+      "image": "/accesorios/pegatina-the-beast/img/2.webp",
+      "axes": []
+    },
+    "ACC-HOLDER": {
+      "href": "/accesorios/soporte-movil/",
+      "image": "/accesorios/soporte-movil/img/2.webp",
+      "axes": []
+    },
+    "ACC-LIMIT-M41": {
+      "href": "/accesorios/mando-limitador-m41-tank/",
+      "image": "/accesorios/mando-limitador-m41-tank/img/1.webp",
+      "axes": []
+    },
+    "ACC-LIMIT-M41-AD": {
+      "href": "/accesorios/mando-limitador-m41-armored-dual/",
+      "image": "/accesorios/mando-limitador-m41-armored-dual/img/1.webp",
+      "axes": []
+    },
+    "ACC-LIMIT-M41-AO": {
+      "href": "/accesorios/mando-limitador-m41-armored-one/",
+      "image": "/accesorios/mando-limitador-m41-armored-one/img/1.webp",
+      "axes": []
+    },
+    "ACC-LIMIT-M41-TD": {
+      "href": "/accesorios/mando-limitador-m41-tank-dual/",
+      "image": "/accesorios/mando-limitador-m41-tank-dual/img/1.webp",
+      "axes": []
+    },
+    "ACC-REFLECT": {
+      "href": "/accesorios/pegatinas-reflectantes/",
+      "image": "/accesorios/pegatinas-reflectantes/img/1.webp",
+      "axes": []
+    },
+    "ACC-RGB": {
+      "href": "/accesorios/luces-led-rgb/",
+      "image": "/accesorios/luces-led-rgb/img/1.webp",
+      "axes": []
+    },
+    "BISONGT": {
+      "href": "/patinetes/ecoxtrem/bison-gt-carbon-design/",
+      "image": "/patinetes/ecoxtrem/bison-gt-carbon-design/img/1.webp",
+      "axes": [
+        {
+          "key": "color",
+          "label": "Color",
+          "type": "swatch",
+          "options": {
+            "rojo-negro": "Rojo/Negro",
+            "gris": "Gris",
+            "negro": "Negro"
+          }
+        }
+      ]
+    },
+    "CHALLENGER12": {
+      "href": "/motos/challenger12/",
+      "image": "/motos/challenger12/img/1.webp",
+      "axes": []
+    },
+    "D20": {
+      "href": "/patinetes/series-n/d20/",
+      "image": "/patinetes/series-n/d20/img/1.webp",
+      "axes": []
+    },
+    "D6": {
+      "href": "/patinetes/series-n/d6/",
+      "image": "/patinetes/series-n/d6/img/1.webp",
+      "axes": []
+    },
+    "EV05M": {
+      "href": "/motos/ev05m/",
+      "image": "/motos/ev05m/img/1.webp",
+      "axes": []
+    },
+    "EV12MPRO": {
+      "href": "/motos/ev12m-pro/",
+      "image": "/motos/ev12m-pro/img/1.webp",
+      "axes": []
+    },
+    "G2": {
+      "href": "/patinetes/series-gt/g2/",
+      "image": "/patinetes/series-gt/g2/img/1.webp",
+      "axes": []
+    },
+    "G2PRO": {
+      "href": "/patinetes/series-k/g2-pro/",
+      "image": "/patinetes/series-k/g2-pro/img/1.webp",
+      "axes": [
+        {
+          "key": "model",
+          "label": "Modelo",
+          "type": "pill",
+          "options": {
+            "vmp": "G2 PRO VMP",
+            "normal": "G2 PRO Normal"
+          }
+        }
+      ]
+    },
+    "G73": {
+      "href": "/bicicletas/g73/",
+      "image": "/bicicletas/g73/img/1.webp",
+      "axes": []
+    },
+    "GT9": {
+      "href": "/patinetes/series-gt/gt9/",
+      "image": "/patinetes/series-gt/gt9/img/1.webp",
+      "axes": []
+    },
+    "GT900": {
+      "href": "/bicicletas/gt900/",
+      "image": "/bicicletas/gt900/img/7.webp",
+      "axes": []
+    },
+    "IES1": {
+      "href": "/patinetes/series-n/ie-s1/",
+      "image": "/patinetes/series-n/ie-s1/img/1.webp",
+      "axes": []
+    },
+    "IX3": {
+      "href": "/patinetes/series-ix/ix3/",
+      "image": "/patinetes/series-ix/ix3/img/1.webp",
+      "axes": []
+    },
+    "IX8": {
+      "href": "/patinetes/series-ix/ix8/",
+      "image": "/patinetes/series-ix/ix8/img/1.webp",
+      "axes": []
+    },
+    "KG2": {
+      "href": "/patinetes/series-k/g2/",
+      "image": "/patinetes/series-k/g2/img/1.webp",
+      "axes": []
+    },
+    "M41DUAL": {
+      "href": "/patinetes/ecoxtrem/m41-armored-dual/",
+      "image": "/patinetes/ecoxtrem/m41-armored-dual/img/8.webp",
+      "axes": [
+        {
+          "key": "color",
+          "label": "Color",
+          "type": "swatch",
+          "options": {
+            "blanco": "BLANCO",
+            "gris-amarillo": "Gris y Amarillo",
+            "azul": "Azul",
+            "granate": "Granate",
+            "verde": "Verde",
+            "amarillo": "Amarillo"
+          }
+        }
+      ]
+    },
+    "M41ONE": {
+      "href": "/patinetes/ecoxtrem/m41-armored-one/",
+      "image": "/patinetes/ecoxtrem/m41-armored-one/img/1.webp",
+      "axes": [
+        {
+          "key": "color",
+          "label": "Color",
+          "type": "swatch",
+          "options": {
+            "naranja": "Naranja",
+            "azul-oscuro": "Azul oscuro",
+            "blanco": "Blanco",
+            "rojo-rosa": "Rojo rosa",
+            "verde-militar": "Verde militar"
+          }
+        }
+      ]
+    },
+    "M41TANK": {
+      "href": "/patinetes/ecoxtrem/m41-tank-ultimate-1000w/",
+      "image": "/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/1.webp",
+      "axes": [
+        {
+          "key": "color",
+          "label": "Color",
+          "type": "swatch",
+          "options": {
+            "negro": "Negro",
+            "verde": "Verde - Fluor",
+            "rojo": "Rojo",
+            "azul": "Azul",
+            "verde-negro": "Verde y Negro"
+          }
+        }
+      ]
+    },
+    "M41TANKDUAL": {
+      "href": "/patinetes/ecoxtrem/m41-tank-dual/",
+      "image": "/patinetes/ecoxtrem/m41-tank-dual/img/1.webp",
+      "axes": [
+        {
+          "key": "color",
+          "label": "Color",
+          "type": "swatch",
+          "options": {
+            "gris-amarillo": "Gris y Amarillo",
+            "gris-rojo": "Gris y Rojo",
+            "gris-azul": "Gris y Azul",
+            "gris-verde": "Gris y Verde"
+          }
+        }
+      ]
+    },
+    "N7PRO": {
+      "href": "/patinetes/series-n/n7/",
+      "image": "/patinetes/series-n/n7/img/1.webp",
+      "axes": []
+    },
+    "S3": {
+      "href": "/patinetes/series-n/s3/",
+      "image": "/patinetes/series-n/s3/img/1.webp",
+      "axes": []
+    },
+    "S4": {
+      "href": "/patinetes/series-n/s4/",
+      "image": "/patinetes/series-n/s4/img/1.webp",
+      "axes": []
+    },
+    "T10": {
+      "href": "/patinetes/series-gt/t10/",
+      "image": "/patinetes/series-gt/t10/img/1.webp",
+      "axes": []
+    },
+    "T10DUAL": {
+      "href": "/patinetes/series-gt/t10-dual/",
+      "image": "/patinetes/series-gt/t10-dual/img/1.webp",
+      "axes": []
+    },
+    "T30": {
+      "href": "/patinetes/series-gt/t30/",
+      "image": "/patinetes/series-gt/t30/img/1.webp",
+      "axes": []
+    },
+    "TF3": {
+      "href": "/patinetes/series-gt/tf3/",
+      "image": "/patinetes/series-gt/tf3/img/1.webp",
+      "axes": []
+    },
+    "V70": {
+      "href": "/patinetes/series-n/v70-connected/",
+      "image": "/patinetes/series-n/v70-connected/img/2.webp",
+      "axes": []
+    },
+    "VS6": {
+      "href": "/patinetes/series-n/vs6/",
+      "image": "/patinetes/series-n/vs6/img/1.webp",
+      "axes": []
+    },
+    "W9": {
+      "href": "/patinetes/series-ix/w9/",
+      "image": "/patinetes/series-ix/w9/img/1.webp",
+      "axes": []
+    }
+  },
+  "byHref": {
+    "/accesorios/bolsa-almacenamiento": "ACC-BAG",
+    "/accesorios/manillar-kocevlo": "ACC-BAR-KOCEVLO",
+    "/accesorios/manillar-lunje": "ACC-BAR-LUNJE",
+    "/accesorios/manillar-nanlio": "ACC-BAR-NANLIO",
+    "/accesorios/manillar-uno": "ACC-BAR-UNO",
+    "/accesorios/manillar-wake": "ACC-BAR-WAKE",
+    "/accesorios/manillar-wake-downhill": "ACC-BAR-WAKE-DH",
+    "/accesorios/pegatina-the-beast": "ACC-BEAST",
+    "/accesorios/soporte-movil": "ACC-HOLDER",
+    "/accesorios/mando-limitador-m41-tank": "ACC-LIMIT-M41",
+    "/accesorios/mando-limitador-m41-armored-dual": "ACC-LIMIT-M41-AD",
+    "/accesorios/mando-limitador-m41-armored-one": "ACC-LIMIT-M41-AO",
+    "/accesorios/mando-limitador-m41-tank-dual": "ACC-LIMIT-M41-TD",
+    "/accesorios/pegatinas-reflectantes": "ACC-REFLECT",
+    "/accesorios/luces-led-rgb": "ACC-RGB",
+    "/patinetes/ecoxtrem/bison-gt-carbon-design": "BISONGT",
+    "/motos/challenger12": "CHALLENGER12",
+    "/patinetes/series-n/d20": "D20",
+    "/patinetes/series-n/d6": "D6",
+    "/motos/ev05m": "EV05M",
+    "/motos/ev12m-pro": "EV12MPRO",
+    "/patinetes/series-gt/g2": "G2",
+    "/patinetes/series-k/g2-pro": "G2PRO",
+    "/bicicletas/g73": "G73",
+    "/patinetes/series-gt/gt9": "GT9",
+    "/bicicletas/gt900": "GT900",
+    "/patinetes/series-n/ie-s1": "IES1",
+    "/patinetes/series-ix/ix3": "IX3",
+    "/patinetes/series-ix/ix8": "IX8",
+    "/patinetes/series-k/g2": "KG2",
+    "/patinetes/ecoxtrem/m41-armored-dual": "M41DUAL",
+    "/patinetes/ecoxtrem/m41-armored-one": "M41ONE",
+    "/patinetes/ecoxtrem/m41-tank-ultimate-1000w": "M41TANK",
+    "/patinetes/ecoxtrem/m41-tank-dual": "M41TANKDUAL",
+    "/patinetes/series-n/n7": "N7PRO",
+    "/patinetes/series-n/s3": "S3",
+    "/patinetes/series-n/s4": "S4",
+    "/patinetes/series-gt/t10": "T10",
+    "/patinetes/series-gt/t10-dual": "T10DUAL",
+    "/patinetes/series-gt/t30": "T30",
+    "/patinetes/series-gt/tf3": "TF3",
+    "/patinetes/series-n/v70-connected": "V70",
+    "/patinetes/series-n/vs6": "VS6",
+    "/patinetes/series-ix/w9": "W9"
+  }
+}

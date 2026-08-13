@@ -1,6 +1,21 @@
+# Bump de la versión global de assets.
+#
+# POR DEFECTO NO TOCA LAS IMÁGENES, y es deliberado. Las fotos se sirven
+# `immutable, max-age=1 año`, así que cambiarles el ?v= crea una URL nueva y el
+# navegador se las vuelve a bajar ENTERAS. Medido en agosto de 2026 sobre la ficha
+# del M41 Armored Dual: la página pesa 1652 KB, de los cuales 1554 KB son imágenes,
+# y 39 de ellas (1146 KB) llevaban ?v=. O sea que un bump por 46 KB de CSS obligaba
+# a rebajar 1,1 MB de fotos idénticas. Con caché la ficha pinta en 136 ms; sin ella,
+# en 576 ms y con las fotos entrando a trozos — el parpadeo al abrir una ficha
+# después de cada despliegue.
+#
+# Las fotos NO necesitan el ?v= global: viven en rutas estables y solo cambian
+# cuando se sustituye el archivo. Para ese caso está -ConImagenes, que vuelve a
+# versionarlas todas.
 param(
   [string]$Root = (Get-Location).Path,
-  [string]$Version
+  [string]$Version,
+  [switch]$ConImagenes
 )
 
 $ErrorActionPreference = 'Stop'
@@ -84,7 +99,8 @@ function Should-SkipVersioning {
 function Update-HtmlAssetUrls {
   param(
     [string]$Html,
-    [string]$Ver
+    [string]$Ver,
+    [bool]$Imagenes = $false
   )
 
   $updated = $Html
@@ -107,10 +123,13 @@ function Update-HtmlAssetUrls {
     [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
   )
 
-  # Versionar recursos locales en <link href="/...ext">
+  # Versionar recursos locales en <link href="/...ext">. Las extensiones de imagen
+  # solo entran con -ConImagenes: aquí caen el favicon y los preload de fotos, que
+  # son de los recursos que más pesan al invalidarse.
+  $extLink = if ($Imagenes) { 'css|webmanifest|ico|png|svg|webp|jpg|jpeg' } else { 'css|webmanifest' }
   $updated = [regex]::Replace(
     $updated,
-    '<link(\s+[^>]*?)?\s+href="(/[^"#?]+\.(?:css|webmanifest|ico|png|svg|webp|jpg|jpeg)(?:\?[^"#]*)?(?:#[^"]*)?)"([^>]*)>',
+    '<link(\s+[^>]*?)?\s+href="(/[^"#?]+\.(?:' + $extLink + ')(?:\?[^"#]*)?(?:#[^"]*)?)"([^>]*)>',
     {
       param($m)
       $pre = if ($m.Groups[1].Success) { $m.Groups[1].Value } else { '' }
@@ -122,20 +141,50 @@ function Update-HtmlAssetUrls {
     [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
   )
 
-  # Versionar imágenes locales en <img src="/...ext">
-  $updated = [regex]::Replace(
-    $updated,
-    '<img(\s+[^>]*?)?\s+src="(/[^"#?]+\.(?:png|svg|webp|jpg|jpeg|gif|avif)(?:\?[^"#]*)?(?:#[^"]*)?)"([^>]*)>',
-    {
-      param($m)
-      $pre = if ($m.Groups[1].Success) { $m.Groups[1].Value } else { '' }
-      $src = $m.Groups[2].Value
-      $post = $m.Groups[3].Value
-      $newSrc = Set-VersionQuery -Url $src -Ver $Ver
-      return ('<img' + $pre + ' src="' + $newSrc + '"' + $post + '>')
-    },
-    [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
-  )
+  # Versionar imágenes locales en <img src="/...ext">. Solo con -ConImagenes: es el
+  # grueso del peso de una ficha y lo que hace que parpadee tras cada despliegue.
+  if ($Imagenes) {
+    $updated = [regex]::Replace(
+      $updated,
+      '<img(\s+[^>]*?)?\s+src="(/[^"#?]+\.(?:png|svg|webp|jpg|jpeg|gif|avif)(?:\?[^"#]*)?(?:#[^"]*)?)"([^>]*)>',
+      {
+        param($m)
+        $pre = if ($m.Groups[1].Success) { $m.Groups[1].Value } else { '' }
+        $src = $m.Groups[2].Value
+        $post = $m.Groups[3].Value
+        $newSrc = Set-VersionQuery -Url $src -Ver $Ver
+        return ('<img' + $pre + ' src="' + $newSrc + '"' + $post + '>')
+      },
+      [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
+    )
+  }
+
+  # Versionar los candidatos de srcset / imagesrcset. Sin esto, un <img> responsive
+  # quedaba con el src bumpeado y el srcset apuntando a la versión anterior: el
+  # navegador elige del srcset, así que el bump no llegaba nunca a esas imágenes.
+  # Va con el mismo interruptor que el <img src>: srcset son imágenes y nada más, y
+  # si se bumpease aquí y no allí volvería justo el desajuste que este bloque evita.
+  if ($Imagenes) {
+    $updated = [regex]::Replace(
+      $updated,
+      '(?<attr>\b(?:image)?srcset)="(?<value>[^"]+)"',
+      {
+        param($m)
+        $attr = $m.Groups['attr'].Value
+        $parts = @()
+        foreach ($candidate in ($m.Groups['value'].Value -split ',')) {
+          $trimmed = $candidate.Trim()
+          if (-not $trimmed) { continue }
+          # "<url> <descriptor>" — el descriptor (400w, 2x…) es opcional.
+          $bits = $trimmed -split '\s+', 2
+          $newUrl = Set-VersionQuery -Url $bits[0] -Ver $Ver
+          $parts += if ($bits.Count -gt 1) { "$newUrl $($bits[1])" } else { $newUrl }
+        }
+        return ($attr + '="' + ($parts -join ', ') + '"')
+      },
+      [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
+    )
+  }
 
   return $updated
 }
@@ -169,6 +218,25 @@ function Update-AssetMeta {
   return $Html
 }
 
+# Variantes responsive de las portadas de tarjeta, ANTES de versionar nada.
+# Este es el enganche que evita tener que acordarse: toda publicacion pasa por
+# aqui, y el generador solo trabaja si falta o esta obsoleta alguna variante
+# (compara fechas contra el original), asi que en el caso normal no hace nada.
+# Nunca aborta el bump: si Python no esta disponible solo avisa.
+$cardShots = Join-Path $PSScriptRoot 'build-card-shots.py'
+if (Test-Path $cardShots) {
+  try {
+    $shotsOut = & python $cardShots --quiet 2>&1
+    $shotsCode = $LASTEXITCODE
+    if ($shotsOut) { $shotsOut | ForEach-Object { Write-Output "  [card-shots] $_" } }
+    if ($shotsCode -eq 2) {
+      Write-Warning 'card-shots: hay portadas declaradas sin imagen valida (ver arriba). El srcset caera al original en esas tarjetas.'
+    }
+  } catch {
+    Write-Warning "card-shots: no se pudo ejecutar ($($_.Exception.Message)). Ejecuta 'python scripts/build-card-shots.py' a mano."
+  }
+}
+
 $assetPath = Join-Path $Root 'asset-version.json'
 
 $htmlFiles = Get-ChildItem -Path $Root -Recurse -File -Filter '*.html'
@@ -191,7 +259,7 @@ if ($targetVersion -notmatch '^\d{8}-\d+$') {
 foreach ($f in $htmlFiles) {
   $raw = Get-Content $f.FullName -Raw -Encoding UTF8
   $updated = Update-AssetMeta -Html $raw -Ver $targetVersion
-  $updated = Update-HtmlAssetUrls -Html $updated -Ver $targetVersion
+  $updated = Update-HtmlAssetUrls -Html $updated -Ver $targetVersion -Imagenes:$ConImagenes.IsPresent
 
   if ($updated -ne $raw) {
     Set-Content -Path $f.FullName -Value $updated -Encoding UTF8
@@ -213,3 +281,11 @@ Set-Content -Path $assetPath -Value $assetUpdated -Encoding UTF8
 Write-Output "OK: asset-version actualizado a $targetVersion"
 Write-Output "- HTML actualizados: $($htmlFiles.Count)"
 Write-Output "- asset-version.json"
+if ($ConImagenes.IsPresent) {
+  Write-Output "- IMAGENES re-versionadas: los visitantes se las volveran a bajar todas."
+  Write-Output "  OJO: el JS construye las URLs de foto SIN ?v= (del catalogo), asi que"
+  Write-Output "  las fichas con variantes de color pediran la misma foto por dos URLs"
+  Write-Output "  y parpadearan. Si no era lo que querias, limpia el ?v= de las imagenes."
+} else {
+  Write-Output "- imagenes intactas (lo normal: sus URLs no llevan version)"
+}

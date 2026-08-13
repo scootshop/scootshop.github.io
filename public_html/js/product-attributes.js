@@ -37,10 +37,10 @@
  *
  * COMPATIBILIDAD
  * --------------
- * Un producto que aún declare `colorVariants` se adapta aquí a un eje de color, con
- * el mismo comportamiento de siempre. Así la migración es producto a producto y no
- * hay un día en que medio catálogo esté roto. Cuando no quede ninguno, se borra
- * `desdeLegacy()` y con él el último rastro de "toda variante es un color".
+ * Ya no hay puente: `colorVariants` no existe en el catálogo y `desdeLegacy()` se
+ * borró en agosto de 2026. Lo único que queda mirando al pasado es la LECTURA de
+ * líneas antiguas —pedidos y carritos guardados cuando el único eje era el color—,
+ * que resuelve `rescatarEjeLegacy()` contra los ejes reales del producto.
  */
 (function () {
   'use strict';
@@ -109,7 +109,10 @@
       // que un mismo acabado tenga foto distinta en cada medida.
       imagesBy: (op.imagesBy && typeof op.imagesBy === 'object') ? op.imagesBy : null,
       default: op.default === true || op.defaultColor === true,
-      disabled: op.disabled === true || op.agotado === true,
+      // `available:false` es como el catálogo marcaba lo agotado antes de que existiera
+      // este núcleo. Se entiende aquí, en el único sitio que lee opciones, para que
+      // ningún consumidor tenga que conocer las dos formas de decir lo mismo.
+      disabled: op.disabled === true || op.agotado === true || op.available === false,
       // Solo lo usan quienes lo entienden (la ficha reescribe descripción y badge).
       desc: texto(op.desc || ''),
       dgt: op.dgt,
@@ -130,23 +133,17 @@
     };
   }
 
-  /* Puente con el modelo viejo: `colorVariants` era SIEMPRE un eje de color. Se
-     traduce tal cual, así que un producto sin migrar se comporta exactamente igual
-     que antes. Desaparece cuando no quede ninguno. */
-  function desdeLegacy(producto) {
-    var variantes = Array.isArray(producto.colorVariants) ? producto.colorVariants : [];
-    if (!variantes.length) return [];
-    return [normalizarEje({ key: 'color', options: variantes }, 0)];
-  }
-
   /* LA función. Todo componente que necesite saber qué variantes tiene un producto
-     pasa por aquí y por ningún otro sitio. */
+     pasa por aquí y por ningún otro sitio.
+
+     Aquí vivía `desdeLegacy()`, que traducía el `colorVariants` del modelo viejo a un
+     eje de color. Se ha borrado: los 12 productos con variantes declaran `attributes`,
+     así que ya no queda un solo sitio en el sistema donde una variante SIGNIFIQUE color
+     por el mero hecho de existir. */
   function ejes(producto) {
     if (!producto) return [];
-    if (Array.isArray(producto.attributes) && producto.attributes.length) {
-      return producto.attributes.map(normalizarEje);
-    }
-    return desdeLegacy(producto);
+    if (!Array.isArray(producto.attributes)) return [];
+    return producto.attributes.map(normalizarEje);
   }
 
   function eje(producto, key) {
@@ -299,9 +296,25 @@
     }
 
     var losEjes = producto ? ejes(producto) : [];
+
+    /* ORDEN DE LECTURA: el que declara el catálogo, no el orden en que se escribieron
+       los atributos. Un manillar lo eligen dos manos distintas —el selector de color lo
+       pinta este núcleo y la medida la gobierna el script de la ficha—, así que quien
+       escribiera primero decidía si la línea decía "Color: … · Medida: …" o al revés,
+       y el mismo producto salía de dos formas según con qué eje hubieras jugado antes.
+       Los atributos que no correspondan a ningún eje conocido van detrás, en su orden. */
+    var claves = [];
+    for (var e = 0; e < losEjes.length; e++) {
+      if (Object.prototype.hasOwnProperty.call(attrs, losEjes[e].key)) claves.push(losEjes[e].key);
+    }
+    for (var otra in attrs) {
+      if (!Object.prototype.hasOwnProperty.call(attrs, otra)) continue;
+      if (claves.indexOf(otra) === -1) claves.push(otra);
+    }
+
     var out = [];
-    for (var k in attrs) {
-      if (!Object.prototype.hasOwnProperty.call(attrs, k)) continue;
+    for (var ic = 0; ic < claves.length; ic++) {
+      var k = claves[ic];
       var valor = texto(attrs[k]);
       if (!valor) continue;
 
@@ -334,8 +347,16 @@
   }
 
   /* "Modelo: VMP · Medida: 720 mm". Un solo sitio decide el formato, así que
-     cambiarlo se nota a la vez en carrito, checkout, /pago y resumen del pedido. */
+     cambiarlo se nota a la vez en carrito, checkout, /pago y resumen del pedido.
+
+     UN PEDIDO ES UN DOCUMENTO HISTÓRICO. Si la línea trae `variant_text`, manda ese
+     texto: es lo que el cliente vio y aceptó al comprar. El catálogo de hoy puede
+     haber renombrado la opción o retirado el eje, y aun así el pedido debe seguir
+     diciendo lo que decía. Lo escribe este mismo núcleo en el momento de la compra
+     —no lo redacta ni el checkout ni el backend—, así que no hay dos formatos. */
   function describirTexto(linea, producto) {
+    var guardado = linea && (linea.variant_text || linea.variantText);
+    if (typeof guardado === 'string' && guardado.trim()) return guardado.trim();
     return describir(linea, producto).map(function (a) {
       return a.label + ': ' + a.valueLabel;
     }).join(' · ');
@@ -359,13 +380,21 @@
      scripts—, pero la promesa es la garantía: aunque el orden vuelva a torcerse, nadie
      pinta antes de tiempo. Sustituye a los repintados a ojo y a los setTimeout.
 
-     Se mantiene el evento `ss:attrs` por compatibilidad con lo ya escrito, pero lo
-     nuevo debe usar la promesa; si aparece un segundo evento de init, esta es la
-     puerta única a la que engancharlo. */
-  var resolverReady;
-  var ready = (typeof Promise === 'function')
-    ? new Promise(function (res) { resolverReady = res; })
-    : null;
+     Hubo además un evento `ss:attrs` para avisar de "ya estoy". Se ha eliminado: era
+     una segunda puerta que obligaba a cada consumidor a escribir el mismo baile —"si
+     existe uso la promesa, si no escucho el evento y entonces uso la promesa"— copiado
+     en cuatro sitios. Ahora la promesa la publica el cargador ANTES de pedir nada, así
+     que siempre está: una sola puerta y ningún evento. */
+  /* La promesa la publica el CARGADOR (js/global-assets.js, js/index-head.js) antes de
+     pedir un solo script, para que exista desde el instante cero incluso para el código
+     que corre antes que este núcleo. Aquí solo se adopta y se cumple. Si esta página no
+     pasó por el cargador, se crea aquí y `SS_ATTRS.ready` sigue siendo la misma cosa. */
+  var resolverReady = window.__ssResolverReady || null;
+  var ready = window.SS_READY || null;
+  if (!ready && typeof Promise === 'function') {
+    ready = new Promise(function (res) { resolverReady = res; });
+    window.SS_READY = ready;
+  }
 
   function hayCatalogo() {
     var lista = window.SCOOTSHOP_PRODUCTS ||
@@ -378,7 +407,6 @@
     var listo = function () {
       if (terminado) return;
       terminado = true;
-      try { document.dispatchEvent(new CustomEvent('ss:attrs')); } catch (_) {}
       if (resolverReady) resolverReady(window.SS_ATTRS);
     };
     if (hayCatalogo()) { listo(); return; }
@@ -426,6 +454,32 @@
     esperar();
   }
 
+  /* ── LA SELECCIÓN VIAJA AL CARRITO ───────────────────────────────────────────
+     `data-attrs` en el botón de añadir es lo que convierte una elección en atributos
+     con nombre dentro de la línea ({ model:'vmp', size:'720' }). Lo escribe SOLO esta
+     función: cada eje de la ficha lo actualiza por su cuenta —el selector de color lo
+     pinta este núcleo, las secciones de modelo/medida las gobierna todavía el script
+     de la ficha— y si cada uno serializara su propio JSON, el último en escribir
+     borraría al anterior y la línea entraría al pedido con medio eje.
+     Por eso MEZCLA en vez de sustituir, y por eso el formato lo conoce un solo sitio. */
+  function marcarSeleccion(el, parcial) {
+    if (!el || !parcial) return;
+    var actual = {};
+    try {
+      var crudo = el.getAttribute('data-attrs');
+      if (crudo) {
+        var leido = JSON.parse(crudo);
+        if (leido && typeof leido === 'object') actual = leido;
+      }
+    } catch (_) {}
+    for (var k in parcial) {
+      if (!Object.prototype.hasOwnProperty.call(parcial, k)) continue;
+      var valor = texto(parcial[k]);
+      if (valor) actual[k] = valor; else delete actual[k];
+    }
+    try { el.setAttribute('data-attrs', JSON.stringify(actual)); } catch (_) {}
+  }
+
   window.SS_ATTRS = {
     ejes: ejes,
     eje: eje,
@@ -438,6 +492,8 @@
     // Presentación: la única puerta para escribir las variantes de una línea.
     describir: describir,
     describirTexto: describirTexto,
+    // La única puerta para llevar una elección al carrito.
+    marcarSeleccion: marcarSeleccion,
     // La puerta única de inicialización: núcleo + catálogo resoluble.
     ready: ready,
     ETIQUETAS: ETIQUETAS

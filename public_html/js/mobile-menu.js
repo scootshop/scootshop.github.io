@@ -72,71 +72,55 @@
 
     // Reset drill-down
     if (viewport) viewport.classList.remove('mm-drilled');
-
-    // Close all series
-    resetSeries();
+    panel.classList.remove('is-drilled');
+    setHeadTitle('Menú');
 
     // Return focus to burger
     burger.focus();
     return true;
   }
 
+  // El título de la cabecera hace de rótulo del nivel en el que estás: "Menú"
+  // en la raíz, "Productos" dentro del drill. Va emparejado con #mmBack, que el
+  // CSS solo muestra cuando el viewport tiene .mm-drilled.
+  function setHeadTitle(text) {
+    var title = document.getElementById('mmHeadTitle');
+    if (title) title.textContent = text;
+  }
+
   function drillToProducts() {
     var viewport = document.getElementById('mmViewport');
     var productsBtn = document.getElementById('mmProductsToggle');
+    var panel = document.getElementById('mobileMenu');
     if (!viewport) return false;
     viewport.classList.add('mm-drilled');
+    // El botón de volver está en .mm-head, hermano ANTERIOR del viewport: no hay
+    // combinador CSS que llegue ahí desde .mm-viewport.mm-drilled. Se marca
+    // también el panel para poder mostrarlo sin depender de :has().
+    if (panel) panel.classList.add('is-drilled');
+    setHeadTitle('Productos');
     if (productsBtn) productsBtn.setAttribute('aria-expanded', 'true');
+
+    // El foco salta a la primera serie: sin esto se queda en el botón
+    // "Productos", que acaba de salir de pantalla.
+    var firstLink = viewport.querySelector('.mm-view--products .mm-link');
+    if (firstLink) firstLink.focus();
     return true;
   }
 
   function drillBack() {
     var viewport = document.getElementById('mmViewport');
     var productsBtn = document.getElementById('mmProductsToggle');
+    var panel = document.getElementById('mobileMenu');
     if (!viewport) return false;
     viewport.classList.remove('mm-drilled');
-    if (productsBtn) productsBtn.setAttribute('aria-expanded', 'false');
-    resetSeries();
+    if (panel) panel.classList.remove('is-drilled');
+    setHeadTitle('Menú');
+    if (productsBtn) {
+      productsBtn.setAttribute('aria-expanded', 'false');
+      productsBtn.focus();
+    }
     return true;
-  }
-
-  function toggleSeries(btn) {
-    if (!btn) return false;
-    var seriesName = btn.getAttribute('data-series');
-    var seriesContent = document.querySelector('[data-series-content="' + seriesName + '"]');
-    if (!seriesContent) return false;
-
-    var isActive = btn.classList.contains('active');
-
-    // Close other series if opening this one
-    if (!isActive) {
-      var allBtns = document.querySelectorAll('[data-series]');
-      var allContent = document.querySelectorAll('[data-series-content]');
-      for (var i = 0; i < allBtns.length; i++) {
-        allBtns[i].classList.remove('active');
-        allBtns[i].setAttribute('aria-expanded', 'false');
-      }
-      for (var j = 0; j < allContent.length; j++) {
-        allContent[j].classList.remove('active');
-      }
-    }
-
-    btn.classList.toggle('active');
-    seriesContent.classList.toggle('active');
-    btn.setAttribute('aria-expanded', btn.classList.contains('active') ? 'true' : 'false');
-    return true;
-  }
-
-  function resetSeries() {
-    var allBtns = document.querySelectorAll('[data-series]');
-    var allContent = document.querySelectorAll('[data-series-content]');
-    for (var i = 0; i < allBtns.length; i++) {
-      allBtns[i].classList.remove('active');
-      allBtns[i].setAttribute('aria-expanded', 'false');
-    }
-    for (var j = 0; j < allContent.length; j++) {
-      allContent[j].classList.remove('active');
-    }
   }
 
   function isMenuOpen() {
@@ -145,7 +129,7 @@
   }
 
   // Resuelve el destino de un enlace ancla SOLO si apunta a una sección de la
-  // página actual (p. ej. /#ubicacion, #legal). Devuelve el elemento o null para
+  // página actual (p. ej. /#faq, #legal). Devuelve el elemento o null para
   // enlaces a otras páginas/dominios, que deben navegar de forma nativa.
   function resolveInPageTarget(href) {
     if (!href) return null;
@@ -225,12 +209,11 @@
         return;
       }
 
-      // Series toggle
-      var seriesBtn = e.target.closest('[data-series]');
-      if (seriesBtn && !e.target.closest('a')) {
+      // Back (mismo destino que el gesto de deslizar)
+      if (e.target.closest('#mmBack')) {
         e.preventDefault();
         e.stopPropagation();
-        toggleSeries(seriesBtn);
+        drillBack();
         return;
       }
 
@@ -249,7 +232,11 @@
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && isMenuOpen()) {
         e.preventDefault();
-        closeMenu();
+        // Escape retrocede un nivel antes de cerrar del todo, igual que el
+        // botón de volver: si estás en Productos, no pierdes el menú entero.
+        var viewport = document.getElementById('mmViewport');
+        if (viewport && viewport.classList.contains('mm-drilled')) drillBack();
+        else closeMenu();
         return;
       }
       if (e.key === 'Tab' && isMenuOpen()) {
@@ -292,7 +279,6 @@
       win.MM_toggleProducts = drillToProducts;
       win.MM_drillToProducts = drillToProducts;
       win.MM_drillBack = drillBack;
-      win.MM_toggleSeries = toggleSeries;
     }
   }
 

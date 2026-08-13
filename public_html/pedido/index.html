@@ -21,7 +21,7 @@
   <meta name="twitter:image" content="https://scootshop.co/img/0-removebg-preview.webp" />
   <meta name="robots" content="noindex,nofollow" />
   <title>Estado del pedido | SCOOT SHOP</title>
-  <meta name="asset-version" content="20260620-2" />
+  <meta name="asset-version" content="20260813-9" />
 
   <!-- Fuente (non-blocking) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,8 +29,8 @@
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" /></noscript>
-  <link rel="stylesheet" href="/css/icons.css?v=20260620-2" />
-  <link rel="stylesheet" href="/css/main.css?v=20260620-2" />
+  <link rel="stylesheet" href="/css/icons.css?v=20260813-9" />
+  <link rel="stylesheet" href="/css/main.css?v=20260813-9" />
   <script src="/js/asset-sync.js?v=20260605-2" defer></script>
 
   <style>
@@ -39,11 +39,14 @@
       --muted:#68707f;
       --line:#e5eaf1;
       --radius:24px;
-      --header-h:72px;
+      /* La altura del header la fija main.css: 88px en escritorio y 72px en
+         móvil. Aquí estaba clavada a 72px y la barra salía más baja que en el
+         resto del sitio. */
     }
 
     *{ box-sizing:border-box; }
-    html,body{ margin:0; padding:0; }
+    html,
+    body{ margin:0; padding:0; }
     body{
       min-height:100vh;
       font-family:var(--ui);
@@ -89,48 +92,16 @@
       z-index:24;
     }
 
+    /* Una sola columna: el sidebar de resumen ya no existe (su info vive
+       ahora dentro de .pedido-view), así el contenido usa todo el ancho. */
     .order-page-container{
       width:min(1160px, calc(100% - 40px));
       padding-inline:0 !important;
       margin-inline:auto;
       display:grid;
-      grid-template-columns:minmax(0, 1fr) minmax(320px, 380px);
+      grid-template-columns:minmax(0, 1fr);
       gap:18px 26px;
       align-items:start;
-    }
-
-    .card:not(.order-summary){
-      border:0;
-      border-radius:22px;
-      background:#fff;
-      overflow:hidden;
-      box-shadow:
-        0 1px 0 rgba(255,255,255,.9) inset,
-        0 18px 44px rgba(15,23,42,.08),
-        0 6px 18px rgba(15,23,42,.04);
-      isolation:isolate;
-    }
-    .card .head:not(.order-summary__header){
-      padding:18px 20px 10px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .card .head:not(.order-summary__header) h1,
-    .card .head:not(.order-summary__header) h2{
-      font-family:var(--sport);
-      letter-spacing:.06em;
-      text-transform:uppercase;
-      font-size:.95rem;
-    }
-    .card .body:not(.order-summary__body){
-      padding:8px 20px 20px;
-      display:grid;
-      gap:12px;
-    }
-    .card--detail .body{
-      padding-top:8px;
     }
 
     /* -- Step indicator -- */
@@ -189,38 +160,20 @@
       width:14px;
       height:14px;
     }
-
-    .hero-shell{
-      grid-column:2;
-      grid-row:2 / span 2;
-      align-self:start;
-      position:sticky;
-      top:90px;
-      margin-top:0 !important;
-    }
-    #orderDetailSection,
-    .section-block--steps{
-      grid-column:1;
+    #orderDetailSection{
+      grid-column:1 / -1;
     }
     .actions,
     .support-line,
     .foot{
       grid-column:1 / -1;
     }
-
-    /* -- Section blocks (same as checkout) -- */
-    .section-block{
-      border:1px solid rgba(17,19,21,.06);
-      border-radius:var(--radius);
-      background:linear-gradient(180deg, rgba(255,255,255,.98), rgba(249,250,252,.99));
-      box-shadow:0 18px 38px rgba(15,23,42,.06);
-      overflow:hidden;
-    }
     .detail-note{margin:0;color:var(--muted);font-weight:700;font-size:.92rem;line-height:1.6}
-    .detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
     .detail-pill{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
-    .detail-pill .status-pill{margin:0}
-    .order-detail-shell{display:grid;gap:18px}
+    /* Solo lo usan ya las vistas "pago confirmado" y "pedido caducado" (el
+       detalle normal usa .pedido-view). Le damos aspecto de tarjeta. */
+    .order-detail-shell{display:grid;gap:18px;background:#fff;border-radius:20px;
+      padding:24px;box-shadow:0 1px 3px rgba(15,23,42,.05),0 8px 22px rgba(15,23,42,.05)}
     .order-detail-top{
       display:grid;
       gap:16px;
@@ -232,27 +185,6 @@
     .order-detail-actions{display:flex;gap:10px;flex-wrap:wrap}
     .order-detail-actions .order-cta{cursor:pointer}
     .order-detail-actions .order-cta:disabled{opacity:.72;cursor:wait}
-    .order-kpis{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:14px;
-    }
-    .order-kpi{
-      display:grid;
-      gap:6px;
-      padding:14px 16px;
-      border:1px solid rgba(17,19,21,.06);
-      border-radius:18px;
-      background:#fff;
-      box-shadow:0 10px 22px rgba(15,23,42,.04);
-      min-width:0;
-    }
-    .order-kpi.is-wide{
-      grid-column:1 / -1;
-    }
-    .order-kpi .k{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
-    .order-kpi .v{font-size:1.02rem;font-weight:800;color:var(--ink);line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .order-kpi.is-wide .v{white-space:normal;overflow:visible;text-overflow:clip}
     .order-empty-state{
       display:grid;
       gap:10px;
@@ -278,71 +210,84 @@
       font-weight:700;
     }
     .order-tracking{display:grid;gap:8px}
-    .tracking-inline {
-      display: grid;
-      gap: 8px;
-      --timeline-icon-size: 29px;
-      padding-inline: calc(var(--timeline-icon-size) / 2);
-    }
-    .tracking-status {
+    .tracking-status{
+      display: flex;
+      align-items: center;
+      gap: .5em;
       font-size: 1.25rem;
       font-weight: 800;
       color: #0f172a;
       line-height: 1.1;
     }
-    .track-line {
-      position: relative;
+    /* La palabra siempre en negro; solo el icono toma el color del estado
+       (--acc, lo pone .order-tracking). Misma paleta que el panel admin. */
+    .tracking-status-ico{
+      display: inline-flex;
+      flex: 0 0 auto;
+      color: var(--acc, #475569);
+    }
+    .tracking-status-ico svg{ width: 1.05em; height: 1.05em; display: block; }
+    /* Línea de tiempo segmentada: iconos y segmentos son hermanos de una
+       fila flex, no una barra continua con los emojis encima. Así cada
+       segmento conserva sus extremos redondeados y el `gap` le da aire al
+       icono tanto al principio como al final. */
+    .track-line{
+      /* Si un contenedor (.tracking-inline) define el tamaño, manda él; si
+         no, 29px. Sin el fallback los iconos se quedaban sin medida en
+         /pedido. */
+      --icon-size: var(--timeline-icon-size, 29px);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      /* La fila ya reserva la altura del icono (antes sobresalían de una
+         barra de 10px y los márgenes lo compensaban). El hueco superior lo
+         pone el `gap` del contenedor. */
+      margin-bottom: 8px;
+    }
+    .track-seg{
+      flex: 1 1 0;
+      min-width: 0;
       height: 10px;
       border-radius: 999px;
-      background: #e7ebf0;
-      overflow: visible;
-      margin-top: 8px;
-      margin-bottom: 18px;
-      --icon-size: var(--timeline-icon-size);
+      background-color: #e7ebf0;
     }
-    .track-line > i {
-      position: absolute;
-      inset: 0 auto 0 0;
-      width: var(--progress, 40%);
-      background: linear-gradient(90deg, #d946ef, #7c3aed);
-      border-radius: 999px;
+    /* El tramo recorrido: color plano y sólido del estado (--acc). */
+    .track-seg.is-on{
+      background-color: var(--acc, #16a34a);
     }
-    .track-line.is-delivered > i {
-      background: linear-gradient(90deg, #22c55e, #16a34a);
-    }
-    .tracking-icons {
-      position: absolute;
-      top: 50%;
-      left: 0;
-      right: 0;
-      --icon-size: var(--timeline-icon-size);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transform: translateY(calc(-50% - 0.9px));
-      z-index: 3;
-      pointer-events: none;
-    }
-    .tracking-icons span {
+    .track-ico{
+      flex: 0 0 auto;
       width: var(--icon-size);
       height: var(--icon-size);
       border-radius: 999px;
       background: #ffffff;
-      color: #111827;
-      border: 3px solid #f8fafc;
+      color: #64748b;
+      border: 1px solid #ecebeb;
       display: grid;
       place-items: center;
-      font-size: .9rem;
-      opacity: 1;
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.30);
+      box-shadow: 0 2px 6px rgba(229, 229, 229, 0.30);
+    }
+    /* El icono es un SVG de línea que hereda `color` con currentColor; se
+       dimensiona en proporción al círculo, así vale para desktop y móvil. */
+    .track-ico svg{
+      width: 58%;
+      height: 58%;
+      display: block;
+    }
+    /* Hito completado: icono y borde en el color del estado (--acc), borde
+       2px. */
+    .track-ico.is-done{
+      color: var(--acc, #16a34a);
+      border: 2px solid var(--acc, #16a34a);
+    }
+    /* Primer hito de un pedido cancelado: mismo tratamiento que el completado
+       (el estado ES definitivo), pero con el icono de cancelación. --acc ya
+       llega en rojo desde statusAccent(). */
+    .track-ico.is-canceled{
+      color: var(--acc, #991b1b);
+      border: 2px solid var(--acc, #991b1b);
     }
     .order-products{display:grid;gap:12px}
-    .order-product-block{
-      display:grid;
-      gap:12px;
-      background:transparent;
-      box-shadow:none;
-    }
     .order-product-list-shell.order-summary--checkout{
       border:0;
       border-radius:0;
@@ -363,273 +308,6 @@
     }
     .order-product-list-shell .order-summary__product-title{
       flex:1 1 100%;
-    }
-    .section-heading{
-      padding:18px 20px 10px;
-      border-bottom:1px solid rgba(17,19,21,.06);
-    }
-    .section-heading strong{
-      display:block;
-      font-family:var(--sport);
-      font-weight:400;
-      font-size:.95rem;
-      color:var(--ink);
-      text-transform:uppercase;
-      letter-spacing:.06em;
-    }
-    .section-body{
-      padding:20px;
-      display:grid;
-      gap:14px;
-    }
-
-    /* -- Hero success -- */
-    .success-icon{
-      width:56px;
-      height:56px;
-      border-radius:50%;
-      background:#25d366;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      box-shadow:0 8px 24px rgba(37,211,102,.22);
-    }
-    .success-icon svg{
-      width:28px;
-      height:28px;
-      stroke:#fff;
-      fill:none;
-    }
-    .hero-text{
-      display:grid;
-      gap:6px;
-    }
-    .hero-text h1{
-      margin:0;
-      font-family:var(--sport);
-      font-size:clamp(1.1rem, .9rem + .8vw, 1.4rem);
-      letter-spacing:.06em;
-      text-transform:uppercase;
-      line-height:1.15;
-    }
-    .hero-text p{
-      margin:0;
-      color:var(--muted);
-      font-weight:600;
-      font-size:.92rem;
-      line-height:1.5;
-    }
-    .hero-text .lead{
-      margin:0;
-      color:var(--muted);
-      font-weight:600;
-      font-size:.92rem;
-      line-height:1.5;
-    }
-
-    /* -- Status pill -- */
-    .status-pill{
-      display:inline-flex;
-      align-items:center;
-      gap:0;
-      padding:8px 14px;
-      border-radius:999px;
-      background:rgba(37,211,102,.08);
-      border: 1px solid rgb(255 255 255 / 0%);
-      color:#12854a;
-      font-weight:800;
-      font-size:.74rem;
-      letter-spacing:.06em;
-      text-transform:uppercase;
-      width:fit-content;
-    }
-    .hero-shell .order-summary__title{
-      line-height:1.1;
-    }
-    .hero-shell .order-summary__product{
-      cursor:default;
-    }
-    .hero-shell .order-summary__product-main{
-      align-items:flex-start;
-    }
-    .order-summary__hero-thumbs{
-      display:flex;
-      align-items:flex-start;
-      flex:0 0 auto;
-      min-width:56px;
-      padding-top:2px;
-    }
-    .order-summary__hero-thumb{
-      width:56px;
-      height:56px;
-      border-radius:16px;
-      border:0;
-      object-fit:contain;
-      background:radial-gradient(circle at 30% 20%, #ffffff 0%, #ffffff 100%);
-      padding:4px;
-      box-shadow:0 10px 24px rgba(15,23,42,.07);
-      display:block;
-    }
-    .hero-shell .order-summary__hero-thumbs--stack{
-      flex-direction:column;
-      align-items:flex-start;
-      padding-top:0;
-      gap:4px;
-    }
-    .hero-shell .order-summary__hero-thumbs--stack .order-summary__hero-thumb{
-      margin-left:0;
-      margin-top:0;
-    }
-    .order-summary__hero-thumb--more{
-      display:grid;
-      place-items:center;
-      font-size:.74rem;
-      font-weight:900;
-      color:#4b5563;
-      background:linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
-    }
-    .hero-shell .sum-meta{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      cursor:default;
-      pointer-events:none;
-    }
-    .hero-shell .sum-meta:hover{
-      background:rgba(17,19,21,.02);
-      border-color:rgba(17,19,21,.06);
-    }
-    .hero-shell .sum-meta-text{
-      color:var(--muted);
-    }
-    .order-summary__row-value--status{
-      display:flex;
-      justify-content:flex-end;
-      align-items:center;
-    }
-    .order-summary__product--hero .order-summary__product-meta--color{
-      white-space:normal;
-    }
-    .order-summary__product--hero .order-summary__product-title{
-      white-space:normal;
-      overflow:visible;
-      text-overflow:clip;
-      line-height:1.14;
-    }
-    .order-summary__hero-lead{
-      display:block !important;
-      width:100% !important;
-      max-width:100% !important;
-      padding:0 !important;
-      border-radius:0 !important;
-      background:transparent !important;
-      box-shadow:none !important;
-      color:var(--muted) !important;
-      font-size:.92rem !important;
-      font-weight:700 !important;
-      line-height:1.55 !important;
-      letter-spacing:0 !important;
-      text-transform:none !important;
-      white-space:normal !important;
-      overflow:visible !important;
-      text-overflow:clip !important;
-      align-items:flex-start !important;
-    }
-
-    /* -- Info rows (minimalist separator lines) -- */
-    .info-list{
-      display:grid;
-      gap:0;
-    }
-    .info-row{
-      display:flex;
-      gap:12px;
-      align-items:flex-start;
-      padding:14px 0;
-      border-bottom:1px solid rgba(17,19,21,.06);
-    }
-    .info-row:last-child{ border-bottom:0; }
-    .info-row .ico{
-      width:34px;
-      height:34px;
-      border-radius:10px;
-      background:rgba(17,19,21,.04);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      flex:0 0 auto;
-    }
-    .info-row .ico svg{
-      width:16px;
-      height:16px;
-      stroke:var(--ink);
-      fill:none;
-      stroke-width:2;
-      stroke-linecap:round;
-      stroke-linejoin:round;
-    }
-    .info-row .t{
-      display:grid;
-      gap:2px;
-      min-width:0;
-    }
-    .info-row .label{
-      font-weight:800;
-      font-size:.76rem;
-      text-transform:uppercase;
-      letter-spacing:.06em;
-      color:var(--muted);
-    }
-    .info-row .value{
-      font-weight:600;
-      font-size:.92rem;
-      color:var(--ink);
-      line-height:1.4;
-    }
-
-    /* -- Steps list -- */
-    .next-steps{
-      display:grid;
-      gap:0;
-    }
-    .step{
-      display:flex;
-      gap:12px;
-      padding:14px 0;
-      border-bottom:1px solid rgba(17,19,21,.06);
-      align-items:flex-start;
-    }
-    .step:last-child{ border-bottom:0; }
-    .step-num{
-      width:28px;
-      height:28px;
-      border-radius:50%;
-      background:rgba(17,19,21,.06);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight:900;
-      font-size:.76rem;
-      color:var(--muted);
-      flex:0 0 auto;
-    }
-    .step .t{
-      display:grid;
-      gap:2px;
-      min-width:0;
-    }
-    .step .t strong{
-      display:block;
-      font-weight:800;
-      font-size:.92rem;
-      line-height:1.25;
-    }
-    .step .t span{
-      display:block;
-      color:var(--muted);
-      font-weight:600;
-      font-size:.86rem;
-      line-height:1.4;
     }
 
     /* -- Actions -- */
@@ -655,27 +333,51 @@
       transition:background .16s ease, box-shadow .16s ease, transform .16s ease, color .16s ease;
       text-decoration:none;
     }
+    /* Los SVG dentro del botón se ocultaban con display:none (regla heredada
+       del diseño antiguo). Ahora se muestran, alineados con el texto. */
     .order-cta svg{
-      display:none;
-      width:16px;
-      height:16px;
+      display:inline-block;
+      vertical-align:middle;
+      flex:0 0 auto;
+      width:18px;
+      height:18px;
       stroke:currentColor;
       fill:none;
       stroke-width:2;
       stroke-linecap:round;
       stroke-linejoin:round;
+      /* Misma micro-interacción que el "Continuar a pago" del checkout (.ck-btn) */
+      transition:transform .18s ease;
     }
+    .order-cta:hover svg{ transform:translateX(3px); }
     .order-cta--primary{
+      position:relative;
+      isolation:isolate;
       background:linear-gradient(180deg, #373737 0%, #111111 100%);
       color:#fff;
       border-color:#6b6c6c;
       box-shadow:none;
     }
+    /* Los degradados no interpolan con transition: para que el aclarado del hover
+       sea gradual y no un salto seco, se funde una segunda capa por opacidad. */
+    .order-cta--primary::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:-1;
+      border-radius:inherit;
+      background:linear-gradient(180deg, #4a4a4a 0%, #171717 100%);
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .26s ease;
+    }
+    .order-cta--primary:hover::before,
+    .order-cta--primary:focus-visible::before{ opacity:1; }
     .order-cta--primary:hover{
       transform:none;
       box-shadow:none;
       background:linear-gradient(180deg, #373737 0%, #111111 100%);
-      border-color:#6b6c6c;
+      border-color:#8f8f8f;
       color:#fff;
     }
     .order-cta--primary:focus-visible,
@@ -686,15 +388,8 @@
       background:linear-gradient(180deg, #373737 0%, #111111 100%);
       border-color:#6b6c6c;
     }
-    .order-cta--ghost{
-      background:rgba(255,255,255,.8);
-      color:var(--ink);
-    }
-    .order-cta--ghost:hover{
-      transform:translateY(-1px);
-      box-shadow:0 8px 24px rgba(15,23,42,.06);
-    }
-    /* Botón "Descargar recibo": mismo estilo que en /cuenta (sin borde, sombra suave) */
+    /* Botón "Descargar recibo": mismo estilo que en /cuenta (sin borde,
+       sombra suave) */
     .order-receipt-cta{
       display:inline-flex;
       align-items:center;
@@ -742,175 +437,14 @@
 
     /* -- Responsive -- */
     #site-header-slot,
+
     #mobile-menu-slot{
       width:100%;
-    }
-
-    #site-header-slot #siteHeader .brand span,
-    #site-header-slot .brand span{
-      font-family:'Tangerine',cursive;
-      font-weight:700;
     }
 
     .order-page-container{
       width:min(1160px, calc(100% - 40px));
       gap:18px 26px;
-    }
-    .hero-shell{
-      overflow:hidden;
-    }
-    .order-overview{
-      display:grid;
-      gap:18px;
-    }
-    .order-overview__head{
-      display:grid;
-      gap:12px;
-      align-items:start;
-    }
-    .order-overview__copy{
-      display:grid;
-      gap:8px;
-    }
-    .order-overview__copy h1{
-      margin:0;
-      font-size:clamp(1.3rem, 1rem + .9vw, 2rem);
-      line-height:1.05;
-      letter-spacing:-.02em;
-    }
-    .order-overview__copy .lead{
-      max-width:62ch;
-      margin:0;
-      color:var(--muted);
-      font-weight:700;
-      font-size:.97rem;
-      line-height:1.6;
-    }
-    .order-overview__meta{
-      display:grid;
-      grid-template-columns:repeat(3, minmax(0,1fr));
-      gap:12px;
-    }
-    .order-overview__meta-card{
-      display:grid;
-      gap:5px;
-      min-width:0;
-      padding:14px 16px;
-      border:1px solid rgba(17,19,21,.07);
-      border-radius:18px;
-      background:#fff;
-      box-shadow:0 8px 20px rgba(15,23,42,.04);
-    }
-    .order-overview__meta-label{
-      font-size:.72rem;
-      font-weight:800;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      color:var(--muted);
-    }
-    .order-overview__meta-value{
-      min-width:0;
-      font-size:1rem;
-      font-weight:800;
-      color:var(--ink);
-      line-height:1.35;
-      word-break:break-word;
-    }
-    .eyebrow{
-      display:inline-flex;
-      width:fit-content;
-      align-items:center;
-      gap:8px;
-      padding:7px 12px;
-      border-radius:999px;
-      background:rgba(17,19,21,.04);
-      color:var(--muted);
-      font-weight:800;
-      font-size:.72rem;
-      letter-spacing:.06em;
-      text-transform:uppercase;
-    }
-      .section-block--steps .section-heading{
-        padding:18px 22px 10px;
-        border-bottom:1px solid rgba(17,19,21,.05);
-      }
-      .section-block--steps .section-heading strong{
-        font-family:var(--ui);
-        font-weight:900;
-        font-size:.75rem;
-        letter-spacing:.14em;
-        text-transform:uppercase;
-        color:#4b5563;
-      }
-      .section-block--steps .section-body{
-        padding:6px 22px 14px;
-      }
-    .status-row{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      align-items:center;
-      justify-content:flex-start;
-    }
-    .status-pill--warn{
-      background:rgba(245,158,11,.12);
-      border-color:rgba(245,158,11,.22);
-      color:#b45309;
-    }
-    .status-pill--neutral{
-      background:rgba(17,19,21,.06);
-      border-color:rgba(17,19,21,.09);
-      color:#4b5563;
-    }
-    .micro-note{
-      color:var(--muted);
-      font-weight:700;
-      font-size:.84rem;
-      text-align:left;
-    }
-    .mini-summary{
-      margin:0;
-      font-weight:800;
-      color:var(--ink);
-      font-size:.92rem;
-      text-align:left;
-    }
-    .mini-steps{
-      display:grid;
-      gap:12px;
-    }
-    .mini-step{
-      display:flex;
-      gap:14px;
-      align-items:flex-start;
-      padding:14px 16px;
-      border:1px solid rgba(17,19,21,.06);
-      border-radius:18px;
-      background:#fff;
-      box-shadow:0 10px 22px rgba(15,23,42,.04);
-    }
-    .mini-step-num{
-      width:28px;
-      height:28px;
-      border-radius:50%;
-          background: rgb(0 0 0 / 4%);
-    border: 1px solid rgb(17 19 21 / 0%);
-
-      color:#111315;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      font-size:.74rem;
-      font-weight:800;
-      flex:0 0 auto;
-    }
-    .mini-step p{
-      margin:0;
-      color:#4b5563;
-      font-weight:700;
-      font-size:.93rem;
-      line-height:1.52;
-      letter-spacing:.01em;
     }
     .actions{
       grid-template-columns:1fr;
@@ -948,31 +482,19 @@
         grid-template-columns:1fr;
         gap:12px;
       }
-      .hero-shell,
       #orderDetailSection,
-      .section-block--steps,
       .actions,
       .support-line,
       .foot{
         grid-column:auto;
         grid-row:auto;
       }
-      .hero-shell{
-        position:static;
-      }
     }
 
     @media (max-width:700px){
       .wrap{ padding:14px clamp(16px,2.5vw,22px) 20px; }
-      .section-block{ border-radius:18px; }
-      .section-body{ padding:16px; }
-      .section-heading{ padding:16px 16px 10px; }
       .ck-steps{padding:8px 0 12px;}
-      .order-kpis{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:14px}
       .order-product-list-shell .order-summary__product-image{width:52px;height:52px}
-      .section-block--steps .section-heading{ padding:16px 16px 10px; }
-      .section-block--steps .section-body{ padding:4px 16px 14px; }
-      .order-overview__meta{grid-template-columns:1fr;}
     }
 
     @media (max-width:640px){
@@ -1000,28 +522,125 @@
       }
     }
 
+    /* Móvil: círculo más pequeño que en escritorio y huecos más estrechos,
+       para que los segmentos se lleven el ancho que sobra (~326px útiles en
+       un teléfono de 390px). El SVG escala solo con el círculo. */
+    @media (max-width:480px){
+      .track-line{ --timeline-icon-size:26px; gap:4px; }
+    }
+
     @media (max-width:420px){
-      .card:not(.order-summary){
-        border-radius:18px;
-      }
       .order-summary{
         border-radius:24px;
       }
-      .card .head:not(.order-summary__header),
-      .card .body:not(.order-summary__body){
-        padding-left:12px;
-        padding-right:12px;
-      }
-      .order-kpis{
-        grid-template-columns:repeat(2,minmax(0,1fr));
-        gap:10px;
-      }
-      .order-kpi{grid-column:1 / -1}
-      .order-kpi.is-pair{grid-column:span 1}
       .order-product-list-shell .order-summary__product-line-total{
         min-width:0;
         font-size:1rem;
       }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       REDISEÑO /pedido/ — identidad propia de "panel de seguimiento".
+       El color del estado (--acc) manda: franja del hero, tick de las
+       etiquetas y timeline. Nada de esto se comparte con Pago/Checkout.
+       ═══════════════════════════════════════════════════════════════ */
+    .pedido-view{ display:grid; gap:16px; }
+
+    /* Hero: franja superior del color de estado + lavado; el timeline manda */
+    .pedido-hero{ position:relative; background:#fff; border-radius:22px; overflow:hidden;
+      box-shadow:0 1px 3px rgba(15,23,42,.05),0 12px 34px rgba(15,23,42,.07); }
+    .pedido-hero::before{ content:""; position:absolute; inset:0 0 auto 0; height:5px; background:var(--acc,#2563eb); }
+    .pedido-hero-wash{ background:#fff; padding:26px 28px 22px; }
+    .pedido-eyebrow{ margin:0; font-size:.72rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:#64748b; }
+    .pedido-eyebrow b{ color:#0f172a; font-variant-numeric:tabular-nums; }
+
+    /* Timeline dentro del hero: grande, protagonista */
+    .pedido-hero .order-tracking{ display:block; gap:0; margin-top:6px; }
+    .pedido-hero .tracking-status{ font-size:1.9rem; margin:0 0 20px; }
+    .pedido-hero .track-line{ --timeline-icon-size:38px; gap:9px; margin:0; }
+    .pedido-hero .track-seg{ height:12px; }
+
+    .pedido-hero-foot{ display:flex; flex-wrap:wrap; align-items:center; gap:12px 20px;
+      margin-top:22px; padding-top:18px; border-top:1px solid #eef0f3; }
+    .pedido-track-chip{ display:inline-flex; align-items:center; gap:9px; border-radius:11px; padding:9px 14px;
+      color:var(--acc,#2563eb); background:#f1f5f9; background:color-mix(in srgb, var(--acc,#2563eb) 12%, #fff); }
+    .pedido-track-chip svg{ width:17px; height:17px; flex:0 0 auto; }
+    .pedido-track-txt{ display:flex; flex-direction:column; line-height:1.25; }
+    .pedido-track-txt small{ font-size:.64rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:#64748b; }
+    .pedido-track-num{ font-weight:800; font-size:.92rem; color:var(--acc,#2563eb); text-decoration:none; font-variant-numeric:tabular-nums; }
+    .pedido-track-num--pending{ color:#64748b; }
+    .pedido-upd{ margin-left:auto; font-size:.82rem; color:#64748b; font-weight:600; }
+    .pedido-upd b{ color:#334155; font-variant-numeric:tabular-nums; }
+
+    /* Etiqueta de sección "sport" con tick del color de estado */
+    .pedido-label{ display:flex; align-items:center; gap:9px; margin:0 0 14px;
+      font-size:.82rem; font-weight:800; letter-spacing:.13em; text-transform:uppercase; color:#334155; }
+    .pedido-label::before{ content:""; width:16px; height:3px; border-radius:2px; background:var(--acc,#2563eb); }
+
+    /* Cuerpo: productos (ancho) + total/entrega (estrecho).
+       align-items:start evita que la columna de productos se estire para
+       igualar la altura del lateral (dejaba un hueco blanco enorme). */
+    .pedido-grid{ display:grid; grid-template-columns:1.55fr 1fr; gap:16px; align-items:start; }
+    .pedido-panel{ background:#fff; border-radius:20px; padding:22px 22px 24px;
+      box-shadow:0 1px 3px rgba(15,23,42,.05),0 8px 22px rgba(15,23,42,.05); }
+    /* Los productos usan su tarjeta de siempre (.order-summary__product);
+       aquí solo va la etiqueta encima, sin panel para no doblar tarjeta. */
+    .pedido-products{ min-width:0; }
+
+    .pedido-side{ min-width:0; }
+    /* Color plano equivalente al botón "Volver al pago": su degradado va de
+       #373737 a #111111, cuyo tono medio es #242424. */
+    .pedido-total{ background:#242424; color:#fff;
+      border-radius:16px; padding:16px 18px; margin-bottom:20px; }
+    .pedido-total-k{ font-size:.7rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:#cbd5e1; }
+    .pedido-total-v{ font-size:1.7rem; font-weight:800; letter-spacing:-.01em; font-variant-numeric:tabular-nums; line-height:1.15; }
+    .pedido-total-method{ font-size:.82rem; color:#e2e8f0; font-weight:600; margin-top:3px; }
+    .pedido-total-method b{ color:#fff; }
+    .pedido-total-fee{ font-size:.73rem; color:#a9adb3; font-weight:600; margin-top:7px; line-height:1.4; }
+
+    /* Entrega va en el lateral, bajo el Total: con varios productos rellena
+       la columna derecha en vez de dejarla vacía. Campos apilados. */
+    .pedido-facts{ margin:0; }
+    .pedido-fact{ display:flex; flex-direction:column; gap:1px; padding:11px 0; }
+    .pedido-fact + .pedido-fact{ border-top:1px solid #eef0f3; }
+    /* Etiqueta y valor con el mismo estilo que los campos del checkout
+       (.field label / .field input de css/address-fields.css). */
+    .pedido-fact dt{ color:var(--muted); font-weight:700; font-size:.78rem;
+      text-transform:none; letter-spacing:.01em; }
+    .pedido-fact dd{ margin:0; color:var(--ink); font-weight:600; font-size:16px;
+      letter-spacing:.01em; word-break:break-word; }
+    .pedido-fact-note{ display:block; margin-top:4px; font-size:.76rem; font-weight:600;
+      line-height:1.45; color:#94a3b8; }
+    /* La nota de entrega es texto libre del cliente, no un dato estructurado:
+       cursiva + comilla de acento colgada para leerla como "su mensaje". */
+    .pedido-fact dd.pedido-note{ font-style:italic; font-weight:600;
+      font-size:15px; }
+    .pedido-fact dd.pedido-note::before{ content:"\201C"; margin-right:2px;
+      font-style:normal; font-weight:800; font-size:20px; line-height:0;
+      vertical-align:-4px; color:var(--acc,#2563eb); opacity:.85; }
+    .pedido-fact dd.pedido-note::after{ content:"\201D"; margin-left:2px;
+      font-style:normal; font-weight:800; font-size:20px; line-height:0;
+      vertical-align:-4px; color:var(--acc,#2563eb); opacity:.85; }
+
+    /* Acciones dentro de la tarjeta lateral, bajo los datos de entrega:
+       botón principal a todo el ancho de la tarjeta y la vuelta a la tienda
+       como enlace de texto debajo. Igual en escritorio y en móvil. */
+    .pedido-view .order-detail-actions{ display:flex; flex-direction:column; gap:12px;
+      align-items:center; margin-top:18px; padding-top:16px; border-top:1px solid #eef0f3; }
+    .pedido-view .order-detail-actions .order-cta,
+    .pedido-view .order-detail-actions .order-receipt-cta{
+      width:100%;
+      min-width:0;
+    }
+
+    @media (max-width:760px){ .pedido-grid{ grid-template-columns:1fr; } }
+    @media (max-width:560px){
+      .pedido-hero-wash{ padding:22px 18px 18px; }
+      .pedido-hero .tracking-status{ font-size:1.55rem; }
+      .pedido-hero .track-line{ --timeline-icon-size:32px; gap:6px; }
+      .pedido-hero .track-seg{ height:10px; }
+      .pedido-panel{ padding:18px; }
+      .pedido-upd{ margin-left:0; width:100%; }
     }
 
   </style>
@@ -1055,67 +674,8 @@
         </span>
       </div>
 
-      <section class="card card--detail" id="orderDetailSection" hidden>
-        <div class="head"><h2>Detalle del pedido</h2></div>
-        <div class="body" id="orderDetailBody"></div>
-      </section>
-
-      <section class="card card--summary order-summary order-summary--payment hero-shell" aria-label="Estado del pedido">
-        <div class="head order-summary__header">
-          <h1 class="order-summary__title" id="heroTitle">Pedido en seguimiento</h1>
-        </div>
-        <div class="body order-summary__body">
-          <div class="sum-product order-summary__product order-summary__product--line order-summary__product--hero">
-            <div class="order-summary__product-main">
-              <div class="order-summary__hero-thumbs" id="heroThumbStack" hidden></div>
-              <div class="order-summary__product-info">
-                <span class="order-summary__product-title" id="miniSummary">Pedido SCOOT SHOP</span>
-                <span class="order-summary__product-meta order-summary__product-meta--ref" id="orderEyebrow">Estado del pedido</span>
-                <span class="order-summary__product-meta order-summary__hero-lead" id="heroLead">Consulta aquí el estado real del pedido, el pago y los siguientes pasos sin salir de esta página.</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="sum-rows order-summary__rows">
-            <div class="sum-row order-summary__row">
-              <span class="k order-summary__row-label">Estado</span>
-              <span class="v order-summary__row-value order-summary__row-value--status"><span class="status-pill" id="statusPill">Pedido recibido</span></span>
-            </div>
-            <div class="sum-row order-summary__row">
-              <span class="k order-summary__row-label">Importe</span>
-              <span class="v order-summary__row-value" id="heroAmount">—</span>
-            </div>
-            <div class="sum-row order-summary__row">
-              <span class="k order-summary__row-label">Actualización</span>
-              <span class="v order-summary__row-value" id="heroUpdatedAt">Pendiente</span>
-            </div>
-          </div>
-
-          <div class="sum-meta order-summary__box order-summary__info-box order-summary__info-box--payment">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            <span id="microNote" class="sum-meta-text order-summary__box-text order-summary__info-line order-summary__info-line--stack">Aquí verás cualquier cambio importante del pedido.</span>
-          </div>
-        </div>
-      </section>
-
-      <section class="card card--detail section-block--steps">
-        <div class="head"><h2>Siguientes pasos</h2></div>
-        <div class="body">
-          <div class="mini-steps">
-            <div class="mini-step">
-              <span class="mini-step-num">1</span>
-              <p id="mailStepText">Revisa tu correo para ver la Confirmación del pedido.</p>
-            </div>
-            <div class="mini-step">
-              <span class="mini-step-num">2</span>
-              <p id="nextStepText">Prepararemos tu pedido y te avisaremos cuando avance.</p>
-            </div>
-            <div class="mini-step">
-              <span class="mini-step-num">3</span>
-              <p id="supportText">Si necesitas ayuda, escríbenos por WhatsApp o email.</p>
-            </div>
-          </div>
-        </div>
+      <section id="orderDetailSection" class="order-view" hidden>
+        <div id="orderDetailBody"></div>
       </section>
 
       <div class="actions">
@@ -1148,24 +708,16 @@
       const PREVIEW_ORDERS_KEY = 'ss_preview_orders_v1';
       const LOCAL_DEV_ORDERS_KEY = 'ss_local_dev_orders_account_v3';
 
-      const lead = document.getElementById('heroLead');
-      const heroTitle = document.getElementById('heroTitle');
-      const orderEyebrow = document.getElementById('orderEyebrow');
-      const statusPill = document.getElementById('statusPill');
-      const microNote = document.getElementById('microNote');
-      const miniSummary = document.getElementById('miniSummary');
-      const heroThumbStack = document.getElementById('heroThumbStack');
-      const heroAmount = document.getElementById('heroAmount');
-      const heroUpdatedAt = document.getElementById('heroUpdatedAt');
-      const mailStepText = document.getElementById('mailStepText');
-      const nextStepText = document.getElementById('nextStepText');
-      const supportText = document.getElementById('supportText');
       const orderDetailSection = document.getElementById('orderDetailSection');
       const orderDetailBody = document.getElementById('orderDetailBody');
       const stepShipping = document.getElementById('stepShipping');
       const stepPayment = document.getElementById('stepPayment');
       const stepConfirmation = document.getElementById('stepConfirmation');
       const primaryOrderCta = document.getElementById('primaryOrderCta');
+      // Caja de acciones estática del pie. En el detalle normal se oculta,
+      // porque la vuelta a la tienda se integra en la fila de acciones del
+      // pedido; las vistas "caducado"/"pago confirmado" la vuelven a mostrar.
+      const actionsBox = document.querySelector('.actions');
 
       function stepCheckSvg(){
         return '<svg class="ck-step-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
@@ -1223,17 +775,66 @@
         return host === 'localhost' || host === '127.0.0.1' || host === '::1';
       }
 
+      // Mismo criterio que /cuenta (js/account.js): un único sitio decide qué
+      // estados son "el pedido no va a llegar", para que el color, la etiqueta y
+      // el timeline no puedan contradecirse entre sí.
+      const CANCELED_STATUSES = /^(cancelled|canceled|refunded|payment_failed|dispute|error)$/;
+
+      function isCanceledStatus(status){
+        return CANCELED_STATUSES.test(String(status || ''));
+      }
+
       function statusLabel(status){
-        if (status === 'pending_payment') return '⏳ Pendiente pago';
-        if (status === 'paid') return '✅ Pagado';
-        if (status === 'processing') return '📦 Preparando';
-        if (status === 'shipped') return '🚚 Enviado';
-        if (status === 'delivered') return '🏠 Entregado';
-        if (status === 'cancelled') return '❌ Revisa el pago';
-        return '📦 Pedido recibido';
+        if (status === 'pending_payment') return 'Pendiente pago';
+        if (status === 'paid') return 'Pagado';
+        if (status === 'processing') return 'Preparando';
+        if (status === 'shipped') return 'Enviado';
+        if (status === 'delivered') return 'Entregado';
+        // Cada motivo con su nombre, igual que en /cuenta. Antes todo esto caía
+        // en «Revisa el pago», que además contradecía a la tarjeta de /cuenta.
+        if (status === 'cancelled' || status === 'canceled') return 'Cancelado';
+        if (status === 'refunded') return 'Reembolsado';
+        if (status === 'payment_failed') return 'Pago fallido';
+        if (status === 'dispute') return 'En disputa';
+        if (status === 'error') return 'Error';
+        return 'Pedido recibido';
+      }
+      // Color del estado para la cabecera y el tramo hecho del timeline. Misma
+      // paleta que el panel admin (un color por estado). Se inyecta como --acc
+      // en .order-tracking.
+      function statusAccent(status){
+        switch (status) {
+          case 'pending_payment': return '#9a3412';
+          case 'paid': return '#15803d';
+          case 'processing':
+          case 'preparing': return '#7c3aed';
+          case 'reserved': return '#5b21b6';
+          case 'shipped': return '#2563eb';
+          case 'delivered': return '#16a34a';
+          case 'cancelled':
+          case 'canceled':
+          case 'refunded':
+          case 'payment_failed':
+          case 'dispute':
+          case 'error': return '#991b1b';
+          default: return '#475569';
+        }
+      }
+      // Icono de línea de la etapa actual para la cabecera (mismo set que el
+      // timeline): reloj → check al pagar → caja → camión → casa; calendario si
+      // reservado, ✕ si incidencia.
+      function statusIcon(status){
+        if (status === 'pending_payment') return TRACK_ICON.hourglass;
+        if (status === 'paid') return TRACK_ICON.check;
+        if (status === 'reserved') return TRACK_ICON.calendar;
+        if (status === 'shipped') return TRACK_ICON.truck;
+        if (status === 'delivered') return TRACK_ICON.house;
+        if (status === 'cancelled' || status === 'canceled' || status === 'refunded' || status === 'payment_failed' || status === 'dispute' || status === 'error') return TRACK_ICON.alert;
+        return TRACK_ICON.box;
       }
 
       function stageIndex(status){
+        if (isCanceledStatus(status)) return 0;
         if (status === 'pending_payment') return 0;
         if (status === 'paid') return 1;
         if (status === 'processing') return 2;
@@ -1267,6 +868,22 @@
         }
       }
 
+      // Tipo de email (event_type de email_events) en lenguaje de cliente.
+      // Si llega un tipo desconocido devolvemos '' y la nota omite el paréntesis.
+      function emailKindLabel(type){
+        const map = {
+          'order.pending_payment': 'pedido pendiente de pago',
+          'order.paid': 'confirmación de pago',
+          'order.preparing': 'pedido en preparación',
+          'order.shipped': 'aviso de envío',
+          'order.delivered': 'confirmación de entrega',
+          'order.reserved': 'confirmación de reserva',
+          'order.canceled': 'cancelación del pedido',
+          'order.refunded': 'reembolso'
+        };
+        return map[String(type || '').trim()] || '';
+      }
+
       function formatDateTime(value){
         if (!value) return '—';
         const d = new Date(value);
@@ -1276,81 +893,89 @@
         });
       }
 
-      function heroCopy(status, tracking, orderNumber){
-        const normalized = normalizeStatus(status);
-        if (normalized === 'pending_payment') {
-          return {
-            eyebrow: 'Estado del pedido',
-            title: 'Pedido ' + orderNumber,
-            lead: 'El pedido está creado, pero el pago todavía no se ha confirmado. Puedes retomarlo sin generar un pedido nuevo.',
-            note: tracking ? ('Tracking activo: ' + tracking + '.') : 'Pendiente de Seguimiento/Tracking.'
-          };
-        }
-        if (normalized === 'paid') {
-          return {
-            eyebrow: 'Estado del pedido',
-            title: 'Pedido ' + orderNumber,
-            lead: 'El pago ya está confirmado y el pedido ha quedado registrado para preparación.',
-            note: tracking ? ('Tracking activo: ' + tracking + '.') : 'Pendiente de Seguimiento/Tracking.'
-          };
-        }
-        if (normalized === 'processing') {
-          return {
-            eyebrow: 'Estado del pedido',
-            title: 'Pedido ' + orderNumber,
-            lead: 'El pedido ya está en preparación. Aquí verás el siguiente avance en cuanto salga a envío.',
-            note: tracking ? ('Tracking activo: ' + tracking + '.') : 'Pendiente de Seguimiento/Tracking.'
-          };
-        }
-        if (normalized === 'shipped') {
-          return {
-            eyebrow: 'Estado del pedido',
-            title: 'Pedido ' + orderNumber,
-            lead: 'El pedido ha salido y esta pantalla seguirá actualizándose con el seguimiento.',
-            note: tracking ? ('Tracking activo: ' + tracking + '.') : 'Pendiente de Seguimiento/Tracking.'
-          };
-        }
-        if (normalized === 'delivered') {
-          return {
-            eyebrow: 'Estado del pedido',
-            title: 'Pedido ' + orderNumber,
-            lead: 'La entrega figura como completada. Si necesitas ayuda postventa, puedes usar los canales de soporte de abajo.',
-            note: tracking ? ('Último tracking: ' + tracking + '.') : 'Entrega confirmada por la transportista.'
-          };
-        }
-        if (normalized === 'cancelled') {
-          return {
-            eyebrow: 'Estado del pedido',
-            title: 'Pedido ' + orderNumber,
-            lead: 'El pedido necesita revisión. Comprueba el método de pago o contacta con soporte para resolverlo.',
-            note: 'Si el pago no terminó bien, no intentes repetirlo sin revisar el pedido primero.'
-          };
-        }
-        return {
-          eyebrow: 'Estado del pedido',
-          title: 'Pedido ' + orderNumber,
-          lead: 'Consulta aquí el estado real del pedido, el pago y los siguientes pasos sin salir de esta página.',
-          note: 'Aquí verás cualquier cambio importante del pedido.'
+      // El teléfono se guarda en E.164 (+34629099690). Para leerlo lo partimos
+      // en prefijo + bloques de 3: "+34 629 099 690". Solo separamos los
+      // prefijos que ofrece el checkout; si el número no encaja, lo dejamos tal
+      // cual antes que romperlo con un agrupado inventado.
+      const PHONE_PREFIXES = ['351', '34', '33', '39', '49'];
+
+      function formatPhone(value){
+        const raw = String(value || '').trim();
+        if (!raw) return '';
+        const digits = raw.replace(/\D/g, '');
+        if (!digits) return raw;
+        // Bloques de 3; si al final fuese a quedar un dígito suelto, el último
+        // bloque crece a 4 (así "+39 333 123 4567" en vez de "…456 7").
+        const groups = function (num) {
+          const out = [];
+          for (let i = 0; i < num.length;) {
+            const size = (num.length - i) === 4 ? 4 : 3;
+            out.push(num.slice(i, i + size));
+            i += size;
+          }
+          return out.join(' ');
         };
+        // 00 al inicio es la otra forma de escribir el "+" internacional.
+        let rest = digits.replace(/^00/, '');
+        const hasCountry = raw.charAt(0) === '+' || /^00\d/.test(digits) || rest.length > 10;
+        if (hasCountry) {
+          for (let i = 0; i < PHONE_PREFIXES.length; i++) {
+            const cc = PHONE_PREFIXES[i];
+            if (rest.indexOf(cc) === 0 && rest.length > cc.length) {
+              return '+' + cc + ' ' + groups(rest.slice(cc.length));
+            }
+          }
+          return raw;
+        }
+        return groups(rest);
       }
+
+      // Iconos SVG de línea (set coherente: trazo 2, esquinas redondeadas).
+      // Heredan el color con currentColor. Reloj → check al pagar; luego caja,
+      // camión y casa; calendario si reservado, ✕ si incidencia.
+      const TRACK_ICON = {
+        hourglass: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.17a2 2 0 0 0-.59-1.41L12 12l-4.41 4.42A2 2 0 0 0 7 17.83V22"/><path d="M7 2v4.17a2 2 0 0 0 .59 1.41L12 12l4.41-4.41A2 2 0 0 0 17 6.17V2"/></svg>',
+        check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>',
+        box: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="m7.5 4.27 9 5.15"/></svg>',
+        truck: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>',
+        house: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .71-1.53l7-6a2 2 0 0 1 2.59 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
+        alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>',
+        calendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>'
+      };
+      const TRACKING_STAGES = [
+        { at: 1, title: 'Pendiente pago', icon: TRACK_ICON.hourglass, doneTitle: 'Pagado', doneIcon: TRACK_ICON.check },
+        { at: 2, title: 'Preparando', icon: TRACK_ICON.box },
+        { at: 3, title: 'Enviado', icon: TRACK_ICON.truck },
+        { at: 4, title: 'Entregado', icon: TRACK_ICON.house }
+      ];
 
       function renderTracking(status){
         const s = normalizeStatus(status);
         const idx = stageIndex(s);
-        const progress = Math.round((idx / 4) * 100);
         const isDelivered = idx >= 4 ? ' is-delivered' : '';
+        const canceled = isCanceledStatus(s);
+        const parts = [];
+        TRACKING_STAGES.forEach(function(stage, i){
+          const done = idx >= stage.at;
+          // El segmento i-1 une el hito anterior con este: se pinta al alcanzarlo.
+          if (i > 0) {
+            parts.push('<i class="track-seg' + (done ? ' is-on' : '') + '" aria-hidden="true"></i>');
+          }
+          // En un pedido cancelado el primer hito deja de ser «pendiente de
+          // pago»: pasa a ser el motivo de la cancelación, con su icono y el
+          // color del estado. Los siguientes quedan apagados: el recorrido se
+          // interrumpió ahí.
+          const esCancelado = canceled && i === 0;
+          const icon = esCancelado ? TRACK_ICON.alert : (done && stage.doneIcon ? stage.doneIcon : stage.icon);
+          const title = esCancelado ? statusLabel(s) : (done && stage.doneTitle ? stage.doneTitle : stage.title);
+          const cls = 'track-ico' + (done ? ' is-done' : '') + (esCancelado ? ' is-canceled' : '');
+          parts.push('<span class="' + cls + '" title="' + esc(title) + '">' + icon + '</span>');
+        });
         return [
-          '<div class="order-tracking">',
-          '  <div class="tracking-status">' + esc(statusLabel(s)) + '</div>',
-          '  <div class="track-line' + isDelivered + '" style="--progress:' + esc(progress + '%') + ';">',
-          '    <i aria-hidden="true"></i>',
-          '    <div class="tracking-icons">',
-          '      <span title="Pendiente pago">⏳</span>',
-          '      <span title="Pagado">✅</span>',
-          '      <span title="Preparando">📦</span>',
-          '      <span title="Enviado">🚚</span>',
-          '      <span title="Entregado">🏠</span>',
-          '    </div>',
+          '<div class="order-tracking" style="--acc:' + statusAccent(s) + '">',
+          '  <div class="tracking-status"><span class="tracking-status-ico">' + statusIcon(s) + '</span>' + esc(statusLabel(s)) + '</div>',
+          '  <div class="track-line' + isDelivered + '">',
+          '    ' + parts.join(''),
           '  </div>',
           '</div>'
         ].join('');
@@ -1375,8 +1000,22 @@
         return '<div class="order-products"><div class="order-product-list-shell order-summary order-summary--checkout"><div class="order-summary__product-list">' + items.map(function(item){
           const img = String(item.image || '').trim();
           const qty = Math.max(1, Number(item.qty || 1));
-          let colorLabel = String(item.color_label || item.color || '').trim();
-          if (/^no especificado$/i.test(colorLabel)) colorLabel = '';
+          /* El texto de variantes lo trae ya resuelto la API (`variant_text`), que a su
+             vez lo recibió del núcleo cuando el cliente compró. Esta página NO decide
+             qué es ese valor: escribía "Color:" pasara lo que pasara, así que un pedido
+             de un patinete elegido por MODELO se leía como si fuera un color.
+             El respaldo por catálogo es para pedidos servidos por una API antigua. */
+          let variantText = String(item.variant_text || '').trim();
+          if (!variantText && window.SS_ATTRS && typeof window.SS_ATTRS.describirTexto === 'function') {
+            try {
+              const lista = window.SCOOTSHOP_PRODUCTS || [];
+              let prod = null;
+              const skuLinea = String(item.sku || '');
+              for (let i = 0; i < lista.length; i++) if (skuLinea && lista[i].sku === skuLinea) { prod = lista[i]; break; }
+              variantText = window.SS_ATTRS.describirTexto(item, prod) || '';
+            } catch (_) {}
+          }
+          if (/^(color:\s*)?no especificado$/i.test(variantText)) variantText = '';
           const sku = String(item.sku || '').trim();
           const itemCurrency = String(item.currency || order.currency || currencyCode || 'EUR').toUpperCase();
           const rawUnitPrice = Number(item.unit_price || item.price || item.amount || item.total_amount || 0);
@@ -1387,11 +1026,11 @@
           return [
             '<article class="order-summary__product order-summary__product--line">',
             '  <div class="order-summary__product-main">',
-            img ? ('<img class="order-summary__product-image" src="' + esc(img) + '" alt="Producto ' + esc(item.name || 'SCOOT SHOP') + '">') : '<img class="order-summary__product-image" src="/img/0-removebg-preview.webp?v=20260620-2" alt="Producto SCOOT SHOP">',
+            img ? ('<img class="order-summary__product-image" src="' + esc(img) + '" alt="Producto ' + esc(item.name || 'SCOOT SHOP') + '">') : '<img class="order-summary__product-image" src="/img/0-removebg-preview.webp" alt="Producto SCOOT SHOP">',
             '  <div class="order-summary__product-info">',
             '    <span class="order-summary__product-title">' + esc(item.name || 'Producto') + '</span>',
             sku ? ('    <span class="order-summary__product-meta order-summary__product-meta--ref">Ref: ' + esc(sku) + '</span>') : '',
-            '    <span class="order-summary__product-meta order-summary__product-meta--color">Color: ' + esc(colorLabel || 'Cualquiera') + '</span>',
+            '    <span class="order-summary__product-meta order-summary__product-meta--color">' + esc(variantText || 'Único') + '</span>',
             '</div>',
             '  </div>',
             '  <div class="order-summary__product-side">',
@@ -1405,23 +1044,6 @@
 
       function buildAddress(ship){
         return [ship.address, ship.address2, ship.city, ship.province, ship.postal, ship.country].filter(Boolean).join(', ');
-      }
-
-      function renderHeroThumbs(items){
-        const list = Array.isArray(items) ? items.filter(function(item){
-          return item && String(item.image || '').trim();
-        }) : [];
-        if (!list.length) return '';
-        const visible = list.slice(0, 3);
-        const extra = list.length - visible.length;
-        return visible.map(function(item, index){
-          const src = String(item.image || '').trim();
-          if (!src) return '';
-          if (index === 2 && extra > 0) {
-            return '<span class="order-summary__hero-thumb order-summary__hero-thumb--more">+' + esc(extra) + '</span>';
-          }
-          return '<img class="order-summary__hero-thumb" src="' + esc(src) + '" alt="Producto ' + esc(item.name || 'SCOOT SHOP') + '">';
-        }).join('');
       }
 
       function saveResumeSessionPayload(payload){
@@ -1505,21 +1127,11 @@
         const amount = formatMoney(order.total_amount || order.amount || amountText, order.currency || currencyCode);
         const method = paymentMethodLabel(order.payment_method);
         const updatedAt = formatDateTime(order.updated_at || order.created_at);
-        const hero = heroCopy(status, tracking, orderNumber);
-        const items = normalizeItems(order);
-        const firstItem = items[0] || null;
-        const itemCount = items.reduce(function(total, item){
-          return total + Math.max(1, Number(item && item.qty || 1));
-        }, 0);
-        const summaryText = items.length > 1
-          ? (String(itemCount) + ' artículos')
-          : (((firstItem && firstItem.name) ? firstItem.name : 'Pedido SCOOT SHOP') + ' · Ref. ' + orderNumber);
-        const summaryMeta = items.length > 1 ? ('Ref. ' + orderNumber) : hero.eyebrow;
         const receiptUrl = String(order.receipt_url || '').trim();
         const receiptFileName = 'recibo-' + orderNumber.replace(/[^A-Za-z0-9_-]+/g, '-') + '.pdf';
         const actionButtons = [];
         if (isPendingPayment) {
-          actionButtons.push('<button type="button" class="order-cta order-cta--primary" id="resumePaymentBtn">Volver al pago</button>');
+          actionButtons.push('<button type="button" class="order-cta order-cta--primary" id="resumePaymentBtn">Volver al pago<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>');
         }
         if (receiptUrl) {
           actionButtons.push('<a class="order-receipt-cta" href="' + esc(receiptUrl) + '" target="_blank" rel="noopener noreferrer" download="' + esc(receiptFileName) + '"><i class="fa-solid fa-receipt" aria-hidden="true"></i> Descargar recibo</a>');
@@ -1527,79 +1139,99 @@
         const resumeAction = actionButtons.length
           ? ('<div class="order-detail-actions">' + actionButtons.join('') + '</div>')
           : '';
+        // El botón "Volver a la tienda" del pie no se usa en el detalle.
+        if (actionsBox) actionsBox.style.display = 'none';
 
         orderDetailSection.hidden = false;
         applyCheckoutSteps(status);
+        const facts = [];
+        if (fullName) facts.push('<div class="pedido-fact"><dt>Nombre</dt><dd>' + esc(fullName) + '</dd></div>');
+        if (phone) facts.push('<div class="pedido-fact"><dt>Teléfono</dt><dd>' + esc(formatPhone(phone)) + '</dd></div>');
+        // Bajo el correo, si consta algún aviso entregado, se indica cuándo
+        // fue el último y se recuerda mirar en spam. Evita el "no me avisaron".
+        // Normalizamos el DATETIME de MySQL ("2026-07-17 22:41:00") a ISO para
+        // que parsee en cualquier navegador, y solo mostramos la nota si la
+        // fecha es válida: formatDateTime devuelve el valor crudo si no lo es.
+        const lastEmailRaw = String(order.last_email_at || '').trim().replace(' ', 'T');
+        const lastEmailDate = lastEmailRaw ? new Date(lastEmailRaw) : null;
+        let lastEmailNote = '';
+        if (lastEmailDate && !isNaN(lastEmailDate.getTime())) {
+          // Mismos tipos que registra el backend (event_type), pero con nombres
+          // de cara al cliente: así sabe qué correo buscar en su bandeja.
+          const kind = emailKindLabel(order.last_email_type);
+          lastEmailNote = '<span class="pedido-fact-note">Último aviso enviado el '
+            + esc(formatDateTime(lastEmailRaw))
+            + (kind ? (' (' + esc(kind) + ')') : '')
+            + '. Si no lo ves, revisa la carpeta de spam.</span>';
+        }
+        if (email) facts.push('<div class="pedido-fact"><dt>Correo electrónico</dt><dd>' + esc(email) + lastEmailNote + '</dd></div>');
+        if (address) facts.push('<div class="pedido-fact"><dt>Dirección</dt><dd>' + esc(address) + '</dd></div>');
+        // La nota de entrega que dejó el cliente en el checkout: se la
+        // devolvemos para que confirme que su indicación quedó registrada.
+        const shipNotes = String(ship.notes || '').trim();
+        if (shipNotes) facts.push('<div class="pedido-fact"><dt>Notas de entrega</dt><dd class="pedido-note">' + esc(shipNotes) + '</dd></div>');
+        const entregaBlock = facts.length
+          ? ('<h2 class="pedido-label">Entrega</h2><dl class="pedido-facts">' + facts.join('') + '</dl>')
+          : '';
+        // "Pagado con" solo si el pedido está realmente cobrado; si sigue
+        // pendiente (o cancelado) el método es el elegido, no uno ya pagado.
+        const isPaidState = ['paid', 'processing', 'shipped', 'delivered'].indexOf(status) !== -1;
+        const methodPrefix = isPaidState ? 'Pagado con' : 'Método:';
+        // Nota bajo el total: deja claro que no queda nada por añadir.
+        const feeNote = '        <div class="pedido-total-fee">Ya incluye la comisión del método de pago y los costes de envío.</div>';
+        const trackNum = tracking
+          ? ('<a class="pedido-track-num" href="https://parcelsapp.com/es/tracking/' + encodeURIComponent(tracking) + '" target="_blank" rel="noopener noreferrer">' + esc(tracking) + '</a>')
+          : '<span class="pedido-track-num pedido-track-num--pending">Pendiente de tracking</span>';
+
         orderDetailBody.innerHTML = [
-          '<div class="order-detail-shell">',
-          '  <div class="order-detail-top">',
-          '    <div class="detail-pill"><span class="detail-note"><strong>Referencia:</strong> ' + esc(orderNumber) + '</span></div>',
-          '    ' + renderTracking(status),
-          tracking ? ('    <p class="detail-note"><strong>Número de seguimiento:</strong> <a href="https://t.17track.net/es#nums=' + encodeURIComponent(tracking) + '" target="_blank" rel="noopener noreferrer" style="text-decoration:underline;font-weight:800">' + esc(tracking) + '</a></p>') : '    <p class="detail-note"><strong>Número de seguimiento:</strong> Pendiente de Seguimiento/Tracking.</p>',
+          '<div class="pedido-view" style="--acc:' + statusAccent(status) + '">',
+          '  <section class="pedido-hero">',
+          '    <div class="pedido-hero-wash">',
+          '      <p class="pedido-eyebrow">Pedido · <b>' + esc(orderNumber) + '</b></p>',
+          '      ' + renderTracking(status),
+          '      <div class="pedido-hero-foot">',
+          '        <span class="pedido-track-chip">',
+          '          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>',
+          '          <span class="pedido-track-txt"><small>Seguimiento</small>' + trackNum + '</span>',
+          '        </span>',
+          '        <span class="pedido-upd">Actualizado <b>' + esc(updatedAt) + '</b></span>',
+          '      </div>',
+          '    </div>',
+          '  </section>',
+          '  <div class="pedido-grid">',
+          '    <section class="pedido-products">',
+          '      <h2 class="pedido-label">Productos</h2>',
+          '      ' + renderItems(order),
+          '    </section>',
+          '    <aside class="pedido-panel pedido-side">',
+          '      <div class="pedido-total">',
+          '        <div class="pedido-total-k">Total del pedido</div>',
+          '        <div class="pedido-total-v">' + esc(amount) + '</div>',
+          method ? ('        <div class="pedido-total-method">' + methodPrefix + ' <b>' + esc(method) + '</b></div>') : '',
+          feeNote,
+          '      </div>',
+          '      ' + entregaBlock,
+          '      ' + resumeAction,
+          '    </aside>',
           '  </div>',
-          '  <div class="order-kpis">',
-          '    <div class="order-kpi"><span class="k">Número de pedido</span><span class="v">' + esc(orderNumber) + '</span></div>',
-          method ? ('    <div class="order-kpi is-pair"><span class="k">Método de pago</span><span class="v">' + esc(method) + '</span></div>') : '',
-          '    <div class="order-kpi is-pair"><span class="k">Importe</span><span class="v">' + esc(amount) + '</span></div>',
-          '    <div class="order-kpi"><span class="k">Última actualización</span><span class="v">' + esc(updatedAt) + '</span></div>',
-          fullName ? ('    <div class="order-kpi"><span class="k">Nombre completo</span><span class="v">' + esc(fullName) + '</span></div>') : '',
-          phone ? ('    <div class="order-kpi"><span class="k">Teléfono</span><span class="v">' + esc(phone) + '</span></div>') : '',
-          email ? ('    <div class="order-kpi is-wide"><span class="k">Correo</span><span class="v">' + esc(email) + '</span></div>') : '',
-          address ? ('    <div class="order-kpi is-wide"><span class="k">Dirección de envío</span><span class="v">' + esc(address) + '</span></div>') : '',
-          '  </div>',
-          '  <div class="order-product-block">',
-          '    <p class="detail-note"><strong>Productos del pedido</strong></p>',
-          '    ' + renderItems(order),
-          '  </div>',
-          '  ' + resumeAction,
           '</div>'
         ].join('');
 
         const resumeBtn = document.getElementById('resumePaymentBtn');
         if (resumeBtn) {
+          // Guardamos el contenido original (icono + texto) para restaurarlo
+          // si el pago falla; con textContent se perdería el icono.
+          const resumeBtnHtml = resumeBtn.innerHTML;
           resumeBtn.addEventListener('click', function(){
             resumeBtn.disabled = true;
             resumeBtn.textContent = 'Abriendo pago...';
             resumePendingPayment(order).catch(function(){
               resumeBtn.disabled = false;
-              resumeBtn.textContent = 'Volver al pago';
+              resumeBtn.innerHTML = resumeBtnHtml;
             });
           });
         }
 
-        if (statusPill) {
-          statusPill.textContent = statusLabel(status);
-          statusPill.className = 'status-pill';
-          if (status === 'pending_payment' || status === 'cancelled') {
-            statusPill.classList.add('status-pill--warn');
-          } else if (status === 'processing' || status === 'shipped') {
-            statusPill.classList.add('status-pill--neutral');
-          }
-        }
-        if (orderEyebrow) orderEyebrow.textContent = summaryMeta;
-        if (heroTitle) heroTitle.textContent = hero.title;
-        if (lead) lead.textContent = hero.lead;
-        if (microNote) microNote.textContent = hero.note;
-        if (miniSummary) miniSummary.textContent = summaryText;
-        if (heroThumbStack) {
-          const thumbsMarkup = renderHeroThumbs(items);
-          heroThumbStack.className = 'order-summary__hero-thumbs' + (items.length > 1 ? ' order-summary__hero-thumbs--stack' : '');
-          heroThumbStack.innerHTML = thumbsMarkup;
-          heroThumbStack.hidden = !thumbsMarkup;
-        }
-        if (heroAmount) heroAmount.textContent = amount;
-        if (heroUpdatedAt) heroUpdatedAt.textContent = updatedAt;
-        if (mailStepText) {
-          mailStepText.textContent = isPendingPayment
-            ? 'Pulsa en Volver al pago para completar el pedido sin cambiar el número.'
-            : (email ? ('Revisa ' + email + ' para ver las actualizaciones del pedido.') : 'Revisa tu correo para ver la confirmación del pedido.');
-        }
-        if (nextStepText) {
-          nextStepText.textContent = isPendingPayment
-            ? 'Cuando el pago se confirme, actualizaremos el estado automáticamente en esta misma pantalla.'
-            : (tracking ? 'Tu pedido ya tiene seguimiento activo y seguirá actualizándose en esta pantalla.' : 'Prepararemos tu pedido y activaremos tracking en cuanto salga a reparto.');
-        }
-        if (supportText) supportText.textContent = 'Si necesitas ayuda, te atendemos por WhatsApp o email.';
       }
 
       function renderExpiredOrder(){
@@ -1617,24 +1249,7 @@
           '</div>'
         ].join('');
 
-        if (statusPill) {
-          statusPill.textContent = '⚠️ Pedido caducado';
-          statusPill.className = 'status-pill status-pill--warn';
-        }
-        if (orderEyebrow) orderEyebrow.textContent = 'Pedido no disponible';
-        if (heroTitle) heroTitle.textContent = 'Pedido caducado';
-        if (lead) lead.textContent = 'Este pedido ya no está disponible para retomar el pago.';
-        if (microNote) microNote.textContent = 'Crea un nuevo pedido para continuar el proceso de compra.';
-        if (miniSummary) miniSummary.textContent = 'Sin datos de pedido';
-        if (heroThumbStack) {
-          heroThumbStack.innerHTML = '';
-          heroThumbStack.hidden = true;
-        }
-        if (heroAmount) heroAmount.textContent = '—';
-        if (heroUpdatedAt) heroUpdatedAt.textContent = '—';
-        if (mailStepText) mailStepText.textContent = 'Este pedido ya no puede recuperarse.';
-        if (nextStepText) nextStepText.textContent = 'Crea un pedido nuevo para continuar con el pago.';
-        if (supportText) supportText.textContent = 'Si necesitas ayuda, te atendemos por WhatsApp o email.';
+        if (actionsBox) actionsBox.style.display = '';
         if (primaryOrderCta) {
           primaryOrderCta.textContent = 'Crear nuevo pedido';
           primaryOrderCta.href = '/checkout/?cart=1';
@@ -1656,13 +1271,12 @@
         applyCheckoutSteps('paid');
 
         var ref = orderId || '';
-        var amount = amountText ? formatMoney(amountText, currencyCode) : '';
 
         orderDetailBody.innerHTML = [
           '<div class="order-detail-shell">',
           '  <div class="order-detail-top">',
           (ref ? ('    <div class="detail-pill"><span class="detail-note"><strong>Referencia:</strong> ' + esc(ref) + '</span></div>') : ''),
-          '    <p class="detail-note"><strong>✅ Pago recibido.</strong> Hemos confirmado tu pago correctamente.</p>',
+          '    <p class="detail-note"><strong>Pago recibido.</strong> Hemos confirmado tu pago correctamente.</p>',
           '  </div>',
           '  <div class="order-empty-state">',
           '    <strong>¡Gracias por tu compra!</strong>',
@@ -1671,18 +1285,7 @@
           '</div>'
         ].join('');
 
-        if (statusPill) { statusPill.textContent = '✅ Pago confirmado'; statusPill.className = 'status-pill'; }
-        if (orderEyebrow) orderEyebrow.textContent = 'Pago completado';
-        if (heroTitle) heroTitle.textContent = 'Pago confirmado';
-        if (lead) lead.textContent = 'Hemos recibido tu pago. Tu pedido está confirmado y te enviaremos los detalles por correo.';
-        if (microNote) microNote.textContent = ref ? ('Pedido ' + ref) : '';
-        if (miniSummary) miniSummary.textContent = ref ? ('Pedido ' + ref) : 'Pago confirmado';
-        if (heroAmount) heroAmount.textContent = amount || '—';
-        if (heroUpdatedAt) heroUpdatedAt.textContent = '—';
-        if (mailStepText) mailStepText.textContent = 'Te enviaremos la confirmación y el seguimiento por correo.';
-        if (nextStepText) nextStepText.textContent = 'Prepararemos tu pedido en breve.';
-        if (supportText) supportText.textContent = 'Si necesitas ayuda, te atendemos por WhatsApp o email.';
-        if (heroThumbStack) { heroThumbStack.innerHTML = ''; heroThumbStack.hidden = true; }
+        if (actionsBox) actionsBox.style.display = '';
         if (primaryOrderCta) { primaryOrderCta.textContent = 'Volver al inicio'; primaryOrderCta.href = '/'; }
       }
 
@@ -1820,6 +1423,32 @@
         };
       }
 
+      // Caché stale-while-revalidate del detalle: pinta al instante en recargas
+      // y vueltas atrás usando la última respuesta buena, y revalida en segundo
+      // plano. sessionStorage (por pestaña) evita dejar datos del pedido en el
+      // disco de un dispositivo compartido: la URL del pedido es capability-URL.
+      function orderCacheKey(){
+        if (!orderId) return '';
+        return 'ss_pedido_detail:' + orderId + ':' + (orderToken || '');
+      }
+      function writeOrderCache(order){
+        const key = orderCacheKey();
+        if (!key || !order) return;
+        try { sessionStorage.setItem(key, JSON.stringify(order)); } catch (_) { /* cuota/privado: ignora */ }
+      }
+      function renderCachedOrderDetail(){
+        const key = orderCacheKey();
+        if (!key) return false;
+        try {
+          const raw = sessionStorage.getItem(key);
+          if (!raw) return false;
+          const cached = JSON.parse(raw);
+          if (!cached || typeof cached !== 'object') return false;
+          renderDetail(cached);
+          return true;
+        } catch (_) { return false; }
+      }
+
       async function loadOrderDetail(opts){
         const silent = !!(opts && opts.silent);
         if(!orderId){
@@ -1850,6 +1479,7 @@
             data = null;
           }
           if (res.ok && data && data.ok && data.order) {
+            writeOrderCache(data.order);
             renderDetail(data.order);
             return;
           }
@@ -1899,26 +1529,242 @@
         });
       }
 
-      if(lead && productName){
-        lead.textContent = 'Consulta aquí el estado de ' + productName + ', el pago y los siguientes pasos sin salir de esta página.';
-      }
-      if(supportText){
-        supportText.textContent = 'Si necesitas ayuda con este pedido, te atendemos por WhatsApp o email.';
-      }
-
       const waSupportLink = document.querySelector('a[href^="https://wa.me/"]');
       if (waSupportLink && orderId) {
         const waBase = waSupportLink.href.split('?')[0];
         waSupportLink.href = waBase + '?text=' + encodeURIComponent('Hola, necesito ayuda con mi pedido ' + orderId + '.');
       }
 
-      loadOrderDetail();
+      // Pinta al instante desde caché si la hay (percepción inmediata) y luego
+      // revalida en silencio; si no hay caché, carga normal con sus fallbacks.
+      const paintedFromCache = renderCachedOrderDetail();
+      loadOrderDetail(paintedFromCache ? { silent: true } : undefined);
       startOrderAutoRefresh();
     })();
   </script>
   <script src="/js/global-assets.js?v=20260605-2"></script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
