@@ -298,10 +298,11 @@ main{ padding-block:22px 32px; }
 .price-row::before{
   content:'';
   position:absolute;
-  top:0; left:0; right:0;
+  top:0; left:0;
+  width:50%;
   height:3px;
-  background-color:var(--series-accent, var(--primary, #d11c1c));
-  border-radius:0 0 3px 3px;
+  background-color:var(--series-accent-a, var(--series-accent, var(--primary, #d11c1c)));
+  border-radius:0 0 0 3px;
   opacity:.8;
   transition:background-color .28s ease, opacity .28s ease;
 }
@@ -309,12 +310,13 @@ main{ padding-block:22px 32px; }
 .price-row::after{
   content:'';
   position:absolute;
-  top:0; left:0; right:0;
+  top:0; right:0;
+  width:50%;
   height:3px;
-  background:var(--series-accent-fill, var(--series-accent, var(--primary, #d11c1c)));
-  border-radius:0 0 3px 3px;
-  opacity:calc(var(--series-accent-mix, 0) * .8);
-  transition:background .28s ease, opacity .28s ease;
+  background-color:var(--series-accent-b, var(--series-accent-a, var(--series-accent, var(--primary, #d11c1c))));
+  border-radius:0 0 3px 0;
+  opacity:.8;
+  transition:background-color .28s ease, opacity .28s ease;
   pointer-events:none;
 }
 
@@ -365,6 +367,21 @@ main{ padding-block:22px 32px; }
   align-self:flex-end;
 }
 
+/* ── Precio en ficha · alineación GENERAL ────────────────────────
+   En las fichas (.panel), cuando .price-row NO trae el wrapper
+   .price-values (markup plano), alinea el precio tachado y el badge de
+   descuento por la BASE del precio actual, en vez de caer al fondo de
+   la fila (que el sello DGT, más alto, agranda). Garantiza por CSS la
+   MISMA posición del precio tachado y del % en TODAS las fichas, sin
+   depender de que el JS los envuelva en .price-values. */
+.panel .price-row:not(:has(.price-values)){
+  align-items:baseline;
+}
+.panel .price-row:not(:has(.price-values)) > .price-was,
+.panel .price-row:not(:has(.price-values)) > .discount-badge{
+  align-self:baseline;
+}
+
 .desc{
   margin:18px 0 0;
   font-family:var(--ui);
@@ -392,36 +409,256 @@ main{ padding-block:22px 32px; }
   letter-spacing:.008em;
 }
 
-.quick-specs{
-  display:grid;
-  grid-template-columns:repeat(3, 1fr);
-  gap:0;
-  margin-top:16px;
-  border-top:1px solid rgba(15,23,42,.1);
+/* ── Accesorio compatible ──────────────────────────────────────────────────
+   Ocupa el hueco de las antiguas .quick-specs, entre .desc y .cta-col. Lo
+   inyecta product-enhancements.js solo en las fichas cuyo producto declara
+   compatibleSkus, asi que la mayoria de fichas no lo tienen nunca.
+
+   El RECUADRO de cada accesorio no se estiliza aqui: reutiliza tal cual
+   .order-summary__product--line de main.css, el mismo del resumen del pedido
+   de /checkout y /pago. Aqui solo va lo que ese sistema no cubre —la cabecera
+   y el boton de anadir— para que el recuadro siga siendo identico al resumen
+   aunque el resumen cambie. */
+.compat-box{
+  margin:16px 0;
 }
 
+.compat-head{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:8px;
+  padding:0 2px 9px;
+}
+
+.compat-title{
+  font-family:var(--sport);
+  font-size:.82rem;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  line-height:1.55;
+  color:var(--ink);
+}
+
+.compat-hint{
+  font-size:.7rem;
+  font-weight:800;
+  color:var(--muted);
+}
+
+.compat-buy{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:7px;
+}
+
+.compat-name{
+  text-decoration:none;
+  color:inherit;
+}
+
+/* Al pasar por CUALQUIER punto de la fila, no solo por el título: el ::after de
+   abajo forma parte del enlace, así que el :hover del enlace se activa desde toda
+   la superficie. Es la única pista visual de que la fila entera lleva a la ficha. */
+.compat-name:hover{ text-decoration:underline; }
+
+/* ── Fila entera clicable ────────────────────────────────────────────────────
+   El enlace del título se ESTIRA por encima de todo el recuadro con un ::after, así
+   que pulsar la foto, el precio, el chip de color o el hueco vacío lleva a la ficha.
+
+   Se hace estirando el enlace REAL y no con un onclick en el div: sigue siendo un
+   <a> de verdad, o sea que se abre en pestaña nueva con el botón central o con Ctrl,
+   se copia con "copiar dirección del enlace", se tabula, lo anuncia el lector de
+   pantalla y lo sigue el buscador. Un div con onclick no da nada de eso.
+
+   Dos requisitos, y si falta uno se rompe: la FILA tiene que ser el bloque de
+   referencia (position:relative) para que el inset:0 la cubra entera, y el botón de
+   acción tiene que quedar POR ENCIMA de la capa. Nada más se sube: el precio se
+   queda debajo a propósito, para que también sea parte del enlace. */
+.compat-row{ position:relative; }
+
+.compat-name::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:1;
+}
+
+/* Botón circular de solo icono: la fila ya dice qué es y cuánto cuesta, así que
+   una etiqueta "AÑADIR" competía con el nombre del producto y el importe. El
+   nombre accesible sigue completo en aria-label. */
+/* Mismo lenguaje que los botones circulares de la cabecera (#siteHeader
+   .header-cart-btn / .header-account-btn / .burger): borde de 1px var(--line),
+   fondo blanco, SIN sombra, y grid + place-items para centrar.
+   NO usa .btn-cart: esa es la píldora ancha del panel, con sombra triple y sin
+   borde, que es justo lo contrario. */
+.compat-add{
+  display:grid;
+  place-items:center;
+  /* Ancla del check de confirmación, que se dibuja con ::after. */
+  position:relative;
+  /* Y, desde que la fila entera es un enlace, lo que mantiene al botón por encima de
+     la capa estirada del <a>: sin esto, pulsar el "+" o la flecha se iría a la ficha
+     en vez de añadir al carrito o abrir la burbuja. */
+  z-index:2;
+  box-sizing:border-box;
+  flex:0 0 38px;
+  width:38px;
+  height:38px;
+  min-width:38px;
+  max-width:38px;
+  min-height:38px;
+  max-height:38px;
+  padding:0;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:#fff;
+  color:#0f172a;
+  box-shadow:none;
+  cursor:pointer;
+  transition:background .22s ease, border-color .22s ease, color .22s ease;
+}
+
+.compat-add:hover{ background:rgba(15,23,42,.04); }
+
+.compat-add:focus-visible{
+  outline:none;
+  box-shadow:0 0 0 3px rgba(17,24,39,.12);
+}
+
+/* El "+" se dibuja con máscara, como el icono del carrito en .cta-col: un "+"
+   de texto se apoya en la métrica de la fuente y queda ópticamente alto dentro
+   del círculo. Con la máscara el centrado es geométrico y exacto. */
+.compat-add-plus{
+  display:block;
+  width:15px;
+  height:15px;
+  background-color:currentColor;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M12 5v14M5 12h14'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M12 5v14M5 12h14'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* Durante ~950 ms cart-runtime cambia el contenido por "Añadido" y marca
+   .is-added; sin esto el texto reventaría el círculo. Se ensancha solo mientras
+   dura el aviso y vuelve al círculo al restaurarse el icono. */
+/* Confirmación (~950 ms, mientras cart-runtime mantiene .is-added).
+
+   El botón NO cambia de tamaño: se queda el mismo círculo y solo vira el borde
+   a verde y entra el check. Ensancharlo para meter la palabra "Añadido" movía
+   el precio de al lado y daba un tirón en la fila.
+
+   cart-runtime sustituye el contenido del botón por el texto de
+   data-added-label, así que ese texto sigue ahí —lo lee un lector de pantalla—
+   pero se oculta visualmente y el check se dibuja con ::after. */
+.compat-add.is-added{
+  border-color:rgba(22,163,74,.5);
+  /* El fondo NO se tiñe de verde: se queda en el mismo gris del :hover. Verde
+     van solo el borde y el check. Se declara explícito en vez de dejar que lo
+     ponga :hover, porque en táctil no hay hover y el fondo saldría blanco. */
+  background:rgba(15,23,42,.04);
+  color:transparent;
+  font-size:0;
+}
+
+.compat-add.is-added::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  margin:auto;
+  width:16px;
+  height:16px;
+  background-color:#16a34a;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.5 12.5l5 5 10-11'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.5 12.5l5 5 10-11'/%3E%3C/svg%3E") center / contain no-repeat;
+  animation:compat-check .34s cubic-bezier(.2,.8,.3,1) both;
+}
+
+@keyframes compat-check{
+  from{ opacity:0; transform:scale(.5); }
+  60%{  opacity:1; transform:scale(1.12); }
+  to{   opacity:1; transform:scale(1); }
+}
+
+/* Quien pide menos movimiento recibe el check sin rebote, solo el fundido. */
+@media (prefers-reduced-motion:reduce){
+  .compat-add.is-added::after{ animation:none; }
+}
+
+/* El recuadro no se ajusta aquí en móvil: lo gobiernan las variables
+   --order-card-* de main.css, las mismas que checkout y pago. */
+@media (max-width:640px){
+  .compat-add{
+    flex-basis:34px;
+    width:34px; height:34px;
+    min-width:34px; max-width:34px;
+    min-height:34px; max-height:34px;
+  }
+  .compat-add-plus{ width:14px; height:14px; }
+  .compat-add.is-added::after{ width:15px; height:15px; }
+}
+
+/* Recuadro estilo botones AÑADIR/RESERVAR: fondo blanco, sin borde visible
+   (transparente) y la misma sombra triple, con esquinas redondeadas de tarjeta. */
 .color-variants{
-  margin-top:14px;
-  padding-top:14px;
-  border-top:1px solid rgba(15,23,42,.1);
+  margin:16px 0;
 }
 
 .panel-inner > .color-variants:first-child{
   margin-top:0;
-  padding-top:4px;
-  border-top:0;
 }
 
+/* La caja interna lleva el estilo botón AÑADIR/RESERVAR (fondo blanco, borde
+   transparente, misma sombra triple). El stock queda FUERA, como línea suelta. */
+.color-variants-box{
+  padding:14px 15px 15px;
+  border:1px solid transparent;
+  border-radius:18px;
+  background:#fff;
+  /* Sombra en grises neutros (no en el azulado rgba(15,23,42)): ajustada en vivo por
+     el usuario el 2026-07-31, halo exterior aclarado a #e8dede (gris cálido) el
+     2026-08-06. Misma geometría que .btn-cart/.btn-reserve. */
+  box-shadow:
+    0 0px 5px 2px rgb(232 222 222 / 18%),
+    0 1px 0 rgba(255,255,255,.94) inset,
+    0 14px 30px rgba(138,138,138,.08);
+}
+
+/* ── Bloque de opciones ÚNICO: canto de abajo recto ───────────────────────────
+   Cuando en el panel solo hay UN recuadro de opciones —da igual que sea el color,
+   la medida o el modelo— pierde las esquinas inferiores. Con DOS o más no cambia
+   nada: se siguen uniendo como hasta ahora (el de arriba recto abajo, el último
+   redondeado), y esas reglas viven en el <style> de cada ficha de manillar.
+
+   Se cuenta con :has() sobre el panel, que es quien sabe cuántos hay; una sección
+   no puede mirarse a sí misma para saber si tiene compañía. Los dos casos:
+     · solo color   → el panel NO tiene ninguna .size-variants
+     · solo medida  → el panel NO tiene .color-variants NI dos .size-variants seguidas
+   En un navegador sin :has() no pasa nada: se queda el recuadro redondeado de siempre. */
+.panel-inner:not(:has(.size-variants)) > .color-variants > .color-variants-box,
+.panel-inner:not(:has(.color-variants)):not(:has(.size-variants + .size-variants)) > .size-variants > .color-variants-box{
+  border-bottom-left-radius:0;
+  border-bottom-right-radius:0;
+}
+
+/* El renglón NO se parte nunca (nowrap). Antes envolvía, y con un nombre de color
+   largo —"Tornasol amarillo · 780 mm"— la píldora de stock caía a una segunda línea
+   y descuadraba el recuadro. Manda el stock: se queda siempre en su sitio, a la
+   derecha del renglón. Lo que cede es el nombre del color, que se recorta con puntos
+   suspensivos (ver .color-variants-list). */
 .color-variants-head{
   display:flex;
   align-items:center;
+  flex-wrap:nowrap;
   gap:8px;
   margin-bottom:10px;
   font-size:.67rem;
   line-height:1.2;
 }
 
+/* Ni la etiqueta ("COLOR:", "MEDIDA:") ni el stock se encogen: son el marco fijo. */
 .color-variants-label{
+  flex:0 0 auto;
   font-size:.67rem;
   font-weight:800;
   letter-spacing:.06em;
@@ -430,8 +667,19 @@ main{ padding-block:22px 32px; }
 }
 
 .color-variants-list{
-  display:inline-flex;
-  align-items:center;
+  /* display:block, no inline-flex: text-overflow:ellipsis solo recorta dentro de un
+     contenedor de bloque; en un flex el texto va a una caja anónima y no se recorta.
+     El centrado vertical lo da align-items del renglón, así que no se pierde nada. */
+  display:block;
+  /* La única pieza que cede ancho. min-width:0 es imprescindible: por defecto un
+     elemento flex no baja del ancho de su contenido y seguiría desbordando el
+     recuadro en vez de recortarse. */
+  flex:0 1 auto;
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
   width:fit-content;
   min-height:auto;
   padding:5px 10px;
@@ -446,143 +694,210 @@ main{ padding-block:22px 32px; }
   box-shadow:0 8px 18px rgba(15,23,42,.06);
 }
 
-.color-variants-grid{
-  display:grid;
-  grid-template-columns:repeat(3, 40px);
-  gap:12px;
-  margin-top:12px;
-}
-
-.product-m41-armored .color-variants-grid{
+/* Fila única SIEMPRE, con los colores que haya. Antes era un grid de 3 columnas fijas
+   y el 4º color caía a una segunda fila, así que las fichas con más de 3 colores
+   necesitaban una clase-hook en el <body> para pasar a flex. Ese hook era frágil: si el
+   HTML se actualiza y el CSS sigue cacheado (los .css van como immutable), el override
+   deja de enganchar y los círculos vuelven a partirse. Con flex en la regla base no hay
+   nada que recordar ni nada que se pueda desincronizar. El tamaño lo fija .color-variant
+   (40px, 38px en móvil), así que con 3 colores se ve exactamente igual que antes. */
+/* El carril de MEDIDA/MODELO es EL MISMO que el de color: mismas reglas, no una
+   copia. Antes vivía inline en las cuatro fichas de manillar con `flex-wrap:wrap`, y
+   con siete medidas se partía en dos filas —el 780 y el 800 caían solos abajo— en vez
+   de deslizarse. Comparte también el controlador de JS (colorVariantsRail en
+   product-enhancements.js), así que hereda las máscaras de los bordes, la rueda
+   horizontal y el "traer a la vista" de la opción activa. */
+.color-variants-grid,
+.size-variants-grid{
+  /* --rail-pad DEBE valer lo mismo que el padding lateral de .color-variants-box:
+     con ese número se sangra el carril hasta el canto del recuadro (margin negativo)
+     y se devuelve el aire por dentro (padding). Si cambia el del recuadro, cambia este. */
+  --rail-pad:15px;
+  /* --rail-air es el aire ARRIBA y ABAJO que necesita el anillo de .is-active
+     (box-shadow 0 0 0 4px) para no salir recortado: overflow-x:auto convierte el
+     overflow-y en auto, así que todo lo que se salga por arriba o por abajo se corta. */
+  --rail-air:12px;
   display:flex;
   flex-wrap:nowrap;
-  overflow:visible;
+  gap:12px;
+  /* Arriba se descuenta lo que ya aporta la etiqueta (margin-bottom:10px de
+     .color-variants-head) y el aire del carril, para que la separación acabe siendo
+     los 12px de siempre pase lo que pase con --rail-air. Abajo el margen negativo
+     compensa el padding entero: el aire extra del carril no engorda el recuadro. */
+  margin:calc(12px - 10px - var(--rail-air)) calc(var(--rail-pad) * -1) calc(var(--rail-air) * -1);
+  padding:var(--rail-air) var(--rail-pad);
+  /* Deslizar en horizontal. Con muchos colores (el manillar LUNJE tiene 10) la fila
+     no cabe en el recuadro, y como NO se parte en dos filas ni se encogen los
+     círculos, la única salida era desbordar. Ahora el dedo la desliza dentro del
+     propio recuadro y el círculo cortado del borde avisa de que hay más.
+     Cuando los colores caben —el caso normal— no hay nada que deslizar y se ve igual. */
+  overflow-x:auto;
+  overflow-y:hidden;
+  /* Que el gesto no se encadene: ni pasa la página al swipe-atrás de iOS ni arrastra
+     la galería al llegar al final del carril. */
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+  /* Sin barra: en móvil es flotante y estorba, y en escritorio una barra gris dentro
+     de una tarjeta blanca rompe el material. La pista de que hay más la dan el círculo
+     cortado y el degradado del borde (.is-rail, más abajo). */
+  scrollbar-width:none;
 }
 
-.color-variant{
-  --variant-swatch:#111;
-  position:relative;
-  display:block;
-  width:40px;
-  height:40px;
-  min-width:40px;
-  padding:0;
-  border-radius:999px;
-  border:1.5px solid rgba(15,23,42,.14);
-  background:var(--variant-swatch);
-  box-shadow:none;
-  text-indent:-9999px;
-  overflow:hidden;
-  cursor:pointer;
-  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+.color-variants-grid::-webkit-scrollbar,
+.size-variants-grid::-webkit-scrollbar{
+  display:none;
 }
 
-.color-variant:focus-visible{
-  outline:none;
-  box-shadow:0 0 0 4px rgba(17,24,39,.12), 0 3px 12px rgba(15,23,42,.08);
+/* Los círculos NUNCA se encogen para caber: el carril crece y se desliza. */
+.color-variants-grid > .color-variant,
+.size-variants-grid > .size-variant{
+  flex:0 0 auto;
 }
 
-.color-variant:hover{
-  transform:translateY(-1px) scale(1.05);
-  border-color:rgba(15,23,42,.24);
-  box-shadow:0 4px 12px rgba(15,23,42,.08);
+/* Salvo cuando la fila CABE entera: entonces las píldoras se reparten el ancho en vez
+   de dejar hueco muerto a la derecha (el WAKE y el LUNJE solo tienen dos medidas). La
+   clase la pone el mismo controlador que las de borde, después de medir. Es el mismo
+   gesto que ya hace la burbuja con .acc-pop-rail.is-fit. */
+.size-variants-grid.is-fit > .size-variant{
+  flex:1 1 auto;
 }
 
-.color-variant.is-active{
-  border-color:rgba(15,23,42,.50);
-  box-shadow:0 0 0 4px rgba(17,24,39,.08), 0 6px 16px rgba(15,23,42,.12), inset 0 0 0 1px rgba(255,255,255,.22);
+/* Degradado de los bordes por los que aún se puede seguir deslizando. Las clases las
+   pone product-enhancements.js (solo cuando el carril desborda de verdad); sin JS o
+   sin desbordamiento no hay máscara y el carril se ve exactamente como siempre. */
+.color-variants-grid.is-rail,
+.size-variants-grid.is-rail{
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 22px,#000 calc(100% - 22px),transparent 100%);
+          mask-image:linear-gradient(90deg,transparent 0,#000 22px,#000 calc(100% - 22px),transparent 100%);
 }
 
-.color-variant.is-active::after{
-  content:'';
-  position:absolute;
-  top:50%;
-  left:50%;
-  width:8px;
-  height:8px;
-  border-radius:999px;
-  background:#fff;
-  transform:translate(-50%, -50%);
-  box-shadow:0 0 0 1px rgba(15,23,42,.18);
-  pointer-events:none;
+.color-variants-grid.is-rail.is-rail-start,
+.size-variants-grid.is-rail.is-rail-start{
+  -webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 22px),transparent 100%);
+          mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 22px),transparent 100%);
 }
 
-.product-m41 .panel-inner > .stock-note--in:not(.stock-note--variant){
-  display:none !important;
+.color-variants-grid.is-rail.is-rail-end,
+.size-variants-grid.is-rail.is-rail-end{
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 22px,#000 100%);
+          mask-image:linear-gradient(90deg,transparent 0,#000 22px,#000 100%);
 }
 
-.product-m41 .cta-col > .stock-note--in{
-  display:none !important;
+/* ── Círculo de color ────────────────────────────────────────────────────────
+   `:not(.size-variant)` en todo el bloque porque hay UN selector de ficha que no
+   elige color sino VERSIÓN: el KUKIRIN G2 PRO (VMP / Normal). Sus dos opciones se
+   leen con su nombre, así que llevan la píldora de main.css (.size-variant) y a la
+   vez la clase .color-variant, que es la que buscan product-enhancements,
+   cart-runtime y global-assets-app para saber qué versión está elegida.
+
+   Con la guardia, la píldora se queda con SU diseño entero (fuente única en
+   main.css) y aquí no hay que repetir ni un color: sin ella, estas reglas —que
+   cargan después de main.css— le devolverían la geometría de círculo y le
+   pintarían un borde sólido encima de la diagonal. Solo se guarda lo que es
+   geometría o borde del círculo; el estado apagado de más abajo sirve a los dos. */
+/* El círculo de variante (geometría, hover, elegido, apagado) vive AHORA en
+   css/main.css, junto al de la burbuja: era el mismo diseño escrito dos veces.
+   Aquí se queda solo lo que es propio de la ficha: la caja, la cabecera y el
+   carril de más arriba. */
+
+/* El sello DGT (img.dgt-badge) mide 57px en main.css, MÁS ALTO que el precio
+   (.price-now = 38px, line-height:1), así que al mostrarse agranda la fila del precio;
+   en fichas que lo alternan (G2 PRO VMP/Normal) el precio "salta" al cambiar de versión.
+   Se quiere el sello a ~43px SIN que la fila crezca. Truco: la CAJA de layout se deja en
+   38px (= altura del precio .price-now, así la fila mide igual con o sin sello → sin salto
+   VMP/Normal), y el tamaño VISUAL se sube a ~43px con transform:scale (no ocupa layout, no
+   empuja la fila; el SVG escala nítido). Aplica a TODAS las fichas. Selector más específico
+   (.panel .price-row) que main.css (.panel .dgt-badge, incl. su media 640px) para ganar. */
+.panel .price-row .dgt-badge{
+  width:38px;
+  transform:scale(1.13);
 }
 
-.stock-note--variant{
-  display:flex;
+/* En DESKTOP hay más aire: se agranda el sello subiendo SOLO el scale (no afecta al
+   layout, así la fila no cambia de alto ni de ancho). La caja sigue en 38px. */
+@media (min-width:981px){
+  .panel .price-row .dgt-badge{
+    transform:scale(1.263); /* 38px * 1.263 ≈ 48px visual */
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   AVISO DE STOCK — píldora única de todas las fichas
+   ──────────────────────────────────────────────────────────────────────────
+   ESTE BLOQUE ES LA ÚNICA FUENTE DEL DISEÑO. Tocarlo aquí cambia el aviso de
+   las 39 fichas a la vez; no hay estilos de stock en ningún otro sitio.
+
+   Las reglas cuelgan de .stock-note, NO del contenedor, justo para eso: antes
+   colgaban del selector de color y las fichas sin colores (GT900, GT9, motos…)
+   se quedaban con otro diseño.
+
+   Reparto de responsabilidades:
+     · la ficha    → solo <p class="stock-note"></p>, sin decidir nada
+     · el catálogo → data/products.js dice el stock del producto
+     · el JS       → ensureStockNote() en js/global-assets-app.js lo coloca,
+                     le pone el texto y la clase de estado (--in / --out)
+     · este CSS    → cómo se ve
+
+   Material calcado del badge "Accesorios" de la cabecera: geometría y sombras
+   de .badge-min MÁS el fondo de .badge-acc, que es donde está el truco. El
+   cristal lo hace el gris translúcido rgba(30,40,55,.08) —no un blanco—: al
+   dejar pasar el fondo por debajo se lee como vidrio esmerilado. Con blanco
+   sobre un recuadro blanco no se vería nada.
+   ══════════════════════════════════════════════════════════════════════════ */
+.stock-note{
+  display:inline-flex;
   align-items:center;
-  flex-wrap:wrap;
-  gap:7px;
-  margin-bottom:18px;
-}
-
-.stock-note--variant::after{
-  content:'';
-  flex:0 0 calc(100% - 16px);
-  margin:12px 8px 0;
-  height:1px;
-  border-radius:999px;
-  background:rgba(27, 40, 68, 0.14);
-}
-
-.color-variant.is-disabled,
-.color-variant:disabled{
-  opacity:.46;
-  cursor:not-allowed;
-  transform:none;
-  box-shadow:0 1px 4px rgba(0,0,0,.03);
-}
-
-.color-variant.is-disabled:hover,
-.color-variant:disabled:hover{
-  transform:none;
-  border-color:rgba(15,23,42,.09);
-  box-shadow:0 1px 4px rgba(0,0,0,.03);
-}
-
-.pill{
-  position:relative;
+  gap:6px;
+  /* auto = pegada a la derecha de su fila, sea la del precio o la del color. */
+  margin:0 0 0 auto;
+  padding:6px 11px;
   border:0;
-  border-radius:0;
-  padding:14px 12px 12px 12px;
-  background:transparent;
-  box-shadow:none;
-  min-height:0;
-  display:flex;
-  flex-direction:column;
-  justify-content:flex-start;
-  overflow:hidden;
-  transition:none;
-  border-right:1px solid rgba(15,23,42,.1);
-}
-.pill:last-child{ border-right:0; }
-.pill:hover{ box-shadow:none; }
-
-.pill-label{
-  display:block;
-  font-weight:500;
-  font-size:9.5px;
-  letter-spacing:.08em;
+  border-radius:999px;
+  background:rgba(30,40,55,.08);
+  color:#4f5752;
+  font-size:.67rem;
+  font-weight:900;
+  letter-spacing:.06em;
   text-transform:uppercase;
-  color:rgba(17,24,39,.42);
-  line-height:1;
+  box-shadow:
+    0 -1px 3px rgba(15,23,42,.04),
+    0 1px 0 rgba(255,255,255,.95) inset,
+    0 10px 22px rgba(15,23,42,.07);
 }
 
-.pill-value{
-  display:block;
-  margin-top:5px;
-  font-weight:600;
-  font-size:14px;
-  line-height:1.2;
-  color:var(--ink);
-  letter-spacing:-.01em;
+/* El punto es lo que marca el estado de un vistazo; el cristal no cambia. */
+.stock-note::before{
+  content:'';
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  flex:0 0 auto;
+  background:#9aa3ab;
+}
+
+.stock-note--in::before{ background:#22c55e; }
+
+.stock-note--out{ color:#b91c1c; }
+.stock-note--out::before{ background:#ef4444; }
+
+/* ── Ajustes de SITIO. Solo posición: el diseño no se toca aquí. ────────── */
+
+/* Dentro del selector, la píldora es la pieza más alta del renglón: con margin
+   movería toda la fila, así que sube con transform. En la fila del precio no
+   hace falta, allí la altura la manda el precio. */
+.color-variants-head > .stock-note{
+  /* No se encoge ni se parte: es la pieza que manda en el renglón. Lo que cede
+     ancho cuando el nombre del color es largo es .color-variants-list. */
+  flex:0 0 auto;
+  white-space:nowrap;
+  transform:translateY(-3px);
+}
+
+/* En la fila del precio el sello DGT ya se empuja con margin-left:auto. Si la
+   píldora usara otro auto, el hueco libre se repartiría entre los dos y el sello
+   quedaría flotando en mitad de la fila; con margen fijo van pegados. */
+.panel .price-row:has(> .dgt-badge) > .stock-note{
+  margin-left:12px;
 }
 
 .cta-col{
@@ -592,6 +907,11 @@ main{ padding-block:22px 32px; }
   margin-top:18px;
 }
 
+/* OJO: regla COMPARTIDA por los TRES botones del panel. .btn-reserve y .btn-cart
+   redeclaran más abajo tamaño, tipografía y radio, pero .btn-main NO: para él esta
+   regla es la única fuente de border-radius, min-height, padding y tipografía.
+   No quitar de aquí declaraciones "que ya están repetidas abajo" mirando solo el
+   último selector del grupo — así se quedó COMPRAR AHORA sin su forma de píldora. */
 .btn-main,
 .btn-reserve,
 .btn-cart{
@@ -718,14 +1038,18 @@ main{ padding-block:22px 32px; }
     0 14px 30px rgba(15,23,42,.09);
 }
 
-.btn-cart:hover{
-  transform:none;
-  color:#0b0c0f;
-  background:#f8fafc;
-  box-shadow:
-    0 0px 5px 2px rgba(15,23,42,.045),
-    0 1px 0 rgba(255,255,255,.94) inset,
-    0 14px 30px rgba(15,23,42,.09);
+/* Solo en punteros reales: en táctil el :hover se queda pegado tras tocar,
+   justo mientras el botón muestra "Añadido". */
+@media (hover:hover){
+  .btn-cart:hover{
+    transform:none;
+    color:#0b0c0f;
+    background:#f8fafc;
+    box-shadow:
+      0 0px 5px 2px rgba(15,23,42,.045),
+      0 1px 0 rgba(255,255,255,.94) inset,
+      0 14px 30px rgba(15,23,42,.09);
+  }
 }
 
 .btn-cart:active{
@@ -845,55 +1169,10 @@ main{ padding-block:22px 32px; }
   }
 }
 
-.stock-note{
-  margin:0;
-  font-size:.82rem;
-  font-weight:800;
-}
-
-.stock-note--in,
-.stock-note--out{
-  grid-column:1 / -1;
-  order:3;
-  display:flex;
-  align-items:center;
-  gap:7px;
-  padding:6px 2px 0;
-  border:0;
-  border-radius:0;
-  background:none;
-  box-shadow:none;
-  width:auto;
-  margin-top:0;
-}
-
-.stock-note--in{
-  color:#15803d;
-}
-
-.stock-note--in::before{
-  content:'';
-  width:7px;
-  height:7px;
-  border-radius:50%;
-  background:#22c55e;
-  box-shadow:none;
-  flex:0 0 auto;
-}
-
-.stock-note--out{
-  color:#b91c1c;
-}
-
-.stock-note--out::before{
-  content:'';
-  width:7px;
-  height:7px;
-  border-radius:50%;
-  background:#ef4444;
-  box-shadow:none;
-  flex:0 0 auto;
-}
+/* El aviso de stock vivía también aquí, en un segundo juego de reglas que
+   peleaba con el de arriba por especificidad. Ahora está TODO en el bloque
+   "AVISO DE STOCK" de este mismo fichero. No devolver reglas de .stock-note
+   a esta zona: se vuelve a partir en dos verdades. */
 
 .shipping-box{
   margin-top:14px;
@@ -929,10 +1208,26 @@ main{ padding-block:22px 32px; }
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='1' y='3' width='15' height='13'/%3E%3Cpolygon points='16 8 20 8 23 11 23 16 16 16 16 8'/%3E%3Ccircle cx='5.5' cy='18.5' r='2.5'/%3E%3Ccircle cx='18.5' cy='18.5' r='2.5'/%3E%3C/svg%3E") center/contain no-repeat;
   mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='1' y='3' width='15' height='13'/%3E%3Cpolygon points='16 8 20 8 23 11 23 16 16 16 16 8'/%3E%3Ccircle cx='5.5' cy='18.5' r='2.5'/%3E%3Ccircle cx='18.5' cy='18.5' r='2.5'/%3E%3C/svg%3E") center/contain no-repeat;
 }
-.shipping-box > div:last-child::before{
+/* Reloj = PREPARACIÓN. Va por posición (2ª línea) y no por :last-child, porque desde
+   que el tránsito tiene línea propia la última ya no es esta. En las fichas sin
+   tránsito —solo dos líneas— la 2ª sigue siendo preparación, así que vale igual. */
+.shipping-box > div:nth-child(2)::before{
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpolyline points='12 6 12 12 16 14'/%3E%3C/svg%3E") center/contain no-repeat;
   mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpolyline points='12 6 12 12 16 14'/%3E%3C/svg%3E") center/contain no-repeat;
 }
+/* Calendario = TRÁNSITO, en su propia línea. Antes el tránsito iba pegado a la
+   preparación en el mismo renglón y en móvil no cabía: el "· Tránsito:" se quedaba
+   arriba y los días caían solos a la línea siguiente, sin icono y descolgados. Como el
+   texto de ese renglón son nodos sueltos dentro de un flex (cajas anónimas, que no se
+   pueden seleccionar ni llevan ::before), la única forma de darle icono propio era
+   partirlo en un <div class="ship-transit"> en las fichas.
+   El reloj se queda para la preparación (horas) y el calendario es para los días de
+   viaje: dos siluetas bien distintas a 14px. */
+.shipping-box > div.ship-transit::before{
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2'/%3E%3Cline x1='16' y1='2' x2='16' y2='6'/%3E%3Cline x1='8' y1='2' x2='8' y2='6'/%3E%3Cline x1='3' y1='10' x2='21' y2='10'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2'/%3E%3Cline x1='16' y1='2' x2='16' y2='6'/%3E%3Cline x1='8' y1='2' x2='8' y2='6'/%3E%3Cline x1='3' y1='10' x2='21' y2='10'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+
 .shipping-box strong{ color:rgba(17,24,39,.85); font-weight:900; }
 
 /* Estilo para tránsito express (M41, Bison GT) */
@@ -1036,6 +1331,62 @@ main{ padding-block:22px 32px; }
   width:100%;
   height:100%;
   border:0;
+}
+
+/* Facade del video (product-enhancements.js): miniatura + boton play. El
+   reproductor real (~1 MB) se carga solo al hacer clic. Hereda el recuadro
+   16/9 de .video-embed-frame -> sin saltos de layout. */
+.yt-facade{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  padding:0;
+  margin:0;
+  border:0;
+  cursor:pointer;
+  background:#0f172a;
+  display:block;
+  -webkit-tap-highlight-color:transparent;
+}
+.yt-facade-thumb{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.yt-facade-play{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:68px;
+  height:48px;
+  border-radius:14px;
+  background:rgba(0,0,0,.62);
+  box-shadow:0 6px 18px rgba(0,0,0,.35);
+  transition:background .16s ease, transform .16s ease;
+}
+.yt-facade-play::before{
+  content:"";
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-38%,-50%);
+  border-style:solid;
+  border-width:11px 0 11px 19px;
+  border-color:transparent transparent transparent #fff;
+}
+.yt-facade:hover .yt-facade-play,
+.yt-facade:focus-visible .yt-facade-play{
+  background:#f00;
+  transform:translate(-50%,-50%) scale(1.06);
+}
+.yt-facade:focus-visible{
+  outline:3px solid rgba(225,6,0,.5);
+  outline-offset:3px;
 }
 
 .spec-acc{
@@ -1185,14 +1536,6 @@ footer a:hover{ color:var(--ink); }
     margin-inline:0;
   }
 
-  .quick-specs{ gap:6px; }
-
-  .pill{
-    padding:10px 8px 10px 10px;
-  }
-
-  .pill-value{ font-size:13px; }
-
   .shipping-box{
     font-size:.8rem;
   }
@@ -1226,15 +1569,10 @@ footer a:hover{ color:var(--ink); }
   .video-embed-frame{ border-radius:16px; }
 
   .color-variants-grid{
-    grid-template-columns:repeat(3, 38px);
     gap:11px;
   }
 
-  .product-m41-armored .color-variants-grid{
-    flex-wrap:nowrap;
-  }
-
-  .color-variant{
+  .color-variant:not(.size-variant){
     width:38px;
     height:38px;
     min-width:38px;
@@ -1256,94 +1594,7 @@ footer a:hover{ color:var(--ink); }
    PRODUCT ENHANCEMENTS
    ======================================== */
 
-/* ── 1) Sticky Buy Bar (mobile) ── */
-.sticky-buy-bar{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  z-index:90;
-  background:rgba(255,255,255,.96);
-  backdrop-filter:blur(14px);
-  -webkit-backdrop-filter:blur(14px);
-  border-top:1px solid rgba(15,23,42,.08);
-  box-shadow:0 -8px 28px rgba(15,23,42,.08);
-  padding:10px clamp(14px,4vw,24px) calc(10px + env(safe-area-inset-bottom,0px));
-  transform:translateY(100%);
-  transition:transform .24s cubic-bezier(.4,0,.2,1);
-  pointer-events:none;
-}
-.sticky-buy-bar.is-visible{
-  transform:translateY(0);
-  pointer-events:auto;
-}
-.sticky-buy-inner{
-  max-width:660px;
-  margin:0 auto;
-  display:flex;
-  align-items:center;
-  gap:14px;
-}
-
-.sticky-buy-actions{
-  display:flex;
-  flex-direction:column;
-  align-items:flex-end;
-  gap:4px;
-}
-.sticky-buy-info{
-  flex:1 1 auto;
-  min-width:0;
-  display:flex;
-  flex-direction:column;
-  gap:1px;
-}
-.sticky-buy-name{
-  font-weight:900;
-  font-size:.82rem;
-  color:var(--ink,#111);
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  letter-spacing:.02em;
-}
-.sticky-buy-price{
-  font-weight:1000;
-  font-size:1.15rem;
-  color:var(--ink,#111);
-  letter-spacing:-.02em;
-}
-.sticky-buy-btn{
-  flex:0 0 auto;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:7px;
-  padding:11px 22px;
-  border-radius:999px;
-  border:1px solid #6b6c6c;
-  background:linear-gradient(180deg, #373737 0%, #111111 100%);
-  color:#fff;
-  font-weight:1000;
-  font-size:.82rem;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  text-decoration:none;
-  white-space:nowrap;
-  transition:transform .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
-}
-.sticky-buy-btn:hover{
-  transform:translateY(-1px);
-  border-color:#8f8f8f;
-  background:linear-gradient(180deg, #4a4a4a 0%, #171717 100%);
-}
-.sticky-buy-btn svg{ flex:0 0 auto; }
-
-@media (min-width:981px){
-  .sticky-buy-bar{ display:none !important; }
-}
-
-/* ── 2) Play Button on Gallery + Video Modal ── */
+/* ── 1) Play Button on Gallery + Video Modal ── */
 .gallery-play-btn{
   position:absolute;
   bottom:14px;
@@ -1437,51 +1688,9 @@ footer a:hover{ color:var(--ink); }
   border:0;
 }
 
-/* ── 3) 4-pill layout ── */
-.quick-specs--4{
-  grid-template-columns:repeat(4, 1fr);
-}
-@media (max-width:640px){
-  .quick-specs--4{
-    grid-template-columns:repeat(2, 1fr);
-  }
-}
-
-/* ── 4) Trust Badges ── */
-.trust-badges{
-  display:grid;
-  grid-template-columns:repeat(3, 1fr);
-  gap:6px;
-  margin-top:14px;
-  padding-top:14px;
-  border-top:1px solid rgba(15,23,42,.08);
-}
-.trust-badge{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:6px;
-  text-align:center;
-  padding:0 6px;
-  border-radius:0;
-  background:transparent;
-  border:0;
-  box-shadow:none;
-  transition:none;
-}
-.trust-badge:hover{ box-shadow:none; }
-.trust-badge svg{
-  color:rgba(17,24,39,.68);
-  flex:0 0 auto;
-}
-.trust-badge span{
-  font-weight:500;
-  font-size:.62rem;
-  letter-spacing:.04em;
-  text-transform:uppercase;
-  color:rgba(17,24,39,.48);
-  line-height:1.25;
-}
+/* Los SELLOS de confianza (.trust-badges / .ship-trust) se eliminaron: el de "Envío
+   gratis" repetía la primera línea del bloque de envío, que está justo encima con el
+   mismo icono, y los otros dos no añadían nada que la ficha no diga ya. */
 
 /* ── 5) Related Products ── */
 .related-products{
@@ -1558,3 +1767,55 @@ footer a:hover{ color:var(--ink); }
     font-size:.78rem;
   }
 }
+
+/* ─── Cambio de color en la ficha: fundido + escala ──────────────────
+   Al elegir otra variante, su foto entra fundiéndose y bajando de 103,5 %
+   a su tamaño, igual que la previsualización de las tarjetas del home.
+   La posición y el tamaño los fija el JS en píxeles, copiando el rectángulo
+   real de la foto. Aquí solo hay que NEUTRALIZAR las reglas de
+   .gallery-main img (width/height al 100 % y max-width:80 % en escritorio),
+   que si no redimensionarían la capa y el patinete daría un salto de tamaño
+   al terminar el fundido. Por eso el selector incluye «img»: necesita ganar
+   en especificidad. object-fit y border-radius sí se heredan a propósito. */
+.gallery-main img.gallery-variant-fade{
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  opacity: 0;
+  transform: scale(1.035);
+  transition: opacity 190ms cubic-bezier(.2,.7,.3,1), transform 190ms cubic-bezier(.2,.7,.3,1);
+  pointer-events: none;
+  z-index: 2;
+}
+.gallery-main img.gallery-variant-fade.is-on{
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* En móvil el gesto es mucho más lento de percibir: el dedo toca el color en la
+   mitad inferior y la foto queda arriba, medio fuera de pantalla. Para cuando la
+   mirada sube, una animación de 190 ms ya ha terminado y el cambio parece seco.
+   Se alarga a 420 ms para que siga en marcha cuando el ojo llega a la foto.
+   (El JS lee esta duración del CSS, así que no hay que tocarla en dos sitios.) */
+@media (max-width:768px){
+  .gallery-main img.gallery-variant-fade{
+    transition: opacity 420ms cubic-bezier(.2,.7,.3,1), transform 420ms cubic-bezier(.2,.7,.3,1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .gallery-main img.gallery-variant-fade{ transition: none; transform: none; }
+  .gallery-main img.gallery-variant-fade.is-on{ transform: none; }
+}
+
+/* La BURBUJA DE VARIANTES (.acc-pop*) ya no está aquí: se mudó a main.css cuando
+   dejó de ser cosa solo de las fichas. Ahora la abren también las tarjetas del
+   home, y el home no carga esta hoja. Con ella se fue la regla de la píldora
+   (.acc-pop-pill, .size-variant), así que el selector de medida de los manillares
+   se pinta desde main.css; el CARRIL sí se queda aquí, junto al de colores. */
+

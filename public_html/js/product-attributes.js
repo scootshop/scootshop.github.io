@@ -224,21 +224,62 @@
   }
 
   /* Imágenes de la selección: identificadores explícitos, nunca images[0]/images[1].
-     Si la opción tiene fotos por combinación (`imagesBy`), mandan esas. */
+     Si la opción tiene fotos por combinación (`imagesBy`), mandan esas.
+
+     La comparación de la clave del OTRO eje es laxa (minúsculas) porque `imagesBy` se
+     escribe a mano en el catálogo: `{ '720': 3 }` frente a una opción `720`, o
+     `{ 'Negro': 2 }` frente a `negro`. Antes cada consumidor lo resolvía a su manera y
+     el que no bajaba a minúsculas se quedaba sin foto por combinación. */
   function imagenesDe(producto, seleccion) {
     var todos = ejes(producto);
     for (var i = 0; i < todos.length; i++) {
       var op = seleccion[todos[i].key];
       if (!op) continue;
       if (op.imagesBy) {
+        var porClave = {};
+        for (var k in op.imagesBy) {
+          if (Object.prototype.hasOwnProperty.call(op.imagesBy, k)) porClave[texto(k).toLowerCase()] = op.imagesBy[k];
+        }
         for (var j = 0; j < todos.length; j++) {
+          if (todos[j].key === todos[i].key) continue;
           var otra = seleccion[todos[j].key];
-          if (otra && op.imagesBy[otra.key] !== undefined) return [].concat(op.imagesBy[otra.key]);
+          var clave = otra ? texto(otra.key).toLowerCase() : '';
+          if (clave && porClave[clave] !== undefined) return [].concat(porClave[clave]);
         }
       }
       if (op.images && op.images.length) return op.images.slice();
     }
     return [];
+  }
+
+  /* ── DE IDENTIFICADOR A FOTO ──────────────────────────────────────────────────
+     El catálogo asocia fotos por IDENTIFICADOR (`images: [3, 4]`, `imagesBy`), nunca
+     por posición. Convertir ese identificador en una URL es lo único que faltaba por
+     centralizar: lo hacían por su cuenta la ficha y la burbuja, cada una con su copia
+     de la convención `{href}/img/{n}.webp` y con criterios distintos para `imagesBy`.
+
+     Un número es un índice de la galería del producto; cualquier otra cosa se toma
+     como ruta ya escrita, para que un producto pueda dar rutas explícitas sin que
+     nadie tenga que cambiar código. Sin selección resoluble, la foto del producto. */
+  function fotoDe(producto, seleccion) {
+    if (!producto) return '';
+    var ids = imagenesDe(producto, seleccion || {});
+    var id = ids.length ? ids[0] : '';
+    if (id === '' || id === null || id === undefined) return texto(producto.image);
+
+    var comoTexto = texto(id);
+    if (!/^\d+$/.test(comoTexto)) return comoTexto;
+
+    // Índice: si el producto declara galería, manda ella (respeta rutas propias).
+    var galeria = Array.isArray(producto.gallery) ? producto.gallery : [];
+    var pos = parseInt(comoTexto, 10);
+    if (galeria.length) {
+      var media = galeria[pos - 1];
+      if (media && media.src) return texto(media.src);
+      return texto(producto.image);
+    }
+    var base = texto(producto.href).replace(/\/+$/, '');
+    return base ? (base + '/img/' + pos + '.webp') : texto(producto.image);
   }
 
   /* ── PRESENTACIÓN DE UNA LÍNEA ───────────────────────────────────────────────
@@ -488,6 +529,8 @@
     claveDe: claveDe,
     etiquetaDe: etiquetaDeSeleccion,
     imagenesDe: imagenesDe,
+    // La foto de una selección, ya como URL. Única convención del sistema.
+    fotoDe: fotoDe,
     atributosDe: seleccionAObjeto,
     // Presentación: la única puerta para escribir las variantes de una línea.
     describir: describir,

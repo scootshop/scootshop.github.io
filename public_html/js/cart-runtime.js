@@ -329,7 +329,10 @@
       if (!colorKey && !colorLabel) return null;
       return {
         color: colorKey || colorLabel,
-        colorLabel: colorLabel || colorKey || 'Color'
+        // Nunca "Color" a pelo: si no hay etiqueta se usa la clave, que al menos es
+        // lo que el cliente eligió. Inventar la palabra metía un rótulo falso en la
+        // línea de un producto que se elige por modelo o por medida.
+        colorLabel: colorLabel || colorKey || ''
       };
     } catch (_) {
       return null;

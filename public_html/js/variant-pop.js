@@ -133,33 +133,21 @@
      es lo que usa la vista previa al pasar el ratón. Sin él responde por el estado.
      Recorre los ejes en orden y se queda con la primera foto que encuentre: primero
      la del acabado EN esa medida (imagesBy), si la ficha las tiene separadas. */
+  /* La foto de lo elegido —o de lo que se está señalando— la resuelve el NÚCLEO.
+     Aquí vivía una copia de esa lógica: recorría los ejes, miraba `imagesBy`, luego
+     `images`, y construía a mano `{href}/img/{n}.webp`. La ficha tenía otra copia con
+     criterios distintos, así que la misma opción podía dar dos fotos según quién
+     preguntara. Ahora la convención existe en un solo sitio. */
   function fotoElegida(alt) {
     var seleccion = {};
     for (var k in estado.seleccion) {
       if (Object.prototype.hasOwnProperty.call(estado.seleccion, k)) seleccion[k] = estado.seleccion[k];
     }
     if (alt && alt.eje) seleccion[alt.eje] = alt.opcion;
-
-    var indice = '';
-    estado.ejes.forEach(function (e) {
-      if (indice) return;
-      var op = seleccion[e.key];
-      if (!op) return;
-      if (op.imagesBy) {
-        estado.ejes.forEach(function (otro) {
-          if (indice || otro.key === e.key) return;
-          var elegidaOtro = seleccion[otro.key];
-          if (elegidaOtro && op.imagesBy[String(elegidaOtro.key).toLowerCase()] !== undefined) {
-            indice = op.imagesBy[String(elegidaOtro.key).toLowerCase()];
-          }
-        });
-      }
-      if (!indice && op.img) indice = op.img;
-      if (!indice && Array.isArray(op.images) && op.images.length) indice = op.images[0];
-    });
-    var base = String(estado.producto.href || '').replace(/\/+$/, '');
-    if (!indice || !base) return estado.producto.image || '';
-    return base + '/img/' + indice + '.webp';
+    if (window.SS_ATTRS && typeof window.SS_ATTRS.fotoDe === 'function') {
+      return window.SS_ATTRS.fotoDe(estado.producto, seleccion) || (estado.producto.image || '');
+    }
+    return estado.producto.image || '';
   }
 
   /* ── Carriles: mismo gesto que el selector de color de la ficha ─────────── */

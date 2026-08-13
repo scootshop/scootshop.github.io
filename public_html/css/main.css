@@ -62,7 +62,15 @@
   position:relative;
 }
 
-#siteHeader nav.menu a,
+/* OJO al `>`: estos selectores solo pueden alcanzar los enlaces DIRECTOS de la
+   barra. Dentro de .menu-products-host cuelga el desplegable de Productos, que
+   contiene el mismo panel .mm-link que el cajón móvil; con un descendiente
+   suelto, estas reglas le ganaban por especificidad (id + clase) y lo dejaban
+   en mayúsculas, peso 800 y forma de píldora. El enlace estático de reserva del
+   host sí se lista aparte para que conserve el aspecto de la barra mientras el
+   JS no ha montado el desplegable. */
+#siteHeader nav.menu > a,
+#siteHeader .menu-products-host > a,
 #siteHeader .pc-products-trigger{
   text-decoration:none;
   color:#0f172a;
@@ -83,22 +91,24 @@
   cursor:pointer;
 }
 
-#siteHeader nav.menu a[aria-current="page"]{
+#siteHeader nav.menu > a[aria-current="page"]{
   background:var(--primary-soft);
   color:var(--primary);
 }
 
-#siteHeader nav.menu a:hover,
+#siteHeader nav.menu > a:hover,
+#siteHeader .menu-products-host > a:hover,
 #siteHeader .pc-products-trigger:hover,
 #siteHeader .menu-products-host.is-open .pc-products-trigger{
   background:rgba(15,23,42,.06);
 }
 
-#siteHeader nav.menu a[aria-current="page"]:hover{
+#siteHeader nav.menu > a[aria-current="page"]:hover{
   background:rgba(209,0,0,.12);
 }
 
-#siteHeader nav.menu a i{ opacity:.9; }
+#siteHeader nav.menu > a i,
+#siteHeader .menu-products-host > a i{ opacity:.9; }
 
 #siteHeader .pc-products-caret{
   font-size:.82em;
@@ -113,8 +123,10 @@
   position:absolute;
   top:calc(100% + 10px);
   left:0;
-  width:320px;
-  padding:12px;
+  width:min(360px, calc(100vw - 32px));
+  max-height:min(72vh, 640px);
+  overflow-y:auto;
+  padding:14px;
   border:1px solid rgba(15,23,42,.08);
   border-radius:18px;
   background:linear-gradient(180deg, rgba(255,255,255,.99) 0%, rgba(248,250,252,.98) 100%);
@@ -122,124 +134,30 @@
   backdrop-filter:blur(14px);
   transform-origin:top left;
   animation:pcProductsMenuIn .18s cubic-bezier(.22, 1, .36, 1);
+
+  /* nav.menu impone versalitas, peso 800 y nowrap a todo lo que cuelga de ella,
+     y eso se hereda dentro del panel. Se neutraliza aquí para que manden las
+     reglas de .mm-* igual que en el móvil. */
+  font-size:1rem;
+  font-weight:400;
+  text-transform:none;
+  letter-spacing:normal;
+  white-space:normal;
 }
 
 #siteHeader .pc-products-panel[hidden]{
   display:none !important;
 }
 
-#siteHeader .pc-products-title{
-  padding:2px 8px 10px;
-  color:rgba(15,23,42,.46);
-  font-size:.68rem;
-  font-weight:800;
-  letter-spacing:.1em;
-  text-transform:uppercase;
-}
-
-#siteHeader .pc-products-groups{
-  display:grid;
-  gap:8px;
-}
-
-#siteHeader .pc-products-category{
-  display:grid;
-  gap:8px;
-}
-
-#siteHeader .pc-products-category + .pc-products-category{
-  margin-top:4px;
-}
-
-#siteHeader .pc-products-category-title{
-  padding:2px 8px 0;
-  color:rgba(15,23,42,.52);
-  font-size:.7rem;
-  font-weight:900;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-}
-
-#siteHeader .pc-products-group{
-  display:grid;
-  gap:0;
-  padding:4px;
-  border:1px solid rgba(15,23,42,.05);
-  border-radius:14px;
-  background:rgba(255,255,255,.72);
-  transition:border-color .16s ease, background .16s ease, box-shadow .18s ease;
-}
-
-#siteHeader .pc-series-toggle{
-  width:100%;
-  border:0;
-  background:transparent;
-  color:#0f172a;
-  cursor:pointer;
-  padding:10px 12px;
-  border-radius:10px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  font-family:var(--ui);
-  font-size:.82rem;
-  font-weight:800;
-  letter-spacing:.02em;
-  text-transform:uppercase;
-}
-
-#siteHeader .pc-series-toggle:hover,
-#siteHeader .pc-products-group.is-open .pc-series-toggle{
-  background:rgba(15,23,42,.05);
-  color:#0f172a;
-}
-
-#siteHeader .pc-products-group.is-open{
-  background:#fff;
-  border-color:rgba(15,23,42,.09);
-  box-shadow:0 10px 22px rgba(15,23,42,.06);
-}
-
-#siteHeader .pc-products-group.is-open .pc-series-toggle{
-  box-shadow:inset 0 -1px 0 rgba(15,23,42,.06);
-}
-
-#siteHeader .pc-series-toggle span{
-  line-height:1.2;
-}
-
-#siteHeader .pc-series-toggle i{
-  opacity:.45;
-}
-
-#siteHeader .pc-products-group.is-open .pc-series-toggle i{
-  opacity:.7;
-}
-
-#siteHeader .pc-series-list{
-  display:grid;
-  gap:4px;
-  padding:6px 6px 4px;
-}
-
-#siteHeader .pc-series-list[hidden]{
-  display:none !important;
-}
-
-#siteHeader .pc-series-list a{
-  display:block;
-  padding:8px 10px;
-  border-radius:10px;
-  font-size:.8rem;
-  font-weight:700;
-  color:rgba(15,23,42,.78);
-  transition:background .16s ease, color .16s ease, transform .16s ease;
-}
-
-#siteHeader .pc-series-list a:hover{
-  background:rgba(15,23,42,.045);
-  color:#0f172a;
-  transform:translateX(2px);
+/* Dentro del desplegable va EXACTAMENTE el mismo panel que en el cajón móvil:
+   el markup .mm-sub-shell que pinta js/products-menu.js, con el CSS de
+   partials.mobile-menu.css. Aquí solo se ajusta el contenedor — el relleno
+   inferior que el móvil necesita para su scroll sobra en un dropdown.
+   NO redefinas .mm-nav, .mm-link ni .mm-sub-title aquí: en cuanto lo hagas, las
+   dos superficies vuelven a divergir, que es justo lo que se quería evitar. */
+#siteHeader .pc-products-panel .mm-sub-shell{
+  gap:16px;
+  padding:0;
 }
 
 @keyframes pcProductsMenuIn{
@@ -250,8 +168,7 @@
   to{
     opacity:1;
     transform:translateY(0) scale(1);
-  }
-}
+  }}
 
 #siteHeader .burger{
   display:none;
@@ -375,216 +292,22 @@
   background:rgba(15,23,42,.04);
 }
 
-.account-quick-backdrop{
-  position:fixed;
-  inset:0;
-  z-index:168;
-  background:rgba(2,8,23,.34);
-  backdrop-filter:blur(2px);
-}
+/* Aquí estaba el avatar del panel rápido de cuenta (.account-quick-avatar*). Lo pintaba
+   el renderAvatar() de auth-ui.js, que ya no existe —no lo llamaba nadie—, así que estas
+   tres reglas se quedaron sin nada a lo que aplicarse. El avatar de /cuenta lo pinta
+   account.js con sus propias clases. */
 
-.account-quick-panel{
-  position:fixed;
-  top:calc(var(--header-h,72px) + 14px);
-  right:16px;
-  z-index:169;
-  width:min(392px, calc(100vw - 32px));
-  max-height:min(78vh, 760px);
-  overflow:auto;
-  border-radius:28px;
-  border:1px solid rgba(15,23,42,.08);
-  background:linear-gradient(180deg, rgba(255,255,255,.98), rgba(248,250,252,.98));
-  box-shadow:0 24px 80px rgba(15,23,42,.16);
-  color:#0f172a;
-}
-
-.account-quick-head{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap:14px;
-  padding:18px 18px 14px;
-  border-bottom:1px solid rgba(15,23,42,.06);
-}
-
-.account-quick-kicker{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  margin-bottom:6px;
-  font-size:.72rem;
-  font-weight:800;
-  letter-spacing:.12em;
-  text-transform:uppercase;
-  color:#b91c1c;
-}
-
-.account-quick-head h2{
-  margin:0;
-  font-family:"Russo One", "Plus Jakarta Sans", sans-serif;
-  font-size:1.28rem;
-  line-height:1.05;
-}
-
-.account-quick-close{
-  width:38px;
-  height:38px;
-  border-radius:999px;
-  border:1px solid rgba(15,23,42,.08);
-  background:#fff;
-  color:#0f172a;
-  cursor:pointer;
-}
-
-.account-quick-body{
-  padding:16px 18px 18px;
-  display:grid;
-  gap:12px;
-}
-
-.account-quick-status{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:14px;
-  border-radius:22px;
-  background:linear-gradient(135deg, rgba(15,23,42,.96), rgba(30,41,59,.92));
-  color:#fff;
-}
-
-.account-quick-avatar,
-.account-quick-avatar-img,
-.account-quick-avatar-fallback{
-  width:54px;
-  height:54px;
-  border-radius:18px;
-  flex:0 0 auto;
-}
-
-.account-quick-avatar-img{
-  object-fit:cover;
-  display:block;
-}
-
-.account-quick-avatar-fallback{
-  display:grid;
-  place-items:center;
-  background:rgba(255,255,255,.12);
-  border:1px solid rgba(255,255,255,.12);
-  font-weight:900;
-  font-size:1.1rem;
-}
-
-.account-quick-meta{
-  min-width:0;
-  display:grid;
-  gap:2px;
-}
-
-.account-quick-state{
-  display:inline-flex;
-  width:fit-content;
-  padding:5px 9px;
-  border-radius:999px;
-  background:rgba(255,255,255,.12);
-  color:#fff;
-  font-size:.7rem;
-  font-weight:800;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-}
-
-.account-quick-meta strong{
-  font-size:1rem;
-  line-height:1.2;
-}
-
-.account-quick-meta span:last-child{
-  color:rgba(255,255,255,.74);
-  font-size:.88rem;
-  line-height:1.35;
-}
-
-.account-quick-status-logout{
-  margin-top:8px;
-  width:fit-content;
-  border:1px solid rgba(255,255,255,.2);
-  background:rgba(255,255,255,.08);
-  color:#fff;
-  border-radius:999px;
-  min-height:34px;
-  padding:0 12px;
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  font-size:.78rem;
-  font-weight:800;
-  letter-spacing:.02em;
-  cursor:pointer;
-}
-
-.account-quick-status-logout i{
-  font-size:.82rem;
-}
-
-.account-quick-copy,
-.account-quick-card p,
-.account-quick-message,
-.account-quick-orders-state{
+.account-quick-message{
   margin:0;
   color:#475569;
   line-height:1.55;
 }
 
-.account-quick-copy{
-  font-size:.97rem;
-  color:#334155;
-}
-
 .account-quick-message.is-error{ color:#b91c1c; }
 .account-quick-message.is-success{ color:#166534; }
 
-.account-quick-card{
-  padding:16px;
-  border-radius:22px;
-  background:rgba(255,255,255,.86);
-  border:1px solid rgba(15,23,42,.08);
-}
-
-.account-quick-card strong{
-  display:block;
-  margin-bottom:4px;
-  font-size:1rem;
-}
-
-.account-quick-google{
-  margin-top:8px;
-  min-height:44px;
-}
-
 .account-quick-message:empty{
   display:none;
-}
-
-.account-quick-orders-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  margin-bottom:10px;
-}
-
-.account-quick-orders-head a{
-  color:#b91c1c;
-  font-size:.82rem;
-  font-weight:800;
-  text-decoration:none;
-}
-
-.account-quick-orders{
-  display:grid;
-  gap:10px;
-  margin-top:10px;
 }
 
 .account-quick-order{
@@ -626,36 +349,6 @@
   font-size:.95rem;
 }
 
-.account-quick-actions{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  margin-top:14px;
-}
-
-.account-quick-link{
-  appearance:none;
-  border:1px solid rgba(15,23,42,.12);
-  background:#fff;
-  border-radius:999px;
-  padding:11px 14px;
-  font:inherit;
-  font-weight:800;
-  text-decoration:none;
-  color:#0f172a;
-  cursor:pointer;
-}
-
-.account-quick-link--primary{
-  background:linear-gradient(135deg, #b91c1c 0%, #0f172a 100%);
-  color:#fff;
-  border-color:transparent;
-}
-
-.account-quick-link i{
-  margin-right:6px;
-}
-
 #siteHeader .cart-badge{
   position:absolute;
   top:-5px;
@@ -677,10 +370,24 @@
   text-align:center;
 }
 
+/* El contexto de apilamiento del menú se decide AQUÍ, y tiene que estar por
+   encima de todo lo demás del sitio.
+   Historia de los dos fallos, para no repetirlos:
+   1) Con `z-index:79` este contenedor creaba un contexto propio y encerraba
+      dentro al menú: por alto que fuese su z-index (9999) no podía superar a
+      #siteHeader (z-index:80), hermano suyo a nivel de <body>. El menú salía
+      DEBAJO del header y el backdrop no lo oscurecía.
+   2) Con `z-index:auto` tampoco vale: un elemento posicionado sin z-index pinta
+      a sus descendientes posicionados dentro de su propio pase (paso 8 del
+      algoritmo de pintado), o sea ANTES que cualquier hermano con z-index
+      positivo. Así, .home-category-strip (sticky, z-index:40) tapaba al menú
+      aunque este declarase 171.
+   La referencia de valores en uso: header 80, carrito 160/161,
+   skip-link y tooltip DGT 200. 300 los supera a todos. */
 #mobile-menu-slot{
   position:fixed;
   inset:0;
-  z-index:79;
+  z-index:300;
   pointer-events:none;
 }
 
@@ -693,27 +400,41 @@
   #siteHeader .burger{ display:grid; }
   #siteHeader .header-cart-btn{ display:grid; }
   #siteHeader .header-actions{ margin-left:auto; }
-  #siteHeader .brand{ min-width:auto; }
-  .account-quick-panel{
-    right:12px;
-    left:12px;
-    width:auto;
-  }
-}
+  #siteHeader .brand{ min-width:auto; }}
 
-html.ss-cart-open,
-html.ss-cart-open body{
-  overflow:hidden;
-}
+/* NO añadir aquí un bloqueo de scroll para el carrito abierto (overflow:hidden
+   sobre html/body, o body en position:fixed). Se probaron los dos y ambos
+   fallan en esta página: con html{height:100%} el navegador resetea el
+   desplazamiento a 0 y salta al inicio, y fijar el body despega los
+   position:sticky (la barra de categorías y series del home desaparece).
+   El bloqueo se hace por eventos en cart-runtime.js, sin tocar el layout. */
 
 .ss-cart-backdrop{
   position:fixed;
   inset:0;
   background:rgba(15,23,42,.32);
-  backdrop-filter:blur(3px);
   opacity:0;
-  transition:opacity .18s ease;
+  transition:opacity .22s ease-out;
   z-index:160;
+  /* El backdrop está en display:none con el carrito cerrado, así que este
+     will-change no cuesta nada en reposo: solo asegura que la capa ya existe
+     cuando arranca el fundido, en vez de promocionarla en el primer frame. */
+  will-change:opacity;
+}
+
+/* Desenfoque del fondo, IGUAL en móvil y en escritorio.
+   Se probó a limitarlo a ≥461px porque con el carrito abierto el panel
+   (min(460px,100vw)) tapa el viewport entero en móvil y el backdrop queda a
+   0 px visibles. Pero SÍ se ve durante el deslizamiento de entrada y de salida,
+   y ahí la diferencia canta: la franja de página que asoma quedaba nítida
+   mientras en escritorio salía difuminada. Decisión del usuario tras verlo en
+   un móvil real: prima que se vea igual en los dos sitios.
+   El prefijo -webkit- no es decorativo: Safari lo exigió hasta la versión 18,
+   así que sin él los iPhone algo antiguos no mostraban NINGÚN desenfoque —
+   probablemente parte de lo que se veía mal. */
+.ss-cart-backdrop{
+  -webkit-backdrop-filter:blur(3px);
+  backdrop-filter:blur(3px);
 }
 
 .ss-cart-backdrop.is-open{
@@ -731,14 +452,28 @@ html.ss-cart-open body{
   border-left:1px solid rgba(15,23,42,.1);
   box-shadow:-18px 0 40px rgba(15,23,42,.12);
   transform:translateX(102%);
-  transition:transform .2s ease;
+  /* Curva de deceleración (arranca rápido, frena suave): a igualdad de
+     duración se percibe más ágil que un `ease` simétrico. */
+  transition:transform .28s cubic-bezier(.32,.72,0,1);
   display:grid;
   grid-template-rows:auto 1fr auto;
   z-index:161;
+  will-change:transform;
+  /* El panel es un mundo aparte: lo que pase dentro (re-render de la lista,
+     cambio de cantidades) no puede invalidar el layout de la página. NO usar
+     `paint` aquí: recortaría el box-shadow del borde izquierdo. */
+  contain:layout style;
 }
 
 .ss-cart-panel.is-open{
   transform:translateX(0);
+}
+
+@media (prefers-reduced-motion:reduce){
+  .ss-cart-panel,
+  .ss-cart-backdrop{
+    transition-duration:.01ms;
+  }
 }
 
 .ss-cart-panel.is-empty .ss-cart-foot{
@@ -794,7 +529,6 @@ html.ss-cart-open body{
   justify-content:space-between;
   position:relative;
   background:#fff;
-  backdrop-filter:none;
   padding-top:calc(16px + env(safe-area-inset-top, 0px));
   z-index:1;
 }
@@ -813,39 +547,44 @@ html.ss-cart-open body{
   color:#475569;
 }
 
+/* Mismo diseño que los botones de cuenta/carrito del header
+   (#siteHeader .header-cart-btn): círculo de 44px, fondo blanco,
+   borde --line y hover gris suave, sin desplazamiento. */
 .ss-cart-close{
-  border:1px solid rgba(15,23,42,.1);
-  background:rgba(15,23,42,.02);
-  color:#344054;
-  width:38px;
-  height:38px;
+  border:1px solid var(--line);
+  background:#fff;
+  color:#0f172a;
+  width:44px;
+  height:44px;
   border-radius:999px;
   cursor:pointer;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  transition:background .16s ease,border-color .16s ease,transform .16s ease,color .16s ease;
+  display:grid;
+  place-items:center;
+  transition:background .16s ease;
 }
 
 .ss-cart-close i{
-  font-size:15px;
+  font-size:16px;
   line-height:1;
 }
 
 .ss-cart-close:hover{
-  background:rgba(15,23,42,.07);
-  border-color:rgba(15,23,42,.18);
-  color:#111827;
-  transform:translateX(1px);
+  background:rgba(15,23,42,.04);
 }
 
 .ss-cart-body{
   overflow:auto;
-  -webkit-overflow-scrolling:touch;
+  /* Corta el encadenado del scroll a la página: este es el único elemento del
+     carrito que scrollea, así que la propiedad tiene que vivir AQUÍ (en el
+     panel, que es overflow:hidden, no hace nada). */
+  overscroll-behavior:contain;
   padding:12px 20px 20px;
   display:flex;
   flex-direction:column;
   gap:10px;
+  /* Aísla el scroll de la lista: el navegador no vuelve a calcular ni a
+     repintar nada de fuera al desplazarla. */
+  contain:layout style;
 }
 
 .ss-cart-empty{
@@ -862,11 +601,8 @@ html.ss-cart-open body{
 }
 
 .ss-cart-empty-icon{
-  width:auto;
-  height:auto;
   display:grid;
   place-items:center;
-  background:transparent;
   color:#0f172a;
   margin-bottom:2px;
 }
@@ -922,28 +658,17 @@ html.ss-cart-open body{
   border:0;
   border-radius:20px;
   background:#fff;
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.9) inset,
-    0 18px 44px rgba(15,23,42,.08),
-    0 6px 18px rgba(15,23,42,.04);
-  transition:border-color .16s ease, box-shadow .16s ease, transform .16s ease, background .16s ease;
+  /* Una sombra en vez de tres: cada capa de sombra es un desenfoque más que
+     pintar por tarjeta, y con 44px de blur se nota al desplazar la lista.
+     El resultado visual es prácticamente el mismo. */
+  box-shadow:0 8px 22px rgba(15,23,42,.08);
 }
 
-.ss-cart-item:hover{
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.94) inset,
-    0 24px 56px rgba(15,23,42,.11),
-    0 10px 24px rgba(15,23,42,.05);
-  transform:translateY(-2px);
-  background:linear-gradient(180deg, rgba(255,255,255,.99) 0%, rgba(244,247,251,.97) 100%);
-}
-
-.ss-cart-item.is-removing{
-  pointer-events:none;
-  opacity:0;
-  transform:translateY(10px) scale(.985);
-  filter:saturate(.92);
-}
+/* La línea del carrito NO reacciona al ratón: ni se levanta, ni le crece la sombra, ni
+   cambia de color. La tarjeta entera no es pulsable —lo pulsable son la ×, el − y el +,
+   que sí tienen su propio hover—, así que el relieve al pasar por encima prometía un
+   clic que no existe. Por eso tampoco hay ya `transition` en la regla de arriba: solo
+   estaba para animar ese hover. */
 
 .ss-cart-thumb,
 .ss-cart-thumb img,
@@ -979,8 +704,19 @@ html.ss-cart-open body{
   padding-right:38px;
 }
 
+/* Una sola línea SIEMPRE, con puntos suspensivos si no cabe ("M41 TANK ARMOR…").
+   Antes envolvía y un nombre largo empujaba hacia abajo el resto de la fila, así que
+   dos productos seguidos podían tener alturas distintas y la lista se veía irregular.
+   El `min-width:0` que lo hace posible ya está en .ss-cart-meta: sin él, el mínimo de
+   una columna de rejilla es el min-content de su contenido —con nowrap, la frase
+   entera— y el nombre desbordaría el cajón en vez de recortarse. */
 .ss-cart-name{
   display:block;
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
   color:#111827;
   text-decoration:none;
   font-weight:800;
@@ -1004,12 +740,8 @@ html.ss-cart-open body{
   box-shadow:0 8px 18px rgba(15,23,42,.06);
 }
 
-.ss-cart-price{
-  font-size:.76rem;
-  color:#6b7280;
-  margin-top:1px;
-  font-weight:800;
-}
+/* .ss-cart-price (el precio unitario suelto) se eliminó: repetía el total de la línea
+   cuando había una unidad, que es el caso normal. */
 
 .ss-cart-row{
   margin-top:8px;
@@ -1102,15 +834,17 @@ html.ss-cart-open body{
   transform:rotate(-45deg);
 }
 
-.ss-cart-remove:hover{
-  background:rgba(255,255,255,.96);
-  box-shadow:0 8px 18px rgba(15,23,42,.12);
-  transform:translateY(-1px);
-}
+@media (hover:hover){
+  .ss-cart-remove:hover{
+    background:rgba(255,255,255,.96);
+    box-shadow:0 8px 18px rgba(15,23,42,.12);
+    transform:translateY(-1px);
+  }
 
-.ss-cart-remove:hover::before,
-.ss-cart-remove:hover::after{
-  background:#111827;
+  .ss-cart-remove:hover::before,
+  .ss-cart-remove:hover::after{
+    background:#111827;
+  }
 }
 
 .ss-cart-line-total{
@@ -1179,8 +913,7 @@ html.ss-cart-open body{
   .ss-cart-checkout{
     font-size:.75rem;
     letter-spacing:.02em;
-  }
-}
+  }}
 
 .ss-cart-continue,
 .ss-cart-clear{
@@ -1267,8 +1000,7 @@ body[class*="product-"] .panel .cta-col #reserveBtn{
       'main'
       'cart'
       'reserve' !important;
-  }
-}
+  }}
 
 .ss-cart-continue:active,
 .ss-cart-clear:active,
@@ -1313,8 +1045,7 @@ body[class*="product-"] .panel .cta-col #reserveBtn{
     width:32px;
     height:32px;
     font-size:18px;
-  }
-}
+  }}
 
 @media (max-width:390px){
   .ss-cart-actions{
@@ -1330,8 +1061,7 @@ body[class*="product-"] .panel .cta-col #reserveBtn{
   .ss-cart-checkout{
     min-height:46px;
     font-size:.8rem;
-  }
-}
+  }}
 
 
 /* === partials.mobile-menu.css === */
@@ -1355,9 +1085,7 @@ body[class*="product-"] .panel .cta-col #reserveBtn{
   --ink:#111315;
   --muted:#676b73;
   --line:#E6E9EF;
-  --line-soft:rgba(17,19,21,.06);
   --surface:#ffffff;
-  --surface-soft:#f6f8fb;
   --primary:#d11c1c;
   --primary-soft:rgba(209,28,28,.10);
 
@@ -1389,11 +1117,27 @@ html{
 /* Transiciones suaves entre páginas (View Transitions cross-document). Mejora
    progresiva: los navegadores sin soporte la ignoran. Se anula con reduced-motion. */
 @view-transition { navigation: auto; }
+
+/* Antijank: el cross-fade por defecto anima a la vez DOS snapshots de toda la
+   página (vieja + nueva). En páginas largas (home/ficha) son texturas enormes y
+   el compositor tira frames -> se ve "a 20fps". Aquí animamos UNA sola capa:
+   la página saliente se queda fija (sin fade-out) y la entrante hace un fade-in
+   corto por encima. La mitad de trabajo de composición por frame = fluido. */
+::view-transition-old(root){
+  animation:none;
+}
+::view-transition-new(root){
+  animation:vt-fade-in .2s cubic-bezier(.2,0,0,1) both;
+  will-change:opacity;
+}
+@keyframes vt-fade-in{
+  from{ opacity:0; }
+  to{ opacity:1; }}
+
 @media (prefers-reduced-motion: reduce){
   ::view-transition-group(*),
   ::view-transition-old(*),
-  ::view-transition-new(*){ animation: none !important; }
-}
+  ::view-transition-new(*){ animation: none !important; }}
 html, body, button, input, select, textarea{ color-scheme: only light !important; }
 
 body{
@@ -1428,6 +1172,38 @@ button{ font-family:inherit; }
 /* =========================
    3) ORDER SUMMARY / COMMON UI
    ========================= */
+/* ══════════════════════════════════════════════════════════════════════════════
+   SISTEMA VISUAL DE VARIANTES — una sola definición para toda la web
+
+   Un selector de variantes aparece en tres sitios: la ficha, la burbuja del home y
+   la caja "Añade algo más". Hasta ahora cada uno traía su copia de los mismos
+   números —el círculo, el anillo del elegido, el punto blanco, el apagado— y no
+   coincidían: el anillo medía 4px en la ficha y 3px en la burbuja, el punto 8px
+   frente a 7px, el hover escalaba 1,05 frente a 1,06. Nadie lo había decidido: era
+   deriva de haberlo escrito dos veces.
+
+   Estas fichas son ahora los únicos números. Lo que cambia por CONTEXTO se cambia
+   redefiniendo una ficha (el tamaño del círculo en la burbuja, por ejemplo), no
+   copiando el bloque entero. */
+:root{
+  --variant-size:40px;                 /* lado del círculo de color */
+  --variant-radius:999px;
+  --variant-gap:10px;
+  --variant-border:1.5px solid rgba(15,23,42,.14);
+  --variant-border-hover:rgba(15,23,42,.24);
+  --variant-border-selected:rgba(15,23,42,.50);
+  --variant-ring-selected:0 0 0 4px rgba(17,24,39,.08);
+  --variant-ring-focus:0 0 0 4px rgba(17,24,39,.12), 0 3px 12px rgba(15,23,42,.08);
+  --variant-shadow-hover:0 4px 12px rgba(15,23,42,.08);
+  --variant-shadow-selected:0 6px 16px rgba(15,23,42,.12), inset 0 0 0 1px rgba(255,255,255,.22);
+  --variant-dot:8px;                   /* punto blanco del círculo elegido */
+  --variant-lift:translateY(-1px) scale(1.05);
+  --variant-transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  --variant-pill-padding:10px 15px;
+  --variant-pill-transition:transform .16s ease, box-shadow .16s ease, background .16s ease, color .16s ease;
+  --variant-disabled-opacity:.45;
+}
+
 :root{
   --summary-radius:24px;
   --summary-product-radius:16px;
@@ -1681,7 +1457,8 @@ button{ font-family:inherit; }
 }
 
 .order-summary--checkout .order-summary__product,
-.order-summary--payment .order-summary__product{
+.order-summary--payment .order-summary__product,
+.compat-box .order-summary__product{
   padding:var(--order-card-pad);
   border:0;
   min-width:0;
@@ -1697,7 +1474,8 @@ button{ font-family:inherit; }
 }
 
 .order-summary--checkout .order-summary__product--line,
-.order-summary--payment .order-summary__product--line{
+.order-summary--payment .order-summary__product--line,
+.compat-box .order-summary__product--line{
   grid-template-columns:minmax(0,1fr) auto;
   gap:10px;
   align-items:center;
@@ -1705,7 +1483,8 @@ button{ font-family:inherit; }
 
 .order-summary--checkout .order-summary__product-main,
 .order-summary--payment .order-summary__product-main,
-.order-summary--payment .sum-cart-item__main{
+.order-summary--payment .sum-cart-item__main,
+.compat-box .order-summary__product-main{
   align-items:center;
   gap:12px;
 }
@@ -1720,7 +1499,8 @@ button{ font-family:inherit; }
 }
 
 .order-summary--checkout .order-summary__product-image,
-.order-summary--payment .order-summary__product-image{
+.order-summary--payment .order-summary__product-image,
+.compat-box .order-summary__product-image{
   width:var(--order-card-img);
   height:var(--order-card-img);
   flex:0 0 var(--order-card-img);
@@ -1733,7 +1513,8 @@ button{ font-family:inherit; }
 }
 
 .order-summary--checkout .order-summary__product-info,
-.order-summary--payment .order-summary__product-info{
+.order-summary--payment .order-summary__product-info,
+.compat-box .order-summary__product-info{
   display:grid;
   justify-items:start;
   align-content:center;
@@ -1744,7 +1525,8 @@ button{ font-family:inherit; }
 }
 
 .order-summary--checkout .order-summary__product-title,
-.order-summary--payment .order-summary__product-title{
+.order-summary--payment .order-summary__product-title,
+.compat-box .order-summary__product-title{
   flex:1 1 100%;
   display:block;
   width:100%;
@@ -1760,7 +1542,8 @@ button{ font-family:inherit; }
 }
 
 .order-summary--checkout .order-summary__product-meta,
-.order-summary--payment .order-summary__product-meta{
+.order-summary--payment .order-summary__product-meta,
+.compat-box .order-summary__product-meta{
   display:inline-flex;
   align-items:center;
   width:auto;
@@ -1784,7 +1567,8 @@ button{ font-family:inherit; }
 .order-summary--checkout .order-summary__product-meta--qty,
 .order-summary--payment .order-summary__product-meta--ref,
 .order-summary--payment .order-summary__product-meta--price,
-.order-summary--payment .order-summary__product-meta--qty{
+.order-summary--payment .order-summary__product-meta--qty,
+.compat-box .order-summary__product-meta--ref{
   padding:4px 9px;
   border-radius:999px;
   background:rgba(17,19,21,.045);
@@ -1866,8 +1650,7 @@ button{ font-family:inherit; }
   }
   .order-summary__product-title{ font-size:.96rem; }
   .order-summary__product-meta{ font-size:.78rem; }
-  .order-summary__row{ padding:12px 0; }
-}
+  .order-summary__row{ padding:12px 0; }}
 
 @media (max-width:640px){
   .order-summary__header{
@@ -1902,8 +1685,7 @@ button{ font-family:inherit; }
   }
   .order-summary__row-label{ font-size:1rem; }
   .order-summary__total .order-summary__row-label{ font-size:1.06rem; }
-  .order-summary__total .order-summary__row-value{ font-size:1.42rem; }
-}
+  .order-summary__total .order-summary__row-value{ font-size:1.42rem; }}
 
 /* Accesibilidad */
 .skip-link{
@@ -1990,7 +1772,10 @@ nav.menu{
   white-space:nowrap;
   min-width:0;
 }
-nav.menu a,
+/* Mismo motivo que arriba para el `>`: los enlaces del panel de Productos NO
+   son enlaces de la barra. */
+nav.menu > a,
+nav.menu .menu-products-host > a,
 nav.menu button{
   padding:7px 11px;
   border-radius:999px;
@@ -2003,12 +1788,14 @@ nav.menu button{
   transition:background .15s ease, color .15s ease, transform .12s ease;
   white-space:nowrap;
 }
-nav.menu a .nav-icon{ font-size:.95em; }
-nav.menu a:hover{
+nav.menu > a .nav-icon,
+nav.menu .menu-products-host > a .nav-icon{ font-size:.95em; }
+nav.menu > a:hover,
+nav.menu .menu-products-host > a:hover{
   background:var(--primary-soft);
   transform:translateY(-1px);
 }
-nav.menu a[aria-current="page"]{
+nav.menu > a[aria-current="page"]{
   background:var(--primary-soft);
   color:var(--primary);
 }
@@ -2036,45 +1823,12 @@ nav.menu a[aria-current="page"]{
   transform:translateY(0);
   box-shadow:0 8px 16px rgba(15,23,42,.06);
 }
-
-/* =========================
-   4) HERO
-   ========================= */
-.hero{
-  position:relative;
-  min-height:calc(var(--vh) * 100);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-  text-align:center;
-  background: url('img/NEGRO.webp') center/cover no-repeat;
-}
-.hero::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.10), rgba(0, 0, 0, 0.45));
-  z-index:1;
-  pointer-events:none;
-}
-.hero-title{
-  font-family:var(--sport);
-  font-size:clamp(40px,7vw,80px);
-  letter-spacing:.10em;
-  text-transform:uppercase;
-  text-shadow:0 18px 48px rgba(0,0,0,.65);
-}
-
-@media (prefers-reduced-motion: reduce){
-  .hero{ background: url('img/NEGRO.webp') center/cover no-repeat; }
-  .card.reveal-ready{
+@media (prefers-reduced-motion: reduce){  .card.reveal-ready{
     opacity:1;
     transform:none;
     transition:box-shadow .18s ease, border-color .16s ease;
     transition-delay:0ms;
-  }
-}
+  }}
 
 /* =========================
    5) SERIES / FEATURES
@@ -2192,24 +1946,18 @@ nav.menu a[aria-current="page"]{
 }
 
 @media (min-width:1200px){
-  .grid{ grid-template-columns:repeat(4, minmax(0, 1fr)); }
-}
+  .grid{ grid-template-columns:repeat(4, minmax(0, 1fr)); }}
 
 @media (max-width:980px){
-  .grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
-}
+  .grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); }}
 @media (max-width:400px){
-  .grid{ grid-template-columns:1fr; }
-}
+  .grid{ grid-template-columns:1fr; }}
 
 .card:not(.order-summary){
-  --card-media-radius:16px;
   --card-media-padding:14px;
-  --card-surface:#ffffff;
   --card-shadow-top:inset 0 1px 0 rgba(255,255,255,.96);
   --card-shadow-base:0 16px 34px rgba(15,23,42,.07);
   --card-shadow-hover:0 24px 54px rgba(15,23,42,.11);
-  --card-accent:var(--series-accent, #111315);
   background:#fff;
   border:0;
   border-radius:20px;
@@ -2218,24 +1966,18 @@ nav.menu a[aria-current="page"]{
   cursor:pointer;
   overflow:hidden;
   box-shadow:var(--card-shadow-top), var(--card-shadow-base);
-  transition:transform .16s ease, box-shadow .2s ease, filter .2s ease;
+  /* .18s = misma duración y curva que .card-colors-list .card-color, para que
+     el crecimiento se sienta idéntico al de las pastillas de color. */
+  transition:transform .18s ease, box-shadow .2s ease, filter .2s ease;
   position:relative;
   outline:none;
 }
-.card[data-series="ecoxtrem"]{ --card-accent:#0b3b8c; }
-.card[data-series="k"]{ --card-accent:#ff8c51; }
-.card[data-series="n"]{ --card-accent:#d11c1c; }
-.card[data-series="gt"]{ --card-accent:#0b0c0f; }
-.card[data-series="ix"]{ --card-accent:#7c3aed; }
-.card[data-series="b"]{ --card-accent:#16a34a; }
-.card[data-series="motos"]{ --card-accent:#0ea5e9; }
-.card[data-series="acc"]{ --card-accent:#f59e0b; }
 .card.reveal-ready{
   opacity:0;
-  transform:translateY(28px);
+  transform:translateY(22px);
   transition:
-    opacity .55s ease,
-    transform .55s cubic-bezier(.22, 1, .36, 1),
+    opacity .6s ease,
+    transform .6s cubic-bezier(.22, 1, .36, 1),
     box-shadow .18s ease,
     border-color .16s ease;
   transition-delay:var(--reveal-delay, 0ms);
@@ -2251,11 +1993,21 @@ nav.menu a[aria-current="page"]{
 .card:focus-within{
   z-index:2;
 }
-.card:not(.order-summary):hover{
-  z-index:2;
-  transform:translateY(-3px);
-  box-shadow:var(--card-shadow-top), var(--card-shadow-hover);
-  filter:saturate(1.01);
+/* Hover: la tarjeta CRECE, igual que las pastillas de color de "Elige color"
+   (.card-colors-list .card-color:hover). Allí el gesto es scale(1.06), pero la
+   pastilla mide ~150px y la tarjeta ~320px: copiar el 1.06 la haría crecer el
+   doble en píxeles y se comería el hueco entre tarjetas. 1.03 da el mismo
+   crecimiento aparente por lado. El translateY(-1px) es el mismo de la pastilla. */
+/* Solo con puntero real. En táctil el :hover se queda pegado en cuanto tocas o
+   arrastras sobre la tarjeta, y como este gesto ESCALA la tarjeta, al deslizar
+   el dedo por encima parecía que la tarjeta se movía sola. */
+@media (hover:hover){
+  .card:not(.order-summary):hover{
+    z-index:2;
+    transform:translateY(-1px) scale(1.03);
+    box-shadow:var(--card-shadow-top), var(--card-shadow-hover);
+    filter:saturate(1.01);
+  }
 }
 
 .card-media{
@@ -2272,31 +2024,15 @@ nav.menu a[aria-current="page"]{
   min-height:0;
 }
 
-/* Carousel */
-.carousel{
-  position:relative;
-  overflow:hidden;
-  height:100%;
-  width:100%;
-  touch-action: pan-y pinch-zoom;
-  user-select:none;
-}
-.carousel-track{
-  display:flex;
-  transition:transform .3s ease;
-  height:100%;
-  cursor:grab;
-  will-change: transform;
-  user-select:none;
-}
-.carousel-track.dragging{
-  cursor:grabbing;
-  transition:none !important;
-}
-.carousel img{
+/* Foto de portada de la tarjeta. Se posiciona igual que .card-color-preview
+   —absoluta e inset:0 dentro de .card-media— porque esa capa se funde encima
+   al pasar el ratón: si los dos encuadres no coinciden, la segunda vista salta
+   en vez de teñirse en el sitio. */
+.card-shot{
+  position:absolute;
+  inset:0;
   width:100%;
   height:100%;
-  flex:0 0 100%;
   object-fit:contain;
   object-position:center;
   padding:var(--card-media-padding);
@@ -2307,29 +2043,6 @@ nav.menu a[aria-current="page"]{
   user-select:none;
   pointer-events:none;
 }
-
-.carousel-dots{
-  position:absolute;
-  bottom:3px;
-  left:50%;
-  transform:translateX(-50%);
-  display:flex;
-  gap:6px;
-  background:rgba(255, 255, 255, 0);
-  border:1px solid rgba(17, 19, 21, 0);
-  padding:2px 6px;
-  border-radius:999px;
-}
-.carousel-dots .dot{
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  border:0;
-  background:#cbd5e1;
-  opacity:.9;
-  cursor:pointer;
-}
-.carousel-dots .dot.active{ background:#111; }
 
 .chip-name{ display:none; }
 
@@ -2532,8 +2245,7 @@ nav.menu a[aria-current="page"]{
 
   .dgt-floating-tooltip::before{
     left:var(--dgt-arrow-left);
-  }
-}
+  }}
 
 .panel .dgt-badge{
   margin-left:auto;
@@ -2557,6 +2269,10 @@ nav.menu a[aria-current="page"]{
 }
 
 .card:not(.order-summary) .btn-primary,
+/* Este botón ya NO lo comparte nadie más. La burbuja de variantes de las fichas lo
+   reutilizaba (`.acc-pop-add` iba en todos los grupos), pero esa burbuja se quedó sin
+   botón de añadir: ahora la línea entra en el carrito en cuanto se eligen todos los
+   ejes, y donde estaba el botón solo hay un renglón de texto (.acc-pop-guia). */
 .card:not(.order-summary) .btn-cart{
   display:block;
   text-align:center;
@@ -2609,14 +2325,19 @@ nav.menu a[aria-current="page"]{
   mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7.5 18C8.32843 18 9 18.6716 9 19.5C9 20.3284 8.32843 21 7.5 21C6.67157 21 6 20.3284 6 19.5C6 18.6716 6.67157 18 7.5 18Z'/%3E%3Cpath d='M16.5 18.0001C17.3284 18.0001 18 18.6716 18 19.5001C18 20.3285 17.3284 21.0001 16.5 21.0001C15.6716 21.0001 15 20.3285 15 19.5001C15 18.6716 15.6716 18.0001 16.5 18.0001Z'/%3E%3Cpath d='M2 3L2.26121 3.09184C3.5628 3.54945 4.2136 3.77826 4.58584 4.32298C4.95808 4.86771 4.95808 5.59126 4.95808 7.03836V9.76C4.95808 12.7016 5.02132 13.6723 5.88772 14.5862C6.75412 15.5 8.14857 15.5 10.9375 15.5H12M16.2404 15.5C17.8014 15.5 18.5819 15.5 19.1336 15.0504C19.6853 14.6008 19.8429 13.8364 20.158 12.3075L20.6578 9.88275C21.0049 8.14369 21.1784 7.27417 20.7345 6.69708C20.2906 6.12 18.7738 6.12 17.0888 6.12H11.0235M4.95808 6.12H7'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
-.card:not(.order-summary) .btn-cart:hover{
-  transform:translateY(-1px);
-  color:#0b0c0f;
-  background:#f8fafc;
-  box-shadow:
-    0 -1px 4px rgba(15,23,42,.055),
-    0 1px 0 rgba(255,255,255,.97) inset,
-    0 18px 34px rgba(15,23,42,.11);
+/* Solo en punteros reales. En táctil el :hover se queda pegado tras tocar
+   —justo mientras se muestra "Añadido"— y encima anima una transición de
+   box-shadow de tres capas en cada tarjeta del listado. */
+@media (hover:hover){
+  .card:not(.order-summary) .btn-cart:hover{
+    transform:translateY(-1px);
+    color:#0b0c0f;
+    background:#f8fafc;
+    box-shadow:
+      0 -1px 4px rgba(15,23,42,.055),
+      0 1px 0 rgba(255,255,255,.97) inset,
+      0 18px 34px rgba(15,23,42,.11);
+  }
 }
 
 .card:not(.order-summary) .btn-cart.is-added{
@@ -2629,8 +2350,7 @@ nav.menu a[aria-current="page"]{
 
 /* Títulos */
 #faq h2,
-#legal h2,
-#ubicacion h2{
+#legal h2{
   margin:20px 0 12px;
   font-family:var(--sport);
   font-size:clamp(1.2rem, 1rem + 1vw, 1.65rem);
@@ -2681,12 +2401,6 @@ nav.menu a[aria-current="page"]{
 /* FAQ: rediseño visual sin tocar posicionamiento */
 #faq h2{
   margin-bottom:8px;
-}
-
-#faq .faq-list{
-  counter-reset:faq-item;
-  display:grid;
-  gap:8px;
 }
 
 #faq details{
@@ -2761,170 +2475,9 @@ nav.menu a[aria-current="page"]{
 }
 
 /* =========================
-   8) MAPA
-   ========================= */
-.map-embed{
-  width:100%;
-  height:300px;
-  border-radius:14px;
-  border:0;
-  box-shadow:0 16px 40px rgba(15,23,42,.16);
-}
-.map-embed.is-pending{
-  background:linear-gradient(135deg, rgba(241,245,249,.9), rgba(226,232,240,.7));
-  background-size:200% 100%;
-  animation:skeleton 1.5s ease infinite;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.map-embed.is-pending::after{
-  content:'\f3c5';
-  font-family:'Font Awesome 6 Free';
-  font-weight:900;
-  font-size:2rem;
-  color:rgba(100,116,139,.3);
-}
-@keyframes skeleton{
-  0%{background-position:200% 0}
-  100%{background-position:-200% 0}
-}
-
-/* Location grid */
-.location-grid{
-  display:grid;
-  grid-template-columns:280px 1fr;
-  gap:18px;
-  align-items:stretch;
-}
-
-.location-info{
-  display:flex;
-  flex-direction:column;
-  gap:16px;
-  padding:4px 0;
-}
-
-.location-item{
-  display:flex;
-  align-items:flex-start;
-  gap:12px;
-}
-
-.location-item > i{
-  flex-shrink:0;
-  width:36px;
-  height:36px;
-  display:grid;
-  place-items:center;
-  border-radius:999px;
-  background:#f3f4f6;
-  color:#111827;
-  font-size:.92rem;
-}
-
-.location-item > div{
-  display:flex;
-  flex-direction:column;
-  gap:2px;
-}
-
-.location-item strong{
-  font-size:.88rem;
-  letter-spacing:.03em;
-  text-transform:uppercase;
-  color:#111827;
-}
-
-.location-item span{
-  color:#6b7280;
-  font-size:.93rem;
-  line-height:1.5;
-  font-weight:600;
-}
-
-.location-item a{
-  color:inherit;
-  text-decoration:none;
-  border-bottom:1px solid rgba(17,24,39,.16);
-}
-
-.location-item a:hover{
-  border-bottom-color:rgba(17,24,39,.40);
-}
-
-.location-grid .map-embed{
-  height:100%;
-  min-height:260px;
-}
-
-/* =========================
    9) LEGAL (layout, sin romper tu diseño)
    ========================= */
 .legal{ padding:36px 0; }
-
-.legal .columns{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:12px;
-  max-width:1000px;
-  margin:16px auto 0;
-}
-
-.legal .columns > details{
-  border-radius:16px;
-  border:1px solid var(--line);
-  background:#fff;
-  box-shadow:0 10px 28px rgba(15,23,42,.04);
-  transition:border-color .16s ease, box-shadow .18s ease, transform .14s ease;
-}
-
-.legal .columns > details:hover{
-  transform:translateY(-1px);
-  border-color:#d7dde8;
-  box-shadow:0 16px 36px rgba(15,23,42,.08);
-}
-
-.legal .columns > details summary{
-  font-size:.98rem;
-  letter-spacing:.01em;
-}
-
-.legal .columns > details[open] summary{
-  margin-bottom:8px;
-}
-
-.legal .columns > details p,
-.legal .columns > details li{
-  color:#1f2937;
-  line-height:1.62;
-}
-
-.legal .columns > details p{
-  font-size:.94rem;
-}
-
-.legal .columns > details p + p{
-  margin-top:8px;
-}
-
-.legal .columns > details ul{
-  margin:8px 0 8px 18px;
-  padding:0;
-}
-
-.legal .columns > details li + li{
-  margin-top:6px;
-}
-
-.legal .columns > details a{
-  text-decoration:none;
-  border-bottom:1px solid rgba(17,19,21,.2);
-}
-
-.legal .columns > details a:hover{
-  border-bottom-color:rgba(185,30,30,.45);
-}
 
 /* =========================
    10) PAGOS / FOOTER
@@ -2956,114 +2509,6 @@ footer{
   gap:16px;
   align-items:stretch;
 }
-
-.p-card{
-  --p-card-radius:16px;
-  --p-media-min-height:220px;
-  --p-media-padding:16px;
-  border-radius:16px;
-  overflow:hidden;
-  background:#fff;
-  border:1px solid rgba(0,0,0,.08);
-  box-shadow:0 12px 34px rgba(15,23,42,.04);
-  transition:transform .16s ease, box-shadow .18s ease, border-color .16s ease;
-}
-.p-card:hover{
-  transform:translateY(-2px);
-  box-shadow:0 20px 48px rgba(15,23,42,.10);
-  border-color:#d0d7e2;
-}
-
-.p-link{
-  display:grid;
-  grid-template-rows:auto 1fr;
-  text-decoration:none;
-  color:inherit;
-  height:100%;
-}
-.p-link:focus-visible{
-  outline:3px solid rgba(17,17,17,.45);
-  outline-offset:4px;
-  border-radius:var(--p-card-radius);
-}
-
-.p-media{
-  background:#fff;
-  border-bottom:1px solid var(--line);
-  aspect-ratio:4 / 3;
-  min-height:var(--p-media-min-height);
-  display:grid;
-  place-items:center;
-  padding:var(--p-media-padding);
-  box-sizing:border-box;
-}
-.p-media img{
-  display:block;
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  object-position:center;
-}
-
-.p-body{
-  padding:14px 14px 16px;
-  display:grid;
-  gap:8px;
-}
-
-.p-title{
-  margin:0;
-  font-size:1.05rem;
-  line-height:1.2;
-  font-weight:900;
-}
-
-.p-price{
-  margin:0;
-  opacity:.75;
-  font-weight:800;
-}
-
-.p-stock{
-  margin:0;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  width:max-content;
-  border-radius:999px;
-  padding:4px 10px;
-  font-size:.78rem;
-  font-weight:900;
-  letter-spacing:.04em;
-  text-transform:uppercase;
-}
-.p-stock--in{
-  color:#14532d;
-  background:#dcfce7;
-  border:1px solid #bbf7d0;
-}
-.p-stock--pre{
-  color:#9a3412;
-  background:#ffedd5;
-  border:1px solid #fed7aa;
-}
-.p-stock--out{
-  color:#991b1b;
-  background:#fee2e2;
-  border:1px solid #fecaca;
-}
-
-.p-card--out .p-media img{
-  filter:grayscale(.22);
-  opacity:.92;
-}
-
-.p-specs{
-  margin:0;
-  padding-left:18px;
-  opacity:.85;
-}
-.p-specs li{ margin:2px 0; }
 
 .empty{ opacity:.7; }
 
@@ -3125,14 +2570,7 @@ footer{
 }
 
 @media (max-width:560px){
-  .feature-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); }
-}
-
-/* Mobile product layout tweaks */
-@media (max-width:768px){
-  .card-media .carousel{ position:absolute; inset:0; }
-  .card-media .carousel-track{ align-items:center; }
-}
+  .feature-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); }}
 
 @media (max-width:640px){
   .series{
@@ -3184,10 +2622,7 @@ footer{
     color-scheme:only light;
     position:relative;
   }
-  .card-media .carousel{ position:absolute; inset:0; }
-  .card-media .carousel-track{ align-items:center; }
   .card-media::after{ display:none; }
-  .p-card{ --p-media-min-height:150px; --p-media-padding:10px; }
 
   /* Nombre del producto */
   .card-info{
@@ -3306,14 +2741,9 @@ footer{
     position:relative;
     top:-1px;
   }
-  .panel .dgt-badge{ width:57px; }
-
-}
+  .panel .dgt-badge{ width:57px; }}
 
 @media (max-width:768px){
-  #faq .faq-list{
-    gap:7px;
-  }
 
   #faq summary{
     grid-template-columns:28px minmax(0, 1fr) 24px;
@@ -3339,33 +2769,10 @@ footer{
     padding:0 14px 14px 50px;
     font-size:.91rem;
     line-height:1.55;
-  }
-}
+  }}
 
-/* Location responsive */
-@media (max-width:768px){
-  .location-grid{
-    grid-template-columns:1fr;
-  }
-  .location-info{
-    order:2;
-    gap:12px;
-  }
-  .location-grid .map-embed{
-    order:1;
-    min-height:220px;
-  }
-}
-
-/* Legal columnas: 2 -> 1 */
-@media (max-width:900px){
-  .legal .columns{ grid-template-columns:1fr; }
-  .legal .columns{ gap:10px; }
-  .legal .columns > details{ padding:10px 12px; border-radius:14px; }
-  .legal .columns > details summary{ font-size:.95rem; }
-  .legal .columns > details p,
-  .legal .columns > details li{ font-size:.92rem; line-height:1.58; }
-}
+/* Aquí había un bloque para `.legal .columns` (2 columnas -> 1 en móvil). Ninguna
+   página legal usa ya esa clase: el acordeón de /legal se maqueta con #legal details. */
 
 /* Grid de series (2 columnas escritorio, 1 columna móvil) */
 @media (max-width:820px){
@@ -3386,32 +2793,35 @@ footer{
   filter:none;
 }
 
-[data-home-catalog-root] .card:not(.order-summary):hover{
-  transform:translateY(-2px);
-  background:linear-gradient(180deg, rgba(255,255,255,.99) 0%, rgba(244,247,251,.97) 100%);
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.96) inset,
-    0 24px 52px rgba(15,23,42,.11),
-    0 10px 24px rgba(15,23,42,.05);
-}
-
-[data-home-catalog-root] .card.is-carousel-interacting:not(.order-summary):hover{
-  transform:none;
-  filter:none;
+/* Esta regla es la que hacía que la tarjeta se moviera al arrastrar en móvil.
+   Su especificidad ([atributo] + clase + :hover) le ganaba a la cancelación
+   `transform:none` de @media (max-width:640px), y además vive fuera de todo
+   media query: reactivaba el escalado en táctil. Afecta al catálogo del home Y
+   a "También te puede interesar", porque product-enhancements.js le pone
+   data-home-catalog-root a esa sección. Con hover:hover el gesto queda donde
+   tiene sentido —ratón— y en el dedo no pasa nada. */
+@media (hover:hover){
+  [data-home-catalog-root] .card:not(.order-summary):hover{
+    transform:translateY(-1px) scale(1.03);
+    background:linear-gradient(180deg, rgba(255,255,255,.99) 0%, rgba(244,247,251,.97) 100%);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.96) inset,
+      0 24px 52px rgba(15,23,42,.11),
+      0 10px 24px rgba(15,23,42,.05);
+  }
 }
 
 [data-home-catalog-root] .card:not(.order-summary) .card-media{
   background:#fff !important;
-  border-bottom:1px solid rgba(15,23,42,.06);
+  border-bottom: 1px solid rgb(15 23 42 / 0%);
   aspect-ratio:1/1;
 }
 
-[data-home-catalog-root] .card:not(.order-summary) .carousel img{
+[data-home-catalog-root] .card:not(.order-summary) .card-shot{
   padding:14px;
   border-radius:33px;
 }
 
-[data-home-catalog-root] .card:not(.order-summary) .carousel-dots,
 [data-home-catalog-root] .card:not(.order-summary) .card-brand,
 [data-home-catalog-root] .card:not(.order-summary) .title,
 [data-home-catalog-root] .card:not(.order-summary) .discount-badge{
@@ -3528,25 +2938,624 @@ footer{
 @media (min-width:769px){
   [data-home-catalog-root] .card:not(.order-summary) .card-bottom{
     gap:1px;
-  }
-}
+  }}
 
 @media (max-width:980px){
-  [data-home-catalog-root] .grid{ grid-template-columns:repeat(2, 1fr); }
-}
+  [data-home-catalog-root] .grid{ grid-template-columns:repeat(2, 1fr); }}
 
 @media (max-width:768px){
   [data-home-catalog-root] .card:not(.order-summary) .card-bottom{
     gap:4px;
     padding:0 12px 3px;
   }
-  [data-home-catalog-root] .card:not(.order-summary) .btn-row{ display:none !important; }
-}
+  [data-home-catalog-root] .card:not(.order-summary) .btn-row{ display:none !important; }}
 
 @media (max-width:480px){
   [data-home-catalog-root] .grid{ gap:10px; }
   [data-home-catalog-root] .card:not(.order-summary) .chip-name{ font-size:.82rem; }
   [data-home-catalog-root] .card.has-dgt:not(.order-summary) .price-row{ padding-right:40px; }
-  [data-home-catalog-root] .card:not(.order-summary) .dgt-tooltip--price{ right:9px; top:-12px; }
+  [data-home-catalog-root] .card:not(.order-summary) .dgt-tooltip--price{ right:9px; top:-12px; }}
+
+/* La PALETA DE COLOR de la tarjeta (.card-colors / .color-pop) ya no existe.
+   Solo sabia de color, asi que un producto con modelo o medida no se podia anadir
+   desde una tarjeta. La sustituyo la burbuja compartida .acc-pop (mas abajo en este
+   mismo archivo), que lee los ejes de la ficha del producto y sirve igual al home,
+   a las fichas y a "Tambien te puede interesar".
+   Lo unico que sobrevive de aquello es .card-color-preview, las capas del fundido:
+   las sigue usando el hover de la tarjeta para la segunda vista del producto. */
+
+
+/* Previsualización de color al pasar el ratón por la paleta.
+   DISOLUCIÓN + ESCALA: la foto del color entra fundiéndose sobre la anterior
+   mientras pasa de 103,5 % a su tamaño natural. Como las fotos son el mismo
+   patinete en la misma pose, se percibe como si se tiñera en el sitio (un velo
+   o un corte rompían esa ilusión), y el micro-movimiento disimula cualquier
+   desalineación entre tomas. Se superpone a la foto de portada sin tocarla, y
+   copia el encuadre de .card-shot para verse idéntica. */
+.card-color-preview{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  padding: var(--card-media-padding);
+  box-sizing: border-box;
+  background: linear-gradient(#fff,#fff);
+  opacity: 0;
+  transform: scale(1.035);
+  transition: opacity 190ms cubic-bezier(.2,.7,.3,1), transform 190ms cubic-bezier(.2,.7,.3,1);
+  pointer-events: none;
+  z-index: 3;
+}
+.card-color-preview.is-on{
+  opacity: 1;
+  transform: scale(1);
+}
+@media (prefers-reduced-motion: reduce){
+  .card-color-preview{ transition: none; transform: none; }
+  .card-color-preview.is-on{ transform: none; }
 }
 
+/* ══════════════════════════════════════════════════════════════════════════════
+   VIENE DE tarjetas.css (2026-08-11). Está en main.css —la hoja que cargan TODAS
+   las páginas— porque la burbuja dejó de ser exclusiva de las fichas: el home la
+   abre desde sus tarjetas y el home no carga tarjetas.css. Misma regla que ya
+   seguía la tarjeta compartida: lo que usan home y fichas vive aquí.
+   ══════════════════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════════════
+   ELEGIR VARIANTE SIN SALIR DE LA PÁGINA — burbuja única del sitio
+   ──────────────────────────────────────────────────────────────────────────
+   El ÚNICO cuadro de opciones que hay. Lo abren tres sitios y es el mismo en los
+   tres: la caja "Añade algo más" de las fichas, las tarjetas del home y las de
+   "También te puede interesar". Lo pinta js/variant-pop.js.
+
+   Nació solo para los accesorios compatibles: los manillares se piden por modelo,
+   medida y acabado, y su botón era una flecha que llevaba a su ficha porque añadir
+   de un clic habría metido en el pedido un manillar sin decir cuál. El home tenía
+   entonces lo suyo aparte —una paleta `.color-pop` que solo sabía de colores—, así
+   que un producto con más ejes no se podía configurar desde una tarjeta. Aquella
+   paleta se eliminó y quedó esta.
+
+   Por eso vive en main.css y no en tarjetas.css: el home NO carga tarjetas.css.
+
+   El tamaño es pequeño a propósito: entra una fila de 4 colores y el resto se ve
+   deslizando. Un cuadro con los 22 acabados del WAKE taparía media pantalla y
+   sería peor que ir a la ficha.
+   ══════════════════════════════════════════════════════════════════════════ */
+.acc-pop{
+  --pop-arrow-left:24px;
+  --pop-arrow-top:24px;
+  /* ANCHO ÚNICO para todo el cuadro. Antes era `max-content` con un tope, y como
+     unas filas son más anchas que otras (la MEDIDA de la UNO tiene 7 píldoras y el
+     MODELO solo 2), el cuadro se quedaba con el ancho de la más larga y las cortas
+     dejaban un hueco muerto a la derecha. Ahora manda un ancho fijo y son las filas
+     las que se estiran para llenarlo (.is-fit).
+     La cuenta: 5 círculos de 44px + 4 huecos de 12 = 268, más 18px de asomo del
+     sexto color para avisar de que hay más = 286 de área útil, +28 de padding = 314.
+     Si se cambia el tamaño del círculo hay que rehacer esta cuenta y el ancho, o
+     dejan de entrar cinco justos. */
+  --acc-pop-swatch:44px;
+  --acc-pop-gap:12px;
+  position:fixed;
+  left:0;
+  top:0;
+  /* En pantallas muy estrechas (320) el cuadro sería más ancho que la propia tarjeta
+     de accesorios y asomaría por los lados. El 72 son los 36px de margen que la
+     tarjeta ya tiene a cada lado, así que ahí se queda exactamente de su ancho.
+     Encogido a 248 la fila baja de cinco círculos a cuatro y sigue entrando de
+     sobra: 212 de círculos contra 220 de área útil. El ancho grande es para el
+     escritorio, donde antes se deslizaba siempre por un solo color de más. */
+  width:min(314px, calc(100vw - 72px));
+  padding:13px 14px 12px;
+  border-radius:18px;
+  border:1px solid rgba(17,24,39,.10);
+  background:rgba(255,255,255,.98);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.92) inset,
+    0 18px 40px rgba(15,23,42,.14),
+    0 6px 16px rgba(15,23,42,.06);
+  display:grid;
+  /* minmax(0,1fr) y no el `auto` implícito: por defecto, el MÍNIMO de una columna de
+     rejilla es el min-content de lo que lleva dentro, y el min-content de un texto con
+     nowrap es la frase ENTERA. Con un acabado de nombre largo ("Tornasol negro · alza
+     25 mm", 166px) la columna se estiraba a 230 y el contenido se salía del cuadro en
+     vez de recortarse: por eso solo se veía roto en algunos manillares, aunque el
+     código y los datos sean los mismos. Con minmax(0,…) la columna puede bajar de su
+     min-content y entonces sí entra en juego el text-overflow del valor. */
+  grid-template-columns:minmax(0, 1fr);
+  gap:11px;
+  opacity:0;
+  visibility:hidden;
+  transform:translateY(-4px);
+  transition:opacity 150ms ease, transform 150ms ease, visibility 150ms ease;
+  z-index:200;
+  pointer-events:none;
+}
+
+.acc-pop.is-visible{
+  opacity:1;
+  visibility:visible;
+  transform:translateY(0);
+  pointer-events:auto;
+}
+
+/* En el móvil los 314px se comían el 80% de la pantalla y el cuadro dejaba de leerse
+   como una nube colgando de la fila: parecía una pantalla nueva. Aquí baja a 258, que
+   NO es un número al azar —es el ancho que tenía antes de ensancharlo para escritorio,
+   y su cuenta ya estaba comprobada: 4 círculos de 44 + 3 huecos de 12 = 212, más 18 de
+   asomo del quinto = 230 de área útil + 28 de padding. O sea, en el teléfono se ven
+   cuatro colores en vez de cinco, que es justo lo que sobraba de ancho.
+   El `calc(100vw - 72px)` sigue mandando por debajo de 330px de pantalla. */
+@media (max-width:640px){
+  .acc-pop{ width:min(258px, calc(100vw - 72px)); }
+}
+
+.acc-pop::before{
+  content:"";
+  position:absolute;
+  width:14px;
+  height:14px;
+  background:rgba(255,255,255,.98);
+  border-top:1px solid rgba(17,24,39,.10);
+  border-left:1px solid rgba(17,24,39,.10);
+}
+.acc-pop.pos-bottom::before{ left:var(--pop-arrow-left); top:-8px; transform:translateX(-50%) rotate(45deg); }
+.acc-pop.pos-right::before{ top:var(--pop-arrow-top); left:-8px; transform:translateY(-50%) rotate(-45deg); }
+.acc-pop.pos-left::before{ top:var(--pop-arrow-top); right:-8px; transform:translateY(-50%) rotate(135deg); }
+
+/* Sin cabecera a propósito: el nombre y el precio del accesorio están en la fila
+   que hay justo debajo, y la burbuja sale pegada a ella con la flecha apuntándola.
+   Repetirlos solo hacía el cuadro más alto. La identidad la sostiene "Ver la ficha". */
+
+/* Una fila por eje: MODELO, MEDIDA, COLOR. El min-width:0 y el minmax(0,1fr) son
+   los que dejan que el nombre del acabado se recorte en vez de ensanchar el cuadro. */
+.acc-pop-row{
+  display:grid;
+  grid-template-columns:minmax(0, 1fr);
+  min-width:0;
+  gap:7px;
+}
+
+.acc-pop-row-head{
+  display:flex;
+  align-items:center;
+  min-width:0;
+  gap:8px;
+  font-size:.64rem;
+  line-height:1.2;
+}
+.acc-pop-row-label{
+  flex:0 0 auto;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:#98a2b3;
+}
+/* El valor elegido cede ancho y se recorta, igual que en el selector de la ficha.
+   Va en TINTA y no en gris: es el único dato de la cabecera —la etiqueta solo dice
+   de qué eje hablamos—, y antes ambos eran 800 uppercase en dos grises casi
+   idénticos (#98a2b3 contra #667085), o sea dos cosas del mismo peso donde solo
+   una lleva información. Lo llevan las TRES filas (modelo, medida y color): así se
+   lee de un vistazo qué se está configurando sin recorrer los carriles. */
+.acc-pop-row-value{
+  flex:0 1 auto;
+  min-width:0;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  font-weight:800;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  color:#111315;
+}
+
+/* Carril: lo que no cabe se desliza. Mismo criterio que el selector de color de
+   la ficha —sin barra, con la pieza cortada asomando y degradado en el borde—,
+   solo que a escala pequeña. Las clases is-rail* las pone el JS. */
+.acc-pop-rail{
+  display:flex;
+  flex-wrap:nowrap;
+  align-items:center;
+  gap:var(--acc-pop-gap);
+  margin:0 -14px;
+  padding:6px 14px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+  /* pan-x es el equivalente táctil de atrapar la rueda: un arrastre que empieza
+     sobre los colores los recorre y NO mueve la página por debajo. Sin esto, al
+     deslizar el dedo un poco torcido se iba la página y la burbuja se cerraba a
+     media elección. */
+  touch-action:pan-x;
+  scrollbar-width:none;
+}
+.acc-pop-rail::-webkit-scrollbar{ display:none; }
+
+.acc-pop-rail.is-rail{
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 18px,#000 calc(100% - 18px),transparent 100%);
+          mask-image:linear-gradient(90deg,transparent 0,#000 18px,#000 calc(100% - 18px),transparent 100%);
+}
+.acc-pop-rail.is-rail.is-rail-start{
+  -webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 18px),transparent 100%);
+          mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 18px),transparent 100%);
+}
+.acc-pop-rail.is-rail.is-rail-end{
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 18px,#000 100%);
+          mask-image:linear-gradient(90deg,transparent 0,#000 18px,#000 100%);
+}
+
+/* Cuando la fila CABE entera no hay nada que deslizar, así que sus píldoras se
+   reparten el ancho en vez de dejar un hueco muerto a la derecha (el mismo gesto
+   que el selector de modelo de las fichas). La clase la pone el JS después de
+   medir; estirar no puede provocar desbordamiento, así que la medida sigue valiendo.
+   Solo las píldoras: los círculos de color son redondos y no se estiran. */
+.acc-pop-rail.is-fit .acc-pop-pill{ flex:1 1 auto; }
+
+/* Círculo de color: el de la ficha a menor tamaño (borde, anillo del activo y
+   punto blanco en el centro). */
+/* ── EL CÍRCULO DE VARIANTE — fuente única ────────────────────────────────────
+   Vale igual para la ficha y para la burbuja: lo mismo que ya se hizo con la
+   píldora (.acc-pop-pill/.size-variant, más abajo). Antes eran dos bloques
+   calcados en dos archivos, con números que habían derivado por separado.
+   El tamaño es lo único que cambia por contexto, y viaja en --variant-size. */
+.acc-pop-swatch,
+.color-variant:not(.size-variant){
+  --variant-swatch:#111;
+  position:relative;
+  flex:0 0 auto;
+  display:block;
+  width:var(--variant-size);
+  height:var(--variant-size);
+  min-width:var(--variant-size);
+  padding:0;
+  border-radius:var(--variant-radius);
+  border:var(--variant-border);
+  background:var(--variant-swatch);
+  /* Imprescindible con los swatches bicolor (linear-gradient 50%/50%): sin él la
+     franja del borde repite el mosaico y asoma el color contrario por el otro lado. */
+  background-origin:border-box;
+  box-shadow:none;
+  text-indent:-9999px;
+  overflow:hidden;
+  cursor:pointer;
+  transition:var(--variant-transition);
+}
+
+.acc-pop-swatch:focus-visible,
+.color-variant:not(.size-variant):focus-visible{
+  outline:none;
+  box-shadow:var(--variant-ring-focus);
+}
+
+.acc-pop-swatch:hover:not([disabled]):not(.is-disabled),
+.color-variant:not(.size-variant):hover:not([disabled]):not(.is-disabled){
+  transform:var(--variant-lift);
+  border-color:var(--variant-border-hover);
+  box-shadow:var(--variant-shadow-hover);
+}
+
+.acc-pop-swatch.is-active,
+.color-variant:not(.size-variant).is-active{
+  border-color:var(--variant-border-selected);
+  box-shadow:var(--variant-ring-selected), var(--variant-shadow-selected);
+}
+
+/* El punto blanco del centro marca el círculo elegido; en una píldora el elegido lo
+   dice el trazo, y este punto caería encima del texto. */
+.acc-pop-swatch.is-active::after,
+.color-variant:not(.size-variant).is-active::after{
+  content:'';
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:var(--variant-dot);
+  height:var(--variant-dot);
+  border-radius:var(--variant-radius);
+  background:#fff;
+  transform:translate(-50%, -50%);
+  box-shadow:0 0 0 1px rgba(15,23,42,.18);
+  pointer-events:none;
+}
+
+/* No disponible: apagado y con una diagonal cruzada, que es lo que dice "no existe
+   en esta combinación" sin depender de lo tenue que sea el color. La diagonal va
+   oscura porque al bajar la opacidad sobre fondo blanco TODOS los círculos aclaran,
+   también el negro. El overflow:hidden del botón la recorta al círculo. */
+.acc-pop-swatch[disabled],
+.acc-pop-swatch.is-disabled,
+.color-variant:not(.size-variant)[disabled],
+.color-variant:not(.size-variant).is-disabled{
+  cursor:not-allowed;
+  opacity:var(--variant-disabled-opacity);
+  transform:none;
+  box-shadow:0 1px 4px rgba(0,0,0,.03);
+}
+
+.acc-pop-swatch[disabled]::after,
+.acc-pop-swatch.is-disabled::after,
+.color-variant:not(.size-variant)[disabled]::after,
+.color-variant:not(.size-variant).is-disabled::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  background:linear-gradient(-45deg,
+    transparent calc(50% - 1px),
+    rgba(15,23,42,.6) calc(50% - 1px),
+    rgba(15,23,42,.6) calc(50% + 1px),
+    transparent calc(50% + 1px));
+  pointer-events:none;
+}
+
+/* En la burbuja el círculo es más pequeño que en la ficha: se cambia LA FICHA,
+   no el bloque. */
+.acc-pop-swatch{ --variant-size:var(--acc-pop-swatch); }
+
+/* Cuánto trazo NEGRO hay dibujado: 0% = ninguno, o sea el filo gris tenue de reposo;
+   100% = anillo negro entero (elegida). En reposo vale 0 a propósito: la píldora que
+   no está elegida conserva su borde apenas visible pero NO enseña ni media diagonal
+   negra, y al elegirla el trazo NACE ahí y da la vuelta. Va REGISTRADA con @property
+   porque una variable normal no se puede animar —el navegador no sabe que es un
+   porcentaje y salta de golpe—; registrada, interpola y el trazo se dibuja.
+   Se usa SIEMPRE con respaldo, `var(--borde-relleno, 0%)`: si un navegador viejo no
+   soporta @property, la variable no existe y sin respaldo el `background` entero
+   sería inválido y la píldora se quedaría sin fondo. Con él, ese navegador da el
+   estado correcto aunque sin gesto: filo tenue en reposo y anillo negro al elegir
+   (el 100% de .is-active se aplica igual; lo que no hay es interpolación). */
+@property --borde-relleno{
+  syntax:'<percentage>';
+  inherits:false;
+  initial-value:0%;
+}
+
+@keyframes acc-pop-rellenar-borde{ from{ --borde-relleno:0%; } }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   PÍLDORA DE MODELO/MEDIDA — FUENTE ÚNICA
+
+   La misma regla para la burbuja de accesorios (.acc-pop-pill) y para el selector
+   de las fichas de manillar (.size-variant). Antes eran dos diseños calcados a mano:
+   uno aquí y otro repetido en el <style> inline de las CUATRO fichas, y cada retoque
+   —el borde diagonal, el relleno animado— había que copiarlo cinco veces. Ahora se
+   toca aquí y cambian los cinco sitios a la vez.
+
+   En las fichas quedan solo las reglas que de verdad son suyas: la maquetación de
+   cada sección y el estado `:disabled` del UNO/KOCEVLO, que no existe en la burbuja.
+
+   El texto va centrado porque al estirarse (.is-fit) la píldora es más ancha que
+   su contenido. */
+.acc-pop-pill,
+.size-variant{
+  padding:var(--variant-pill-padding);
+  border-radius:var(--variant-radius);
+  /* El TRAZO, que es lo único que distingue a la elegida. `border` no sabe dibujarse a
+     medias, así que se hace con DOS fondos: el blanco recortado a padding-box (el
+     relleno) y el degradado recortado a border-box (el anillo), con el borde real en
+     transparente para dejar ver ese trozo. Es la única forma que respeta el
+     border-radius de píldora; un ::before girado se saldría de la curva.
+
+     El degradado va del negro del trazo a un gris casi transparente (#00000008), con
+     corte seco en `--borde-relleno`. Así la variable es literalmente cuánto trazo hay
+     DIBUJADO: en reposo vale 0 y el anillo es ese gris de punta a punta —el filo tenue
+     de siempre, sin ningún tramo negro ni medias diagonales— y al elegirla sube a 100%
+     y el negro nace y da la vuelta entera. El borde real va transparente y sus 2px
+     están puestos siempre, también en reposo, para que al dibujarse no se mueva nada.
+     135deg: la MISMA diagonal que los swatches bicolor del sitio
+     (project_swatch_diagonal_rule), así que el trazo nace por la misma esquina. */
+  border:2px solid transparent;
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    linear-gradient(135deg,
+      #000000b3 var(--borde-relleno, 0%),
+      #00000008 var(--borde-relleno, 0%)) border-box;
+  /* Ancla de la capa que dibuja el trazo en táctil (ver más abajo). */
+  position:relative;
+  color:#111315;
+  font-size:.78rem;
+  font-weight:800;
+  line-height:1.1;
+  text-align:center;
+  white-space:nowrap;
+  cursor:pointer;
+  transition:var(--variant-pill-transition);
+}
+
+/* ── El barrido del trazo, SOLO con puntero fino ──────────────────────────────
+   Mover `--borde-relleno` obliga a repintar el degradado del anillo en CADA fotograma:
+   no hay nada que la GPU pueda componer, es rasterizado puro sobre un borde redondeado
+   con dos recortes (padding-box + border-box) y con el texto encima. En escritorio
+   sobra potencia; en un iPhone de verdad NO — se ve a tirones, confirmado por el
+   usuario en agosto de 2026.
+
+   OJO al medirlo: en WebKit headless sobre un PC esto sale a ~57 fps y parece sano.
+   No sirve de prueba. El dispositivo real es el que manda, y ahí va mal.
+
+   En táctil se anima IGUAL de lejos pero por otra vía: el anillo entero va en una capa
+   aparte (el ::after de abajo) a la que solo se le mueve la OPACIDAD, que la GPU sí
+   compone. El gesto es un fundido en vez de un barrido, pero va fino y el estado final
+   es idéntico. Las dos vías son EXCLUYENTES: aquí se apaga la capa, y allí la variable
+   se queda en el 0% de reposo. */
+@media (hover: hover) and (pointer: fine){
+  .acc-pop-pill,
+  .size-variant{
+    /* La animación solo dispara al PONERSE la clase, así que al quitarla el trazo se
+       borraba de golpe: la transición es la que corre en los dos sentidos y hace que
+       la que deja de estar elegida DESdibuje el borde. Conviven a propósito — la
+       animación manda mientras dura y es la que dibuja en la burbuja del home, donde
+       las píldoras se crean de cero y una transición no tendría valor anterior del que
+       partir. Solo transiciona porque está registrada con @property. */
+    transition:transform .16s ease, box-shadow .16s ease, background .16s ease, color .16s ease,
+               --borde-relleno .45s ease;
+  }
+  /* El 100% vive AQUÍ DENTRO: en táctil la variable tiene que quedarse en el 0% de
+     reposo, porque allí el trazo lo pone la capa. Si además saltara a 100%, el anillo
+     se pintaría dos veces. */
+  .acc-pop-pill.is-active,
+  .acc-pop-pill.is-active:hover,
+  .size-variant.is-active,
+  .size-variant.is-active:hover{
+    --borde-relleno:100%;
+    animation:acc-pop-rellenar-borde .45s ease;
+  }
+  /* Con barrido el trazo lo pinta la propia variable: la capa sobra y lo duplicaría. */
+  .acc-pop-pill::after,
+  .size-variant::after{ display:none; }
+}
+
+/* ── El trazo como CAPA (la vía de táctil) ────────────────────────────────────
+   El anillo ENTERO, superpuesto al filo tenue de la píldora y con la opacidad a 0. Al
+   elegir sube a 1 y el trazo queda puesto.
+
+   Entero y no la mitad: en reposo ya no hay ningún tramo negro debajo (el fondo de la
+   píldora se queda en el 0%, o sea todo el anillo en #00000008), así que fundir el aro
+   completo no repinta nada dos veces. Cuando el reposo era "media diagonal negra" esta
+   capa tenía que traer solo la mitad que faltaba, y de ahí venía su degradado a 135°;
+   ahora es un color plano.
+
+   El anillo se recorta con dos máscaras compuestas en XOR —una al border-box y otra al
+   padding-box—, que es la forma estándar de dejar solo el marco sin tapar el texto.
+   `inset:-2px` porque una capa absoluta se coloca respecto al PADDING box: sin eso
+   quedaría 2px por dentro y no encajaría con el borde. */
+.acc-pop-pill::after,
+.size-variant::after{
+  content:'';
+  position:absolute;
+  inset:-2px;
+  border:2px solid transparent;
+  border-radius:inherit;
+  background:#000000b3 border-box;
+  -webkit-mask:linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+          mask:linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+          mask-composite:exclude;
+  opacity:0;
+  /* Solo opacidad: es de lo poco que la GPU compone sin repintar nada. */
+  transition:opacity .38s ease;
+  pointer-events:none;
+}
+.acc-pop-pill.is-active::after,
+.size-variant.is-active::after{ opacity:1; }
+/* Al apuntar, la píldora SOLO se levanta 1px. Sin sombra: la única diferencia entre
+   elegida y no elegida es el trazo, y una sombra al pasar por encima metía un segundo
+   relieve que competía con él. Tampoco lleva border-color, que pintaría un anillo
+   sólido de un color encima y se cargaría la diagonal justo al apuntar. En las fichas
+   se excluye además la píldora apagada, que allí sí existe.
+
+   Va tras `hover:hover` porque en táctil NO hay hover de verdad: el navegador lo
+   aplica al tocar y lo deja PEGADO hasta que tocas en otro sitio, así que la píldora
+   recién elegida se quedaba 1px más alta que su vecina, desalineada, sin nada que lo
+   justificara. Comprobado en WebKit táctil: tras el toque, transform=translateY(-1px)
+   persistente hasta tocar fuera. */
+@media (hover: hover) and (pointer: fine){
+  .acc-pop-pill:hover,
+  .size-variant:hover:not(:disabled){ transform:translateY(-1px); }
+  .acc-pop-pill[disabled]:hover{ transform:none; }
+}
+/* El box-shadow que queda es el aro de foco por teclado, y es el ÚNICO del componente:
+   por eso no hay ninguna regla que lo apague en la elegida. La había, y como iba
+   después de esta y con la misma especificidad, se llevaba por delante el aro de foco
+   de la píldora ya elegida. */
+.acc-pop-pill:focus-visible,
+.size-variant:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(17,24,39,.14); }
+/* .45 y no .32, por lo mismo que el círculo: a 12,5px un texto al 32% no se lee
+   como deshabilitado, se lee como un fallo de pintado. */
+.acc-pop-pill[disabled]{ cursor:not-allowed; opacity:var(--variant-disabled-opacity); }
+
+/* ── Acuse: lo elegido se pone VERDE ─────────────────────────────────────────
+   Al añadir, el trazo de la píldora y el anillo del color viran al mismo verde que
+   el "✓ Añadido" de abajo, y —esto es lo importante— la animación de relleno se
+   APAGA. Elegir repinta la burbuja entera, así que en el último repintado las
+   píldoras nacían de cero y el borde se volvía a dibujar entero justo cuando ya no
+   quedaba nada que elegir: el gesto se leía como "elige otra vez" en vez de como una
+   confirmación. Ahora el movimiento termina y lo que cambia es el color.
+
+   El fondo se redeclara aquí porque el tramo tiene que ser verde; el tope sigue siendo
+   --borde-relleno, que con puntero fino ya vale 100%, así que el anillo verde sale
+   cerrado. */
+.acc-pop.is-anadido .acc-pop-pill.is-active{
+  animation:none;
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    linear-gradient(135deg,
+      #15803d var(--borde-relleno, 0%),
+      #00000008 var(--borde-relleno, 0%)) border-box;
+}
+/* En táctil el trazo lo pone la capa, así que también tiene que virar: si no, el acuse
+   saldría verde por debajo pero con el aro negro encima, tapándolo. */
+.acc-pop.is-anadido .acc-pop-pill.is-active::after{
+  background:#15803d border-box;
+}
+
+.acc-pop.is-anadido .acc-pop-swatch.is-active{
+  border-color:#15803d;
+  box-shadow:0 0 0 3px rgba(21,128,61,.16), 0 4px 12px rgba(21,128,61,.14);
+}
+
+/* AQUÍ NO HAY BOTÓN DE AÑADIR. La línea entra en el carrito sola en cuanto están
+   elegidos todos los ejes, así que lo que cierra el cuadro es este renglón de texto:
+   mientras falta algo dice qué falta ("Elige medida") y, al completarse, se convierte
+   en el acuse y la burbuja se cierra sola.
+
+   Es un <p>, no un botón apagado: no hay nada que pulsar y darle forma de píldora
+   sería prometer un clic que no existe. De ahí que tampoco herede ya nada del botón
+   del home —`.acc-pop-add` se ha quitado de los grupos de `.card .btn-cart` en
+   main.css— y que el cuadro sea ~46px más bajo que antes. */
+.acc-pop-guia{
+  margin:2px 0 0;
+  min-height:17px;
+  text-align:center;
+  font-size:.68rem;
+  font-weight:800;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  line-height:1.25;
+  color:#98a2b3;
+}
+
+/* Acuse. El verde es el mismo que usa el círculo "+" de la fila al añadir, para que
+   el cliente vea el mismo gesto venga de donde venga. */
+.acc-pop-guia.is-ok{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  color:#15803d;
+}
+/* Check por máscara, como el "+" de .compat-add-plus y el icono de .btn-main: el
+   subset local de Font Awesome (css/icons.css) no trae este glifo. */
+.acc-pop-guia.is-ok::before{
+  content:'';
+  flex:0 0 auto;
+  width:13px;
+  height:13px;
+  background-color:currentColor;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* Esqueleto mientras se lee la ficha del accesorio. */
+.acc-pop-cargando{
+  margin:0;
+  padding:14px 0;
+  text-align:center;
+  font-size:.7rem;
+  font-weight:800;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:#98a2b3;
+}
+
+/* No hay enlace "Ver la ficha" a propósito: el título de la fila desde la que se
+   abre esto YA es un enlace a la ficha, así que era un duplicado que solo sumaba
+   alto al cuadro. */
+
+@media (prefers-reduced-motion: reduce){
+  .acc-pop{ transition:none; transform:none; }
+  .acc-pop-swatch, .acc-pop-pill, .size-variant{ transition:none; }
+  /* El trazo aparece ya puesto, sin gesto. Hay que cortar las TRES vías: la animación
+     y la transición del barrido (puntero fino) y el fundido de la capa (táctil). */
+  .acc-pop-pill.is-active, .size-variant.is-active{ animation:none; }
+  .acc-pop-pill::after, .size-variant::after{ transition:none; }
+}

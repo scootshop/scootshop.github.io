@@ -194,7 +194,7 @@
     try {
       var parsed = new URL(href, window.location.origin);
       parsed.searchParams.set('color', colorKey || 'default');
-      parsed.searchParams.set('colorLabel', colorLabel || 'Color');
+      parsed.searchParams.set('colorLabel', colorLabel || '');
       if (variantImage) parsed.searchParams.set('image', variantImage);
 
       var nextHref = /^https?:\/\//i.test(href)
@@ -204,7 +204,7 @@
       link.setAttribute('href', nextHref);
     } catch (_) {
       var base = href.split('&color=')[0].split('&colorLabel=')[0];
-      var fallbackHref = base + '&color=' + encodeURIComponent(colorKey || 'default') + '&colorLabel=' + encodeURIComponent(colorLabel || 'Color');
+      var fallbackHref = base + '&color=' + encodeURIComponent(colorKey || 'default') + '&colorLabel=' + encodeURIComponent(colorLabel || '');
       if (variantImage) fallbackHref += '&image=' + encodeURIComponent(variantImage);
       link.setAttribute('href', fallbackHref);
     }
@@ -231,7 +231,12 @@
       (activeButton.getAttribute('aria-label') || '').trim() ||
       (activeButton.getAttribute('title') || '').trim() ||
       (activeLabelNode ? String(activeLabelNode.textContent || '').trim() : '') ||
-      'Color';
+      /* Último recurso leyendo el DOM: el rótulo del eje que la propia sección
+         declara. "Color" a pelo era la suposición de siempre. */
+      (function () {
+        var et = selector.querySelector('.color-variants-label');
+        return et ? String(et.textContent || '').replace(/:\s*$/, '').trim() : '';
+      })();
 
     var key = (activeButton.getAttribute('data-color-key') || '').trim() || label || 'default';
     var mainImage = gallery.querySelector('#mainImage');
@@ -823,7 +828,10 @@
       }
 
       if (activeColorLabel) {
-        activeColorLabel.textContent = variant.label || variant.name || 'Color';
+        // Sin etiqueta en la opción, el respaldo es el nombre del EJE del catálogo.
+        // Poner "Color" aquí era la vieja suposición: en una ficha de modelo, el
+        // valor activo se anunciaba como un color.
+        activeColorLabel.textContent = variant.label || variant.name || (eje && eje.label) || '';
       }
 
       applyVariantContent(variant);
@@ -864,7 +872,17 @@
       }
     }
 
+    /* La foto principal de una opción la resuelve el NÚCLEO, con la misma convención
+       que usa la burbuja: identificadores explícitos, `imagesBy` para las fotos por
+       combinación y la galería del producto para traducir un índice en ruta. Aquí
+       había una copia que resolvía solo por índice y no entendía `imagesBy`. */
     function getVariantPrimaryImage(variant) {
+      if (window.SS_ATTRS && typeof window.SS_ATTRS.fotoDe === 'function' && eje) {
+        var seleccion = {};
+        seleccion[eje.key] = variant;
+        var url = window.SS_ATTRS.fotoDe(product, seleccion);
+        if (url) return url;
+      }
       var indexes = toIndexList(variant, originalItems.length);
       var primaryIndex = indexes.length ? indexes[0] : 1;
       var item = originalItems[primaryIndex - 1] || originalItems[0];
@@ -892,6 +910,39 @@
         if (badge) {
           var target = (badge.closest && badge.closest('.dgt-tooltip')) || badge;
           target.style.display = variant.dgt ? '' : 'none';
+        }
+      }
+
+      /* PRECIO Y REFERENCIA POR OPCIÓN. Una variante no siempre cambia solo la foto:
+         puede ser otra configuración con otro precio y otra referencia (una versión
+         Plus, una medida más larga). El catálogo ya podía declararlo —el núcleo
+         normaliza `sku` y `priceText` en cada opción— pero nadie los leía, así que
+         declararlo no servía de nada. Se leen aquí, en el mismo sitio que la
+         descripción y el sello, y de aquí salen el precio visible, el botón de
+         carrito y el enlace de compra. Si la opción no los declara, no se toca nada:
+         los productos de hoy se comportan exactamente igual. */
+      var precioEl = panel.querySelector('.price-now');
+      if (precioEl && variant.priceText && precioEl.textContent.trim() !== variant.priceText) {
+        precioEl.textContent = variant.priceText;
+      }
+
+      if (variant.sku) {
+        var btnCarrito = panel.querySelector('[data-product-cart-btn="true"]');
+        if (btnCarrito) {
+          btnCarrito.setAttribute('data-sku', variant.sku);
+          if (variant.priceText) btnCarrito.setAttribute('data-price', variant.priceText);
+        }
+        var comprar = panel.querySelector('.btn-main');
+        if (comprar && comprar.getAttribute('href')) {
+          try {
+            var u = new URL(comprar.getAttribute('href'), window.location.origin);
+            u.searchParams.set('sku', variant.sku);
+            if (variant.priceText) {
+              var num = String(variant.priceText).replace(/[^\d.,]/g, '').replace(',', '.');
+              if (num) u.searchParams.set('price', num);
+            }
+            comprar.setAttribute('href', u.pathname + u.search + u.hash);
+          } catch (_) {}
         }
       }
     }
@@ -1012,7 +1063,7 @@
 
     function updateCheckoutUrlWithColor(variant) {
       var colorKey = variant.key || variant.label || 'default';
-      var colorLabel = variant.label || variant.name || 'Color';
+      var colorLabel = variant.label || variant.name || (eje && eje.label) || '';
       var variantImage = getVariantPrimaryImage(variant);
       updateCheckoutLinksColorParams(colorKey, colorLabel, variantImage);
 
@@ -1039,7 +1090,12 @@
       }
     }
 
-    var defaultVariant = variants.find(function (variant) { return variant.default === true || variant.defaultColor === true; }) || variants[0];
+    /* La opción de partida la decide el núcleo: la marcada, y si no la primera que no
+       esté agotada. Aquí se cogía `variants[0]` a secas, así que una ficha cuyo primer
+       color estuviera agotado abría con una opción que no se podía comprar. */
+    var defaultVariant = (window.SS_ATTRS && typeof window.SS_ATTRS.porDefecto === 'function')
+      ? window.SS_ATTRS.porDefecto(eje)
+      : (variants.find(function (variant) { return variant.default === true || variant.defaultColor === true; }) || variants[0]);
     if (defaultVariant) {
       // Carga inicial: sin animación (no tiene sentido "cambiar" a la foto que
       // ya se está pintando por primera vez).

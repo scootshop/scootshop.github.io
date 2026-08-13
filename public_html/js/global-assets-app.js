@@ -996,7 +996,9 @@
         if (!colorKey) return parsed.pathname + parsed.search + parsed.hash;
 
         parsed.searchParams.set('color', colorKey);
-        parsed.searchParams.set('colorLabel', colorLabel || 'Color');
+        // Sin etiqueta no se inventa una: escribir "Color" aqui metia la palabra
+        // en el enlace de compra de un producto que se elige por modelo o medida.
+        parsed.searchParams.set('colorLabel', colorLabel || '');
 
         var mainImage = document.querySelector('#mainImage');
         var mainImageSrc = mainImage ? (mainImage.getAttribute('src') || '').trim() : '';
