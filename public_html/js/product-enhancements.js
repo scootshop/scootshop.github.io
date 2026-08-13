@@ -211,7 +211,7 @@
   }
 
   function ensureDefaultColorFromDom() {
-    var selector = panel.querySelector('.color-variants');
+    var selector = panel.querySelector('.variant-axis');
     if (!selector) return;
 
     var activeButton = selector.querySelector('.variant-option.is-active:not([disabled]):not([aria-disabled="true"])');
@@ -234,7 +234,7 @@
       /* Último recurso leyendo el DOM: el rótulo del eje que la propia sección
          declara. "Color" a pelo era la suposición de siempre. */
       (function () {
-        var et = selector.querySelector('.color-variants-label');
+        var et = selector.querySelector('.variant-axis-label');
         return et ? String(et.textContent || '').replace(/:\s*$/, '').trim() : '';
       })();
 
@@ -441,24 +441,24 @@
     if (!ejes.length) return;
 
     /* QUÉ EJE PINTA ESTA FUNCIÓN.
-       El contenedor `.color-variants` es el de los círculos. En un producto de varios
+       El contenedor `.variant-axis` es el de los círculos. En un producto de varios
        ejes (los manillares: medida + color, o modelo + medida) el primero del catálogo
        NO tiene por qué ser el color, y escribir ahí el eje equivocado rotulaba los
        círculos con "720 mm". Así que se empareja por contenedor: si existe un eje de
-       tipo swatch, es el suyo; si no, el primero. Las secciones `.size-variants` de
+       tipo swatch, es el suyo; si no, el primero. Las secciones `.variant-axis` de
        esas fichas las gobierna su propio script inline hasta la etapa 4. */
     var eje = null;
     for (var ie = 0; ie < ejes.length; ie++) {
       if (ejes[ie].type === 'swatch') { eje = ejes[ie]; break; }
     }
     /* SIN EJE DE CÍRCULOS. Un manillar de modelo+medida no tiene ninguno: sus dos ejes
-       viven en secciones `.size-variants`. Antes aquí se abandonaba —los pintaba el
+       viven en secciones `.variant-axis`. Antes aquí se abandonaba —los pintaba el
        script inline de la ficha—; ahora se marcan como "todos secundarios" y los pinta
        el mismo controlador genérico de más abajo. Si la ficha no trae ninguna sección
        donde pintarlos, se usa el primer eje como principal, como siempre. */
     var soloSecundarios = false;
     if (!eje) {
-      soloSecundarios = !!panel.querySelector('.size-variants');
+      soloSecundarios = !!panel.querySelector('.variant-axis');
       eje = ejes[0];
     }
     var variants = eje.options;
@@ -477,7 +477,14 @@
     if (!originalItems.length) return;
 
     // Reutilizar markup estático si ya existe en el DOM (evita inserción dinámica que causa CLS)
-    var existingSelector = soloSecundarios ? null : panelInner.querySelector('.color-variants');
+    /* La sección de este eje: las secciones del HTML se emparejan EN ORDEN con los
+       ejes del catálogo, así que la del eje principal es la que ocupa su posición.
+       Coger "la primera" fallaba en una ficha de dos ejes cuyo primer eje no es el de
+       círculos: el selector de color se montaba encima de la medida. */
+    var indicePrincipal = 0;
+    for (var ip = 0; ip < ejes.length; ip++) if (ejes[ip].key === eje.key) indicePrincipal = ip;
+    var seccionesFicha = panelInner.querySelectorAll('.variant-axis');
+    var existingSelector = soloSecundarios ? null : (seccionesFicha[indicePrincipal] || seccionesFicha[0] || null);
     var selector;
     var isStaticMarkup = false;
 
@@ -486,34 +493,34 @@
       isStaticMarkup = true;
     } else {
       selector = document.createElement('section');
-      selector.className = 'color-variants';
+      selector.className = 'variant-axis';
       selector.setAttribute('aria-label', eje.label + ': opciones disponibles');
     }
 
     var header, activeColorLabel, grid;
 
     if (isStaticMarkup) {
-      header = selector.querySelector('.color-variants-head');
+      header = selector.querySelector('.variant-axis-head');
       activeColorLabel = selector.querySelector('[data-active-color-label]');
-      grid = selector.querySelector('.color-variants-grid');
+      grid = selector.querySelector('.variant-axis-grid');
       /* El rótulo lo manda el CATÁLOGO, también sobre markup estático. Así una ficha
          no puede volver a decir "MODELOS:" mientras su dato dice otra cosa —que es
          justo la contradicción que hacía que el Home y la ficha no coincidieran. */
-      var etiquetaEstatica = selector.querySelector('.color-variants-label');
+      var etiquetaEstatica = selector.querySelector('.variant-axis-label');
       if (etiquetaEstatica) etiquetaEstatica.textContent = eje.label.toUpperCase() + ':';
       selector.setAttribute('aria-label', eje.label + ': opciones disponibles');
     } else {
       var dynBox = document.createElement('div');
-      dynBox.className = 'color-variants-box';
+      dynBox.className = 'variant-axis-box';
       header = document.createElement('div');
-      header.className = 'color-variants-head';
+      header.className = 'variant-axis-head';
       header.innerHTML =
-        '<span class="color-variants-label">' + eje.label.toUpperCase() + ':</span>' +
-        '<span class="color-variants-list" data-active-color-label></span>';
+        '<span class="variant-axis-label">' + eje.label.toUpperCase() + ':</span>' +
+        '<span class="variant-axis-value" data-active-color-label></span>';
       dynBox.appendChild(header);
       activeColorLabel = header.querySelector('[data-active-color-label]');
       grid = document.createElement('div');
-      grid.className = 'color-variants-grid';
+      grid.className = 'variant-axis-grid';
       dynBox.appendChild(grid);
       selector.appendChild(dynBox);
     }
@@ -1024,7 +1031,7 @@
     // Si hay markup estático se REUTILIZAN sus nodos (evita el salto de maquetación
     // de insertarlos), pero su contenido se reescribe desde el catálogo.
     if (soloSecundarios) {
-      // Nada que pintar aquí: los ejes van todos a las secciones `.size-variants`.
+      // Nada que pintar aquí: los ejes van todos a las secciones `.variant-axis`.
     } else if (isStaticMarkup && grid) {
       var existingButtons = grid.querySelectorAll('.variant-option');
       variants.forEach(function (variant, index) {
@@ -1142,7 +1149,7 @@
        nueva de dos ejes exigía escribir una quinta.
 
        Aquí eso pasa a ser UNA implementación guiada por los datos: los ejes vienen del
-       catálogo, las secciones `.size-variants` del HTML se emparejan EN ORDEN con los
+       catálogo, las secciones `.variant-axis` del HTML se emparejan EN ORDEN con los
        ejes que no son el principal, y a partir de ahí toda elección —de cualquier eje—
        pasa por `aplicarSeleccion()`.
 
@@ -1159,24 +1166,29 @@
       }
       if (!otros.length) return;
 
-      var secciones = panel.querySelectorAll('.size-variants');
-      if (!secciones.length) return;   // esta ficha no tiene dónde pintarlos
+      var todasSecciones = panel.querySelectorAll('.variant-axis');
+      if (!todasSecciones.length) return;   // esta ficha no tiene dónde pintarlos
+      var secciones = [];
+      for (var isec = 0; isec < todasSecciones.length; isec++) {
+        if (!soloSecundarios && isec === indicePrincipal) continue;   // esa es la del principal
+        secciones.push(todasSecciones[isec]);
+      }
 
       var controles = [];
 
       otros.forEach(function (ejeSec, idx) {
         var seccion = secciones[idx];
         if (!seccion) return;
-        var rejilla = seccion.querySelector('.size-variants-grid') || seccion.querySelector('.color-variants-grid');
+        var rejilla = seccion.querySelector('.variant-axis-grid') || seccion.querySelector('.variant-axis-grid');
         if (!rejilla) return;
 
         // El rótulo lo pone el CATÁLOGO, no el HTML: es justo lo que se estaba
         // escribiendo a mano y lo que hacía que un eje se anunciara mal.
-        var rotulo = seccion.querySelector('.color-variants-label');
+        var rotulo = seccion.querySelector('.variant-axis-label');
         if (rotulo && ejeSec.label) rotulo.textContent = String(ejeSec.label).toUpperCase() + ':';
         var valorActivo = seccion.querySelector('[data-active-size-label]')
           || seccion.querySelector('[data-active-model-label]')
-          || seccion.querySelector('.color-variants-list');
+          || seccion.querySelector('.variant-axis-value');
 
         var existentes = rejilla.querySelectorAll('button');
         var botones = [];
@@ -1303,6 +1315,16 @@
         aplicarSeleccion({ boton: boton });
         applySeriesAccentForVariant(variant, boton);
       };
+
+      /* El aviso de stock vive en la cabecera del PRIMER eje —es donde lo pone el HTML
+         y donde estaba el diseño—. Con dos secciones que ahora se llaman igual, la
+         hidratación lo recolocaba en la segunda; se reafirma aquí, que es el último
+         que toca estas secciones. */
+      var cabeceraPrimera = panel.querySelector('.variant-axis .variant-axis-head');
+      var aviso = panel.querySelector('.stock-note');
+      if (cabeceraPrimera && aviso && aviso.parentElement !== cabeceraPrimera) {
+        cabeceraPrimera.appendChild(aviso);
+      }
 
       // Estado inicial sin animación: la página ya nace con la foto correcta.
       aplicarSeleccion({ animate: false });
@@ -1909,7 +1931,7 @@
      La fila de círculos no se parte en dos líneas ni encoge (flex-wrap:nowrap en
      tarjetas.css, a propósito), así que con muchos colores —el manillar LUNJE
      tiene 10— se sale del recuadro. El deslizamiento lo pone el CSS
-     (overflow-x:auto en .color-variants-grid); aquí va solo lo que el CSS no
+     (overflow-x:auto en .variant-axis-grid); aquí va solo lo que el CSS no
      puede saber:
 
        1) si el carril desborda DE VERDAD y por qué lado queda algo por ver, para
@@ -1942,7 +1964,7 @@
        que un cambio aquí vale para los dos. */
     function rails() {
       return Array.prototype.slice.call(
-        document.querySelectorAll('.color-variants-grid, .size-variants-grid'));
+        document.querySelectorAll('.variant-axis-grid, .variant-axis-grid'));
     }
 
     function prefersReducedMotion() {

@@ -301,7 +301,7 @@
 
   function readActiveColorSelection() {
     try {
-      var selector = document.querySelector('.color-variants');
+      var selector = document.querySelector('.variant-axis');
       if (!selector) return null;
 
       var activeButton = selector.querySelector('.variant-option.is-active:not([disabled]):not([aria-disabled="true"])');
@@ -1078,7 +1078,7 @@
       }
       if (!item) return;
 
-      // El selector .color-variants pertenece a la ficha del producto que se
+      // El selector .variant-axis pertenece a la ficha del producto que se
       // está viendo, así que solo vale para SU botón principal. Antes se leía
       // con un querySelector global y el color del producto visible se aplicaba
       // a cualquier otro botón de añadir de la página (p. ej. una tarjeta de

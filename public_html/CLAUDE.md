@@ -128,7 +128,11 @@ The checkout chip printed `Color: G2 PRO VMP` instead of `Modelo: …`. The hypo
 
 On top of that both summaries repaint once on `SS_ATTRS.ready` (the single frontier, as in the drawer), rewriting **only the chip text** — never the list HTML, which would re-download the photos that `check-image-dupes.js` guards.
 
-**Migration status (Aug 2026):** stages 1–7 done and live (`20260813-11`). What is left is not variant architecture: structured `accessoryCategory` + compatibility (so a helmet or a bag declares what it fits the same way it declares its axes) and the containers' class names (`.color-variants` still names the axis, though nothing reads it as such).
+**Compatibility and accessory families are declared too.** `UNIVERSAL_ACCESSORIES_BY_CATEGORY` — a table inside `data/products.js` listing which SKUs are offered for each product category — is gone: an accessory now declares `fitsCategories: ['electric-scooters', …]` and `getCompatibleAccessories()` asks the accessories instead of consulting a list nobody remembers to update. All 15 accessories declare `accessoryCategory`, there is a real table of families (`accessoryCategoryDefinitions` + `SCOOTSHOP_getAccessoryCategories()`), and the catalog validator now fails if an accessory has no family, names one that doesn't exist, or points `compatibleSkus`/`fitsCategories` at something that isn't in the catalog. Verified invariant: the compatible list of all 26 products is identical before and after.
+
+**Class names, containers included.** `.color-variants*`/`.size-variants*` are now `.variant-axis`, `-box`, `-head`, `-label`, `-value`, `-grid`. Two consequences worth knowing, both hit for real: code that used to identify "the colour axis" by its class name now has to identify it by **what it contains** (`.variant-option--swatch`) or by **its position** (sections pair in order with the catalog's axes) — that's `seccionDeSwatches()` in `global-assets-app.js` and `indicePrincipal` in `product-enhancements.js`; and the four fichas' inline `<style>` blocks, which used to override `.size-variants` freely because the name was theirs alone, suddenly collided with `tarjetas.css` — so the "two axes read as one card" rule moved to `tarjetas.css`, once, for any ficha with two or more axes.
+
+**Migration status (Aug 2026):** stages 1–7 done and live (`20260813-12`), plus the visual system, the class rename and the compatibility model. Nothing of the variant architecture is pending.
 
 Two traps, both hit for real:
 

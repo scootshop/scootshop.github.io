@@ -764,7 +764,7 @@
     if (!panelInner) return;
 
     // Caja de variantes del panel: aqui solo importa DONDE va, no de que eje es.
-    var cajaVariantes = panelInner.querySelector('.color-variants');
+    var cajaVariantes = panelInner.querySelector('.variant-axis');
     var desc = panelInner.querySelector('.desc');
     // Lo inyecta product-enhancements.js despues de .desc. Si no se contempla
     // aqui, esta funcion vuelve a pegar el CTA justo detras de .desc y lo tira
@@ -885,9 +885,26 @@
      colgado del color quedaba flotando a media altura del cuadro. Buscando la
      primera sube al borde superior. En el resto de fichas no cambia nada: allí la
      única cabecera de opciones ES la del color. */
+  /* La sección del eje de CÍRCULOS. Se busca por lo que CONTIENE, no por su nombre:
+     todas las secciones de eje se llaman igual (.variant-axis) desde que las clases
+     nombran el control y no el eje. Antes esto decía `.color-variants` y funcionaba
+     por accidente —el nombre delataba el eje—; con el nombre único, coger "la
+     primera" señalaba la medida en las fichas de manillar. */
+  function seccionDeSwatches(raiz) {
+    var ambito = raiz || document;
+    var secciones = ambito.querySelectorAll('.variant-axis');
+    for (var i = 0; i < secciones.length; i++) {
+      if (secciones[i].querySelector('.variant-option--swatch')) return secciones[i];
+    }
+    /* Sin círculos NO hay respuesta: devolver "la primera" hacía que en una ficha de
+       modelo+medida se leyera un eje cualquiera como si fuera la variante elegida, y
+       la hidratación escribía "720 mm" donde el selector ya había puesto "rb12-720". */
+    return null;
+  }
+
   function findStockNoteHome(ctaCol) {
-    return document.querySelector('.panel-inner .color-variants-head')
-      || document.querySelector('.color-variants')
+    return document.querySelector('.panel-inner .variant-axis-head')
+      || document.querySelector('.variant-axis')
       || document.querySelector('.panel .price-row')
       || ctaCol
       || null;
@@ -904,7 +921,13 @@
       note = document.createElement('p');
       note.className = 'stock-note';
     }
-    if (note.parentElement !== home) home.appendChild(note);
+    /* PERO si la ficha ya la colocó en la cabecera de un eje, ahí se queda. En una
+       ficha de dos ejes "la primera cabecera" depende del orden en que se esté
+       reordenando el panel en ese instante, y el aviso saltaba de la fila de la
+       medida a la del color según quién llegara antes. Lo que el HTML declara manda. */
+    var yaColocada = note.parentElement && note.parentElement.classList
+      && note.parentElement.classList.contains('variant-axis-head');
+    if (!yaColocada && note.parentElement !== home) home.appendChild(note);
     return note;
   }
 
@@ -965,7 +988,7 @@
       try {
         var parsed = new URL(nextHref, window.location.origin);
 
-        var selector = document.querySelector('.color-variants');
+        var selector = seccionDeSwatches();
         var activeButton = selector ? selector.querySelector('.variant-option.is-active:not([disabled]):not([aria-disabled="true"])') : null;
         if (!activeButton && selector) {
           var allButtons = selector.querySelectorAll('.variant-option');
@@ -1068,7 +1091,7 @@
           var activeImage = document.querySelector('#mainImage');
           var imageSrc = activeImage ? (activeImage.getAttribute('src') || '') : '';
 
-          var colorSelector = document.querySelector('.color-variants');
+          var colorSelector = seccionDeSwatches();
           var activeColorButton = colorSelector ? colorSelector.querySelector('.variant-option.is-active:not([disabled]):not([aria-disabled="true"])') : null;
           if (!activeColorButton && colorSelector) {
             var colorButtons = colorSelector.querySelectorAll('.variant-option');
@@ -1097,11 +1120,15 @@
              ninguno, así que aquí `activeColorKey` sale vacío y borraba la clave que
              el selector ya había escrito: la línea entraba al carrito sin variante.
              Se escribe solo cuando hay algo que escribir. */
-          if (activeColorKey) {
+          /* La variante la manda el SELECTOR, no esta hidratación. Si el botón ya trae
+             atributos con nombre es que alguien la ha resuelto —incluida la
+             combinación de dos ejes— y aquí no hay nada que corregir. */
+          var yaResuelta = !!addToCartBtn.getAttribute('data-attrs');
+          if (!yaResuelta && activeColorKey) {
             addToCartBtn.setAttribute('data-color-key', activeColorKey);
             addToCartBtn.setAttribute('data-color', activeColorKey);
           }
-          if (activeColorLabel) addToCartBtn.setAttribute('data-color-label', activeColorLabel);
+          if (!yaResuelta && activeColorLabel) addToCartBtn.setAttribute('data-color-label', activeColorLabel);
           addToCartBtn.setAttribute('data-stock', 'in_stock');
           addToCartBtn.setAttribute('aria-label', 'Añadir al carrito ' + (product.name || 'producto'));
           addToCartBtn.innerHTML = '<i class="fa-solid fa-cart-plus" aria-hidden="true"></i> Añadir';

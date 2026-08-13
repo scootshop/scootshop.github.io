@@ -1169,6 +1169,11 @@
       productType: 'accessory',
       catalogType: 'accessory',
       categoryKey: 'accessories',
+      accessoryCategory: 'bags',
+      /* DONDE ENCAJA. Lo declara el accesorio, no una tabla central: al añadir uno
+         nuevo no hay que acordarse de editar ninguna lista en el codigo. Vale para
+         cualquier categoria del catalogo presente o futura. */
+      fitsCategories: ['electric-scooters', 'electric-bikes'],
       priceText: '8 €',
       compareAtPriceText: '',
       stock: 'in_stock',
@@ -1198,6 +1203,7 @@
       productType: 'accessory',
       catalogType: 'accessory',
       categoryKey: 'accessories',
+      accessoryCategory: 'mounts',
       priceText: '7,40 €',
       compareAtPriceText: '',
       stock: 'in_stock',
@@ -1226,6 +1232,7 @@
       productType: 'accessory',
       catalogType: 'accessory',
       categoryKey: 'accessories',
+      accessoryCategory: 'stickers',
       priceText: '4,50 €',
       compareAtPriceText: '',
       stock: 'in_stock',
@@ -1255,6 +1262,7 @@
       productType: 'accessory',
       catalogType: 'accessory',
       categoryKey: 'accessories',
+      accessoryCategory: 'stickers',
       priceText: '6,50 €',
       compareAtPriceText: '',
       stock: 'in_stock',
@@ -1284,6 +1292,7 @@
       productType: 'accessory',
       catalogType: 'accessory',
       categoryKey: 'accessories',
+      accessoryCategory: 'lighting',
       priceText: '6 €',
       compareAtPriceText: '',
       stock: 'in_stock',
@@ -2099,6 +2108,7 @@ attributes: [
       productType: 'accessory',
       catalogType: 'accessory',
       categoryKey: 'accessories',
+      accessoryCategory: 'limiters',
       priceText: '58,99 €',
       compareAtPriceText: '',
       stock: 'in_stock',
@@ -2128,6 +2138,7 @@ attributes: [
       productType: 'accessory',
       catalogType: 'accessory',
       categoryKey: 'accessories',
+      accessoryCategory: 'limiters',
       priceText: '58,99 €',
       compareAtPriceText: '',
       stock: 'in_stock',
@@ -2157,6 +2168,7 @@ attributes: [
       productType: 'accessory',
       catalogType: 'accessory',
       categoryKey: 'accessories',
+      accessoryCategory: 'limiters',
       priceText: '58,99 €',
       compareAtPriceText: '',
       stock: 'in_stock',
@@ -2186,6 +2198,7 @@ attributes: [
       productType: 'accessory',
       catalogType: 'accessory',
       categoryKey: 'accessories',
+      accessoryCategory: 'limiters',
       priceText: '58,99 €',
       compareAtPriceText: '',
       stock: 'in_stock',
@@ -2484,10 +2497,26 @@ attributes: [
      en cada entrada del catalogo. La clave es el categoryKey del producto, asi
      que un accesorio puede valer para patinetes y no para motos o bicis.
      Anadir uno nuevo es anadir su SKU a la categoria que toque. */
-  var UNIVERSAL_ACCESSORIES_BY_CATEGORY = {
-    'electric-scooters': ['ACC-BAG'],
-    'electric-bikes': ['ACC-BAG']
-  };
+  /* CATEGORÍAS DE ACCESORIO — declaradas, no deducidas del nombre ni del SKU.
+     Un accesorio dice a qué familia pertenece (`accessoryCategory`) y aquí está qué
+     significa cada familia. Sirve para agrupar, filtrar y para que un casco o una
+     mochila entren sin que nadie programe nada: se añade la familia aquí y el
+     producto la declara. El validador exige que la que declare exista. */
+  var accessoryCategoryDefinitions = [
+    { key: 'handlebars', label: 'Manillares', order: 1 },
+    { key: 'limiters',   label: 'Mandos limitadores', order: 2 },
+    { key: 'bags',       label: 'Bolsas y transporte', order: 3 },
+    { key: 'lighting',   label: 'Iluminación', order: 4 },
+    { key: 'mounts',     label: 'Soportes', order: 5 },
+    { key: 'stickers',   label: 'Pegatinas', order: 6 }
+  ];
+
+  function getAccessoryCategories() {
+    return accessoryCategoryDefinitions
+      .slice()
+      .sort(function (a, b) { return (a.order || 99) - (b.order || 99); })
+      .map(function (c) { return Object.assign({}, c); });
+  }
 
   function getCompatibleAccessories(sku) {
     var todos = cloneProducts();
@@ -2502,7 +2531,16 @@ attributes: [
 
     /* Primero los declarados por el producto (el limitador de SU modelo, lo mas
        relevante) y despues los universales. */
-    var universales = UNIVERSAL_ACCESSORIES_BY_CATEGORY[origen.categoryKey] || [];
+    /* Universales: los accesorios que declaran encajar en la CATEGORIA de este
+       producto. Antes esto era una tabla escrita a mano aqui —categoria -> lista de
+       SKU— y cada accesorio nuevo obligaba a editarla; ahora lo dice el propio
+       accesorio con `fitsCategories`. Misma respuesta, sin lista que mantener. */
+    var universales = [];
+    for (var u = 0; u < todos.length; u++) {
+      var acc = todos[u];
+      if (!Array.isArray(acc.fitsCategories)) continue;
+      if (acc.fitsCategories.indexOf(origen.categoryKey) !== -1) universales.push(acc.sku);
+    }
     var pedidos = (Array.isArray(origen.compatibleSkus) ? origen.compatibleSkus : [])
       .concat(universales);
 
@@ -2740,6 +2778,32 @@ attributes: [
       });
     });
 
+    /* Estructura de accesorios: familia declarada y existente, y compatibilidad que
+       apunta a algo real. Sin esto, un accesorio nuevo podía entrar al catálogo sin
+       decir qué es ni dónde encaja y nadie se enteraba hasta verlo mal en una ficha. */
+    var familias = {};
+    accessoryCategoryDefinitions.forEach(function (c) { familias[c.key] = true; });
+    var porSkuVal = {};
+    list.forEach(function (p) { porSkuVal[p.sku] = true; });
+
+    list.forEach(function (p) {
+      var id = p.id || p.sku || 'producto-sin-id';
+      if (p.catalogType === 'accessory') {
+        if (!p.accessoryCategory) {
+          errors.push('[' + id + '] Accesorio sin accessoryCategory.');
+        } else if (!familias[p.accessoryCategory]) {
+          errors.push('[' + id + '] accessoryCategory desconocida: "' + p.accessoryCategory + '".');
+        }
+      }
+      (Array.isArray(p.compatibleSkus) ? p.compatibleSkus : []).forEach(function (sk) {
+        if (!porSkuVal[sk]) errors.push('[' + id + '] compatibleSkus apunta a un SKU que no existe: "' + sk + '".');
+      });
+      (Array.isArray(p.fitsCategories) ? p.fitsCategories : []).forEach(function (ck) {
+        var existe = categoryDefinitions.some(function (c) { return c.key === ck; });
+        if (!existe) errors.push('[' + id + '] fitsCategories apunta a una categoría que no existe: "' + ck + '".');
+      });
+    });
+
     return {
       checkedProducts: list.length,
       warnings: warnings,
@@ -2764,6 +2828,7 @@ attributes: [
   window.SCOOTSHOP_getCategorySeries = getCategorySeries;
   window.SCOOTSHOP_getSeriesProducts = getSeriesProducts;
   window.SCOOTSHOP_getCompatibleAccessories = getCompatibleAccessories;
+  window.SCOOTSHOP_getAccessoryCategories = getAccessoryCategories;
   window.SCOOTSHOP_validateCatalogColors = function () {
     var report = validateCatalogColors(window.SCOOTSHOP_PRODUCTS || []);
     return report;

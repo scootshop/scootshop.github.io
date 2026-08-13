@@ -9,7 +9,7 @@
   <meta name="robots" content="index,follow,max-image-preview:large" />
   <meta name="format-detection" content="telephone=no" />
   <link rel="canonical" href="https://scootshop.co/accesorios/manillar-uno/" />
-  <meta name="asset-version" content="20260813-11" />
+  <meta name="asset-version" content="20260813-12" />
   <!-- Ficha SIEMPRE arriba: reset al tope en inline + DOMContentLoaded + 2 frames (vence el carry de scroll del WebView de apps, que aparece al renderizar). Sin lock ni guard. -->
   <script>(function(){try{if('scrollRestoration' in history)history.scrollRestoration='manual';var t=function(){try{window.scrollTo(0,0);}catch(e){}};t();document.addEventListener('DOMContentLoaded',function(){t();requestAnimationFrame(function(){t();requestAnimationFrame(t);});},{once:true});addEventListener('pageshow',function(e){if(e&&e.persisted)t();});}catch(e){}})();</script>
   <meta property="og:url" content="https://scootshop.co/accesorios/manillar-uno/" />
@@ -29,11 +29,11 @@
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" media="print" onload="this.media='all'" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" /></noscript>
-  <link rel="stylesheet" href="/css/icons.css?v=20260813-11">
-  <link rel="stylesheet" href="/css/main.css?v=20260813-11">
-  <link rel="stylesheet" href="/css/partials.mobile-menu.css?v=20260813-11">
-  <link rel="stylesheet" href="/css/tarjetas.css?v=20260813-11">
-  <!-- Estilos SOLO de esta ficha. Reutiliza .color-variants-box/-head/-label/-list de
+  <link rel="stylesheet" href="/css/icons.css?v=20260813-12">
+  <link rel="stylesheet" href="/css/main.css?v=20260813-12">
+  <link rel="stylesheet" href="/css/partials.mobile-menu.css?v=20260813-12">
+  <link rel="stylesheet" href="/css/tarjetas.css?v=20260813-12">
+  <!-- Estilos SOLO de esta ficha. Reutiliza .variant-axis-box/-head/-label/-list de
        tarjetas.css (son selectores sueltos) y aqui solo van las pildoras, que no existen
        en ninguna otra pagina. Va inline para no tocar un .css global, que obligaria a
        bumpear el asset-version y redesplegar las 40 fichas por dos filas de botones.
@@ -41,17 +41,17 @@
        envuelve (son hasta 7) y admite estado deshabilitado. -->
   <style>
     /* El DISEÑO de las pildoras ya NO esta aqui: .variant-option--pill comparte regla con
-       .variant-option--pill en tarjetas.css, y el carril (.size-variants-grid) comparte la
+       .variant-option--pill en tarjetas.css, y el carril (.variant-axis-grid) comparte la
        del carril de colores, incluido su controlador de JS. Asi un retoque vale para
        los cinco sitios a la vez. Aqui queda solo lo propio de esta ficha: la
        maquetacion de sus dos secciones y el estado apagado, que no existe en la
        burbuja. */
-    .size-variants{margin:16px 0}
-    .panel-inner > .size-variants:first-child{margin-top:0}
+    .variant-axis{margin:16px 0}
+    .panel-inner > .variant-axis:first-child{margin-top:0}
 
     /* MODELO y MEDIDA se leen como UNA sola tarjeta. NO se envuelven en un contenedor
        comun A PROPOSITO: enforceProductActionOrder() (global-assets-app.js) busca
-       .color-variants por descendencia y lo reinserta como HIJO DIRECTO de
+       .variant-axis por descendencia y lo reinserta como HIJO DIRECTO de
        .panel-inner, asi que un envoltorio lo arrancaria de dentro ~1s despues de
        cargar, a la vista del cliente. Siguen siendo secciones hermanas y lo unico
        que cambia es el aspecto: sin hueco, esquinas redondeadas solo por fuera y una
@@ -60,20 +60,8 @@
        que la ultima caja de la pila es la de MEDIDA. Por eso la regla de "sin
        esquinas abajo" va acotada con :first-of-type: sin acotar dejaba tambien la
        ultima con las esquinas de abajo cuadradas. */
-    .size-variants{margin-bottom:0}
-    .size-variants + .size-variants{margin-top:0}
-    /* Solo la de arriba (MODELO) pierde las esquinas de abajo. */
-    .size-variants:first-of-type > .color-variants-box{
-      border-bottom-left-radius:0;
-      border-bottom-right-radius:0;
-    }
-    /* Solo la de abajo (MEDIDA) pierde las de arriba y lleva la linea de union. Se
-       pinta el borde transparente de 1px que la caja YA tenia: no mueve nada. */
-    .size-variants + .size-variants > .color-variants-box{
-      border-top-left-radius:0;
-      border-top-right-radius:0;
-      border-top-color:rgba(15,23,42,.07);
-    }
+    /* La union de las dos secciones en una sola tarjeta es GLOBAL: vive en
+       css/tarjetas.css (.variant-axis + .variant-axis). Aqui ya no se copia. */
     /* El FB12 no se fabrica de 740 a 800: la pildora se queda visible pero apagada,
        asi el cliente ve que esa medida existe y que es el modelo el que la limita. */
     .variant-option--pill:disabled{
@@ -114,30 +102,30 @@
                  colorVariants. La clave de variante la construye el script del final y la
                  escribe en el boton del carrito y en el enlace de compra.
                  Van ANTES de .desc a proposito: enforceProductActionOrder()
-                 (global-assets-app.js) recoloca .color-variants delante de .desc ~1 s
+                 (global-assets-app.js) recoloca .variant-axis delante de .desc ~1 s
                  despues de cargar; con este orden no encuentra nada que mover y no salta
                  (project_ficha_panel_order_authority). -->
-            <section class="size-variants" aria-label="Modelo" data-static="true">
-              <div class="color-variants-box">
-                <div class="color-variants-head">
-                  <span class="color-variants-label">MODELO:</span>
-                  <span class="color-variants-list" data-active-model-label>RB12 elevador</span>
+            <section class="variant-axis" aria-label="Modelo" data-static="true">
+              <div class="variant-axis-box">
+                <div class="variant-axis-head">
+                  <span class="variant-axis-label">MODELO:</span>
+                  <span class="variant-axis-value" data-active-model-label>RB12 elevador</span>
                   <p class="stock-note stock-note--in">Stock</p>
                 </div>
-                <div class="size-variants-grid">
+                <div class="variant-axis-grid">
                   <button type="button" class="variant-option variant-option--pill model-variant is-active" aria-pressed="true" data-model-key="rb12" data-model-label="RB12 elevador" data-model-img="2" data-model-sizes="640,680,720,740,760,780,800">RB12 elevador</button>
                   <button type="button" class="variant-option variant-option--pill model-variant" aria-pressed="false" data-model-key="fb12" data-model-label="FB12 plano" data-model-img="3" data-model-sizes="640,680,720">FB12 plano</button>
                 </div>
               </div>
             </section>
 
-            <section class="size-variants" aria-label="Medidas disponibles" data-static="true">
-              <div class="color-variants-box">
-                <div class="color-variants-head">
-                  <span class="color-variants-label">MEDIDA:</span>
-                  <span class="color-variants-list" data-active-size-label>720 mm</span>
+            <section class="variant-axis" aria-label="Medidas disponibles" data-static="true">
+              <div class="variant-axis-box">
+                <div class="variant-axis-head">
+                  <span class="variant-axis-label">MEDIDA:</span>
+                  <span class="variant-axis-value" data-active-size-label>720 mm</span>
                 </div>
-                <div class="size-variants-grid">
+                <div class="variant-axis-grid">
                   <button type="button" class="variant-option variant-option--pill" aria-pressed="false" data-size-key="640" data-size-label="640 mm">640</button>
                   <button type="button" class="variant-option variant-option--pill" aria-pressed="false" data-size-key="680" data-size-label="680 mm">680</button>
                   <button type="button" class="variant-option variant-option--pill is-active" aria-pressed="true" data-size-key="720" data-size-label="720 mm">720</button>
@@ -165,8 +153,8 @@
     <footer>© <span id="y"></span> SCOOT SHOP · <a href="/#legal">Legal</a></footer>
   </main>
 
-  <script src="/data/products.js?v=20260813-11"></script>
-  <script src="/js/product-enhancements.js?v=20260813-11"></script>
+  <script src="/data/products.js?v=20260813-12"></script>
+  <script src="/js/product-enhancements.js?v=20260813-12"></script>
 
   <!-- El selector de ESTA ficha ya no tiene script propio. Sus dos ejes los pinta y
        los gobierna js/product-enhancements.js leyendo `attributes` del catálogo: la
@@ -175,6 +163,7 @@
        reescribían el botón de carrito; había cuatro copias, una por ficha. -->
 </body>
 </html>
+
 
 
 

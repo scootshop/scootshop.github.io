@@ -600,17 +600,17 @@ main{ padding-block:22px 32px; }
 
 /* Recuadro estilo botones AÑADIR/RESERVAR: fondo blanco, sin borde visible
    (transparente) y la misma sombra triple, con esquinas redondeadas de tarjeta. */
-.color-variants{
+.variant-axis{
   margin:16px 0;
 }
 
-.panel-inner > .color-variants:first-child{
+.panel-inner > .variant-axis:first-child{
   margin-top:0;
 }
 
 /* La caja interna lleva el estilo botón AÑADIR/RESERVAR (fondo blanco, borde
    transparente, misma sombra triple). El stock queda FUERA, como línea suelta. */
-.color-variants-box{
+.variant-axis-box{
   padding:14px 15px 15px;
   border:1px solid transparent;
   border-radius:18px;
@@ -631,22 +631,43 @@ main{ padding-block:22px 32px; }
    redondeado), y esas reglas viven en el <style> de cada ficha de manillar.
 
    Se cuenta con :has() sobre el panel, que es quien sabe cuántos hay; una sección
-   no puede mirarse a sí misma para saber si tiene compañía. Los dos casos:
-     · solo color   → el panel NO tiene ninguna .size-variants
-     · solo medida  → el panel NO tiene .color-variants NI dos .size-variants seguidas
+   no puede mirarse a sí misma para saber si tiene compañía. Ahora las secciones se
+   llaman igual (.variant-axis), así que la condición es literalmente "no hay dos
+   seguidas" — antes había que enumerar los casos por el NOMBRE de cada una.
    En un navegador sin :has() no pasa nada: se queda el recuadro redondeado de siempre. */
-.panel-inner:not(:has(.size-variants)) > .color-variants > .color-variants-box,
-.panel-inner:not(:has(.color-variants)):not(:has(.size-variants + .size-variants)) > .size-variants > .color-variants-box{
+.panel-inner:not(:has(.variant-axis + .variant-axis)) > .variant-axis > .variant-axis-box{
   border-bottom-left-radius:0;
   border-bottom-right-radius:0;
+}
+
+/* ── VARIOS EJES: se leen como UNA sola tarjeta ───────────────────────────────
+   Dos secciones seguidas se pegan: la de arriba pierde las esquinas de abajo, la de
+   abajo las de arriba y se dibuja la línea de unión sobre el borde que la caja YA
+   tenía (transparente), así que no mueve nada.
+
+   Esto estaba COPIADO en el <style> de las cuatro fichas de manillar. Al pasar las
+   dos secciones a llamarse igual (.variant-axis), esas copias además dejaron de
+   ganarle a este archivo —mismo selector, y el fichero carga después—, así que la
+   maquetación conjunta se rompía. Vive aquí, una vez, para cualquier ficha con dos
+   o más ejes, presentes o futuros. */
+.variant-axis + .variant-axis{ margin-top:0; }
+.panel-inner:has(.variant-axis + .variant-axis) > .variant-axis:not(:last-of-type){ margin-bottom:0; }
+.panel-inner:has(.variant-axis + .variant-axis) > .variant-axis:not(:last-of-type) > .variant-axis-box{
+  border-bottom-left-radius:0;
+  border-bottom-right-radius:0;
+}
+.variant-axis + .variant-axis > .variant-axis-box{
+  border-top-left-radius:0;
+  border-top-right-radius:0;
+  border-top-color:rgba(15,23,42,.07);
 }
 
 /* El renglón NO se parte nunca (nowrap). Antes envolvía, y con un nombre de color
    largo —"Tornasol amarillo · 780 mm"— la píldora de stock caía a una segunda línea
    y descuadraba el recuadro. Manda el stock: se queda siempre en su sitio, a la
    derecha del renglón. Lo que cede es el nombre del color, que se recorta con puntos
-   suspensivos (ver .color-variants-list). */
-.color-variants-head{
+   suspensivos (ver .variant-axis-value). */
+.variant-axis-head{
   display:flex;
   align-items:center;
   flex-wrap:nowrap;
@@ -657,7 +678,7 @@ main{ padding-block:22px 32px; }
 }
 
 /* Ni la etiqueta ("COLOR:", "MEDIDA:") ni el stock se encogen: son el marco fijo. */
-.color-variants-label{
+.variant-axis-label{
   flex:0 0 auto;
   font-size:.67rem;
   font-weight:800;
@@ -666,7 +687,7 @@ main{ padding-block:22px 32px; }
   color:#667085;
 }
 
-.color-variants-list{
+.variant-axis-value{
   /* display:block, no inline-flex: text-overflow:ellipsis solo recorta dentro de un
      contenedor de bloque; en un flex el texto va a una caja anónima y no se recorta.
      El centrado vertical lo da align-items del renglón, así que no se pierde nada. */
@@ -707,9 +728,9 @@ main{ padding-block:22px 32px; }
    de deslizarse. Comparte también el controlador de JS (colorVariantsRail en
    product-enhancements.js), así que hereda las máscaras de los bordes, la rueda
    horizontal y el "traer a la vista" de la opción activa. */
-.color-variants-grid,
-.size-variants-grid{
-  /* --rail-pad DEBE valer lo mismo que el padding lateral de .color-variants-box:
+.variant-axis-grid,
+.variant-axis-grid{
+  /* --rail-pad DEBE valer lo mismo que el padding lateral de .variant-axis-box:
      con ese número se sangra el carril hasta el canto del recuadro (margin negativo)
      y se devuelve el aire por dentro (padding). Si cambia el del recuadro, cambia este. */
   --rail-pad:15px;
@@ -721,7 +742,7 @@ main{ padding-block:22px 32px; }
   flex-wrap:nowrap;
   gap:12px;
   /* Arriba se descuenta lo que ya aporta la etiqueta (margin-bottom:10px de
-     .color-variants-head) y el aire del carril, para que la separación acabe siendo
+     .variant-axis-head) y el aire del carril, para que la separación acabe siendo
      los 12px de siempre pase lo que pase con --rail-air. Abajo el margen negativo
      compensa el padding entero: el aire extra del carril no engorda el recuadro. */
   margin:calc(12px - 10px - var(--rail-air)) calc(var(--rail-pad) * -1) calc(var(--rail-air) * -1);
@@ -743,14 +764,14 @@ main{ padding-block:22px 32px; }
   scrollbar-width:none;
 }
 
-.color-variants-grid::-webkit-scrollbar,
-.size-variants-grid::-webkit-scrollbar{
+.variant-axis-grid::-webkit-scrollbar,
+.variant-axis-grid::-webkit-scrollbar{
   display:none;
 }
 
 /* Los círculos NUNCA se encogen para caber: el carril crece y se desliza. */
-.color-variants-grid > .variant-option,
-.size-variants-grid > .variant-option--pill{
+.variant-axis-grid > .variant-option,
+.variant-axis-grid > .variant-option--pill{
   flex:0 0 auto;
 }
 
@@ -758,27 +779,27 @@ main{ padding-block:22px 32px; }
    de dejar hueco muerto a la derecha (el WAKE y el LUNJE solo tienen dos medidas). La
    clase la pone el mismo controlador que las de borde, después de medir. Es el mismo
    gesto que ya hace la burbuja con .acc-pop-rail.is-fit. */
-.size-variants-grid.is-fit > .variant-option--pill{
+.variant-axis-grid.is-fit > .variant-option--pill{
   flex:1 1 auto;
 }
 
 /* Degradado de los bordes por los que aún se puede seguir deslizando. Las clases las
    pone product-enhancements.js (solo cuando el carril desborda de verdad); sin JS o
    sin desbordamiento no hay máscara y el carril se ve exactamente como siempre. */
-.color-variants-grid.is-rail,
-.size-variants-grid.is-rail{
+.variant-axis-grid.is-rail,
+.variant-axis-grid.is-rail{
   -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 22px,#000 calc(100% - 22px),transparent 100%);
           mask-image:linear-gradient(90deg,transparent 0,#000 22px,#000 calc(100% - 22px),transparent 100%);
 }
 
-.color-variants-grid.is-rail.is-rail-start,
-.size-variants-grid.is-rail.is-rail-start{
+.variant-axis-grid.is-rail.is-rail-start,
+.variant-axis-grid.is-rail.is-rail-start{
   -webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 22px),transparent 100%);
           mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 22px),transparent 100%);
 }
 
-.color-variants-grid.is-rail.is-rail-end,
-.size-variants-grid.is-rail.is-rail-end{
+.variant-axis-grid.is-rail.is-rail-end,
+.variant-axis-grid.is-rail.is-rail-end{
   -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 22px,#000 100%);
           mask-image:linear-gradient(90deg,transparent 0,#000 22px,#000 100%);
 }
@@ -885,9 +906,9 @@ main{ padding-block:22px 32px; }
 /* Dentro del selector, la píldora es la pieza más alta del renglón: con margin
    movería toda la fila, así que sube con transform. En la fila del precio no
    hace falta, allí la altura la manda el precio. */
-.color-variants-head > .stock-note{
+.variant-axis-head > .stock-note{
   /* No se encoge ni se parte: es la pieza que manda en el renglón. Lo que cede
-     ancho cuando el nombre del color es largo es .color-variants-list. */
+     ancho cuando el nombre del color es largo es .variant-axis-value. */
   flex:0 0 auto;
   white-space:nowrap;
   transform:translateY(-3px);
@@ -1158,7 +1179,7 @@ main{ padding-block:22px 32px; }
     padding-top:12px;
   }
 
-  .panel-inner > .color-variants:first-child{
+  .panel-inner > .variant-axis:first-child{
     padding-top:0;
   }
 
@@ -1568,7 +1589,7 @@ footer a:hover{ color:var(--ink); }
 
   .video-embed-frame{ border-radius:16px; }
 
-  .color-variants-grid{
+  .variant-axis-grid{
     gap:11px;
   }
 
@@ -1722,7 +1743,7 @@ footer a:hover{ color:var(--ink); }
 
 /* ── Tablet & up: slightly larger color variant buttons ── */
 @media (min-width:600px){
-  .color-variants{
+  .variant-axis{
     margin-top:14px;
     padding-top:14px;
   }
@@ -1730,7 +1751,7 @@ footer a:hover{ color:var(--ink); }
 
 /* ── Large Tablet & up: moderate color variant buttons ── */
 @media (min-width:768px){
-  .color-variants{
+  .variant-axis{
     margin-top:14px;
     padding-top:14px;
   }
@@ -1738,7 +1759,7 @@ footer a:hover{ color:var(--ink); }
 
 /* ── Desktop: comfortable color variant buttons ── */
 @media (min-width:981px){
-  .color-variants{
+  .variant-axis{
     margin-top:14px;
     padding-top:14px;
   }
@@ -1758,11 +1779,11 @@ footer a:hover{ color:var(--ink); }
     object-fit:contain;
   }
 
-  .color-variants-head{
+  .variant-axis-head{
     gap:6px;
   }
 
-  .color-variants-list{
+  .variant-axis-value{
     padding:0 8px;
     font-size:.78rem;
   }

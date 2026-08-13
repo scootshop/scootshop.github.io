@@ -10,7 +10,7 @@
  * un eje de MODELO, pero se declaraban así:
  *
  *     class="color-variant size-variant"     ← opción de color vestida de píldora
- *     <span class="color-variants-label">MODELOS:</span>
+ *     <span class="variant-axis-label">MODELOS:</span>
  *
  * La ficha se veía bien porque el rótulo y la clase extra estaban puestos a mano allí.
  * El Home no: descubría los ejes parseando el HTML de la ficha, veía `.variant-option`

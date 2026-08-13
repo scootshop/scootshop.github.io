@@ -9,7 +9,7 @@
   <meta name="robots" content="index,follow,max-image-preview:large" />
   <meta name="format-detection" content="telephone=no" />
   <link rel="canonical" href="https://scootshop.co/accesorios/manillar-wake/" />
-  <meta name="asset-version" content="20260813-11" />
+  <meta name="asset-version" content="20260813-12" />
   <!-- Ficha SIEMPRE arriba: reset al tope en inline + DOMContentLoaded + 2 frames (vence el carry de scroll del WebView de apps, que aparece al renderizar). Sin lock ni guard. -->
   <script>(function(){try{if('scrollRestoration' in history)history.scrollRestoration='manual';var t=function(){try{window.scrollTo(0,0);}catch(e){}};t();document.addEventListener('DOMContentLoaded',function(){t();requestAnimationFrame(function(){t();requestAnimationFrame(t);});},{once:true});addEventListener('pageshow',function(e){if(e&&e.persisted)t();});}catch(e){}})();</script>
   <meta property="og:url" content="https://scootshop.co/accesorios/manillar-wake/" />
@@ -29,48 +29,43 @@
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" media="print" onload="this.media='all'" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" /></noscript>
-  <link rel="stylesheet" href="/css/icons.css?v=20260813-11">
-  <link rel="stylesheet" href="/css/main.css?v=20260813-11">
-  <link rel="stylesheet" href="/css/partials.mobile-menu.css?v=20260813-11">
-  <link rel="stylesheet" href="/css/tarjetas.css?v=20260813-11">
+  <link rel="stylesheet" href="/css/icons.css?v=20260813-12">
+  <link rel="stylesheet" href="/css/main.css?v=20260813-12">
+  <link rel="stylesheet" href="/css/partials.mobile-menu.css?v=20260813-12">
+  <link rel="stylesheet" href="/css/tarjetas.css?v=20260813-12">
   <!-- Estilos SOLO de esta ficha: el selector de MEDIDA no existe en ninguna otra
        página, así que va inline en vez de en tarjetas.css. Así no hay que bumpear
        el asset-version global (ni redesplegar las 39 fichas) por dos píldoras.
-       La caja reutiliza .color-variants-box/-head/-label/-list, que en tarjetas.css
-       son selectores sueltos (no descendientes de .color-variants). -->
+       La caja reutiliza .variant-axis-box/-head/-label/-list, que en tarjetas.css
+       son selectores sueltos (no descendientes de .variant-axis). -->
   <style>
     /* El DISEÑO de las pildoras ya NO esta aqui: .variant-option--pill comparte regla con
-       .variant-option--pill en tarjetas.css, y el carril (.size-variants-grid) comparte la
+       .variant-option--pill en tarjetas.css, y el carril (.variant-axis-grid) comparte la
        del carril de colores, incluido su controlador de JS. Asi un retoque vale para
        los cinco sitios a la vez. Aqui queda solo la maquetacion de esta ficha. */
-    .size-variants{margin:16px 0}
-    .panel-inner > .size-variants:first-child{margin-top:0}
+    .variant-axis{margin:16px 0}
+    .panel-inner > .variant-axis:first-child{margin-top:0}
 
     /* MEDIDA y COLOR se leen como UNA sola tarjeta. NO se envuelven en un contenedor
        comun A PROPOSITO: enforceProductActionOrder() (global-assets-app.js) busca
-       .color-variants por descendencia y lo reinserta como HIJO DIRECTO de
+       .variant-axis por descendencia y lo reinserta como HIJO DIRECTO de
        .panel-inner, asi que un envoltorio lo arrancaria de dentro ~1s despues de
        cargar, a la vista del cliente. Siguen siendo secciones hermanas y lo unico
        que cambia es el aspecto: sin hueco, esquinas redondeadas solo por fuera y una
        linea fina de union. */
-    .size-variants{margin-bottom:0}
+    .variant-axis{margin-bottom:0}
     /* El padding-top hace falta ademas del margen: tarjetas.css le mete a
-       .color-variants un `padding-top:14px` en TRES media queries (600, 768 y 981),
+       .variant-axis un `padding-top:14px` en TRES media queries (600, 768 y 981),
        asi que quitando solo el margen quedaba un hueco de 14px en escritorio. */
-    .size-variants + .color-variants{margin-top:0; padding-top:0}
+    .variant-axis + .variant-axis{margin-top:0; padding-top:0}
     /* La de arriba pierde las esquinas de abajo. */
-    .size-variants > .color-variants-box{
+    .variant-axis > .variant-axis-box{
       border-bottom-left-radius:0;
       border-bottom-right-radius:0;
     }
     /* Todas menos la primera: sin esquinas arriba y con la linea de union. Se pinta
        el borde transparente de 1px que la caja YA tenia, asi que no mueve nada. */
-    .size-variants + .size-variants > .color-variants-box,
-    .size-variants + .color-variants > .color-variants-box{
-      border-top-left-radius:0;
-      border-top-right-radius:0;
-      border-top-color:rgba(15,23,42,.07);
-    }
+    .variant-axis + .variant-axis > .variant-axis-box,
   </style>
   <script src="/js/global-assets.js?v=20260605-2" defer></script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"Manillar WAKE 720mm/780mm","description":"Manillar elevador WAKE de aleación de aluminio 6061 con abrazadera de Ø31,8 mm y zona de puños de Ø22,2 mm. Rise de 25 mm, backsweep 6° y upsweep 3°. Disponible en 720 mm (330 g) y 780 mm (365 g). Compatible con todos los Ecoxtrem M41.","brand":{"@type":"Brand","name":"WAKE"},"sku":"ACC-BAR-WAKE","mpn":"WKHB01","image":["https://scootshop.co/accesorios/manillar-wake/img/1.webp","https://scootshop.co/accesorios/manillar-wake/img/2.webp","https://scootshop.co/accesorios/manillar-wake/img/3.webp"],"url":"https://scootshop.co/accesorios/manillar-wake/","offers":{"@type":"Offer","priceCurrency":"EUR","price":"39.99","availability":"https://schema.org/InStock","url":"https://scootshop.co/accesorios/manillar-wake/"}}</script>
@@ -90,19 +85,19 @@
         <aside class="panel panel-acc">
           <div class="price-row"><span class="price-now">39,99 €</span></div>
           <div class="panel-inner">
-            <!-- Selector de MEDIDA. Va ANTES de .color-variants a propósito:
-                 enforceProductActionOrder() (global-assets-app.js) recoloca .color-variants
+            <!-- Selector de MEDIDA. Va ANTES de .variant-axis a propósito:
+                 enforceProductActionOrder() (global-assets-app.js) recoloca .variant-axis
                  justo delante de .desc ~1s después de cargar. Con el orden medida → color →
                  desc, esa función ya no encuentra nada que mover y no hay salto visible
                  (project_ficha_panel_order_authority). -->
-            <section class="size-variants" aria-label="Medidas disponibles" data-static="true">
-              <div class="color-variants-box">
-                <div class="color-variants-head">
-                  <span class="color-variants-label">MEDIDA:</span>
-                  <span class="color-variants-list" data-active-size-label>780 mm</span>
+            <section class="variant-axis" aria-label="Medidas disponibles" data-static="true">
+              <div class="variant-axis-box">
+                <div class="variant-axis-head">
+                  <span class="variant-axis-label">MEDIDA:</span>
+                  <span class="variant-axis-value" data-active-size-label>780 mm</span>
                   <p class="stock-note stock-note--in">Stock</p>
                 </div>
-                <div class="size-variants-grid">
+                <div class="variant-axis-grid">
                   <button type="button" class="variant-option variant-option--pill" aria-pressed="false" data-size-key="720" data-size-label="720 mm">720 mm</button>
                   <button type="button" class="variant-option variant-option--pill is-active" aria-pressed="true" data-size-key="780" data-size-label="780 mm">780 mm</button>
                 </div>
@@ -113,13 +108,13 @@
                  combinadas con la medida por defecto (780): así la página nace con el
                  valor definitivo y nadie tiene que reescribirlo al cargar. El script
                  del final recombina claves y etiquetas cuando cambia la medida. -->
-            <section class="color-variants" aria-label="Colores disponibles" data-static="true">
-              <div class="color-variants-box">
-                <div class="color-variants-head">
-                  <span class="color-variants-label">COLOR:</span>
-                  <span class="color-variants-list" data-active-color-label>Negro · 780 mm</span>
+            <section class="variant-axis" aria-label="Colores disponibles" data-static="true">
+              <div class="variant-axis-box">
+                <div class="variant-axis-head">
+                  <span class="variant-axis-label">COLOR:</span>
+                  <span class="variant-axis-value" data-active-color-label>Negro · 780 mm</span>
                 </div>
-                <div class="color-variants-grid">
+                <div class="variant-axis-grid">
                   <button type="button" class="variant-option variant-option--swatch is-active" aria-pressed="true" aria-label="Negro · 780 mm" title="Negro · 780 mm" data-color-key="negro-780" data-color-base="negro" data-color-base-label="Negro" data-img-780="6" data-img-720="12" style="--variant-swatch:#111111"></button>
                   <button type="button" class="variant-option variant-option--swatch" aria-pressed="false" aria-label="Rojo · 780 mm" title="Rojo · 780 mm" data-color-key="rojo-780" data-color-base="rojo" data-color-base-label="Rojo" data-img-780="7" data-img-720="13" style="--variant-swatch:#b93f3a"></button>
                   <button type="button" class="variant-option variant-option--swatch" aria-pressed="false" aria-label="Azul · 780 mm" title="Azul · 780 mm" data-color-key="azul-780" data-color-base="azul" data-color-base-label="Azul" data-img-780="8" data-img-720="14" style="--variant-swatch:#2f93b8"></button>
@@ -146,8 +141,8 @@
     <footer>© <span id="y"></span> SCOOT SHOP · <a href="/#legal">Legal</a></footer>
   </main>
 
-  <script src="/data/products.js?v=20260813-11"></script>
-  <script src="/js/product-enhancements.js?v=20260813-11"></script>
+  <script src="/data/products.js?v=20260813-12"></script>
+  <script src="/js/product-enhancements.js?v=20260813-12"></script>
 
   <!-- El selector de ESTA ficha ya no tiene script propio. Sus dos ejes los pinta y
        los gobierna js/product-enhancements.js leyendo `attributes` del catálogo: la
@@ -156,6 +151,7 @@
        reescribían el botón de carrito; había cuatro copias, una por ficha. -->
 </body>
 </html>
+
 
 
 
