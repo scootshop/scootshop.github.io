@@ -1,17 +1,17 @@
-(function () {
+﻿(function () {
   "use strict";
 
-  // En todas las páginas (no solo el home): desactivar la restauración de scroll
-  // nativa del navegador. Sin esto, las fichas hacían su propia restauración —que
-  // con scroll-behavior:smooth se ve ANIMADA y a veces deja la página en una
-  // posición previa (p. ej. abajo)— al volver/entrar en iOS WebKit. Con 'manual',
-  // las fichas abren arriba; el bfcache sigue restaurando el atrás/adelante real.
+  // En todas las pÃ¡ginas (no solo el home): desactivar la restauraciÃ³n de scroll
+  // nativa del navegador. Sin esto, las fichas hacÃ­an su propia restauraciÃ³n â€”que
+  // con scroll-behavior:smooth se ve ANIMADA y a veces deja la pÃ¡gina en una
+  // posiciÃ³n previa (p. ej. abajo)â€” al volver/entrar en iOS WebKit. Con 'manual',
+  // las fichas abren arriba; el bfcache sigue restaurando el atrÃ¡s/adelante real.
   try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch (e) {}
 
   // En fichas de producto: abrir SIEMPRE arriba. Al re-entrar desde el bfcache
-  // (volver/adelante en iOS WebKit) el navegador las restauraba en una posición
+  // (volver/adelante en iOS WebKit) el navegador las restauraba en una posiciÃ³n
   // previa (p. ej. los botones de compra); forzamos el tope solo en ese caso
-  // (pageshow persistido), sin arrancar al usuario que ya está leyendo.
+  // (pageshow persistido), sin arrancar al usuario que ya estÃ¡ leyendo.
   try {
     window.addEventListener('pageshow', function (e) {
       if (e && e.persisted && isProductDetailPath()) {
@@ -54,8 +54,8 @@
     return ver ? String(ver).trim() : '1';
   }
 
-  // Auto-actualización al restaurar desde bfcache: si la versión publicada cambió
-  // respecto a la que tiene esta página congelada, recargar para traer el código nuevo.
+  // Auto-actualizaciÃ³n al restaurar desde bfcache: si la versiÃ³n publicada cambiÃ³
+  // respecto a la que tiene esta pÃ¡gina congelada, recargar para traer el cÃ³digo nuevo.
   window.addEventListener('pageshow', function (e) {
     if (!e || !e.persisted) return;
     fetch('/asset-version.json?t=' + Date.now(), { cache: 'no-store' })
@@ -66,21 +66,6 @@
       })
       .catch(function () {});
   });
-
-  function addVersionToUrl(url, ver) {
-    if (!url) return '';
-    var raw = String(url).trim();
-    if (!raw) return '';
-
-    try {
-      var parsed = new URL(raw, window.location.origin);
-      if (parsed.origin !== window.location.origin) return parsed.toString();
-      parsed.searchParams.set('v', String(ver || '1'));
-      return parsed.pathname + parsed.search + parsed.hash;
-    } catch (_) {
-      return raw;
-    }
-  }
 
   function isProductDetailPath() {
     var path = String(window.location.pathname || '');
@@ -98,7 +83,7 @@
     var href = mainImg && mainImg.getAttribute('src') ? mainImg.getAttribute('src').trim() : '';
 
     if (!href) {
-      // Fallback: og:image (same-origin only — avoids fetching from production on localhost)
+      // Fallback: og:image (same-origin only â€” avoids fetching from production on localhost)
       var ogImage = document.querySelector('meta[property="og:image"]');
       var ogHref = ogImage && ogImage.getAttribute('content') ? ogImage.getAttribute('content').trim() : '';
       if (ogHref) {
@@ -118,6 +103,17 @@
     preload.rel = 'preload';
     preload.as = 'image';
     preload.href = href;
+    // Si el <img> es responsive, la precarga DEBE copiar su srcset/sizes. Con
+    // solo el href se precargaba el original mientras el srcset elegia una
+    // variante: el navegador se descargaba LAS DOS (medido en produccion).
+    if (mainImg) {
+      var imgSrcset = mainImg.getAttribute('srcset');
+      var imgSizes = mainImg.getAttribute('sizes');
+      if (imgSrcset) {
+        preload.setAttribute('imagesrcset', imgSrcset);
+        if (imgSizes) preload.setAttribute('imagesizes', imgSizes);
+      }
+    }
     preload.setAttribute('fetchpriority', 'high');
     preload.dataset.lcpPreload = 'true';
     document.head.appendChild(preload);
@@ -178,15 +174,15 @@
     });
   }
 
-  // Pinta cabecera y menú móvil desde la caché de sesión lo antes posible (antes de
+  // Pinta cabecera y menÃº mÃ³vil desde la cachÃ© de sesiÃ³n lo antes posible (antes de
   // que cargue el runtime) para que en visitas repetidas aparezcan al instante, sin
-  // el parpadeo de la barra vacía. El runtime los rehidrata después (menús, carrito).
+  // el parpadeo de la barra vacÃ­a. El runtime los rehidrata despuÃ©s (menÃºs, carrito).
   function primeCachedPartials(ver) {
     try {
       var v = ver || fallbackVersion();
       var slots = [
-        ['site-header-slot', '/partials/site-header.html'],
-        ['mobile-menu-slot', '/partials/mobile-menu.html']
+        ['site-header-slot', '/partials/site-header'],
+        ['mobile-menu-slot', '/partials/mobile-menu']
       ];
       for (var i = 0; i < slots.length; i++) {
         var slot = document.getElementById(slots[i][0]);
@@ -205,19 +201,50 @@
 
     if (!document.querySelector('script[data-cart-runtime="true"]')) {
       var cartScript = document.createElement('script');
-      // cart-runtime.js se sirve como inmutable; este sufijo de revisión fuerza
-      // la recarga tras un fix del runtime sin esperar a un bump global de versión
-      // (global-assets.js es no-store, así que el nuevo sufijo llega al instante).
-      var cartRuntimeRev = '20260616-4';
+      // cart-runtime.js se sirve como inmutable; este sufijo de revisiÃ³n fuerza
+      // la recarga tras un fix del runtime sin esperar a un bump global de versiÃ³n
+      // (global-assets.js es no-store, asÃ­ que el nuevo sufijo llega al instante).
+      // Subir esta revisiÃ³n SIEMPRE que se toque cart-runtime.js: el fichero se
+      // sirve como immutable y el ?v global no basta para refrescarlo.
+      var cartRuntimeRev = '20260813-5';
       cartScript.src = '/js/cart-runtime.js?v=' + encodeURIComponent(ver) + '&r=' + cartRuntimeRev;
       cartScript.async = false;
       cartScript.dataset.cartRuntime = 'true';
       document.head.appendChild(cartScript);
     }
 
+    /* NÃºcleo de atributos: quiÃ©n dice quÃ© eje es cada variante, cÃ³mo se llama y cÃ³mo
+       se representa. Va ANTES de todo lo que pinta variantes (la ficha y la burbuja),
+       y `async=false` mantiene el orden. Ver js/product-attributes.js. */
+    if (!document.querySelector('script[data-product-attributes="true"]')) {
+      var attrsScript = document.createElement('script');
+      // Mismo truco que cart-runtime.js: product-attributes.js se sirve como immutable,
+      // asi que el ?v global no basta para refrescarlo. Subir SIEMPRE esta revision al
+      // tocar el nucleo (global-assets.js es no-store y llega al instante).
+      var attrsRev = '20260813-1';
+      attrsScript.src = '/js/product-attributes.js?v=' + encodeURIComponent(ver) + '&r=' + attrsRev;
+      attrsScript.async = false;
+      attrsScript.dataset.productAttributes = 'true';
+      document.head.appendChild(attrsScript);
+    }
+
+    // DueÃ±o Ãºnico del panel de Productos (escritorio + mÃ³vil). Va ANTES de
+    // global-assets-app.js, que delega en Ã©l. `async = false` mantiene el orden.
+    if (!document.querySelector('script[data-products-menu="true"]')) {
+      var menuScript = document.createElement('script');
+      menuScript.src = '/js/products-menu.js?v=' + encodeURIComponent(ver);
+      menuScript.async = false;
+      menuScript.dataset.productsMenu = 'true';
+      document.head.appendChild(menuScript);
+    }
+
     if (!document.querySelector('script[data-global-assets-runtime="true"]')) {
       var script = document.createElement('script');
-      script.src = '/js/global-assets-app.js?v=' + encodeURIComponent(ver);
+      // Mismo truco que cart-runtime.js justo arriba: global-assets-app.js se
+      // sirve como immutable, asÃ­ que el ?v global no basta para refrescarlo.
+      // Subir SIEMPRE esta revisiÃ³n al tocar global-assets-app.js.
+      var globalAppRev = '20260812-3';
+      script.src = '/js/global-assets-app.js?v=' + encodeURIComponent(ver) + '&r=' + globalAppRev;
       script.async = false;
       script.dataset.globalAssetsRuntime = 'true';
       document.head.appendChild(script);
@@ -254,7 +281,7 @@
     }
   }
 
-  // Reusar versión ya obtenida por asset-sync.js si existe
+  // Reusar versiÃ³n ya obtenida por asset-sync.js si existe
   if (window.ASSET_VER && window.ASSET_VER !== '1') {
     normalizeCriticalFontsForProductPage();
     primeProductLcpImage(window.ASSET_VER);

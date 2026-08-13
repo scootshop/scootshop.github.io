@@ -6,7 +6,7 @@
   <title>Pago | SCOOT SHOP</title>
   <meta name="description" content="Pago seguro: Stripe, PayPal, Bizum o transferencia bancaria." />
   <link rel="canonical" href="https://scootshop.co/pago" />
-  <meta name="asset-version" content="20260620-2" />
+  <meta name="asset-version" content="20260813-8" />
 
   <meta property="og:url" content="https://scootshop.co/pago" />
   <meta property="og:title" content="Pago | SCOOT SHOP" />
@@ -29,24 +29,24 @@
   <meta name="format-detection" content="telephone=no" />
 
   <!-- ? Favicon -->
-  <link rel="icon" href="/favicon.ico?v=20260620-2" sizes="any" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=20260620-2" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=20260620-2" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=20260620-2" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=20260620-2" />
-  <link rel="manifest" href="/site.webmanifest?v=20260620-2" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="manifest" href="/site.webmanifest?v=20260813-8" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@500;800&display=swap" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@500;800&display=swap" media="print" onload="this.media='all'" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@500;800&display=swap" /></noscript>
-  <link rel="stylesheet" href="/css/icons.css?v=20260620-2" />
-  <link rel="stylesheet" href="/css/main.css?v=20260620-2" />
+  <link rel="stylesheet" href="/css/icons.css?v=20260813-8" />
+  <link rel="stylesheet" href="/css/main.css?v=20260813-8" />
   <script src="/js/asset-sync.js?v=20260605-2"></script>
   <script src="/js/global-assets.js?v=20260605-2"></script>
 
-  <link rel="stylesheet" href="/css/pago.css?v=20260620-2" />
+  <link rel="stylesheet" href="/css/pago.css?v=20260813-8" />
 
   <script id="stripe-js" src="https://js.stripe.com/v3/" async></script>
 </head>
@@ -104,13 +104,28 @@
               <span class="v order-summary__row-value" id="sumPrice">—</span>
             </div>
             <div class="discount-box order-summary__box" id="discountBox" aria-label="Código de descuento" hidden>
-              <label for="discountCodeInput">Código de descuento</label>
-              <div class="discount-controls">
-                <div class="discount-input-wrap">
-                  <input id="discountCodeInput" type="text" maxlength="64" autocomplete="off" spellcheck="false" placeholder="Ej. SUMMER20" />
-                  <button id="discountRemoveBtn" type="button" hidden style="display:none" aria-label="Quitar código">✕</button>
+              <div class="discount-controls" id="discountControls">
+                <div class="discount-field">
+                  <label class="sr-only" for="discountCodeInput">Código de descuento</label>
+                  <input id="discountCodeInput" type="text" maxlength="15" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Código de descuento" />
+                  <span class="discount-actions">
+                    <button id="discountRemoveBtn" type="button" hidden style="display:none" aria-label="Borrar código">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                    <button id="discountApplyBtn" type="button">Aplicar</button>
+                  </span>
                 </div>
-                <button id="discountApplyBtn" type="button">Aplicar</button>
+              </div>
+              <div class="discount-applied" id="discountApplied" hidden>
+                <span class="discount-applied__text">
+                  <strong id="discountAppliedCode">—</strong>
+                </span>
+                <span class="discount-applied__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+                <button type="button" class="discount-applied__remove" id="discountChipRemove" aria-label="Quitar código">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
               </div>
               <div class="discount-msg" id="discountMsg" role="status" aria-live="polite"></div>
             </div>
@@ -163,12 +178,12 @@
                 <span class="tab-title">
                   <span class="tab-brands" aria-label="Visa, Amex, Mastercard, Apple Pay, Amazon Pay y JCB">
                     <span class="brand-carousel" aria-hidden="true">
-                      <img src="/img/visa.svg?v=20260620-2" alt="" loading="lazy" decoding="async">
-                      <img src="/img/amex.svg?v=20260620-2" alt="" loading="lazy" decoding="async">
-                      <img src="/img/mastercard.svg?v=20260620-2" alt="" loading="lazy" decoding="async">
-                      <img src="/img/apple-pay.svg?v=20260620-2" alt="" loading="lazy" decoding="async">
-                      <img src="/img/amazon-pay.svg?v=20260620-2" alt="" loading="lazy" decoding="async">
-                      <img src="/img/jcb.svg?v=20260620-2" alt="" loading="lazy" decoding="async">
+                      <img src="/img/visa.svg" alt="" loading="lazy" decoding="async">
+                      <img src="/img/amex.svg" alt="" loading="lazy" decoding="async">
+                      <img src="/img/mastercard.svg" alt="" loading="lazy" decoding="async">
+                      <img src="/img/apple-pay.svg" alt="" loading="lazy" decoding="async">
+                      <img src="/img/amazon-pay.svg" alt="" loading="lazy" decoding="async">
+                      <img src="/img/jcb.svg" alt="" loading="lazy" decoding="async">
                     </span>
                   </span>
                   Pago online <span class="tab-badge">Recomendado</span>
@@ -183,10 +198,23 @@
               <span class="pay-radio" aria-hidden="true"></span>
               <span class="tab-body">
                 <span class="tab-title">
-                  <img class="tab-logo" src="/img/klarna.webp?v=20260620-2" alt="Klarna" loading="lazy" decoding="async">
+                  <img class="tab-logo" src="/img/klarna.webp" alt="Klarna" loading="lazy" decoding="async">
                   Klarna
                 </span>
                 <span class="tab-desc">Pago a plazos si aplica · <span class="tab-fee" data-fee-method="klarna"></span></span>
+              </span>
+            </button>
+
+            <!-- SCALAPAY -->
+            <button class="pay-tab" id="tab-scalapay" type="button" role="tab"
+              aria-selected="false" aria-controls="panel-scalapay" data-pay-tab="scalapay">
+              <span class="pay-radio" aria-hidden="true"></span>
+              <span class="tab-body">
+                <span class="tab-title">
+                  <img class="tab-logo" src="/img/scalapay.svg" alt="Scalapay" loading="lazy" decoding="async">
+                  Scalapay
+                </span>
+                <span class="tab-desc">Paga en 3 plazos sin intereses · <span class="tab-fee" data-fee-method="scalapay"></span></span>
               </span>
             </button>
 
@@ -196,7 +224,7 @@
               <span class="pay-radio" aria-hidden="true"></span>
               <span class="tab-body">
                 <span class="tab-title">
-                  <img class="tab-logo" src="/img/paypal-svgrepo-com.svg?v=20260620-2" alt="PayPal" loading="lazy" decoding="async">
+                  <img class="tab-logo" src="/img/paypal-svgrepo-com.svg" alt="PayPal" loading="lazy" decoding="async">
                   PayPal
                 </span>
                 <span class="tab-desc">PayPal o plazos · <span class="tab-fee" data-fee-method="paypal"></span></span>
@@ -209,7 +237,7 @@
               <span class="pay-radio" aria-hidden="true"></span>
               <span class="tab-body">
                 <span class="tab-title">
-                  <img class="tab-logo" src="/img/bizum.svg?v=20260620-2" alt="Bizum" loading="lazy" decoding="async">
+                  <img class="tab-logo" src="/img/bizum.svg" alt="Bizum" loading="lazy" decoding="async">
                   Bizum
                 </span>
                 <span class="tab-desc">Pago instantáneo</span>
@@ -257,9 +285,8 @@
                 <div id="stripe-embedded-checkout"></div>
               </div>
 
-              <div class="paypal-note" id="stripeInfo">
-                Tarjeta, Apple Pay y otros métodos rápidos. Klarna y PayPal están en sus propias pestañas.
-              </div>
+              <!-- Sin nota en la pestaña de tarjeta; el JS la usa para Klarna/PayPal. -->
+              <div class="paypal-note" id="stripeInfo" hidden></div>
 
               <div class="paypal-error" id="cardErr"></div>
             </div>
@@ -281,6 +308,25 @@
               </div>
 
               <div class="paypal-error" id="klarnaErr"></div>
+            </div>
+          </div>
+
+          <div class="panel panel--stripe" id="panel-scalapay" role="tabpanel" aria-labelledby="tab-scalapay" hidden data-pay-panel>
+            <div class="pbody">
+              <div id="scalapay-wrap" hidden>
+                <div class="stripe-loading" id="scalapayLoading" aria-live="polite">
+                  <span class="loading-dots" aria-hidden="true"><span></span><span></span><span></span></span>
+                  <span class="loading-label" data-loading-label>Scalapay</span>
+                  <span class="visually-hidden" data-loading-sr>Cargando checkout de Scalapay</span>
+                </div>
+                <div id="stripe-scalapay-checkout"></div>
+              </div>
+
+              <div class="paypal-note" id="scalapayInfo">
+                Paga en 3 plazos sin intereses. Sujeto a aprobación de Scalapay.
+              </div>
+
+              <div class="paypal-error" id="scalapayErr"></div>
             </div>
           </div>
 
@@ -417,9 +463,230 @@
     </div>
   </div>
 
-  <script src="/js/pago.js?v=20260620-2"></script>
+  <!-- pago.js se sirve como immutable: el ?v global no basta para refrescarlo. Subir
+       SIEMPRE el sufijo &r al tocar js/pago.js (este HTML es no-store y llega ya). -->
+  <script src="/js/pago.js?v=20260813-8&amp;r=20260813-1"></script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

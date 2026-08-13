@@ -8,21 +8,21 @@
   <meta name="description" content="Completa tus datos de envío antes del pago seguro en SCOOT SHOP." />
   <meta name="robots" content="noindex,nofollow" />
   <meta name="theme-color" content="#ffffff" />
-  <meta name="asset-version" content="20260620-2" />
+  <meta name="asset-version" content="20260813-8" />
 
   <link rel="canonical" href="https://scootshop.co/checkout" />
-  <link rel="icon" href="/favicon.ico?v=20260620-2" sizes="any" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=20260620-2" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=20260620-2" />
-  <link rel="manifest" href="/site.webmanifest?v=20260620-2" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="manifest" href="/site.webmanifest?v=20260813-8" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" /></noscript>
-  <link rel="stylesheet" href="/css/icons.css?v=20260620-2" />
-  <link rel="stylesheet" href="/css/main.css?v=20260620-2" />
+  <link rel="stylesheet" href="/css/icons.css?v=20260813-8" />
+  <link rel="stylesheet" href="/css/main.css?v=20260813-8" />
   <script src="/js/asset-sync.js?v=20260605-2" defer></script>
   <script src="/js/global-assets.js?v=20260605-2" defer></script>
 
@@ -233,14 +233,22 @@
       max-width:380px;
       justify-self:end;
     }
+    /* En escritorio el resumen NO se pliega: siempre abierto, sin flecha ni cursor
+       de acción (el guard de JS bloquea además el toggle nativo del <details>).
+       A partir de 1200px hacia abajo sí es plegable. */
     .ck-summary-head{
       cursor:default;
       list-style:none;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
     }
     .ck-summary-head::-webkit-details-marker{ display:none; }
     .ck-summary-head::marker{ display:none; content:''; }
     .ck-toggle-arrow{
       display:none;
+      flex:0 0 auto;
       width:20px;
       height:20px;
       transition:transform .2s ease;
@@ -393,6 +401,27 @@
     }
     .section-heading span{
       display:none;
+    }
+    /* "Resumen del pedido" al mismo tamaño que Contacto/Dirección. Va aquí (y no en
+       main.css) para no forzar un bump global; debe quedar ANTES de las media queries. */
+    .order-summary__title{
+      font-size:.95rem;
+      /* Misma altura de línea que .section-heading strong (su SVG de 20px la engorda),
+         para que la línea inferior de ambas cabeceras caiga a la misma altura. */
+      min-height:25.8px;
+      display:flex;
+      align-items:center;
+    }
+    /* …y misma caja que .section-heading / .form-grid, para que ambos títulos
+       arranquen en la misma vertical (main.css usa 20/22/24 y 22/16). */
+    .order-summary__header,
+    .order-summary__body{
+      padding-left:20px;
+      padding-right:20px;
+    }
+    .order-summary__header{
+      padding-top:18px;
+      padding-bottom:12px;
     }
     .form-grid{
       display:grid;
@@ -622,10 +651,10 @@
       box-shadow:none;
       transition:transform .18s ease, background .18s ease, box-shadow .18s ease, border-color .18s ease;
     }
+    /* El aclarado del hover lo hace el ::before (ver "Continue CTA"): aquí solo
+       el borde. Sin translateY: el botón no se mueve al pasar por encima. */
     .ck-btn:hover{
-      transform:translateY(-1px);
       border-color:#8f8f8f;
-      background:linear-gradient(180deg, #4a4a4a 0%, #171717 100%);
       box-shadow:none;
     }
     .ck-btn:focus,
@@ -658,6 +687,10 @@
         padding:20px 24px 12px;
       }
       .section-heading strong{ font-size:1rem; }
+      .order-summary__title{ font-size:1rem; }
+      .order-summary__header,
+      .order-summary__body{ padding-left:24px; padding-right:24px; }
+      .order-summary__header{ padding-top:20px; padding-bottom:12px; }
       .form-grid{
         grid-template-columns:repeat(2, minmax(0, 1fr));
         column-gap:18px;
@@ -702,11 +735,9 @@
         width:100%;
         max-width:none;
       }
+      /* Plegable solo aquí (≤1200px) */
       .ck-summary-head{
         cursor:pointer;
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
       }
       .ck-toggle-arrow{
         display:block;
@@ -746,6 +777,9 @@
         padding:18px 18px 12px;
       }
       .section-heading strong{ font-size:1rem; }
+      .order-summary__title{ font-size:1rem; }
+      .order-summary__header,
+      .order-summary__body{ padding-left:18px; padding-right:18px; }
       .shipping-form{ gap:14px; }
       .form-grid{ padding:0 18px; }
       .field{
@@ -870,25 +904,38 @@
 
     /* Continue CTA */
     .ck-btn{
+      position:relative;
+      isolation:isolate;
       background:linear-gradient(180deg, #373737 0%, #111111 100%);
       color:#fff;
       border:1px solid #6b6c6c;
-      border-radius:14px;
+      border-radius:999px;
       font-weight:800;
       letter-spacing:.04em;
       text-transform:uppercase;
       box-shadow:none;
-      transition:transform .18s ease, background .18s ease, box-shadow .18s ease, border-color .18s ease;
+      transition:border-color .18s ease;
       min-height:52px;
     }
-    .ck-btn:hover{
-      transform:translateY(-1px);
-      border-color:#8f8f8f;
+    /* Los degradados no interpolan con transition: para que el aclarado del hover
+       sea gradual y no un salto seco, se funde una segunda capa por opacidad.
+       El botón no se mueve: solo cambia el color y avanza la flecha. */
+    .ck-btn::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:-1;
+      border-radius:inherit;
       background:linear-gradient(180deg, #4a4a4a 0%, #171717 100%);
-      box-shadow:none;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .26s ease;
     }
-    .ck-btn:active{
-      transform:translateY(0);
+    .ck-btn:hover::before,
+    .ck-btn:focus-visible::before{ opacity:1; }
+    .ck-btn:hover{
+      border-color:#8f8f8f;
+      box-shadow:none;
     }
     .ck-btn svg{ transition: transform .18s ease; }
     .ck-btn:hover svg{ transform: translateX(3px); }
@@ -931,6 +978,119 @@
     }
     #notesToggle:hover{
       color:#111315 !important;
+    }
+
+    /* Selector de direcciones guardadas (cabecera de Dirección) */
+    .section-heading--action{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .section-heading--action strong{ flex:1 1 auto; }
+    .addr-picker{
+      position:relative;
+      flex:0 0 auto;
+    }
+    .addr-picker[hidden]{ display:none; }
+    .addr-picker__btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:36px;
+      height:36px;
+      border:1px solid rgba(17,19,21,.14);
+      border-radius:50%;
+      background:#fff;
+      color:#111315;
+      cursor:pointer;
+      /* El icono de casa del título va más alto (vertical-align:-2px): compensamos. */
+      transform: translateY(-2px);
+      transition: background .18s ease, border-color .18s ease, transform .18s ease;
+    }
+    .addr-picker__btn:hover{
+      background:#f4f5f7;
+    }
+    .addr-picker__btn:active{ transform: translateY(-2px) scale(.96); }
+    .addr-picker__btn[aria-expanded="true"]{
+      background:#111315;
+      border-color:#111315;
+      color:#fff;
+    }
+    .addr-picker__menu{
+      position:absolute;
+      top:calc(100% + 8px);
+      right:0;
+      z-index:40;
+      width:min(320px, calc(100vw - 44px));
+      max-height:300px;
+      overflow-y:auto;
+      -webkit-overflow-scrolling:touch;
+      background:#fff;
+      border:1px solid rgba(17,19,21,.1);
+      border-radius:14px;
+      box-shadow:0 18px 40px rgba(17,19,21,.16);
+      padding:6px;
+    }
+    .addr-picker__menu[hidden]{ display:none; }
+    .addr-picker__title{
+      padding:8px 10px 6px;
+      font-size:.68rem;
+      font-weight:800;
+      letter-spacing:.09em;
+      text-transform:uppercase;
+      color:#8b9199;
+    }
+    .addr-picker__item{
+      display:block;
+      width:100%;
+      text-align:left;
+      border:0;
+      background:transparent;
+      border-radius:10px;
+      padding:9px 10px;
+      cursor:pointer;
+      transition: background .15s ease;
+    }
+    .addr-picker__item + .addr-picker__item{ margin-top:2px; }
+    .addr-picker__item:hover,
+    .addr-picker__item:focus-visible{ background:#f4f5f7; }
+    /* La activa se marca con check, no con fondo: dos grises pegados se leían como uno. */
+    .addr-picker__check{
+      display:none;
+      margin-left:auto;
+      flex:0 0 auto;
+      color:#111315;
+    }
+    .addr-picker__item.is-active .addr-picker__check{ display:block; }
+    .addr-picker__label{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      font-weight:800;
+      font-size:.82rem;
+      color:#111315;
+    }
+    /* La cabecera oculta sus <span> (subtítulo); el menú necesita mostrarlos. */
+    .section-heading .addr-picker__label{ display:flex; }
+    .section-heading .addr-picker__badge{ display:inline-block; }
+    .section-heading .addr-picker__text{ display:block; }
+    .addr-picker__badge{
+      font-size:.6rem;
+      font-weight:800;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      color:#fff;
+      background:#111315;
+      border-radius:999px;
+      padding:2px 7px;
+    }
+    .addr-picker__text{
+      display:block;
+      margin-top:2px;
+      font-size:.78rem;
+      line-height:1.4;
+      color:#5b6168;
     }
 
   </style>
@@ -986,8 +1146,15 @@
             </div>
 
             <div class="section-block section-block--address">
-              <div class="section-heading">
+              <div class="section-heading section-heading--action">
                 <strong>Dirección <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-left:5px"><path d="M20 9v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9"/><path d="M9 22V12h6v10"/><path d="M2 10.6L12 2l10 8.6"/></svg></strong>
+                <!-- Selector de direcciones guardadas (visible solo con 2 o más en la cuenta) -->
+                <div class="addr-picker" id="addrPickerWrap" hidden>
+                  <button type="button" class="addr-picker__btn" id="addrPickerBtn" aria-haspopup="true" aria-expanded="false" aria-controls="addrPickerMenu" title="Usar una dirección guardada" aria-label="Usar una dirección guardada">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="15" height="20" rx="2"/><path d="M16 2v20"/><path d="M3 6h4"/><path d="M3 10h4"/><path d="M3 14h4"/><path d="M3 18h4"/></svg>
+                  </button>
+                  <div class="addr-picker__menu" id="addrPickerMenu" role="menu" aria-labelledby="addrPickerBtn" hidden></div>
+                </div>
                 <span>Introduce la dirección donde quieres recibir tu pedido para continuar al pago seguro.</span>
               </div>
               <div class="form-grid">
@@ -1037,8 +1204,8 @@
 
                 <div class="field field--full" id="notesBlock" hidden>
                   <label for="notes">Notas de entrega</label>
-                  <textarea id="notes" name="notes" placeholder="Ej.: portal, horario de entrega o cualquier indicación útil." maxlength="160"></textarea>
-                  <span class="field-note" id="notesCount" style="text-align:right;font-size:.7rem;color:#aab0ba">0 / 160</span>
+                  <textarea id="notes" name="notes" placeholder="Ej.: portal, horario de entrega o cualquier indicación útil." maxlength="130"></textarea>
+                  <span class="field-note" id="notesCount" style="text-align:right;font-size:.7rem;color:#aab0ba">0 / 130</span>
                 </div>
                 <div class="field field--full" id="notesToggleWrap">
                   <a href="#" id="notesToggle" style="color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:.76rem;text-transform:uppercase;letter-spacing:.08em"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Añadir nota de entrega</a>
@@ -1131,10 +1298,32 @@
       'use strict';
 
       // Summary toggle: desktop open, mobile/tablet collapsed
+      // Resumen del pedido: plegable solo hasta 1200px. En escritorio queda SIEMPRE
+      // abierto — el <details> nativo se plegaría con clic o Enter aunque la flecha
+      // esté oculta, así que se bloquea el toggle y se reabre si algo lo cierra.
       var summaryDetails = document.getElementById('ckSummaryDetails');
       if (summaryDetails) {
-        var isCompactCheckout = window.matchMedia('(max-width: 1200px)').matches;
-        summaryDetails.open = !isCompactCheckout;
+        var summaryCompactMq = window.matchMedia('(max-width: 1200px)');
+        var summaryHead = summaryDetails.querySelector('summary');
+        var syncSummaryOpen = function(){
+          if (!summaryCompactMq.matches) summaryDetails.open = true;
+        };
+        summaryDetails.open = !summaryCompactMq.matches;
+        if (summaryHead) {
+          summaryHead.addEventListener('click', function(event){
+            if (!summaryCompactMq.matches) event.preventDefault();
+          });
+        }
+        summaryDetails.addEventListener('toggle', syncSummaryOpen);
+        if (summaryCompactMq.addEventListener) {
+          summaryCompactMq.addEventListener('change', function(){
+            summaryDetails.open = !summaryCompactMq.matches;
+          });
+        } else if (summaryCompactMq.addListener) {
+          summaryCompactMq.addListener(function(){
+            summaryDetails.open = !summaryCompactMq.matches;
+          });
+        }
       }
 
       function getParam(key){
@@ -1203,6 +1392,24 @@
           .replace(/'/g, '&#039;');
       }
 
+      /* Atributos con nombre de una línea ({ model: 'vmp' }). Se copian TAL CUAL del
+         carrito: son lo que hace que el resumen diga "Modelo: G2 PRO VMP".
+         Perderlos aquí era la causa real de que el chip dijera "Color: G2 PRO VMP"
+         por mucho que el núcleo y el catálogo estuvieran cargados — sin `attrs` la
+         línea se lee como legacy, y legacy significa color. */
+      function sanitizeAttrs(raw){
+        if (!raw || typeof raw !== 'object') return null;
+        var out = {};
+        var hay = false;
+        for (var k in raw) {
+          if (!Object.prototype.hasOwnProperty.call(raw, k)) continue;
+          var clave = safeText(k);
+          var valor = safeText(raw[k]);
+          if (clave && valor) { out[clave] = valor; hay = true; }
+        }
+        return hay ? out : null;
+      }
+
       function loadCartItems(){
         try {
           var raw = readStorageValue(CART_STORAGE_KEY);
@@ -1226,7 +1433,8 @@
               url: normalizePath(item && (item.url || item.href) || '/'),
               image: safeText(item && item.image),
               color: safeText(item && item.color),
-              colorLabel: safeText(item && item.colorLabel)
+              colorLabel: safeText(item && item.colorLabel),
+              attrs: sanitizeAttrs(item && item.attrs)
             };
           }).filter(Boolean);
         } catch (_) {
@@ -1422,12 +1630,54 @@
         };
       }
 
-      function renderColorLabel(nextColorLabel){
+      /* El producto de catálogo de una línea. Por SKU y, si no, por ruta: los enlaces
+         de compra llevan la ruta y hay líneas antiguas que no guardaron SKU. Sin
+         producto el núcleo no tiene con qué traducir la variante. */
+      function findCatalogForLine(linea){
+        var lista = window.SCOOTSHOP_PRODUCTS || [];
+        var sinBarra = function(v){ return String(v || '').replace(/\/+$/, ''); };
+        var skuLinea = String((linea && linea.sku) || '');
+        var urlLinea = sinBarra(linea && (linea.url || linea.href));
+        for (var i = 0; i < lista.length; i++) {
+          if ((skuLinea && lista[i].sku === skuLinea) ||
+              (urlLinea && sinBarra(lista[i].href) === urlLinea)) return lista[i];
+        }
+        return null;
+      }
+
+      /* El rótulo del eje lo pone el NÚCLEO, no esta página. Escribir "Color:" a mano
+         hacía que un patinete elegido por MODELO apareciera en el checkout como si
+         fuera un color. `describirTexto` resuelve el rótulo real desde el catálogo,
+         entiende las líneas antiguas y cae a la etiqueta guardada si la opción ya no
+         existe. Sin núcleo cargado se mantiene el texto de siempre.
+         ÚNICO sitio de esta página que escribe variantes: el resumen de una compra
+         directa y cada línea del carrito pasan por aquí. */
+      function textoVariantes(linea){
+        try {
+          if (window.SS_ATTRS && typeof window.SS_ATTRS.describirTexto === 'function') {
+            var texto = window.SS_ATTRS.describirTexto(linea, findCatalogForLine(linea));
+            if (texto) return texto;
+          }
+        } catch (_) {}
+        var bruto = (linea && (linea.colorLabel || linea.color)) || '';
+        return bruto ? ('Color: ' + bruto) : '';
+      }
+
+      function renderColorLabel(nextColorLabel, item){
         if (!ckColor) return;
         var normalizedLabel = safeText(nextColorLabel);
         if (!normalizedLabel) return;
         colorLabel = normalizedLabel;
-        ckColor.textContent = 'Color: ' + normalizedLabel;
+        /* La línea de una compra directa se arma con SKU y ruta. Sin ellos el núcleo no
+           llega al producto, y sin producto no hay forma de saber que "vmp" es un
+           MODELO: antes se le pasaba solo la etiqueta y por eso salía "Color:". */
+        var linea = item || {
+          sku: sku,
+          url: productUrl,
+          color: colorKey || normalizedLabel,
+          colorLabel: normalizedLabel
+        };
+        ckColor.textContent = textoVariantes(linea) || ('Color: ' + normalizedLabel);
         ckColor.classList.add('order-summary__product-meta--color');
         ckColor.style.display = 'inline-flex';
       }
@@ -1455,6 +1705,52 @@
 
       function sanitizePhoneValue(value){
         return String(value || '').replace(/\D+/g, '').slice(0, 15);
+      }
+
+      // Longitud nacional (en dígitos) por código de país, para los países que ofrecemos.
+      // Sirve para detectar un código de país DUPLICADO sin romper números legítimos
+      // (caso crítico: Italia +39, cuyos móviles empiezan por 3xx, incluido 39x).
+      // trunk0: el país descarta el 0 troncal en formato internacional (FR, DE).
+      // Italia lo MANTIENE en fijos, por eso trunk0 es false ahí.
+      var PHONE_CC_RULES = {
+        '34':  { min: 9,  max: 9,  trunk0: false }, // España  (móvil 6/7, fijo 8/9)
+        '351': { min: 9,  max: 9,  trunk0: false }, // Portugal
+        '33':  { min: 9,  max: 10, trunk0: true  }, // Francia  (0 troncal se descarta: +33 6…)
+        '39':  { min: 9,  max: 11, trunk0: false }, // Italia   (móvil 3xx incl. 39x; fijo mantiene el 0)
+        '49':  { min: 10, max: 11, trunk0: true  }  // Alemania (0 troncal se descarta: +49 170…)
+      };
+
+      // Quita el código de país del campo NACIONAL para evitar prefijos duplicados (+3434…).
+      // Causa: el autocompletado del navegador (o el usuario) mete el número internacional
+      // completo (+34…, 0034…, 34…) en el campo nacional, y se concatena con el prefijo.
+      // Estrategia segura para todos los países: solo se quita el código de país cuando
+      //  (a) hay marcador internacional explícito (+ o 00) al inicio, o
+      //  (b) el número es DEMASIADO LARGO para ser nacional de ese país (duplicado claro).
+      // Así un móvil italiano 39x de longitud válida nunca se toca.
+      function stripCountryFromNational(value, prefixValue){
+        var raw = String(value || '').trim();
+        var hadIntlMarker = /^(\+|00)/.test(raw);
+        var digits = raw.replace(/\D+/g, '');
+        if (!digits) return '';
+        var cc = String(prefixValue || '').replace(/\D+/g, ''); // p.ej. "34"
+        var rule = PHONE_CC_RULES[cc] || { min: 6, max: 15 };
+        // "00" internacional (con o sin el código de país detrás)
+        if (cc && digits.indexOf('00' + cc) === 0) digits = digits.slice(2 + cc.length);
+        else if (digits.indexOf('00') === 0) digits = digits.slice(2);
+        // Si venía con marcador internacional (+ o 00), el cc inicial ES el código de país → quítalo una vez
+        if (cc && hadIntlMarker && digits.indexOf(cc) === 0 && (digits.length - cc.length) >= rule.min) {
+          digits = digits.slice(cc.length);
+        }
+        // Código de país duplicado sin marcador: solo si el número es demasiado largo para ser nacional
+        while (cc && digits.length > rule.max && digits.indexOf(cc) === 0 && (digits.length - cc.length) >= rule.min) {
+          digits = digits.slice(cc.length);
+        }
+        // 0 troncal: en FR/DE se descarta en formato internacional (queda dentro del +33/+49).
+        // Italia (trunk0:false) lo mantiene porque forma parte del número fijo.
+        if (rule.trunk0 && digits.charAt(0) === '0') {
+          digits = digits.replace(/^0+/, '');
+        }
+        return digits.slice(0, 15);
       }
 
       function formatPhoneDisplay(value){
@@ -1841,8 +2137,12 @@
           cartList.innerHTML = cartItems.map(function(item){
             var itemName = escapeHtml(item.name || 'Producto');
             var itemRef = item.sku ? ('<span class="order-summary__product-meta order-summary__product-meta--ref">Ref: ' + escapeHtml(item.sku) + '</span>') : '';
-            var itemColorText = item.colorLabel || item.color || '';
-            var itemColor = itemColorText ? ('<span class="order-summary__product-meta order-summary__product-meta--color">Color: ' + escapeHtml(itemColorText) + '</span>') : '';
+            /* Regla global: una linea sin variantes muestra "Unico" (el chip --color va
+               en mayusculas por CSS) para igualar la fuerza visual de las que si tienen.
+               El TEXTO lo escribe el nucleo: un patinete elegido por modelo dice
+               "Modelo: G2 PRO VMP", no "Color: vmp". */
+            var itemColorText = textoVariantes(item);
+            var itemColor = '<span class="order-summary__product-meta order-summary__product-meta--color">' + (itemColorText ? escapeHtml(itemColorText) : 'Único') + '</span>';
             var itemQty = (Number(item.qty) > 1)
               ? ('<span class="order-summary__product-meta order-summary__product-meta--qty">Cant: ' + escapeHtml(item.qty) + '</span>')
               : '';
@@ -1873,6 +2173,43 @@
           ckProduct.parentNode.insertBefore(cartList, ckProduct.nextSibling);
         }
       }
+
+      /* REPINTADO ÚNICO en cuanto el núcleo puede resolver el catálogo. El resumen se
+         escribe nada más cargar la página, mientras que núcleo y catálogo llegan
+         diferidos: con red lenta el chip se quedaba con el respaldo ("Color: …") para
+         siempre, porque nadie volvía a escribirlo. Se engancha a `SS_ATTRS.ready` —la
+         puerta única de readiness, la misma que usa el cajón del carrito— y no a un
+         evento suelto ni a un temporizador.
+         Se reescribe SOLO el texto del chip: rehacer el HTML de la lista volvería a
+         descargar las fotos (los duplicados que vigila check-image-dupes.js). */
+      function repintarVariantes(){
+        try {
+          if (!isCartMode) {
+            if (colorLabel) renderColorLabel(colorLabel);
+            return;
+          }
+          var lista = document.getElementById('ckCartItemsList');
+          if (!lista) return;
+          var chips = lista.querySelectorAll('.order-summary__product-meta--color');
+          for (var i = 0; i < chips.length && i < cartItems.length; i++) {
+            chips[i].textContent = textoVariantes(cartItems[i]) || 'Único';
+          }
+        } catch (_) {}
+      }
+
+      try {
+        if (window.SS_ATTRS && window.SS_ATTRS.ready && window.SS_ATTRS.ready.then) {
+          window.SS_ATTRS.ready.then(repintarVariantes);
+        } else {
+          document.addEventListener('ss:attrs', function(){
+            if (window.SS_ATTRS && window.SS_ATTRS.ready && window.SS_ATTRS.ready.then) {
+              window.SS_ATTRS.ready.then(repintarVariantes);
+            } else {
+              repintarVariantes();
+            }
+          }, { once: true });
+        }
+      } catch (_) {}
 
       if (!isCartMode) {
         loadProductCatalog()
@@ -1945,7 +2282,7 @@
       var COUNTRY_PLACEHOLDERS = {
         'España':   { city:'Madrid',    address:'Calle Gran Vía 1',      phone:'600 000 000' },
         'Portugal': { city:'Lisboa',    address:'Rua Augusta 1',         phone:'912 345 678' },
-        'Francia':  { city:'Paris',     address:'12 Rue de Rivoli',      phone:'06 12 34 56 78' },
+        'Francia':  { city:'Paris',     address:'12 Rue de Rivoli',      phone:'6 12 34 56 78' },
         'Italia':   { city:'Roma',      address:'Via del Corso 1',       phone:'312 345 6789' },
         'Alemania': { city:'Berlin',    address:'Friedrichstraße 1',     phone:'170 123 4567' }
       };
@@ -2046,6 +2383,11 @@
         }
       }
 
+      // La nota de entrega NO se recupera en una visita nueva: es de un pedido
+      // concreto, no un dato del cliente. Solo vuelve al editar desde /pago
+      // (ese enlace trae edit=1), y si la borras y guardas ya no reaparece.
+      var restoreNotes = getParam('edit') === '1';
+
       function prefillForm(data){
         if (!data) {
           syncPostalCodeField();
@@ -2058,6 +2400,7 @@
           'fullName','email','phone','addressLine1','addressLine2',
           'postalCode','city','country','notes'
         ].forEach(function(key){
+          if (key === 'notes' && !restoreNotes) return;
           var field = document.getElementById(key);
           if (field && data[key]) field.value = data[key];
         });
@@ -2069,14 +2412,19 @@
         syncPostalCodeField();
         syncPlaceholders();
         syncPhonePrefix();
-        if (phoneField && phoneField.value) {
-          phoneField.value = formatPhoneDisplay(phoneField.value);
+        // El borrador guarda 'phone' completo (con prefijo); restaurar el campo NACIONAL
+        // desde 'phoneNumber' si existe, o limpiando el código de país del 'phone'.
+        if (phoneField) {
+          var restoredNational = (data.phoneNumber != null && String(data.phoneNumber) !== '')
+            ? String(data.phoneNumber)
+            : stripCountryFromNational(phoneField.value, phonePrefixField ? phonePrefixField.value : '');
+          if (restoredNational) phoneField.value = formatPhoneDisplay(restoredNational);
         }
         syncProvinceField(data.province || '');
         if ((!data.city || !data.province) && data.postalCode) {
           autofillLocationFromPostalCode(data.postalCode);
         }
-        if (data.notes) {
+        if (data.notes && restoreNotes) {
           var nb = document.getElementById('notesBlock');
           var nw = document.getElementById('notesToggleWrap');
           if (nb) nb.hidden = false;
@@ -2087,10 +2435,12 @@
       prefillForm(loadSavedShipping());
       syncPlaceholders();
 
-      // ── Fase 2: autocompletar desde la dirección guardada del cliente ──
-      // Regla: si hay una dirección PREDETERMINADA, se aplica SIEMPRE al cargar
-      // (aunque el navegador/localStorage hayan pre-rellenado campos — esto es lo
-      // que fallaba en móvil). Sin predeterminada, solo se rellena si está vacío.
+      // ── Fase 2: autocompletar desde la cuenta del cliente ──
+      // CONTACTO (nombre + teléfono): "Mis datos" de /cuenta MANDA SIEMPRE. Pisa el
+      // borrador local, el autofill del navegador y el nombre/teléfono de la dirección.
+      // DIRECCIÓN: si hay una PREDETERMINADA se aplica siempre al cargar (aunque el
+      // navegador/localStorage hayan pre-rellenado campos — esto es lo que fallaba en
+      // móvil). Sin predeterminada, solo se rellena si está vacío.
       (function prefillFromAccount(){
         fetch('/api/index.php?route=account_profile', { credentials: 'same-origin', cache: 'no-store' })
           .then(function(r){ return r.ok ? r.json() : null; })
@@ -2109,24 +2459,33 @@
               emailEl.dispatchEvent(new Event('input', { bubbles: true }));
             }
 
+            // "Mis datos" (/cuenta): fuente de verdad del contacto.
+            var profileName = safeText(profile.name);
+            var profilePhone = safeText(profile.phone);
+            var hasProfileContact = !!(profileName || profilePhone);
+
             var def = null;
             for (var i = 0; i < addrs.length; i++) { if (addrs[i].is_default) { def = addrs[i]; break; } }
             var hasDefault = !!def;
             if (!def && addrs.length) def = addrs[0];
 
-            // Sin predeterminada: respetar lo ya rellenado (no pisar).
+            // Sin predeterminada: respetar la dirección ya rellenada (no pisar).
+            var keepAddress = false;
             if (!hasDefault) {
               var existing = loadSavedShipping();
-              if (existing && (existing.addressLine1 || existing.fullName)) return;
-              var fn = document.getElementById('fullName');
-              var al = document.getElementById('addressLine1');
-              if ((fn && fn.value.trim()) || (al && al.value.trim())) return;
+              var fnNow = document.getElementById('fullName');
+              var alNow = document.getElementById('addressLine1');
+              keepAddress = !!(existing && (existing.addressLine1 || existing.fullName)) ||
+                !!((fnNow && fnNow.value.trim()) || (alNow && alNow.value.trim()));
             }
 
+            // Con 2 o más direcciones guardadas, el usuario elige cuál usar.
+            setupAddressPicker(addrs);
+
             var mapped = {
-              fullName: (def && def.name) || profile.name || '',
+              fullName: profileName || (def && def.name) || '',
               email: profile.email || '',
-              phone: (def && def.phone) || profile.phone || '',
+              phone: profilePhone || (def && def.phone) || '',
               addressLine1: def ? def.address : '',
               addressLine2: def ? def.address2 : '',
               postalCode: def ? def.postal : '',
@@ -2134,33 +2493,190 @@
               province: def ? def.province : '',
               country: (def && def.country) || ''
             };
-            if (!mapped.fullName && !mapped.email && !mapped.addressLine1) return;
+            if (!hasProfileContact && !mapped.fullName && !mapped.email && !mapped.addressLine1) return;
+            // Nada que aportar: ni contacto guardado ni dirección aplicable.
+            if (keepAddress && !hasProfileContact) return;
 
             if (mapped.country && countryField) {
               var ok = Array.prototype.some.call(countryField.options, function(o){ return o.value === mapped.country; });
               if (!ok) mapped.country = '';
             }
 
+            // El teléfono del perfil puede llevar prefijo internacional dentro ("+351 912…").
+            function detectIntlPrefix(value){
+              var raw = safeText(value);
+              if (!/^(\+|00)/.test(raw)) return '';
+              var digits = raw.replace(/\D+/g, '').replace(/^00/, '');
+              var best = '';
+              for (var key in COUNTRY_PHONE_PREFIXES) {
+                if (!Object.prototype.hasOwnProperty.call(COUNTRY_PHONE_PREFIXES, key)) continue;
+                var candidate = COUNTRY_PHONE_PREFIXES[key];
+                if (digits.indexOf(candidate.replace(/\D+/g, '')) === 0 && candidate.length > best.length) best = candidate;
+              }
+              return best;
+            }
+
+            // Nombre y teléfono de "Mis datos": prioridad absoluta sobre todo lo demás.
+            function applyProfileContact(){
+              if (!hasProfileContact) return;
+              var fn = document.getElementById('fullName');
+              if (fn && profileName && fn.value !== profileName) {
+                fn.value = profileName;
+                fn.dispatchEvent(new Event('input', { bubbles: true }));
+              }
+              if (!phoneField || !profilePhone) return;
+              var intl = detectIntlPrefix(profilePhone);
+              if (intl && phonePrefixField) {
+                phonePrefixField.value = intl;
+                phonePrefixField.setAttribute('data-auto-prefix', intl);
+              }
+              var prefix = safeText(phonePrefixField ? phonePrefixField.value : '') || '+34';
+              var national = stripCountryFromNational(profilePhone, prefix);
+              if (!national) return;
+              phoneField.value = formatPhoneDisplay(national);
+              phoneField.dispatchEvent(new Event('input', { bubbles: true }));
+              if (phonePrefixField) phonePrefixField.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+
             function apply(){
-              // Override limpio del campo opcional para no dejar restos de pre-rellenado.
-              if (hasDefault) { var a2 = document.getElementById('addressLine2'); if (a2 && !mapped.addressLine2) a2.value = ''; }
-              prefillForm(mapped);
-              ['fullName','email','phone','phonePrefix'].forEach(function(id){
-                var el = document.getElementById(id);
-                if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
-              });
+              if (!keepAddress) {
+                // Override limpio del campo opcional para no dejar restos de pre-rellenado.
+                if (hasDefault) { var a2 = document.getElementById('addressLine2'); if (a2 && !mapped.addressLine2) a2.value = ''; }
+                prefillForm(mapped);
+                ['fullName','email','phone','phonePrefix'].forEach(function(id){
+                  var el = document.getElementById(id);
+                  if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
+                });
+              }
+              applyProfileContact();
             }
 
             apply();
 
             // Móvil: el autofill del navegador puede dispararse tras la carga y pisar
-            // la predeterminada. La re-aplicamos una vez (salvo que estés escribiendo).
-            if (hasDefault) {
+            // lo aplicado. Lo re-aplicamos una vez (salvo que estés escribiendo).
+            if (hasDefault || hasProfileContact) {
               setTimeout(function(){
                 var act = document.activeElement;
                 if (act && /^(INPUT|SELECT|TEXTAREA)$/.test(act.tagName)) return;
                 apply();
               }, 450);
+            }
+
+            // ── Selector de direcciones guardadas (icono en la cabecera "Dirección") ──
+            function escHtml(value){
+              return String(value == null ? '' : value).replace(/[&<>"']/g, function(ch){
+                return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch];
+              });
+            }
+
+            function addressSummary(a){
+              return [
+                safeText(a.address),
+                safeText(a.address2),
+                [safeText(a.postal), safeText(a.city)].filter(Boolean).join(' '),
+                [safeText(a.province), safeText(a.country)].filter(Boolean).join(', ')
+              ].filter(Boolean).join(' · ');
+            }
+
+            function setAddressField(id, value){
+              var el = document.getElementById(id);
+              if (el) el.value = safeText(value);
+            }
+
+            function applySavedAddress(a){
+              if (!a) return;
+              var country = safeText(a.country);
+              if (country && countryField) {
+                var exists = Array.prototype.some.call(countryField.options, function(o){ return o.value === country; });
+                if (exists) countryField.value = country;
+              }
+              // Sin dispatch de 'input': el CP dispara una búsqueda que pisaría ciudad/provincia.
+              setAddressField('addressLine1', a.address);
+              setAddressField('addressLine2', a.address2);
+              setAddressField('postalCode', a.postal);
+              setAddressField('city', a.city);
+              syncPostalCodeField();
+              syncPlaceholders();
+              syncPhonePrefix();
+              syncProvinceField(safeText(a.province));
+              // Contacto: "Mis datos" manda; si está vacío, se usa el de la dirección.
+              if (!profileName && safeText(a.name)) {
+                var fnEl = document.getElementById('fullName');
+                if (fnEl) {
+                  fnEl.value = safeText(a.name);
+                  fnEl.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+              }
+              if (!profilePhone && safeText(a.phone) && phoneField) {
+                phoneField.value = formatPhoneDisplay(stripCountryFromNational(a.phone, phonePrefixField ? phonePrefixField.value : ''));
+                phoneField.dispatchEvent(new Event('input', { bubbles: true }));
+              }
+              applyProfileContact();
+              clearFieldErrors();
+            }
+
+            function setupAddressPicker(list){
+              var wrap = document.getElementById('addrPickerWrap');
+              var btn = document.getElementById('addrPickerBtn');
+              var menu = document.getElementById('addrPickerMenu');
+              if (!wrap || !btn || !menu || !list || list.length < 2) return;
+
+              menu.innerHTML = '<div class="addr-picker__title">Mis direcciones</div>' + list.map(function(a, idx){
+                var label = safeText(a.label) || ('Dirección ' + (idx + 1));
+                return '<button type="button" class="addr-picker__item" role="menuitem" data-addr-index="' + idx + '">' +
+                  '<span class="addr-picker__label">' + escHtml(label) +
+                  (a.is_default ? '<span class="addr-picker__badge">Predet.</span>' : '') +
+                  '<svg class="addr-picker__check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>' +
+                  '</span>' +
+                  '<span class="addr-picker__text">' + escHtml(addressSummary(a)) + '</span>' +
+                '</button>';
+              }).join('');
+
+              function markActive(){
+                var addrEl = document.getElementById('addressLine1');
+                var current = safeText(addrEl && addrEl.value).toLowerCase();
+                var items = menu.querySelectorAll('.addr-picker__item');
+                for (var i = 0; i < items.length; i++) {
+                  var a = list[Number(items[i].getAttribute('data-addr-index'))];
+                  items[i].classList.toggle('is-active', !!current && safeText(a && a.address).toLowerCase() === current);
+                }
+              }
+
+              function closeMenu(){
+                menu.hidden = true;
+                btn.setAttribute('aria-expanded', 'false');
+              }
+
+              btn.addEventListener('click', function(event){
+                event.preventDefault();
+                if (menu.hidden) {
+                  markActive();
+                  menu.hidden = false;
+                  btn.setAttribute('aria-expanded', 'true');
+                } else {
+                  closeMenu();
+                }
+              });
+
+              menu.addEventListener('click', function(event){
+                var item = event.target && event.target.closest ? event.target.closest('.addr-picker__item') : null;
+                if (!item) return;
+                event.preventDefault();
+                applySavedAddress(list[Number(item.getAttribute('data-addr-index'))]);
+                closeMenu();
+              });
+
+              document.addEventListener('click', function(event){
+                if (menu.hidden || wrap.contains(event.target)) return;
+                closeMenu();
+              });
+
+              document.addEventListener('keydown', function(event){
+                if (event.key === 'Escape' && !menu.hidden) { closeMenu(); btn.focus(); }
+              });
+
+              wrap.hidden = false;
             }
           })
           .catch(function(){ /* invitado o error: sin autocompletar */ });
@@ -2206,7 +2722,7 @@
       // Phone summary: combine prefix + number
       function updatePhoneSummary(){
         var prefix = safeText(phonePrefixField ? phonePrefixField.value : '');
-        var number = phoneField ? formatPhoneDisplay(phoneField.value) : '';
+        var number = phoneField ? formatPhoneDisplay(stripCountryFromNational(phoneField.value, prefix)) : '';
         var full = number ? (prefix + ' ' + number).trim() : '';
         syncSummaryMeta(ckContactMeta, phoneRow, ckPhoneValue, '', full, 'Teléfono pendiente');
       }
@@ -2314,8 +2830,8 @@
       var notesTA = document.getElementById('notes');
       var notesCount = document.getElementById('notesCount');
       if (notesTA && notesCount) {
-        var notesMax = parseInt(notesTA.getAttribute('maxlength') || '160', 10);
-        if (!Number.isFinite(notesMax) || notesMax <= 0) notesMax = 160;
+        var notesMax = parseInt(notesTA.getAttribute('maxlength') || '130', 10);
+        if (!Number.isFinite(notesMax) || notesMax <= 0) notesMax = 130;
         var notesWarnAt = Math.max(notesMax - 20, Math.floor(notesMax * 0.85));
 
         function updateNotesCounter(){
@@ -2360,10 +2876,10 @@
         });
         phoneField.addEventListener('input', function(){
           phoneField.setCustomValidity('');
-          phoneField.value = formatPhoneDisplay(phoneField.value);
+          phoneField.value = formatPhoneDisplay(stripCountryFromNational(phoneField.value, phonePrefixField ? phonePrefixField.value : ''));
         });
         phoneField.addEventListener('blur', function(){
-          phoneField.value = formatPhoneDisplay(phoneField.value);
+          phoneField.value = formatPhoneDisplay(stripCountryFromNational(phoneField.value, phonePrefixField ? phonePrefixField.value : ''));
         });
       }
 
@@ -2442,7 +2958,7 @@
           event.preventDefault();
           syncPostalCodeField();
           if (phoneField) {
-            var phoneDigits = sanitizePhoneValue(phoneField.value);
+            var phoneDigits = stripCountryFromNational(phoneField.value, phonePrefixField ? phonePrefixField.value : '');
             phoneField.value = formatPhoneDisplay(phoneDigits);
             phoneField.setCustomValidity(phoneDigits.length >= 9 && phoneDigits.length <= 15 ? '' : 'Introduce un teléfono válido de 9 a 15 dígitos.');
           }
@@ -2474,9 +2990,9 @@
           var payload = {
             fullName: safeText(document.getElementById('fullName').value),
             email: safeText(document.getElementById('email').value),
-            phone: safeText(phonePrefixField ? phonePrefixField.value : '') + sanitizePhoneValue(document.getElementById('phone').value),
+            phone: safeText(phonePrefixField ? phonePrefixField.value : '') + stripCountryFromNational(document.getElementById('phone').value, phonePrefixField ? phonePrefixField.value : ''),
             phonePrefix: safeText(phonePrefixField ? phonePrefixField.value : '+34'),
-            phoneNumber: sanitizePhoneValue(document.getElementById('phone').value),
+            phoneNumber: stripCountryFromNational(document.getElementById('phone').value, phonePrefixField ? phonePrefixField.value : ''),
             addressLine1: safeText(document.getElementById('addressLine1').value),
             addressLine2: safeText(document.getElementById('addressLine2').value),
             postalCode: safeText(document.getElementById('postalCode').value),
@@ -2506,6 +3022,225 @@
   </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -42,6 +42,49 @@
           .replace(/'/g, '&#039;');
       }
       function compactKey(s){ return safeText(s).toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+
+      /* ── Descripción de variantes: SIEMPRE por el núcleo ──────────────────────
+         Antes esta página escribía "Color: " + colorLabel en tres sitios, así que un
+         patinete elegido por MODELO aparecía en el resumen del pedido como si fuera un
+         color. El núcleo (js/product-attributes.js) resuelve el rótulo del eje y la
+         etiqueta de la opción desde el catálogo, entiende las líneas antiguas sin
+         `attrs` y cae al valor guardado si esa opción ya no existe — un pedido de hace
+         meses se sigue leyendo aunque el catálogo haya cambiado.
+         Devuelve '' cuando la línea no tiene variantes: quien pinta decide si eso es
+         "Único" o no mostrar nada. */
+      function describirVariantes(item){
+        if(!item) return '';
+        var producto = null;
+        try {
+          var lista = window.SCOOTSHOP_PRODUCTS ||
+            (window.SCOOTSHOP_CATALOG && window.SCOOTSHOP_CATALOG.products) || [];
+          var sinBarra = function(v){ return String(v || '').replace(/\/+$/, ''); };
+          var url = sinBarra(item.url || item.href);
+          var sku = String(item.sku || '');
+          for (var i = 0; i < lista.length; i++) {
+            if ((sku && lista[i].sku === sku) || (url && sinBarra(lista[i].href) === url)) {
+              producto = lista[i]; break;
+            }
+          }
+        } catch(_){}
+        if (window.SS_ATTRS && typeof window.SS_ATTRS.describirTexto === 'function') {
+          return window.SS_ATTRS.describirTexto(item, producto);
+        }
+        // Sin núcleo: NO se inventa que el eje es color. Solo una línea legacy de
+        // verdad —sin `attrs`— se lee como color.
+        if (item.attrs) {
+          var partes = [];
+          for (var k in item.attrs) {
+            if (Object.prototype.hasOwnProperty.call(item.attrs, k)) {
+              var t = String(k).replace(/[_-]+/g, ' ').trim();
+              partes.push(t.charAt(0).toUpperCase() + t.slice(1) + ': ' + item.attrs[k]);
+            }
+          }
+          if (partes.length) return partes.join(' · ');
+        }
+        var etiqueta = item.colorLabel || item.color || '';
+        return etiqueta ? ('Color: ' + etiqueta) : '';
+      }
       function loadCheckoutShipping(){
         try {
           var raw = readStorageValue('ss_checkout_shipping');
@@ -49,6 +92,22 @@
         } catch(e) {
           return null;
         }
+      }
+      /* Atributos con nombre de una línea ({ model: 'vmp' }). Se copian TAL CUAL del
+         carrito: sin ellos la línea se lee como legacy —y legacy significa color—, que
+         es lo que hacía que el resumen dijera "Color: G2 PRO VMP" aunque el núcleo y el
+         catálogo estuvieran cargados. */
+      function sanitizeAttrs(raw){
+        if(!raw || typeof raw !== 'object') return null;
+        var out = {};
+        var hay = false;
+        for (var k in raw) {
+          if(!Object.prototype.hasOwnProperty.call(raw, k)) continue;
+          var clave = safeText(k);
+          var valor = safeText(raw[k]);
+          if(clave && valor){ out[clave] = valor; hay = true; }
+        }
+        return hay ? out : null;
       }
       function loadCheckoutCart(){
         try {
@@ -72,7 +131,8 @@
               url: normalizePath(item && (item.url || item.href) || '/'),
               image: safeText(item && item.image),
               color: safeText(item && item.color),
-              colorLabel: safeText(item && item.colorLabel)
+              colorLabel: safeText(item && item.colorLabel),
+              attrs: sanitizeAttrs(item && item.attrs)
             };
           }).filter(Boolean);
         } catch(e) {
@@ -321,8 +381,9 @@
             sumThumb.hidden = false;
           }
 
-          if(sumColor && resolved.colorLabel){
-            sumColor.textContent = 'Color: ' + resolved.colorLabel;
+          var descResolved = describirVariantes(resolved);
+          if(sumColor && descResolved){
+            sumColor.textContent = descResolved;
             sumColor.style.display = 'block';
             sumColor.style.fontSize = '.75rem';
             sumColor.style.color = '#68707f';
@@ -424,8 +485,9 @@
       // Fórmula inversa: total = (base + fixedFee) / (1 - pct)
       // Así Stripe cobra su % del total y a nosotros nos llegan los €base limpios.
       var PAYMENT_FEES = {
-        card:    { pct: 0.009,  fixed: 0.15, label: 'Comisión pago online' },
-        klarna:  { pct: 0.0359, fixed: 0.15, label: 'Comisión Klarna' },
+        card:    { pct: 0.015,  fixed: 0.25, label: 'Comisión pago online' },
+        klarna:  { pct: 0.05,   fixed: 0.40, label: 'Comisión Klarna' },
+        scalapay:{ pct: 0.05,   fixed: 0.30, label: 'Comisión Scalapay' },
         paypal:  { pct: 0.0209, fixed: 0.29, label: 'Comisión PayPal' },
         bizum:   null,
         bank:    null
@@ -815,6 +877,7 @@
         var msg = document.getElementById('discountMsg');
         if(!msg) return;
         msg.textContent = text || '';
+        if(text) msg.hidden = false;
         msg.classList.remove('is-ok', 'is-error');
         if(text && kind === 'ok') msg.classList.add('is-ok');
         if(text && kind === 'error') msg.classList.add('is-error');
@@ -823,22 +886,52 @@
       function setDiscountButtonsLoading(isLoading){
         var applyBtn = document.getElementById('discountApplyBtn');
         var removeBtn = document.getElementById('discountRemoveBtn');
+        var chipRemove = document.getElementById('discountChipRemove');
         var input = document.getElementById('discountCodeInput');
-        if(applyBtn) applyBtn.disabled = !!isLoading;
+        if(applyBtn) {
+          applyBtn.disabled = !!isLoading;
+          if(isLoading){
+            applyBtn.setAttribute('aria-busy', 'true');
+            applyBtn.innerHTML = '<span class="loading-dots" aria-hidden="true"><span></span><span></span><span></span></span>';
+          } else {
+            applyBtn.removeAttribute('aria-busy');
+            applyBtn.textContent = 'Aplicar';
+          }
+        }
         if(removeBtn) removeBtn.disabled = !!isLoading;
+        if(chipRemove) chipRemove.disabled = !!isLoading;
         if(input) input.disabled = !!isLoading;
       }
 
+      // El importe del descuento ya tiene su propia fila en el resumen; la fila
+      // verde solo muestra el código, así no se repite la misma cifra dos veces.
       function updateDiscountControls(){
         var input = document.getElementById('discountCodeInput');
+        var controls = document.getElementById('discountControls');
+        var applied = document.getElementById('discountApplied');
         var removeBtn = document.getElementById('discountRemoveBtn');
+        var msg = document.getElementById('discountMsg');
         var inputValue = safeText(input && input.value);
         if(input && appliedDiscountCode && !safeText(input.value)) {
           input.value = appliedDiscountCode;
           inputValue = safeText(input.value);
         }
+
+        var isApplied = (discountCodeState === 'valid' && !!appliedDiscountCode);
+
+        // Estado aplicado: el campo colapsa en un chip de éxito.
+        if(controls) controls.hidden = isApplied;
+        if(applied) applied.hidden = !isApplied;
+        if(msg) msg.hidden = isApplied;
+
+        if(isApplied){
+          var codeEl = document.getElementById('discountAppliedCode');
+          if(codeEl) codeEl.textContent = appliedDiscountCode;
+        }
+
+        // ✕ en línea: solo cuando hay un código erróneo que limpiar.
         if(removeBtn) {
-          var canShowRemove = !!inputValue && (discountCodeState === 'valid' || discountCodeState === 'invalid');
+          var canShowRemove = !!inputValue && discountCodeState === 'invalid';
           removeBtn.hidden = !canShowRemove;
           removeBtn.style.display = canShowRemove ? 'inline-flex' : 'none';
         }
@@ -852,7 +945,11 @@
           discount_code: discountCode || '',
           customer_email: safeText(savedShipping && savedShipping.email).toLowerCase(),
           category: safeText(checkoutMetaState && checkoutMetaState.category),
-          cart_items: isCartMode ? cartItemsPayload : []
+          cart_items: isCartMode ? cartItemsPayload : [],
+          // Al reanudar un pedido, el backend recupera de él el envío guardado
+          // (recargos manuales de admin). Sin esto el resumen mostraría el precio
+          // de catálogo y no coincidiría con lo que se cobra.
+          order_id: resumeOrderIdParam || getSessionOrderId() || ''
         };
 
         return fetch(LOCAL_API_BASE + '/index.php?route=order_pricing_preview', {
@@ -1017,6 +1114,9 @@
           params.delete('session_id');
           params.delete('cancelled');
           params.delete('method');
+          // Marca de "vuelvo a editar este pedido": el checkout la usa para
+          // recuperar la nota de entrega, que en una visita nueva no se restaura.
+          params.set('edit', '1');
           url.search = params.toString();
           return url.pathname + (url.search || '');
         } catch(e) {
@@ -1048,8 +1148,17 @@
             ? (cartItems.length + (cartItems.length === 1 ? ' producto en carrito' : ' productos en carrito'))
             : ('Ref: ' + sku);
         }
-        if(sumColor && colorLabel) {
-          sumColor.textContent = 'Color: ' + colorLabel;
+        /* La línea de una compra directa se arma con SKU y ruta: sin ellos el núcleo no
+           llega al producto, y sin producto no hay forma de saber que "vmp" es un
+           MODELO y no un color. La clave (`color`) manda sobre la etiqueta. */
+        function lineaResumen(){
+          return (isCartMode && cartItems.length === 1)
+            ? cartItems[0]
+            : { sku: sku, url: productUrl, color: colorKey || colorLabel, colorLabel: colorLabel };
+        }
+        var descLinea = describirVariantes(lineaResumen());
+        if(sumColor && descLinea) {
+          sumColor.textContent = descLinea;
           sumColor.style.display = 'block';
           sumColor.style.fontSize = '.75rem';
           sumColor.style.color = '#68707f';
@@ -1071,8 +1180,12 @@
             list.innerHTML = cartItems.map(function(item){
               var itemName = escapeHtml(item.name || 'Producto');
               var itemRef = item.sku ? ('<span class="order-summary__product-meta order-summary__product-meta--ref">Ref: ' + escapeHtml(item.sku) + '</span>') : '';
-              var itemColorText = item.colorLabel || item.color || '';
-              var itemColor = itemColorText ? ('<span class="order-summary__product-meta order-summary__product-meta--color">Color: ' + escapeHtml(itemColorText) + '</span>') : '';
+              /* Regla global: una linea sin variantes muestra "Unico" (el chip --color
+                 va en mayusculas por CSS) para igualar la fuerza visual de las que si
+                 tienen. Lo que cambia es que el TEXTO lo escribe el nucleo: un patinete
+                 elegido por modelo dice "Modelo: G2 PRO VMP", no "Color: vmp". */
+              var itemColorText = describirVariantes(item);
+              var itemColor = '<span class="order-summary__product-meta order-summary__product-meta--color">' + (itemColorText ? escapeHtml(itemColorText) : 'Único') + '</span>';
               var itemQty = (Number(item.qty) > 1) ? ('<span class="order-summary__product-meta order-summary__product-meta--qty">Cant: ' + escapeHtml(item.qty) + '</span>') : '';
               var lineTotal = ((Number(item.price) || 0) * (Number(item.qty) || 1)).toFixed(2) + ' €';
               var itemImage = item.image
@@ -1100,6 +1213,39 @@
             applyCartLinePriceStyles(currentPaymentMethod || 'card');
           }
         }
+
+        /* REPINTADO ÚNICO en cuanto el núcleo puede resolver el catálogo. El resumen se
+           escribe nada más cargar la página y el núcleo llega diferido: con red lenta el
+           chip se quedaba con el respaldo ("Color: …") para siempre porque nadie volvía a
+           escribirlo. Se engancha a `SS_ATTRS.ready` —la puerta única de readiness, la
+           misma que usa el cajón del carrito—, nunca a un temporizador.
+           Solo se reescribe el TEXTO: rehacer el HTML de la lista volvería a descargar
+           las fotos (los duplicados que vigila check-image-dupes.js). */
+        var repintarVariantes = function(){
+          try {
+            var desc = describirVariantes(lineaResumen());
+            if(sumColor && desc) sumColor.textContent = desc;
+            var lista = document.getElementById('sumCartItemsList');
+            if(!lista) return;
+            var chips = lista.querySelectorAll('.order-summary__product-meta--color');
+            for(var i = 0; i < chips.length && i < cartItems.length; i++){
+              chips[i].textContent = describirVariantes(cartItems[i]) || 'Único';
+            }
+          } catch(_){}
+        };
+        try {
+          if(window.SS_ATTRS && window.SS_ATTRS.ready && window.SS_ATTRS.ready.then){
+            window.SS_ATTRS.ready.then(repintarVariantes);
+          } else {
+            document.addEventListener('ss:attrs', function(){
+              if(window.SS_ATTRS && window.SS_ATTRS.ready && window.SS_ATTRS.ready.then){
+                window.SS_ATTRS.ready.then(repintarVariantes);
+              } else {
+                repintarVariantes();
+              }
+            }, { once: true });
+          }
+        } catch(_){}
 
         // Populate fee hints in tabs
         if(priceNum){
@@ -1178,7 +1324,7 @@
           if(input) input.value = appliedDiscountCode;
           saveDiscountInSession(appliedDiscountCode);
           updateDiscountControls();
-          setDiscountMessage('Código aplicado correctamente (modo local).', 'ok');
+          setDiscountMessage('', '');
           renderSummaryFromBreakdown(currentPaymentMethod || 'card', localDemo);
           applyCartLinePriceStyles(currentPaymentMethod || 'card');
           return;
@@ -1246,7 +1392,7 @@
           if(input) input.value = appliedDiscountCode;
           saveDiscountInSession(appliedDiscountCode);
           updateDiscountControls();
-          setDiscountMessage(data.message || 'Código aplicado correctamente.', 'ok');
+          setDiscountMessage('', '');
           if(isCartMode){
             var cartPricingOnApply = buildCartLinePricing(currentPaymentMethod);
             renderSummaryFromBreakdown(
@@ -1322,6 +1468,8 @@
 
         applyBtn.addEventListener('click', applyDiscountCode);
         removeBtn.addEventListener('click', clearDiscountCode);
+        var chipRemove = document.getElementById('discountChipRemove');
+        if(chipRemove) chipRemove.addEventListener('click', clearDiscountCode);
         input.addEventListener('keydown', function(evt){
           if(evt.key === 'Enter'){
             evt.preventDefault();
@@ -1428,20 +1576,12 @@
       var panels = {
         card:   document.getElementById('panel-card'),
         klarna: document.getElementById('panel-klarna'),
+        scalapay: document.getElementById('panel-scalapay'),
         paypal: document.getElementById('panel-paypal'),
         bizum:  document.getElementById('panel-bizum'),
         bank:   document.getElementById('panel-bank')
       };
       var paypalLoading = document.getElementById('paypalLoading');
-
-      function setPaypalLoading(message, keepVisible){
-        if(!paypalLoading) return;
-        var label = paypalLoading.querySelector('[data-loading-label]');
-        var sr = paypalLoading.querySelector('[data-loading-sr]');
-        if(label) label.textContent = message || 'PayPal';
-        if(sr) sr.textContent = 'Cargando PayPal';
-        paypalLoading.hidden = !keepVisible;
-      }
 
       function ensurePaypalButtons(){
         clearErr('paypalErr');
@@ -1458,6 +1598,10 @@
       var klarnaLoading = document.getElementById('klarnaLoading');
       var klarnaMount = document.getElementById('stripe-klarna-checkout');
       var klarnaWrap = document.getElementById('klarna-wrap');
+      var scalapayInfo = document.getElementById('scalapayInfo');
+      var scalapayLoading = document.getElementById('scalapayLoading');
+      var scalapayMount = document.getElementById('stripe-scalapay-checkout');
+      var scalapayWrap = document.getElementById('scalapay-wrap');
       var paypalInfo = document.getElementById('paypalInfo');
       var paypalMount = document.getElementById('stripe-paypal-checkout');
       var paypalWrap = document.getElementById('paypal-wrap');
@@ -1650,6 +1794,16 @@
             label: 'Klarna'
           };
         }
+        if(mode === 'scalapay'){
+          return {
+            loading: scalapayLoading,
+            info: scalapayInfo,
+            mount: scalapayMount,
+            mountSelector: '#stripe-scalapay-checkout',
+            errorId: 'scalapayErr',
+            label: 'Scalapay'
+          };
+        }
         if(mode === 'paypal'){
           return {
             loading: paypalLoading,
@@ -1716,9 +1870,9 @@
         var sessionId = safeText(getParam('session_id'));
         var orderId = safeText(getParam('order'));
         var returnedMethod = safeText(getParam('method')).toLowerCase();
-        var errorTarget = returnedMethod === 'klarna'
-          ? 'klarnaErr'
-          : (returnedMethod === 'paypal' ? 'paypalErr' : 'cardErr');
+        var errorTarget = returnedMethod === 'klarna' ? 'klarnaErr'
+          : (returnedMethod === 'paypal' ? 'paypalErr'
+          : (returnedMethod === 'scalapay' ? 'scalapayErr' : 'cardErr'));
         if(!sessionId) return Promise.resolve(false);
 
         return fetch(LOCAL_API_BASE + '/stripe/session-status?session_id=' + encodeURIComponent(sessionId), {
@@ -1753,6 +1907,7 @@
         var titleMap = {
           card: 'Pagar online',
           klarna: 'Pagar con Klarna',
+          scalapay: 'Pagar con Scalapay',
           paypal: 'Pagar con PayPal',
           bizum: 'Pagar con Bizum',
           bank: 'Pagar por transferencia'
@@ -1778,6 +1933,7 @@
         if(!hasSelection) return;
         if(key === 'card'){ ensureCardButtons(); }
         if(key === 'klarna'){ ensureKlarnaButtons(); }
+        if(key === 'scalapay'){ ensureScalapayButtons(); }
         if(key === 'paypal'){ ensurePaypalButtons(); }
         if(key === 'bizum' || key === 'bank'){ ensureManualOrder(key); }
       }
@@ -1856,6 +2012,166 @@
         return ensureStripeButtons('klarna');
       }
 
+      function ensureScalapayButtons(){
+        clearErr('scalapayErr');
+        if(scalapayWrap) scalapayWrap.hidden = false;
+        if(scalapayInfo){
+          scalapayInfo.textContent = 'Paga en 3 plazos sin intereses. Sujeto a aprobación de Scalapay.';
+        }
+        return ensureStripeButtons('scalapay');
+      }
+
+      // ── Checkout HOSTED para métodos por redirección (Klarna / PayPal) ──────────
+      // El checkout embebido corre dentro de un iframe; cuando Klarna/PayPal exigen
+      // redirección, el iframe no logra romper hacia la ventana superior en navegadores
+      // in-app (Instagram, Gmail, app de Google…) y el pago queda colgado en
+      // `requires_action` sin completarse. El flujo hosted redirige la página entera a
+      // checkout.stripe.com, que gestiona la ida y vuelta de forma fiable.
+      function startHostedStripeCheckout(mode, btn, originalLabel){
+        var ui = stripeUiFor(mode);
+        resolveCheckoutMeta().then(function(meta){
+          var existingOrderId = getSessionOrderId();
+          var adjustedPrice = getAdjustedPrice(mode);
+          return fetch(LOCAL_API_BASE + '/stripe/checkout', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: meta.name || name,
+              sku: meta.sku || sku || name,
+              price: adjustedPrice.toFixed(2),
+              currency: 'EUR',
+              discount_code: appliedDiscountCode || undefined,
+              frontend_base_amount: priceNum ? priceNum.toFixed(2) : undefined,
+              shipping_amount: (currentPricingSnapshot && Number.isFinite(currentPricingSnapshot.shipping)) ? currentPricingSnapshot.shipping.toFixed(2) : '0.00',
+              cart_items: isCartMode ? cartItemsPayload : undefined,
+              ref: ref,
+              productUrl: meta.productUrl || productUrl || undefined,
+              productImageUrl: meta.productImage || productImage || undefined,
+              productColor: meta.colorKey || colorKey || undefined,
+              productColorLabel: meta.colorLabel || colorLabel || undefined,
+              checkoutPath: buildStripeReturnPath(mode),
+              paymentMethodMode: mode,
+              paymentUiMode: 'hosted',
+              shipping: savedShipping || undefined,
+              existingOrderId: existingOrderId || undefined
+            })
+          }).then(function(res){
+            return res.json().catch(function(){ return {}; }).then(function(data){
+              if(!res.ok || !data.checkoutUrl){
+                var unavailableMsg = {
+                  klarna: 'Klarna no está disponible para este importe o comprador. Prueba con Pago online o PayPal.',
+                  paypal: 'PayPal no está disponible ahora mismo en Stripe. Prueba con Pago online o Klarna.',
+                  scalapay: 'Scalapay no está disponible para este importe o comprador. Prueba con Pago online.'
+                };
+                throw new Error(unavailableMsg[mode] || 'Este método no está disponible ahora mismo. Prueba con Pago online.');
+              }
+              if(data.orderId) saveSessionOrderId(data.orderId);
+              // Redirección de página completa a la pasarela hosted de Stripe.
+              window.location.assign(data.checkoutUrl);
+            });
+          });
+        }).catch(function(err){
+          console.error(err);
+          if(btn){
+            btn.disabled = false;
+            var lblEl = btn.querySelector('.btn-hosted-label');
+            if(lblEl) lblEl.textContent = originalLabel; else btn.textContent = originalLabel;
+          }
+          showErr(ui.errorId, err && err.message ? err.message : 'No se pudo iniciar el pago.');
+        });
+      }
+
+      function renderHostedCheckoutButton(mode){
+        var ui = stripeUiFor(mode);
+
+        if(!priceNum){
+          showErr(ui.errorId, 'Precio inválido. Vuelve al producto e inténtalo de nuevo.');
+          return;
+        }
+        if(!ui.mount){
+          showErr(ui.errorId, mode === 'klarna' ? 'No se pudo cargar Klarna en esta página.' : 'No se pudo cargar PayPal en esta página.');
+          return;
+        }
+
+        clearErr('cardErr');
+        clearErr('klarnaErr');
+        clearErr('paypalErr');
+        setStripeLoading(mode, '', false);
+
+        // Limpia cualquier checkout embebido previo (p. ej. al venir de la pestaña tarjeta).
+        if(stripeCheckout && typeof stripeCheckout.destroy === 'function'){
+          try { stripeCheckout.destroy(); } catch(e) {}
+          stripeCheckout = null;
+        }
+        stripeInitPromise = null;
+        stripeCurrentMode = mode;
+        if(stripeMount) stripeMount.innerHTML = '';
+        if(klarnaMount && mode !== 'klarna') klarnaMount.innerHTML = '';
+        if(paypalMount && mode !== 'paypal') paypalMount.innerHTML = '';
+
+        var labelMap = { klarna: 'Continuar con Klarna', paypal: 'Continuar con PayPal', scalapay: 'Continuar con Scalapay' };
+        var logoMap = { klarna: '/img/klarna.webp', paypal: '/img/paypal-svgrepo-com.svg', scalapay: '/img/scalapay.svg' };
+        var label = labelMap[mode] || 'Continuar con el pago';
+        var logoSrc = logoMap[mode] || '';
+
+        ui.mount.innerHTML = '';
+        var wrap = document.createElement('div');
+        wrap.className = 'hosted-checkout';
+
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn-hosted-pay btn-hosted-pay--' + mode;
+
+        if(logoSrc){
+          var logo = document.createElement('img');
+          logo.className = 'btn-hosted-logo';
+          logo.src = logoSrc;
+          logo.alt = '';
+          logo.setAttribute('aria-hidden', 'true');
+          logo.loading = 'lazy';
+          logo.decoding = 'async';
+          btn.appendChild(logo);
+        }
+
+        var lbl = document.createElement('span');
+        lbl.className = 'btn-hosted-label';
+        lbl.textContent = label;
+
+        btn.appendChild(lbl);
+        btn.addEventListener('click', function(){
+          if(btn.disabled) return;
+          btn.disabled = true;
+          lbl.textContent = 'Redirigiendo…';
+          startHostedStripeCheckout(mode, btn, label);
+        });
+
+        wrap.appendChild(btn);
+
+        // Señales de confianza bajo el botón.
+        var trust = document.createElement('div');
+        trust.className = 'hosted-trust';
+        trust.innerHTML =
+          '<span class="hosted-trust__item">'
+          + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'
+          + 'Pago cifrado SSL</span>'
+          + '<span class="hosted-trust__item">'
+          + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>'
+          + (mode === 'klarna' ? 'Compra protegida' : 'Protección al comprador') + '</span>';
+        wrap.appendChild(trust);
+
+        ui.mount.appendChild(wrap);
+        // El flujo hosted solo monta un botón: libera el min-height reservado
+        // para el checkout embebido para que no quede un hueco vacío enorme.
+        ui.mount.classList.add('mount--hosted');
+
+        if(ui.info){
+          ui.info.textContent = mode === 'klarna'
+            ? 'Paga a plazos con Klarna. Te llevaremos a la pasarela segura de Stripe para completar el pago.'
+            : 'Te llevaremos a la pasarela segura de Stripe para completar el pago con PayPal.';
+        }
+      }
+
       function ensureStripeButtons(mode){
         var ui = stripeUiFor(mode);
 
@@ -1917,6 +2233,14 @@
           return;
         }
 
+        // Klarna / PayPal → checkout HOSTED (página completa). El embebido (iframe) no
+        // completa la redirección de estos métodos en navegadores in-app. Tarjeta sigue
+        // embebida porque no necesita salir de la página.
+        if(mode === 'klarna' || mode === 'paypal' || mode === 'scalapay'){
+          renderHostedCheckoutButton(mode);
+          return;
+        }
+
         clearErr('cardErr');
         clearErr('klarnaErr');
         clearErr('paypalErr');
@@ -1965,8 +2289,8 @@
                   productImageUrl: meta.productImage || productImage || undefined,
                   productColor: meta.colorKey || colorKey || undefined,
                   productColorLabel: meta.colorLabel || colorLabel || undefined,
-                  checkoutPath: buildStripeReturnPath(mode === 'klarna' ? 'klarna' : (mode === 'paypal' ? 'paypal' : 'card')),
-                  paymentMethodMode: mode === 'klarna' ? 'klarna' : (mode === 'paypal' ? 'paypal' : 'dynamic'),
+                  checkoutPath: buildStripeReturnPath(mode === 'klarna' ? 'klarna' : (mode === 'paypal' ? 'paypal' : (mode === 'scalapay' ? 'scalapay' : 'card'))),
+                  paymentMethodMode: mode === 'klarna' ? 'klarna' : (mode === 'paypal' ? 'paypal' : (mode === 'scalapay' ? 'scalapay' : 'dynamic')),
                   shipping: savedShipping || undefined,
                   existingOrderId: existingOrderId || undefined
                 })
@@ -2018,11 +2342,12 @@
           stripeCheckout.mount(ui.mountSelector);
           setStripeLoading(mode, '', false);
           if(ui.info){
-            ui.info.textContent = mode === 'klarna'
+            // La pestaña de tarjeta no lleva nota: los métodos ya se ven en la lista.
+            var infoText = mode === 'klarna'
               ? 'Financiación sujeta a aprobación.'
-              : (mode === 'paypal'
-                ? 'Pago seguro con PayPal a través de Stripe.'
-                : 'Tarjeta y métodos rápidos, sin Klarna ni PayPal.');
+              : (mode === 'paypal' ? 'Pago seguro con PayPal a través de Stripe.' : '');
+            ui.info.textContent = infoText;
+            ui.info.hidden = !infoText;
           }
         }).catch(function(err){
           console.error(err);
@@ -2043,8 +2368,8 @@
       var hasSessionReturn = !!safeText(getParam('session_id'));
       var defaultMethod = 'card';
       if(hasSessionReturn || getParam('cancelled') === '1'){
-        defaultMethod = (methodFromUrl === 'klarna' || methodFromUrl === 'paypal') ? methodFromUrl : 'card';
-      } else if(methodFromUrl === 'paypal' || methodFromUrl === 'card' || methodFromUrl === 'klarna' || methodFromUrl === 'bizum' || methodFromUrl === 'bank'){
+        defaultMethod = (methodFromUrl === 'klarna' || methodFromUrl === 'paypal' || methodFromUrl === 'scalapay') ? methodFromUrl : 'card';
+      } else if(methodFromUrl === 'paypal' || methodFromUrl === 'card' || methodFromUrl === 'klarna' || methodFromUrl === 'scalapay' || methodFromUrl === 'bizum' || methodFromUrl === 'bank'){
         defaultMethod = methodFromUrl;
       }
 
@@ -2058,6 +2383,6 @@
       }
 
       if(getParam('cancelled') === '1'){
-        showErr(methodFromUrl === 'klarna' ? 'klarnaErr' : (methodFromUrl === 'paypal' ? 'paypalErr' : 'cardErr'), 'Has cancelado el pago con Stripe. Puedes intentarlo de nuevo cuando quieras.');
+        showErr(methodFromUrl === 'klarna' ? 'klarnaErr' : (methodFromUrl === 'paypal' ? 'paypalErr' : (methodFromUrl === 'scalapay' ? 'scalapayErr' : 'cardErr')), 'Has cancelado el pago con Stripe. Puedes intentarlo de nuevo cuando quieras.');
       }
     })();
