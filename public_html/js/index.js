@@ -297,7 +297,13 @@
       : { src: product.image, alt: product.alt || product.name };
     const isHeroCard = productIndex === 0;
     const loading = isHeroCard ? 'eager' : 'lazy';
-    const fetchpriority = isHeroCard ? ' fetchpriority="high"' : '';
+    /* PRIORIDAD BAJA para las demás. `loading="lazy"` no basta en un carril
+       horizontal: el navegador considera "cerca del viewport" todo lo que cabe a unos
+       miles de píxeles a la derecha, así que en el home se bajaban ~20 fotos de
+       tarjeta a la vez y competían por el ancho de banda con la imagen de portada, que
+       es la que decide el LCP. Con `low` siguen bajándose —el carril se puede arrastrar
+       en cualquier momento— pero DETRÁS de lo que el cliente está mirando. */
+    const fetchpriority = isHeroCard ? ' fetchpriority="high"' : ' fetchpriority="low"';
     const srcset = cardShotSrcset(lead.src);
     const responsive = srcset
       ? ' srcset="' + esc(srcset) + '" sizes="' + CARD_SHOT_SIZES + '"'
@@ -433,13 +439,25 @@
      Se pide en cuanto hay una tarjeta que la pueda abrir. Doble red: el módulo se
      protege con window.__ssVariantPop (en las fichas lo carga también
      product-enhancements.js) y aquí se evita el segundo <script>. */
+  /* La burbuja se pide cuando el hilo está LIBRE, no en cuanto aparece una tarjeta que
+     podría abrirla. Medido en móvil con red lenta: empezaba a los 2,5 s y terminaba a
+     los 3,6 s, justo mientras se descargaban las fotos que el cliente está mirando.
+     Nadie puede pulsar "Añadir" en ese hueco —la página aún se está pintando— así que
+     esperar a un momento ocioso no cambia nada de lo que se ve ni de lo que se puede
+     hacer; solo deja de competir por el ancho de banda. El respaldo con temporizador
+     es para Safari, que no tiene requestIdleCallback. */
   const ensureVariantPop = () => {
     if (document.querySelector('script[data-variant-pop]')) return;
-    const s = document.createElement('script');
-    s.src = withVer('/js/variant-pop.js');
-    s.defer = true;
-    s.setAttribute('data-variant-pop', 'true');
-    document.head.appendChild(s);
+    const pedir = () => {
+      if (document.querySelector('script[data-variant-pop]')) return;
+      const s = document.createElement('script');
+      s.src = withVer('/js/variant-pop.js');
+      s.defer = true;
+      s.setAttribute('data-variant-pop', 'true');
+      document.head.appendChild(s);
+    };
+    if (typeof requestIdleCallback === 'function') requestIdleCallback(pedir, { timeout: 3000 });
+    else setTimeout(pedir, 1200);
   };
 
   /* ===== Previsualización de la foto sobre la tarjeta =====

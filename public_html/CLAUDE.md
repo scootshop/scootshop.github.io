@@ -42,6 +42,9 @@ powershell -ExecutionPolicy Bypass -File scripts/qa/smoke-web.ps1               
 powershell -ExecutionPolicy Bypass -File scripts/qa/smoke-web.ps1 -IncludeApiRoutes
 powershell -ExecutionPolicy Bypass -File scripts/qa/check-image-cache.ps1          # images must carry no ?v=
 node scripts/qa/check-image-dupes.js                                               # no image downloaded twice
+python scripts/build-web-fonts.py --check                                          # cada hoja de fuentes, con sus .woff2
+python scripts/build-icon-fonts.py --check                                         # ningún icono sin glifo
+python scripts/qa/carga-no-bloqueante.py                                           # ningún script bloquea el pintado
 ```
 
 Deploy is FTP via `deploy.py` (also wired into VS Code tasks: "Deploy dry-run", "Deploy whitelist", "Deploy selected files"). **Deploy selectively** — `--all-changed` is intentionally gated behind `--allow-bulk`. Secrets come from `.env`/`.env.local` (`SCOOTSHOP_FTP_PASSWORD`), never the command line.
@@ -183,6 +186,46 @@ When editing CSS/JS, bump the version (`bump-assets-version.ps1`) so clients pic
 - **Duplicate downloads.** When HTML and JS disagree on the URL shape (one with `?v=`, one without), the browser starts fetching one, some code rewrites the `src`, it discards the in-flight request and fetches the other. The image goes blank in between — that is the flicker users report. It peaked at 25 photos downloaded twice on a single page.
 
 The bump script leaves images alone by default (`-ConImagenes` re-versions them, and reintroduces the mismatch above). Two guards enforce this, both listed under Smoke / QA: `check-image-cache.ps1` (static) and `check-image-dupes.js` (drives a real browser and watches traffic — needed because the worst offender never contained the string `?v=`; it was a generic `bumpAttr(img, "src", ver)` in `global-assets-app.js`). Run both after touching anything that emits image URLs.
+
+### Rendimiento: qué se hizo y qué NO se puede tocar (13 Aug 2026)
+
+Medido con Lighthouse contra producción, antes → después. Móvil: home 65 → **91**, ficha
+66 → **88**, checkout 72 → **89**. Escritorio: home 97 → **100**, ficha **96**, checkout
+**100**. Nada de esto cambió el diseño: las 10 capturas por elemento del selector (1440 y
+390 px) salen idénticas al píxel, `ICONOS_WEB_OK` y `VARIANTES_OK` siguen en verde, y la
+tipografía se comprobó midiendo el ancho de una frase con canvas en cada familia y peso
+(`GLIFOS_IDENTICOS`) — no basta con que "se vea parecido".
+
+Tres cosas, en orden de lo que costaban:
+
+1. **Los `<script>` de la ficha ya no bloquean el primer pintado.** `data/products.js` y
+   `js/product-enhancements.js` iban SÍNCRONOS al final del body: 522 ms de evaluación solo
+   el segundo, con el CSS ya listo a los 434 ms y el primer pintado esperando hasta los
+   2 711 ms. Ahora los dos llevan `defer` — y la etiqueta de `global-assets.js` se movió del
+   `<head>` al final del body para que el ORDEN DE EJECUCIÓN no cambie: hoy es
+   products → enhancements → global-assets (los dos primeros eran síncronos y el tercero ya
+   era `defer`), y con las tres en `defer` el orden lo da el orden del documento. Medido en
+   la ficha del M41: FCP 4 832 → 2 032 ms, LCP 4 952 → 2 380 ms. **Si algún día se añade un
+   script a una ficha, va con `defer` y después de esos tres**, o vuelve el bloqueo — de eso
+   se encarga `scripts/qa/carga-no-bloqueante.py`, que vigila el atributo y el orden.
+2. **Las fuentes de texto se sirven desde el propio dominio** (`scripts/build-web-fonts.py`,
+   `css/fuentes*.css`, `fonts/*.woff2`). Son los MISMOS `.woff2` que sirve Google, con sus
+   `unicode-range` intactos; lo que desaparece son dos orígenes con su DNS y su TLS
+   (`fonts.googleapis.com` para la hoja, `fonts.gstatic.com` para los ficheros). Con la
+   precarga de los dos ficheros de arriba, el intercambio de tipografía deja de ocurrir
+   tarde: **CLS 0,0515 → 0,0024** y FCP 2 032 → 1 792 ms.
+   Hay **seis hojas** porque hay seis combinaciones de pesos declaradas por el sitio, y eso
+   es a propósito: una página que no declara el 500 pinta ese texto con el 400, y
+   declarárselo lo engordaría. Unificarlas es una decisión de diseño, no de rendimiento.
+3. **Las fuentes de iconos, recortadas** (`scripts/build-icon-fonts.py`): 267 KB desde cdnjs
+   → 5 KB desde aquí, solo con los glifos que `icons.css` declara. Su `--check` es el
+   guardián: añadir un icono al CSS sin regenerar deja un hueco en blanco.
+
+Lo que se probó y **no** vale la pena: bloquear las 24 miniaturas de la galería o las fotos
+de accesorios ahorra 30 ms de LCP (medido, no estimado); el prefetch de la galería ya está
+acotado a 4 fotos y va en tiempo de inactividad. Lo que Lighthouse sigue pidiendo —minificar
+JS y CSS, 320 + 140 ms— exigiría un paso de compilación, y este sitio no tiene ninguno a
+propósito: lo que se lee en el repositorio es lo que corre en producción.
 
 ### .htaccess routing
 Apache rewrites give the clean-URL behavior the static pages depend on: `/algo.html` → 301 → `/algo`, and `/algo` internally serves `algo.html`. It also forces HTTPS, sets the cache/security headers above, and blocks direct access to `.env`, `api/config.php`, and the local-only `server.ps1`/`server.py`/`router.php`. Local PHP dev does not run Apache, so URL rewriting differs locally vs. prod — test clean URLs against the deployed/`.htaccess`-aware path when in doubt.

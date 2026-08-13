@@ -1,6 +1,11 @@
-/* icons.css — Font Awesome 6.5.0 subset
-   Replaces the full all.min.css (~63 KB) with only what SCOOT SHOP uses.
-   Fonts still loaded from CDN (WOFF2, ~120KB solid + ~80KB brands vs ~300KB+ for all). */
+/* icons.css — subconjunto de Font Awesome 6.5.0
+   Sustituye al all.min.css completo (~63 KB) por lo que SCOOT SHOP usa de verdad.
+
+   Y las FUENTES son propias y recortadas: 266 KB desde cdnjs pasaron a 4 KB servidos
+   desde aquí (28 glifos solid + 3 brands). Medido en móvil con red lenta, aquellas dos
+   peticiones a cdnjs terminaban a los 7,7 y 7,9 segundos, con su DNS y su TLS aparte.
+   Se generan con `python scripts/build-icon-fonts.py`; si añades un icono al CSS hay
+   que regenerarlas o saldrá un hueco en blanco (`--check` lo avisa).
 
 /* === @font-face: Solid 900 === */
 @font-face {
@@ -8,7 +13,7 @@
   font-style: normal;
   font-weight: 900;
   font-display: swap;
-  src: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/webfonts/fa-solid-900.woff2') format('woff2');
+  src: url('/fonts/fa-solid-900.woff2') format('woff2');
 }
 
 /* === @font-face: Brands 400 === */
@@ -17,7 +22,7 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/webfonts/fa-brands-400.woff2') format('woff2');
+  src: url('/fonts/fa-brands-400.woff2') format('woff2');
 }
 
 /* === Base classes === */
@@ -48,6 +53,9 @@
 /* === Solid icons === */
 .fa-house::before          { content: "\f015"; }
 .fa-cart-shopping::before  { content: "\f07a"; }
+/* El icono del boton "Anadir" de tarjetas y fichas. FALTABA en el subconjunto: el
+   boton se pintaba sin carrito, y llevaba meses asi sin que nadie lo viera. */
+.fa-cart-plus::before      { content: "\f217"; }
 .fa-circle-question::before{ content: "\f059"; }
 .fa-location-dot::before   { content: "\f3c5"; }
 .fa-user::before           { content: "\f007"; }
