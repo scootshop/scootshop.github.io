@@ -1,0 +1,6 @@
+accesorios/manillar-kocevlo/img/1-1000.webp
+accesorios/manillar-lunje/img/1-1000.webp
+accesorios/manillar-nanlio/img/1-1000.webp
+accesorios/manillar-uno/img/1-1000.webp
+accesorios/manillar-wake-downhill/img/1-1000.webp
+accesorios/manillar-wake/img/1-1000.webp

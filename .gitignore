@@ -44,3 +44,6 @@ public_html/skills-lock.json
 
 # Backup local de imágenes (fuera del sitio desplegable)
 m41-armored-dual-img-backup/
+
+# Collages del carrito generados en runtime (miniatura de Stripe)
+public_html/img/cart-collage/

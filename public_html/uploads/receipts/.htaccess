@@ -1,0 +1,7 @@
+# Recibos en PDF subidos desde el panel admin (route=admin_order_receipt_upload).
+# Solo se sirven archivos estáticos; nunca ejecutar scripts desde aquí.
+Options -Indexes
+
+<FilesMatch "(?i)\.(php|phtml|phar|phps|cgi|pl|py|sh|asp|aspx|jsp)$">
+  Require all denied
+</FilesMatch>
