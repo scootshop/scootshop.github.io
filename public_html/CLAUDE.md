@@ -31,6 +31,7 @@ Smoke / QA (expect terminal markers `LOCAL_START_OK`, `VARIANTES_OK`, `CATALOGO_
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/qa/variantes.ps1                  # TODO el sistema de variantes
+python scripts/qa/panel-precio.py https://scootshop.co                             # el panel cambia un precio de verdad
 powershell -ExecutionPolicy Bypass -File scripts/qa/variantes.ps1 -BaseUrl https://scootshop.co
 node scripts/qa/catalogo.js                                                        # el catálogo se ejecuta y es válido
 node scripts/qa/api-sql.js                                                         # cada SQL cuadra con sus bindings
@@ -146,6 +147,22 @@ Two traps, both hit for real:
 - Fichas link `product-enhancements.js` with a static tag while `global-assets.js` appends the core deferred, so the core arrives **after** the ficha runs. Consumers wait for the `ss:attrs` event instead of assuming it is loaded. If a second init event ever appears, centralise on a single `SS_ATTRS.ready` promise rather than growing a web of events.
 
 Do **not** write `data-color-key` from the catalog yet: today it holds the label (`Negro`) while the catalog says `negro`, and changing it would split cart-line identity and break stored orders. That conversion belongs with the cart stage, which carries backwards-compatible reads.
+
+### El catálogo tiene UN solo escritor (desde 13 Aug 2026)
+
+`data/products.js` es la **estructura** del catálogo —qué productos hay, sus fotos, sus ejes de variante, sus textos— y la edita una persona. Lo que cambia a diario —precio, precio tachado, stock, altas y bajas desde el panel— vive en `data/product-overrides.js` (+ su gemelo `.json` para el backend), que **genera el panel entero** con `json_encode` y escritura atómica.
+
+Por qué: hasta hoy el panel reescribía `products.js` con expresiones regulares (`preg_replace('/id: "x" .*? priceText: "([^"]*)"/s')`). Con `/s` y `.*?` esas expresiones cruzan bloques —un producto sin ese campo hace que la sustitución caiga en el siguiente— y el bloque a insertar iba como cadena de reemplazo, así que un `$` o un `\` en un nombre corrompía el fichero. Lo que se rompía no era una página: era el catálogo del que dependen home, menús, las 44 fichas, el carrito y el checkout, y la recuperación era restaurar por FTP.
+
+Reglas:
+- **PHP no abre `data/products.js` para escribir.** `scripts/qa/catalogo.js` falla si alguien vuelve a hacerlo.
+- El navegador carga `product-overrides.js` **antes** que el catálogo (`async=false`, en los cuatro cargadores). Si no llega, se ven los precios de `products.js`: viejos quizá, nunca rotos — comprobado en `scripts/qa/catalogo-overrides.js`.
+- El backend lee el catálogo *mezclado* con `catalog_products_merged()` (índice generado + capa operativa): el listado del panel, la validación de precios de los pedidos y el catálogo de descuentos salen de ahí, ya sin una sola expresión regular.
+- Solo se aceptan tres campos operativos (`priceText`, `compareAtPriceText`, `stock`). Que el panel pudiera tocar `href` o los ejes sería volver a tener dos escritores de la misma verdad.
+- Un producto creado desde el panel vive en `extras` hasta que alguien lo redacta en condiciones (fotos, ejes, textos) y lo mueve a mano a `products.js`.
+- Una baja se marca en `ocultos`: desaparece de la web al instante y es reversible.
+
+`python scripts/qa/panel-precio.py [base]` hace el viaje completo contra el sitio real: cambia un precio por la ruta del panel, comprueba que la web lo refleja y que `products.js` no ha cambiado, y lo devuelve a su valor. **Ojo con el formato al probar**: el backend normaliza `1.111 €` a `1,11 €`.
 
 ### Asset versioning & cache-busting (important, easy to break)
 There is no content hashing. Cache-busting is a single global version string in `asset-version.json` (`{"v":"YYYYMMDD-N"}`) mirrored into each page's `<meta name="asset-version">`.

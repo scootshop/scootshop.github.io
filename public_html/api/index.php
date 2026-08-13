@@ -3621,30 +3621,29 @@ function ensure_discount_schema_safe(PDO $pdo): bool {
  * Nunca devuelve precio 0 silencioso: si price = 0.00, devuelve null.
  * Nunca confía en el precio enviado por el frontend.
  */
-function lookup_product_price_by_sku(string $sku, string $productsFile): ?array {
+/**
+ * El precio de catálogo de un SKU, tal y como lo ve el cliente: estructura + capa
+ * operativa del panel. Es la fuente de verdad del backend para validar importes, así
+ * que TIENE que incluir los cambios de precio hechos desde el panel — si no, un
+ * precio recién cambiado haría que el propio backend rechazara el pedido.
+ *
+ * Antes esto rastreaba data/products.js con dos expresiones regulares encadenadas
+ * (una "por si acaso" la otra fallaba). Ahora sale del índice generado, que es la
+ * misma información sin adivinar nada. El parámetro del fichero se conserva por
+ * compatibilidad con las llamadas existentes; ya no se usa.
+ */
+function lookup_product_price_by_sku(string $sku, string $productsFile = ''): ?array {
   if ($sku === '') return null;
-  if (!is_file($productsFile) || !is_readable($productsFile)) return null;
 
-  $js = file_get_contents($productsFile);
-  if (!is_string($js) || $js === '') return null;
-
-  // Regex basado en el mismo patrón de admin_products_list en este archivo.
-  // Busca el bloque del producto cuyo sku coincide exactamente.
-  $skuEscaped = preg_quote($sku, '/');
-  $pattern = '/\{[^{}]*sku:\s*[\'"]' . $skuEscaped . '[\'"][^{}]*priceText:\s*[\'"]([^\'"]+)[\'"][^{}]*\}/s';
-
-  if (!preg_match($pattern, $js, $m)) {
-    // Intento alternativo: bloque multi-línea con mayor alcance
-    $pattern2 = '/id:\s*[^\n]*\n.*?sku:\s*[\'"]' . $skuEscaped . '[\'"].*?priceText:\s*[\'"]([^\'"]+)[\'"]/s';
-    if (!preg_match($pattern2, $js, $m)) {
-      return null;
-    }
+  $priceText = '';
+  foreach (catalog_products_merged() as $p) {
+    if ((string)$p['sku'] !== $sku) continue;
+    $priceText = trim((string)$p['priceText']);
+    break;
   }
-
-  $priceText = trim((string)($m[1] ?? ''));
   if ($priceText === '') return null;
 
-  $priceNum = extract_price_number($priceText); // función ya existente en este archivo
+  $priceNum = extract_price_number($priceText);
   $priceFloat = (float)$priceNum;
   if ($priceFloat <= 0.0) return null; // nunca precio 0 silencioso
 
@@ -3663,6 +3662,151 @@ function lookup_product_price_by_sku(string $sku, string $productsFile): ?array 
  * desde el home) acababa guardado como "Blanco". Si el cliente no eligió
  * variante, el pedido debe quedarse sin color.
  */
+/* ── CATÁLOGO: LA CAPA OPERATIVA ──────────────────────────────────────────────
+   El panel NO escribe `data/products.js`. Ese fichero es la estructura del catálogo
+   —productos, fotos, ejes de variante, textos— y lo edita una persona; de él dependen
+   el home, los menús, las 44 fichas, el carrito y el checkout.
+
+   Hasta agosto de 2026 el panel lo reescribía con expresiones regulares para cambiar
+   precio o stock:
+
+       preg_replace('/id: "x" .*? priceText: "([^"]*)"/s', ...)
+
+   Con `/s` y `.*?` esa expresión cruza bloques: un producto sin ese campo hace que la
+   sustitución caiga en el SIGUIENTE producto, y un nombre con `$` o `\` corrompe el
+   fichero al interpretarse en la cadena de reemplazo. El resultado no es una página
+   rota: es la tienda entera sin catálogo, y la recuperación es restaurar por FTP.
+
+   Ahora el panel escribe aquí, en su propio fichero, GENERADO ENTERO desde una
+   estructura de datos (`json_encode`) y con escritura atómica (temporal + rename), así
+   que no existe la posibilidad de dejar el catálogo a medias. Si estos ficheros
+   faltaran o llegaran rotos, la web sigue funcionando con los precios de products.js.
+
+   Se guardan DOS copias del mismo dato a propósito:
+     · .json  la que lee y escribe el backend
+     · .js    la que carga el navegador antes del catálogo
+   Las escribe la misma función, en la misma llamada. */
+function catalog_overrides_files(): array {
+  return [
+    'json' => __DIR__ . '/../data/product-overrides.json',
+    'js'   => __DIR__ . '/../data/product-overrides.js',
+  ];
+}
+
+function catalog_overrides_read(): array {
+  $vacio = ['generado' => '', 'porId' => [], 'ocultos' => [], 'extras' => []];
+  $f = catalog_overrides_files();
+  if (!is_file($f['json'])) return $vacio;
+  $raw = @file_get_contents($f['json']);
+  $data = is_string($raw) ? json_decode($raw, true) : null;
+  if (!is_array($data)) return $vacio;
+  return [
+    'generado' => (string)($data['generado'] ?? ''),
+    'porId'    => is_array($data['porId'] ?? null) ? $data['porId'] : [],
+    'ocultos'  => array_values(array_filter(array_map('strval', (array)($data['ocultos'] ?? [])))),
+    'extras'   => is_array($data['extras'] ?? null) ? array_values($data['extras']) : [],
+  ];
+}
+
+/** Escritura ATÓMICA: se escribe un temporal y se renombra. Un fallo a mitad deja el
+ *  fichero anterior intacto; nunca uno a medias, que es lo que sí podía pasar
+ *  reescribiendo el catálogo. */
+function catalog_overrides_write(array $datos): bool {
+  $f = catalog_overrides_files();
+  $datos['generado'] = gmdate('c');
+
+  $json = json_encode($datos, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+  if (!is_string($json)) return false;
+
+  $cabecera = "/* data/product-overrides.js — LO ESCRIBE EL PANEL. No editar a mano.\n"
+    . " * La estructura del catálogo está en data/products.js; aquí solo viven precio,\n"
+    . " * precio tachado, stock, altas y bajas hechas desde el panel. Ver la nota larga\n"
+    . " * en api/index.php (catalog_overrides_write). */\n";
+  $js = $cabecera . 'window.SCOOTSHOP_OVERRIDES = ' . $json . ";\n";
+
+  $ok = true;
+  foreach ([['json', $json . "\n"], ['js', $js]] as $par) {
+    [$clave, $contenido] = $par;
+    $destino = $f[$clave];
+    $tmp = $destino . '.tmp' . bin2hex(random_bytes(4));
+    if (@file_put_contents($tmp, $contenido, LOCK_EX) === false) { $ok = false; continue; }
+    if (!@rename($tmp, $destino)) { @unlink($tmp); $ok = false; }
+  }
+  return $ok;
+}
+
+/** Cambia campos operativos de un producto. Solo estos tres: lo demás es estructura. */
+function catalog_override_set(string $productId, array $cambios): bool {
+  $permitidos = ['priceText', 'compareAtPriceText', 'stock'];
+  $datos = catalog_overrides_read();
+  $actual = is_array($datos['porId'][$productId] ?? null) ? $datos['porId'][$productId] : [];
+  foreach ($permitidos as $campo) {
+    if (!array_key_exists($campo, $cambios)) continue;
+    $valor = $cambios[$campo];
+    if ($valor === null) { unset($actual[$campo]); continue; }
+    $actual[$campo] = (string)$valor;
+  }
+  if ($actual) $datos['porId'][$productId] = $actual;
+  else unset($datos['porId'][$productId]);
+  return catalog_overrides_write($datos);
+}
+
+/** El catálogo tal y como lo ve el cliente: estructura + capa operativa. Lo usa el
+ *  panel para listar, así que lo que se ve en el panel es lo que se ve en la web. */
+function catalog_products_merged(): array {
+  $indice = attributes_index();
+  $over = catalog_overrides_read();
+  $ocultos = array_flip($over['ocultos']);
+
+  $salida = [];
+  foreach (($indice['products'] ?? []) as $sku => $info) {
+    $id = (string)($info['id'] ?? '');
+    if ($id !== '' && isset($ocultos[$id])) continue;
+    $p = [
+      'id' => $id,
+      'sku' => (string)$sku,
+      'name' => (string)($info['name'] ?? ''),
+      'series' => (string)($info['series'] ?? ''),
+      'categoryKey' => (string)($info['categoryKey'] ?? ''),
+      'priceText' => (string)($info['priceText'] ?? ''),
+      'compareAtPriceText' => (string)($info['compareAtPriceText'] ?? ''),
+      'stock' => (string)($info['stock'] ?? 'in_stock'),
+      'href' => (string)($info['href'] ?? ''),
+      'image' => (string)($info['image'] ?? ''),
+      'variantCount' => 0,
+    ];
+    foreach ((array)($info['axes'] ?? []) as $eje) {
+      $p['variantCount'] += count((array)($eje['options'] ?? []));
+    }
+    $cambios = is_array($over['porId'][$id] ?? null) ? $over['porId'][$id] : [];
+    foreach (['priceText', 'compareAtPriceText', 'stock'] as $campo) {
+      if (isset($cambios[$campo])) $p[$campo] = (string)$cambios[$campo];
+    }
+    $salida[] = $p;
+  }
+
+  foreach ($over['extras'] as $extra) {
+    if (!is_array($extra) || empty($extra['id'])) continue;
+    if (isset($ocultos[(string)$extra['id']])) continue;
+    $salida[] = [
+      'id' => (string)$extra['id'],
+      'sku' => (string)($extra['sku'] ?? ''),
+      'name' => (string)($extra['name'] ?? ''),
+      'series' => (string)($extra['series'] ?? ''),
+      'categoryKey' => (string)($extra['categoryKey'] ?? ''),
+      'priceText' => (string)($extra['priceText'] ?? ''),
+      'compareAtPriceText' => (string)($extra['compareAtPriceText'] ?? ''),
+      'stock' => (string)($extra['stock'] ?? 'in_stock'),
+      'href' => (string)($extra['href'] ?? ''),
+      'image' => (string)($extra['image'] ?? ''),
+      'variantCount' => 0,
+      'creadoEnPanel' => true,
+    ];
+  }
+
+  return $salida;
+}
+
 /* La ruta y la foto de un producto por SKU. PRIMERO el índice de atributos, que se
    genera ejecutando el catálogo real; solo si el SKU no está —un producto creado desde
    el panel después de la última generación— se cae al rastreo del propio products.js.
@@ -7877,44 +8021,18 @@ switch ($route) {
     $key = header_get('x-admin-key');
     if ($CFG['admin_key'] === '' || !hash_equals($CFG['admin_key'], $key)) json_out(['ok'=>false,'error'=>'unauthorized'], 401);
 
-    $productsFile = __DIR__ . '/../data/products.js';
-    if (!is_file($productsFile)) json_out(['ok'=>false,'error'=>'products_file_not_found'], 500);
-
-    $js = file_get_contents($productsFile);
+    /* El listado sale del índice de atributos —generado ejecutando el catálogo real—
+       más la capa operativa del panel. Antes se sacaba con UNA expresión regular de
+       diez grupos sobre `products.js` que exigía que cada producto declarara los diez
+       campos, en ese orden: un producto sin `compareAtPriceText` simplemente no
+       aparecía en el panel, y nadie sabía por qué. */
     $products = [];
-
-    // Extract each product block by matching id + relevant fields
-    if (preg_match_all('/\{\s*\n\s*id:\s*[\'"]([^\'"]+)[\'"].*?sku:\s*[\'"]([^\'"]+)[\'"].*?name:\s*[\'"]([^\'"]+)[\'"].*?series:\s*[\'"]([^\'"]+)[\'"].*?categoryKey:\s*[\'"]([^\'"]+)[\'"].*?priceText:\s*[\'"]([^\'"]*)[\'"].*?compareAtPriceText:\s*[\'"]([^\'"]*)[\'"].*?stock:\s*[\'"]([^\'"]+)[\'"].*?href:\s*[\'"]([^\'"]+)[\'"].*?image:\s*[\'"]([^\'"]+)[\'"]/s', $js, $matches, PREG_SET_ORDER)) {
-      foreach ($matches as $m) {
-        /* Cuántas opciones de variante tiene el producto. Antes se contaban a golpe de
-           expresión regular sobre `colorVariants`, que ya no existe: hoy salen del
-           índice de atributos, que se genera EJECUTANDO el catálogo real
-           (scripts/build-attributes-index.js). Así cuenta cualquier eje —color, modelo,
-           medida o el que aparezca mañana— en vez de solo los colores. */
-        $variantCount = 0;
-        $ejesProducto = attributes_index()['products'][$m[2]]['axes'] ?? [];
-        foreach ($ejesProducto as $ejeProducto) {
-          $variantCount += count((array)($ejeProducto['options'] ?? []));
-        }
-        $stock = (string)$m[8];
-        $hasHref = trim((string)$m[9]) !== '';
-        $hasImage = trim((string)$m[10]) !== '';
-        $products[] = [
-          'id' => $m[1],
-          'sku' => $m[2],
-          'name' => $m[3],
-          'series' => $m[4],
-          'categoryKey' => $m[5],
-          'priceText' => $m[6],
-          'compareAtPriceText' => $m[7],
-          'stock' => $stock,
-          'href' => $m[9],
-          'image' => $m[10],
-          'variantCount' => $variantCount,
-          'publishState' => ($hasHref && $hasImage) ? 'published' : 'incomplete',
-          'availabilityLabel' => $stock === 'in_stock' ? 'Disponible' : 'Agotado',
-        ];
-      }
+    foreach (catalog_products_merged() as $p) {
+      $hasHref = trim((string)$p['href']) !== '';
+      $hasImage = trim((string)$p['image']) !== '';
+      $p['publishState'] = ($hasHref && $hasImage) ? 'published' : 'incomplete';
+      $p['availabilityLabel'] = $p['stock'] === 'in_stock' ? 'Disponible' : 'Agotado';
+      $products[] = $p;
     }
 
     json_out(['ok'=>true, 'products'=>$products]);
@@ -7932,24 +8050,22 @@ switch ($route) {
     if ($productId === '') json_out(['ok'=>false,'error'=>'missing_id'], 400);
     if (!in_array($newStock, ['in_stock', 'out_of_stock'], true)) json_out(['ok'=>false,'error'=>'bad_stock_value'], 400);
 
-    $productsFile = __DIR__ . '/../data/products.js';
-    if (!is_file($productsFile)) json_out(['ok'=>false,'error'=>'products_file_not_found'], 500);
-
-    $js = file_get_contents($productsFile);
-
+    /* El stock se guarda en la capa operativa, NO reescribiendo el catálogo. Antes
+       esto era un `preg_replace` con `.*?` y `/s`: si el producto no declaraba
+       `stock`, la sustitución caía en el bloque del SIGUIENTE producto y dejaba sin
+       existencias a otro. Ver catalog_overrides_write(). */
     $prevStock = null;
-    if (preg_match('/id:\s*[\'\"]' . preg_quote($productId, '/') . '[\'\"].*?stock:\s*[\'\"](in_stock|out_of_stock)[\'\"]/s', $js, $mPrevStock)) {
-      $prevStock = (string)($mPrevStock[1] ?? '');
+    $existe = false;
+    foreach (catalog_products_merged() as $p) {
+      if ((string)$p['id'] !== $productId) continue;
+      $existe = true;
+      $prevStock = (string)$p['stock'];
     }
+    if (!$existe) json_out(['ok'=>false,'error'=>'product_not_found'], 404);
 
-    // Find this product's block and replace its stock value
-    $pattern = '/(id:\s*[\'"]' . preg_quote($productId, '/') . '[\'"].*?stock:\s*[\'"])(in_stock|out_of_stock)([\'"])/s';
-    $count = 0;
-    $js = preg_replace($pattern, '${1}' . $newStock . '${3}', $js, 1, $count);
-
-    if ($count === 0) json_out(['ok'=>false,'error'=>'product_not_found'], 404);
-
-    file_put_contents($productsFile, $js, LOCK_EX);
+    if (!catalog_override_set($productId, ['stock' => $newStock])) {
+      json_out(['ok'=>false,'error'=>'overrides_write_failed'], 500);
+    }
 
     try {
       $pdo = get_pdo($CFG);
@@ -7958,7 +8074,8 @@ switch ($route) {
     } catch (Throwable $e) {}
 
     bump_asset_version();
-    header('X-LiteSpeed-Purge: /data/products.js');
+    // Lo que cambia ahora es la capa operativa, no el catálogo.
+    header('X-LiteSpeed-Purge: /data/product-overrides.js');
 
     json_out(['ok'=>true, 'id'=>$productId, 'stock'=>$newStock]);
     break;
@@ -8023,41 +8140,40 @@ switch ($route) {
     $newPrice = $formatPrice($parsedPrice);
     if ($parsedCompare !== null) $newCompare = $formatPrice($parsedCompare);
 
-    $productsFile = __DIR__ . '/../data/products.js';
-    if (!is_file($productsFile)) json_out(['ok'=>false,'error'=>'products_file_not_found'], 500);
-
-    $js = file_get_contents($productsFile);
-
+    /* El precio va a la capa operativa. La versión anterior hacía DOS `preg_replace`
+       sobre el catálogo entero, y la cadena de reemplazo tenía que escaparse a mano
+       (`$` y `\\`) porque un nombre o un precio con esos caracteres corrompía el
+       fichero del que depende toda la web. Ver catalog_overrides_write(). */
     $oldPriceText = '';
-    if (preg_match('/id:\s*[\'\"]' . preg_quote($productId, '/') . '[\'\"].*?priceText:\s*[\'\"]([^\'\"]*)[\'\"]/s', $js, $mOldPrice)) {
-      $oldPriceText = trim((string)($mOldPrice[1] ?? ''));
+    $existe = false;
+    foreach (catalog_products_merged() as $p) {
+      if ((string)$p['id'] !== $productId) continue;
+      $existe = true;
+      $oldPriceText = (string)$p['priceText'];
     }
+    if (!$existe) json_out(['ok'=>false,'error'=>'product_not_found'], 404);
 
-    // Replace priceText
-    $pattern = '/(id:\s*[\'"]' . preg_quote($productId, '/') . '[\'"].*?priceText:\s*[\'"])[^\'"]*([\'"])/s';
-    $count = 0;
-    $js = preg_replace($pattern, '${1}' . $escapeReplacement($newPrice) . '${2}', $js, 1, $count);
-    if ($count === 0) json_out(['ok'=>false,'error'=>'product_not_found'], 404);
-
-    // Replace compareAtPriceText if provided
-    $patternCompare = '/(id:\s*[\'"]' . preg_quote($productId, '/') . '[\'"].*?compareAtPriceText:\s*[\'"])[^\'"]*([\'"])/s';
-    if ($newCompare !== '') {
-      $js = preg_replace($patternCompare, '${1}' . $escapeReplacement($newCompare) . '${2}', $js, 1);
+    $cambios = ['priceText' => $newPrice];
+    if ($newCompare !== '') $cambios['compareAtPriceText'] = $newCompare;
+    if (!catalog_override_set($productId, $cambios)) {
+      json_out(['ok'=>false,'error'=>'overrides_write_failed'], 500);
     }
-
-    file_put_contents($productsFile, $js, LOCK_EX);
 
     // El espejo de servidor (data/products-server.js) ya no existe: el backend lee el
     // mismo catálogo que el cliente, así que un precio cambiado aquí no puede quedarse
     // viejo en una segunda copia.
 
-    // ── Also update the individual product HTML page ──
-    // Extract href for this product from products.js
+    // ── Y el precio escrito en el HTML de la ficha ──
+    /* La ruta de la ficha sale del catálogo mezclado. Antes se rastreaba con una
+       expresión regular sobre el contenido de products.js, y esa variable ya no
+       existe: esta ruta dejó de abrir el catálogo. */
     $pageUpdated = false;
     $pageFields = [];
-    $hrefPattern = '/id:\s*[\'"]' . preg_quote($productId, '/') . '[\'"].*?href:\s*[\'"]([^\'"]+)[\'"]/s';
-    if (preg_match($hrefPattern, $js, $hrefMatch)) {
-      $productHref = $hrefMatch[1]; // e.g. /patinetes/series-ix/ix8/
+    $productHref = '';
+    foreach (catalog_products_merged() as $pRuta) {
+      if ((string)$pRuta['id'] === $productId) { $productHref = (string)$pRuta['href']; break; }
+    }
+    if ($productHref !== '') {
       $htmlFile = __DIR__ . '/..' . $productHref . 'index.html';
 
       if (is_file($htmlFile)) {
@@ -8159,7 +8275,8 @@ switch ($route) {
     $newVersion = bump_asset_version();
 
     // Purge LiteSpeed cache
-    header('X-LiteSpeed-Purge: /data/products.js');
+    // Lo que cambia ahora es la capa operativa, no el catálogo.
+    header('X-LiteSpeed-Purge: /data/product-overrides.js');
     header('X-LiteSpeed-Purge: ' . trim($productId, '/') . '/');
     if (isset($productHref) && $productHref !== '') header('X-LiteSpeed-Purge: ' . $productHref);
 
@@ -8273,86 +8390,64 @@ switch ($route) {
       $alt = ($categoryKey === 'accessories') ? ('Accesorio ' . $name) : ('Producto ' . $name);
     }
 
-    $productsFile = __DIR__ . '/../data/products.js';
-    if (!is_file($productsFile)) json_out(['ok'=>false,'error'=>'products_file_not_found'], 500);
+    /* El producto nuevo NO se escribe en data/products.js. Antes se componía a mano
+       un bloque de JavaScript —con sus comillas escapadas a pelo— y se inyectaba
+       reemplazando el array entero del catálogo:
 
-    $js = file_get_contents($productsFile);
-    if (!is_string($js) || $js === '') json_out(['ok'=>false,'error'=>'products_file_read_failed'], 500);
+           preg_replace('/var products = \\[(.*)\\]\\s*;/s', 'var products = [' . $bloque . '];', $js)
 
-    if (!preg_match('/var products = \[(.*)\]\s*;/s', $js, $arrMatch)) {
-      json_out(['ok'=>false,'error'=>'products_array_not_found'], 500);
-    }
+       Dos cosas mal a la vez: el `$bloque` va como cadena de REEMPLAZO, así que un
+       nombre con `$` o `\\` se interpretaba y rompía el fichero; y el `.*` con `/s`
+       se traga el catálogo completo, de modo que un fallo no estropea un producto,
+       los estropea todos.
 
-    $productsBlock = $arrMatch[1];
+       Ahora el alta vive en la capa operativa, que se genera con `json_encode` y se
+       escribe de forma atómica. Cuando el producto esté redactado en condiciones
+       —galería, ejes, textos— se mueve a mano a `data/products.js` y se quita de
+       `extras`; hasta entonces la tienda ya lo vende. */
+    $overrides = catalog_overrides_read();
 
-    if (preg_match('/id:\s*[\'\"]' . preg_quote($id, '/') . '[\'\"]/i', $productsBlock)) {
-      json_out(['ok'=>false,'error'=>'duplicate_id'], 409);
-    }
-    if (preg_match('/sku:\s*[\'\"]' . preg_quote($sku, '/') . '[\'\"]/i', $productsBlock)) {
-      json_out(['ok'=>false,'error'=>'duplicate_sku'], 409);
+    foreach (catalog_products_merged() as $p) {
+      if ((string)$p['id'] === $id) json_out(['ok'=>false,'error'=>'duplicate_id'], 409);
+      if ((string)$p['sku'] === $sku) json_out(['ok'=>false,'error'=>'duplicate_sku'], 409);
     }
 
     $homeOrder = 1;
-    if (preg_match_all('/series:\s*[\'\"]' . preg_quote($series, '/') . '[\'\"].*?homeOrder:\s*(\d+)/s', $productsBlock, $orders)) {
-      foreach ($orders[1] as $v) {
-        $num = (int)$v;
-        if ($num >= $homeOrder) $homeOrder = $num + 1;
-      }
+    foreach (catalog_products_merged() as $p) {
+      if ((string)$p['series'] !== $series) continue;
+      $homeOrder++;
     }
 
-    $q = static function (string $value): string {
-      $value = str_replace('\\', '\\\\', $value);
-      $value = str_replace("'", "\\'", $value);
-      $value = str_replace(["\r", "\n"], ' ', $value);
-      return "'" . $value . "'";
-    };
+    $nuevoProducto = [
+      'id' => $id,
+      'sku' => $sku,
+      'name' => $name,
+      'menuLabel' => $name,
+      'badgeText' => $name,
+      'brand' => $brand,
+      'series' => $series,
+      'productType' => $productType,
+      'catalogType' => $catalogType,
+      'categoryKey' => $categoryKey,
+      'priceText' => $priceText,
+      'compareAtPriceText' => $compareAtPriceText,
+      'stock' => $stock,
+      'href' => $href,
+      'image' => $image,
+      'alt' => $alt,
+      'specs' => array_values($specs),
+      'homeOrder' => $homeOrder,
+      'homeTitle' => $name,
+      'homeAriaLabel' => $name,
+      'priceAriaLabel' => 'Estado ' . $name,
+      'gallery' => [['src' => $image, 'alt' => $alt]],
+    ];
+    if ($paypalId !== '') $nuevoProducto['paypalId'] = $paypalId;
+    if ($youtubeUrl !== '') $nuevoProducto['youtubeUrl'] = $youtubeUrl;
 
-    $specLines = [];
-    foreach ($specs as $spec) {
-      $specLines[] = '      ' . $q($spec);
-    }
-
-    $galleryLines = [];
-    foreach ($gallery as $idx => $url) {
-      $galleryLines[] = '        { src: ' . $q($url) . ', alt: ' . $q($name . ' vista ' . ($idx + 1)) . ' }';
-    }
-
-    $newProduct = "    {\n"
-      . '      id: ' . $q($id) . ",\n"
-      . '      sku: ' . $q($sku) . ",\n"
-      . '      name: ' . $q($name) . ",\n"
-      . '      menuLabel: ' . $q($menuLabel) . ",\n"
-      . '      badgeText: ' . $q($badgeText) . ",\n"
-      . '      brand: ' . $q($brand) . ",\n"
-      . '      series: ' . $q($series) . ",\n"
-      . '      productType: ' . $q($productType) . ",\n"
-      . '      catalogType: ' . $q($catalogType) . ",\n"
-      . '      categoryKey: ' . $q($categoryKey) . ",\n"
-      . '      priceText: ' . $q($priceText) . ",\n"
-      . '      compareAtPriceText: ' . $q($compareAtPriceText) . ",\n"
-      . '      stock: ' . $q($stock) . ",\n"
-      . ($paypalId !== '' ? ('      paypalId: ' . $q($paypalId) . ",\n") : '')
-      . ($youtubeUrl !== '' ? ('      youtubeUrl: ' . $q($youtubeUrl) . ",\n") : '')
-      . '      href: ' . $q($href) . ",\n"
-      . '      image: ' . $q($image) . ",\n"
-      . '      alt: ' . $q($alt) . ",\n"
-      . "      specs: [\n" . implode(",\n", $specLines) . "\n      ],\n"
-      . '      homeOrder: ' . $homeOrder . ",\n"
-      . '      homeTitle: ' . $q($homeTitle) . ",\n"
-      . '      homeAriaLabel: ' . $q($homeAriaLabel) . ",\n"
-      . '      priceAriaLabel: ' . $q($priceAriaLabel) . ",\n"
-      . "      gallery: [\n" . implode(",\n", $galleryLines) . "\n      ]\n"
-      . '    }';
-
-    $existing = rtrim($productsBlock);
-    if ($existing !== '' && !str_ends_with($existing, ',')) {
-      $existing .= ',';
-    }
-    $newProductsBlock = $existing . "\n" . $newProduct . "\n  ";
-
-    $updatedJs = preg_replace('/var products = \[(.*)\]\s*;/s', 'var products = [' . $newProductsBlock . '];', $js, 1, $replaceCount);
-    if ($replaceCount !== 1 || !is_string($updatedJs) || $updatedJs === '') {
-      json_out(['ok'=>false,'error'=>'products_array_replace_failed'], 500);
+    $overrides['extras'][] = $nuevoProducto;
+    if (!catalog_overrides_write($overrides)) {
+      json_out(['ok'=>false,'error'=>'overrides_write_failed'], 500);
     }
 
     $pageResult = create_static_product_page([
@@ -8371,14 +8466,13 @@ switch ($route) {
       json_out(['ok'=>false, 'error'=> (string)($pageResult['error'] ?? 'product_page_generation_failed')], 500);
     }
 
-    file_put_contents($productsFile, $updatedJs, LOCK_EX);
-
     $sitemapUpdated = append_product_to_sitemap($CFG['public_base'], $href);
 
     $version = bump_asset_version();
 
     // Purge LiteSpeed cache for this specific file and all related assets
-    header('X-LiteSpeed-Purge: /data/products.js');
+    // Lo que cambia ahora es la capa operativa, no el catálogo.
+    header('X-LiteSpeed-Purge: /data/product-overrides.js');
     header('X-LiteSpeed-Purge: /data/*');
     header('X-LiteSpeed-Purge: /js/global-assets*.js');
     header('X-LiteSpeed-Purge: /css/*');
@@ -8624,48 +8718,40 @@ switch ($route) {
     $productId = trim((string)($b['id'] ?? ''));
     if ($productId === '') json_out(['ok'=>false,'error'=>'missing_id'], 400);
 
-    $productsFile = __DIR__ . '/../data/products.js';
-    if (!is_file($productsFile)) json_out(['ok'=>false,'error'=>'products_file_not_found'], 500);
+    /* La baja se marca en la capa operativa. Antes se recortaba el bloque del
+       producto del catálogo con `preg_replace` y luego se "arreglaban" las comas
+       sueltas que quedaban:
 
-    $js = file_get_contents($productsFile);
-    if (!is_string($js) || $js === '') json_out(['ok'=>false,'error'=>'products_file_read_failed'], 500);
+           preg_replace('/,\\s*,/', ',', $bloque);   // comas dobles
+           preg_replace('/,\\s*\\]/', ']', $bloque);  // coma final
 
-    if (!preg_match('/var products = \[(.*)\]\s*;/s', $js, $arrMatch)) {
-      json_out(['ok'=>false,'error'=>'products_array_not_found'], 500);
-    }
+       Que haga falta reparar la sintaxis después de editar es la señal de que se
+       estaba editando código con expresiones regulares. Un bloque que no casara del
+       todo dejaba el catálogo con una llave suelta y la tienda sin catálogo.
 
-    $productsBlock = $arrMatch[1];
-
-    // Find product block first (needed to capture href and delete physical page/folder)
-    $findPattern = '/\{\s*\n\s*id:\s*[\'"]' . preg_quote($productId, '/') . '[\'"].*?\n\s*\}/s';
-    if (!preg_match($findPattern, $productsBlock, $pm)) {
-      json_out(['ok'=>false,'error'=>'product_not_found'], 404);
-    }
-
-    $productBlock = (string)$pm[0];
+       Ahora el producto se oculta: desaparece de la web al instante, el dato se
+       conserva y la operación se deshace quitándolo de `ocultos`. La página estática
+       y las fotos sí se borran de verdad, como antes. */
     $href = '';
-    if (preg_match('/href:\s*[\'"]([^\'"]+)[\'"]/', $productBlock, $hm)) {
-      $href = trim((string)($hm[1] ?? ''));
+    $existe = false;
+    foreach (catalog_products_merged() as $p) {
+      if ((string)$p['id'] !== $productId) continue;
+      $existe = true;
+      $href = (string)$p['href'];
     }
+    if (!$existe) json_out(['ok'=>false,'error'=>'product_not_found'], 404);
 
-    // Remove product object from products array
-    $pattern = '/,?\s*\{\s*\n\s*id:\s*[\'"]' . preg_quote($productId, '/') . '[\'"].*?\n\s*\}/s';
-    $count = 0;
-    $newBlock = preg_replace($pattern, '', $productsBlock, 1, $count);
-
-    if ($count === 0) json_out(['ok'=>false,'error'=>'product_not_found'], 404);
-
-    // Clean up any leftover commas or formatting issues
-    $newBlock = preg_replace('/,\s*,/', ',', $newBlock); // double commas
-    $newBlock = preg_replace('/,\s*\]/', ']', $newBlock); // trailing comma before ]
-    $newBlock = preg_replace('/\[\s*,/', '[', $newBlock); // leading comma after [
-
-    $updatedJs = preg_replace('/var products = \[(.*)\]\s*;/s', 'var products = [' . $newBlock . '];', $js, 1, $replaceCount);
-    if ($replaceCount !== 1 || !is_string($updatedJs) || $updatedJs === '') {
-      json_out(['ok'=>false,'error'=>'products_array_replace_failed'], 500);
+    $overrides = catalog_overrides_read();
+    if (!in_array($productId, $overrides['ocultos'], true)) $overrides['ocultos'][] = $productId;
+    /* Si era un producto creado desde el panel, se va del todo: su sitio es esta capa
+       y no tiene sentido dejarlo dentro marcado como oculto. */
+    $overrides['extras'] = array_values(array_filter($overrides['extras'], static function ($e) use ($productId) {
+      return !is_array($e) || (string)($e['id'] ?? '') !== $productId;
+    }));
+    unset($overrides['porId'][$productId]);
+    if (!catalog_overrides_write($overrides)) {
+      json_out(['ok'=>false,'error'=>'overrides_write_failed'], 500);
     }
-
-    file_put_contents($productsFile, $updatedJs, LOCK_EX);
 
     // Sin espejo de servidor que sincronizar: un solo catálogo.
 
@@ -8687,7 +8773,8 @@ switch ($route) {
     $version = bump_asset_version();
 
     // Purge LiteSpeed cache
-    header('X-LiteSpeed-Purge: /data/products.js');
+    // Lo que cambia ahora es la capa operativa, no el catálogo.
+    header('X-LiteSpeed-Purge: /data/product-overrides.js');
     header('X-LiteSpeed-Purge: /sitemap.xml');
     if ($href !== '') header('X-LiteSpeed-Purge: ' . $href);
 
@@ -8754,8 +8841,7 @@ switch ($route) {
     if ($customerEmail === '') json_out(['ok'=>false,'error'=>'INVALID_REQUEST','detail'=>'missing_customer_email'], 400);
 
     // ── Lookup precio desde catálogo (fuente de verdad backend) ─────────────
-    $productsFile = __DIR__ . '/../data/products.js';
-    $catalogEntry = lookup_product_price_by_sku($sku, $productsFile);
+    $catalogEntry = lookup_product_price_by_sku($sku);
 
     if ($catalogEntry === null) {
       json_out(['ok'=>false,'error'=>'INVALID_REQUEST','detail'=>'sku_not_found_in_catalog'], 400);
@@ -8933,8 +9019,7 @@ switch ($route) {
     }
 
     // ── Precio desde catálogo (fuente de verdad) ─────────────────────────────
-    $productsFile = __DIR__ . '/../data/products.js';
-    $catalogEntry = lookup_product_price_by_sku($sku, $productsFile);
+    $catalogEntry = lookup_product_price_by_sku($sku);
 
     if ($catalogEntry === null) {
       json_out(['ok'=>false,'error'=>'INVALID_REQUEST','detail'=>'sku_not_found_in_catalog'], 400);
@@ -9229,29 +9314,22 @@ switch ($route) {
       json_out(['ok'=>false,'error'=>'unauthorized'], 401);
     }
 
-    $productsFile = __DIR__ . '/../data/products.js';
+    /* El catálogo para los descuentos sale del mismo sitio que el del panel: índice
+       generado + capa operativa. Aquí había OTRA expresión regular de seis grupos
+       sobre products.js, con su propia idea de qué campos existen; un producto que no
+       los declarara todos, en ese orden, no se podía elegir al crear un descuento. */
     $products = [];
     $categoryKeys = [];
-
-    if (is_file($productsFile)) {
-      $js = file_get_contents($productsFile);
-      if (is_string($js) && $js !== '') {
-        if (preg_match_all('/\{\s*\n\s*id:\s*[\'"]([^\'"]+)[\'"].*?sku:\s*[\'"]([^\'"]+)[\'"].*?name:\s*[\'"]([^\'"]+)[\'"].*?categoryKey:\s*[\'"]([^\'"]+)[\'"].*?priceText:\s*[\'"]([^\'"]*)[\'"].*?stock:\s*[\'"]([^\'"]+)[\'"]/s', $js, $matches, PREG_SET_ORDER)) {
-          foreach ($matches as $m) {
-            $catKey = (string)$m[4];
-            $products[] = [
-              'sku'         => (string)$m[2],
-              'name'        => (string)$m[3],
-              'categoryKey' => $catKey,
-              'priceText'   => (string)$m[5],
-              'stock'       => (string)$m[6],
-            ];
-            if ($catKey !== '' && !in_array($catKey, $categoryKeys, true)) {
-              $categoryKeys[] = $catKey;
-            }
-          }
-        }
-      }
+    foreach (catalog_products_merged() as $p) {
+      $catKey = (string)$p['categoryKey'];
+      $products[] = [
+        'sku'         => (string)$p['sku'],
+        'name'        => (string)$p['name'],
+        'categoryKey' => $catKey,
+        'priceText'   => (string)$p['priceText'],
+        'stock'       => (string)$p['stock'],
+      ];
+      if ($catKey !== '' && !in_array($catKey, $categoryKeys, true)) $categoryKeys[] = $catKey;
     }
 
     // Category label map (same keys as products.js)

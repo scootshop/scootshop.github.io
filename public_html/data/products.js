@@ -2438,13 +2438,69 @@ attributes: [
     });
   }
 
-  function cloneProducts() {
-    return products.map(function (product) {
-      var copy = Object.assign({}, product);
-      copy.gallery = cloneGallery(product.gallery);
-      if (Array.isArray(product.attributes)) copy.attributes = cloneAttributes(product.attributes);
-      return copy;
+  /* ── LA CAPA OPERATIVA ────────────────────────────────────────────────────────
+     Este fichero es la ESTRUCTURA del catálogo y lo escribe una persona. El precio,
+     el precio tachado y el stock los cambia el panel a diario, y para eso está
+     `data/product-overrides.js`, que el panel genera entero y este fichero aplica
+     aquí, en el ÚNICO sitio por el que pasan todas las copias del catálogo.
+
+     Antes el panel reescribía ESTE fichero con expresiones regulares. Ahora no lo
+     toca, así que ninguna operación de tienda puede romper el catálogo. Si los
+     overrides no llegan o llegan rotos, se ven los precios de aquí: viejos quizá,
+     pero la tienda vende igual. */
+  function overridesActuales() {
+    var o = window.SCOOTSHOP_OVERRIDES;
+    if (!o || typeof o !== 'object') return { porId: {}, ocultos: [], extras: [] };
+    return {
+      porId: (o.porId && typeof o.porId === 'object') ? o.porId : {},
+      ocultos: Array.isArray(o.ocultos) ? o.ocultos : [],
+      extras: Array.isArray(o.extras) ? o.extras : []
+    };
+  }
+
+  /* Solo se aceptan los campos OPERATIVOS. Que el panel pudiera sobrescribir `href`,
+     `attributes` o la galería sería volver al problema de dos escritores sobre la
+     misma verdad, con el añadido de que este no se vería en el repositorio. */
+  var CAMPOS_OPERATIVOS = ['priceText', 'compareAtPriceText', 'stock'];
+
+  function aplicarOverride(copy, cambios) {
+    if (!cambios || typeof cambios !== 'object') return copy;
+    CAMPOS_OPERATIVOS.forEach(function (campo) {
+      var valor = cambios[campo];
+      if (typeof valor === 'string') copy[campo] = valor;
     });
+    return copy;
+  }
+
+  function cloneProducts() {
+    var over = overridesActuales();
+    var ocultos = {};
+    over.ocultos.forEach(function (id) { ocultos[String(id)] = true; });
+
+    var salida = products
+      .filter(function (product) { return !ocultos[String(product.id)]; })
+      .map(function (product) {
+        var copy = Object.assign({}, product);
+        copy.gallery = cloneGallery(product.gallery);
+        if (Array.isArray(product.attributes)) copy.attributes = cloneAttributes(product.attributes);
+        return aplicarOverride(copy, over.porId[String(product.id)]);
+      });
+
+    /* Productos dados de alta desde el panel. Viven en los overrides y no en este
+       fichero a propósito: el panel no puede escribir aquí. Cuando uno de ellos se
+       redacta en condiciones —fotos, ejes, textos— se mueve a mano a `products` y se
+       quita de los extras. */
+    over.extras.forEach(function (extra) {
+      if (!extra || typeof extra !== 'object' || !extra.id) return;
+      if (ocultos[String(extra.id)]) return;
+      if (salida.some(function (p) { return String(p.id) === String(extra.id); })) return;
+      var copy = Object.assign({}, extra);
+      copy.gallery = cloneGallery(extra.gallery);
+      if (Array.isArray(extra.attributes)) copy.attributes = cloneAttributes(extra.attributes);
+      salida.push(copy);
+    });
+
+    return salida;
   }
 
   function cloneSeriesDefinitions() {

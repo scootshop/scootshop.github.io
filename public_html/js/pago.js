@@ -183,7 +183,16 @@
           }
 
           var script = document.createElement('script');
+          // La capa operativa (precio/stock del panel) antes del catálogo.
+          if (!document.querySelector('script[data-product-overrides="true"]')) {
+            var over = document.createElement('script');
+            over.src = withAssetVersion('/data/product-overrides.js');
+            over.async = false;
+            over.dataset.productOverrides = 'true';
+            document.head.appendChild(over);
+          }
           script.src = withAssetVersion('/data/products.js');
+          script.async = false;
           script.defer = true;
           script.dataset.productsCatalog = 'true';
           script.addEventListener('load', function(){ resolve(window.SCOOTSHOP_PRODUCTS || []); }, { once:true });

@@ -11,11 +11,25 @@
   },
   "products": {
     "ACC-BAG": {
+      "id": "acc-storage-bag",
+      "name": "Bolsa de almacenamiento",
+      "series": "acc",
+      "categoryKey": "accessories",
+      "priceText": "8 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
       "href": "/accesorios/bolsa-almacenamiento/",
       "image": "/accesorios/bolsa-almacenamiento/img/1.webp",
       "axes": []
     },
     "ACC-BAR-KOCEVLO": {
+      "id": "acc-handlebar-kocevlo",
+      "name": "Manillar KOCEVLO Carbono 680-760mm",
+      "series": "acc",
+      "categoryKey": "accessories",
+      "priceText": "44,99 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
       "href": "/accesorios/manillar-kocevlo/",
       "image": "/accesorios/manillar-kocevlo/img/1.webp",
       "axes": [
@@ -43,6 +57,13 @@
       ]
     },
     "ACC-BAR-LUNJE": {
+      "id": "acc-handlebar-lunje",
+      "name": "Manillar LUNJE 720mm/780mm",
+      "series": "acc",
+      "categoryKey": "accessories",
+      "priceText": "42,99 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
       "href": "/accesorios/manillar-lunje/",
       "image": "/accesorios/manillar-lunje/img/1.webp",
       "axes": [
@@ -75,6 +96,13 @@
       ]
     },
     "ACC-BAR-NANLIO": {
+      "id": "acc-handlebar-nanlio",
+      "name": "Manillar NANLIO Tornasol 780mm",
+      "series": "acc",
+      "categoryKey": "accessories",
+      "priceText": "44,99 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
       "href": "/accesorios/manillar-nanlio/",
       "image": "/accesorios/manillar-nanlio/img/1.webp",
       "axes": [
@@ -93,6 +121,13 @@
       ]
     },
     "ACC-BAR-UNO": {
+      "id": "acc-handlebar-uno",
+      "name": "Manillar UNO 640-800mm",
+      "series": "acc",
+      "categoryKey": "accessories",
+      "priceText": "39,99 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
       "href": "/accesorios/manillar-uno/",
       "image": "/accesorios/manillar-uno/img/1.webp",
       "axes": [
@@ -122,6 +157,13 @@
       ]
     },
     "ACC-BAR-WAKE": {
+      "id": "acc-handlebar-wake",
+      "name": "Manillar WAKE 720mm/780mm",
+      "series": "acc",
+      "categoryKey": "accessories",
+      "priceText": "39,99 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
       "href": "/accesorios/manillar-wake/",
       "image": "/accesorios/manillar-wake/img/1.webp",
       "axes": [
@@ -150,6 +192,13 @@
       ]
     },
     "ACC-BAR-WAKE-DH": {
+      "id": "acc-handlebar-wake-dh",
+      "name": "Manillar WAKE Downhill 780mm",
+      "series": "acc",
+      "categoryKey": "accessories",
+      "priceText": "42,99 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
       "href": "/accesorios/manillar-wake-downhill/",
       "image": "/accesorios/manillar-wake-downhill/img/1.webp",
       "axes": [
@@ -170,46 +219,109 @@
       ]
     },
     "ACC-BEAST": {
+      "id": "acc-the-beast-stickers",
+      "name": "Pegatinas THE BEAST",
+      "series": "acc",
+      "categoryKey": "accessories",
+      "priceText": "4,50 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
       "href": "/accesorios/pegatina-the-beast/",
       "image": "/accesorios/pegatina-the-beast/img/2.webp",
       "axes": []
     },
     "ACC-HOLDER": {
+      "id": "acc-phone-holder",
+      "name": "Soporte móvil antivibración para patinete",
+      "series": "acc",
+      "categoryKey": "accessories",
+      "priceText": "7,40 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
       "href": "/accesorios/soporte-movil/",
       "image": "/accesorios/soporte-movil/img/2.webp",
       "axes": []
     },
     "ACC-LIMIT-M41": {
+      "id": "acc-speed-limiter-m41",
+      "name": "Mando limitador — M41 Tank",
+      "series": "acc-limit",
+      "categoryKey": "accessories",
+      "priceText": "58,99 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
       "href": "/accesorios/mando-limitador-m41-tank/",
       "image": "/accesorios/mando-limitador-m41-tank/img/1.webp",
       "axes": []
     },
     "ACC-LIMIT-M41-AD": {
+      "id": "acc-speed-limiter-m41-armored-dual",
+      "name": "Mando limitador — M41 Armored Dual",
+      "series": "acc-limit",
+      "categoryKey": "accessories",
+      "priceText": "58,99 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
       "href": "/accesorios/mando-limitador-m41-armored-dual/",
       "image": "/accesorios/mando-limitador-m41-armored-dual/img/1.webp",
       "axes": []
     },
     "ACC-LIMIT-M41-AO": {
+      "id": "acc-speed-limiter-m41-armored-one",
+      "name": "Mando limitador — M41 Armored One",
+      "series": "acc-limit",
+      "categoryKey": "accessories",
+      "priceText": "58,99 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
       "href": "/accesorios/mando-limitador-m41-armored-one/",
       "image": "/accesorios/mando-limitador-m41-armored-one/img/1.webp",
       "axes": []
     },
     "ACC-LIMIT-M41-TD": {
+      "id": "acc-speed-limiter-m41-tank-dual",
+      "name": "Mando limitador — M41 Tank Dual",
+      "series": "acc-limit",
+      "categoryKey": "accessories",
+      "priceText": "58,99 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
       "href": "/accesorios/mando-limitador-m41-tank-dual/",
       "image": "/accesorios/mando-limitador-m41-tank-dual/img/1.webp",
       "axes": []
     },
     "ACC-REFLECT": {
+      "id": "acc-reflective-stickers",
+      "name": "Pegatinas reflectantes",
+      "series": "acc",
+      "categoryKey": "accessories",
+      "priceText": "6,50 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
       "href": "/accesorios/pegatinas-reflectantes/",
       "image": "/accesorios/pegatinas-reflectantes/img/1.webp",
       "axes": []
     },
     "ACC-RGB": {
+      "id": "acc-rgb-lights",
+      "name": "Luces estroboscópicas LED RGB para patinete y bicicleta",
+      "series": "acc",
+      "categoryKey": "accessories",
+      "priceText": "6 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
       "href": "/accesorios/luces-led-rgb/",
       "image": "/accesorios/luces-led-rgb/img/1.webp",
       "axes": []
     },
     "BISONGT": {
+      "id": "ecoxtrem-bison-gt-carbon-design",
+      "name": "Bison GT Carbon Design",
+      "series": "ecoxtrem",
+      "categoryKey": "electric-scooters",
+      "priceText": "470 €",
+      "compareAtPriceText": "560 €",
+      "stock": "in_stock",
       "href": "/patinetes/ecoxtrem/bison-gt-carbon-design/",
       "image": "/patinetes/ecoxtrem/bison-gt-carbon-design/img/1.webp",
       "axes": [
@@ -226,36 +338,85 @@
       ]
     },
     "CHALLENGER12": {
+      "id": "motos-challenger12",
+      "name": "CHALLENGER12",
+      "series": "motos",
+      "categoryKey": "electric-motorcycles",
+      "priceText": "299 €",
+      "compareAtPriceText": "365 €",
+      "stock": "in_stock",
       "href": "/motos/challenger12/",
       "image": "/motos/challenger12/img/1.webp",
       "axes": []
     },
     "D20": {
+      "id": "d20",
+      "name": "D20",
+      "series": "n",
+      "categoryKey": "electric-scooters",
+      "priceText": "265 €",
+      "compareAtPriceText": "320 €",
+      "stock": "in_stock",
       "href": "/patinetes/series-n/d20/",
       "image": "/patinetes/series-n/d20/img/1.webp",
       "axes": []
     },
     "D6": {
+      "id": "d6",
+      "name": "D6",
+      "series": "n",
+      "categoryKey": "electric-scooters",
+      "priceText": "375 €",
+      "compareAtPriceText": "450 €",
+      "stock": "in_stock",
       "href": "/patinetes/series-n/d6/",
       "image": "/patinetes/series-n/d6/img/1.webp",
       "axes": []
     },
     "EV05M": {
+      "id": "motos-ev05m",
+      "name": "EVERCROSS EV05M",
+      "series": "motos",
+      "categoryKey": "electric-motorcycles",
+      "priceText": "245 €",
+      "compareAtPriceText": "280 €",
+      "stock": "in_stock",
       "href": "/motos/ev05m/",
       "image": "/motos/ev05m/img/1.webp",
       "axes": []
     },
     "EV12MPRO": {
+      "id": "motos-ev12m-pro",
+      "name": "EVERCROSS EV12M PRO",
+      "series": "motos",
+      "categoryKey": "electric-motorcycles",
+      "priceText": "349 €",
+      "compareAtPriceText": "420 €",
+      "stock": "in_stock",
       "href": "/motos/ev12m-pro/",
       "image": "/motos/ev12m-pro/img/1.webp",
       "axes": []
     },
     "G2": {
+      "id": "g2",
+      "name": "G2",
+      "series": "gt",
+      "categoryKey": "electric-scooters",
+      "priceText": "380 €",
+      "compareAtPriceText": "435 €",
+      "stock": "in_stock",
       "href": "/patinetes/series-gt/g2/",
       "image": "/patinetes/series-gt/g2/img/1.webp",
       "axes": []
     },
     "G2PRO": {
+      "id": "k-g2-pro",
+      "name": "KUKIRIN G2 PRO",
+      "series": "k",
+      "categoryKey": "electric-scooters",
+      "priceText": "515 €",
+      "compareAtPriceText": "660 €",
+      "stock": "in_stock",
       "href": "/patinetes/series-k/g2-pro/",
       "image": "/patinetes/series-k/g2-pro/img/1.webp",
       "axes": [
@@ -271,41 +432,97 @@
       ]
     },
     "G73": {
+      "id": "b-g73",
+      "name": "G73",
+      "series": "b",
+      "categoryKey": "electric-bikes",
+      "priceText": "590 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
       "href": "/bicicletas/g73/",
       "image": "/bicicletas/g73/img/1.webp",
       "axes": []
     },
     "GT9": {
+      "id": "gt9",
+      "name": "GT9",
+      "series": "gt",
+      "categoryKey": "electric-scooters",
+      "priceText": "1250 €",
+      "compareAtPriceText": "1499 €",
+      "stock": "out_of_stock",
       "href": "/patinetes/series-gt/gt9/",
       "image": "/patinetes/series-gt/gt9/img/1.webp",
       "axes": []
     },
     "GT900": {
+      "id": "b-gt900",
+      "name": "Aairsk GT900",
+      "series": "b",
+      "categoryKey": "electric-bikes",
+      "priceText": "700 €",
+      "compareAtPriceText": "840 €",
+      "stock": "in_stock",
       "href": "/bicicletas/gt900/",
       "image": "/bicicletas/gt900/img/7.webp",
       "axes": []
     },
     "IES1": {
+      "id": "ie-s1",
+      "name": "iENYRID iE-S1",
+      "series": "n",
+      "categoryKey": "electric-scooters",
+      "priceText": "435 €",
+      "compareAtPriceText": "500 €",
+      "stock": "in_stock",
       "href": "/patinetes/series-n/ie-s1/",
       "image": "/patinetes/series-n/ie-s1/img/1.webp",
       "axes": []
     },
     "IX3": {
+      "id": "ix3",
+      "name": "iScooter IX3",
+      "series": "ix",
+      "categoryKey": "electric-scooters",
+      "priceText": "380 €",
+      "compareAtPriceText": "435 €",
+      "stock": "in_stock",
       "href": "/patinetes/series-ix/ix3/",
       "image": "/patinetes/series-ix/ix3/img/1.webp",
       "axes": []
     },
     "IX8": {
+      "id": "ix8",
+      "name": "iScooter IX8",
+      "series": "ix",
+      "categoryKey": "electric-scooters",
+      "priceText": "700 €",
+      "compareAtPriceText": "770 €",
+      "stock": "in_stock",
       "href": "/patinetes/series-ix/ix8/",
       "image": "/patinetes/series-ix/ix8/img/1.webp",
       "axes": []
     },
     "KG2": {
+      "id": "k-g2",
+      "name": "KUKIRIN G2",
+      "series": "k",
+      "categoryKey": "electric-scooters",
+      "priceText": "489 €",
+      "compareAtPriceText": "535 €",
+      "stock": "in_stock",
       "href": "/patinetes/series-k/g2/",
       "image": "/patinetes/series-k/g2/img/1.webp",
       "axes": []
     },
     "M41DUAL": {
+      "id": "ecoxtrem-m41-armored-dual",
+      "name": "M41 ARMORED DUAL (LR)",
+      "series": "ecoxtrem",
+      "categoryKey": "electric-scooters",
+      "priceText": "785 €",
+      "compareAtPriceText": "899 €",
+      "stock": "in_stock",
       "href": "/patinetes/ecoxtrem/m41-armored-dual/",
       "image": "/patinetes/ecoxtrem/m41-armored-dual/img/8.webp",
       "axes": [
@@ -325,6 +542,13 @@
       ]
     },
     "M41ONE": {
+      "id": "ecoxtrem-m41-armored-one",
+      "name": "M41 ARMORED ONE PRO",
+      "series": "ecoxtrem",
+      "categoryKey": "electric-scooters",
+      "priceText": "639 €",
+      "compareAtPriceText": "759 €",
+      "stock": "in_stock",
       "href": "/patinetes/ecoxtrem/m41-armored-one/",
       "image": "/patinetes/ecoxtrem/m41-armored-one/img/1.webp",
       "axes": [
@@ -343,6 +567,13 @@
       ]
     },
     "M41TANK": {
+      "id": "ecoxtrem-m41-tank-ultimate-1000w",
+      "name": "M41 Tank Ultimate 1000W",
+      "series": "ecoxtrem",
+      "categoryKey": "electric-scooters",
+      "priceText": "535 €",
+      "compareAtPriceText": "620 €",
+      "stock": "in_stock",
       "href": "/patinetes/ecoxtrem/m41-tank-ultimate-1000w/",
       "image": "/patinetes/ecoxtrem/m41-tank-ultimate-1000w/img/1.webp",
       "axes": [
@@ -361,6 +592,13 @@
       ]
     },
     "M41TANKDUAL": {
+      "id": "ecoxtrem-m41-tank-dual",
+      "name": "M41 TANK DUAL",
+      "series": "ecoxtrem",
+      "categoryKey": "electric-scooters",
+      "priceText": "725 €",
+      "compareAtPriceText": "849 €",
+      "stock": "in_stock",
       "href": "/patinetes/ecoxtrem/m41-tank-dual/",
       "image": "/patinetes/ecoxtrem/m41-tank-dual/img/1.webp",
       "axes": [
@@ -378,51 +616,121 @@
       ]
     },
     "N7PRO": {
+      "id": "n7",
+      "name": "N7PRO",
+      "series": "n",
+      "categoryKey": "electric-scooters",
+      "priceText": "185 €",
+      "compareAtPriceText": "220,50 €",
+      "stock": "in_stock",
       "href": "/patinetes/series-n/n7/",
       "image": "/patinetes/series-n/n7/img/1.webp",
       "axes": []
     },
     "S3": {
+      "id": "s3",
+      "name": "S3-11",
+      "series": "n",
+      "categoryKey": "electric-scooters",
+      "priceText": "1070 €",
+      "compareAtPriceText": "1200 €",
+      "stock": "in_stock",
       "href": "/patinetes/series-n/s3/",
       "image": "/patinetes/series-n/s3/img/1.webp",
       "axes": []
     },
     "S4": {
+      "id": "s4",
+      "name": "ZWheel MASCOOTER S4",
+      "series": "n",
+      "categoryKey": "electric-scooters",
+      "priceText": "380 €",
+      "compareAtPriceText": "475 €",
+      "stock": "in_stock",
       "href": "/patinetes/series-n/s4/",
       "image": "/patinetes/series-n/s4/img/1.webp",
       "axes": []
     },
     "T10": {
+      "id": "t10",
+      "name": "T10",
+      "series": "gt",
+      "categoryKey": "electric-scooters",
+      "priceText": "450 €",
+      "compareAtPriceText": "599 €",
+      "stock": "in_stock",
       "href": "/patinetes/series-gt/t10/",
       "image": "/patinetes/series-gt/t10/img/1.webp",
       "axes": []
     },
     "T10DUAL": {
+      "id": "t10-dual",
+      "name": "JOYOR T10 DUAL",
+      "series": "gt",
+      "categoryKey": "electric-scooters",
+      "priceText": "799 €",
+      "compareAtPriceText": "860 €",
+      "stock": "in_stock",
       "href": "/patinetes/series-gt/t10-dual/",
       "image": "/patinetes/series-gt/t10-dual/img/1.webp",
       "axes": []
     },
     "T30": {
+      "id": "t30",
+      "name": "T30",
+      "series": "gt",
+      "categoryKey": "electric-scooters",
+      "priceText": "1199 €",
+      "compareAtPriceText": "1499 €",
+      "stock": "in_stock",
       "href": "/patinetes/series-gt/t30/",
       "image": "/patinetes/series-gt/t30/img/1.webp",
       "axes": []
     },
     "TF3": {
+      "id": "tf3",
+      "name": "TF3",
+      "series": "gt",
+      "categoryKey": "electric-scooters",
+      "priceText": "399 €",
+      "compareAtPriceText": "499 €",
+      "stock": "in_stock",
       "href": "/patinetes/series-gt/tf3/",
       "image": "/patinetes/series-gt/tf3/img/1.webp",
       "axes": []
     },
     "V70": {
+      "id": "v70-connected",
+      "name": "Cecotec Bongo V70 Connected",
+      "series": "n",
+      "categoryKey": "electric-scooters",
+      "priceText": "620 €",
+      "compareAtPriceText": "805 €",
+      "stock": "in_stock",
       "href": "/patinetes/series-n/v70-connected/",
       "image": "/patinetes/series-n/v70-connected/img/2.webp",
       "axes": []
     },
     "VS6": {
+      "id": "vs6",
+      "name": "VS6",
+      "series": "n",
+      "categoryKey": "electric-scooters",
+      "priceText": "550 €",
+      "compareAtPriceText": "675 €",
+      "stock": "in_stock",
       "href": "/patinetes/series-n/vs6/",
       "image": "/patinetes/series-n/vs6/img/1.webp",
       "axes": []
     },
     "W9": {
+      "id": "w9",
+      "name": "W9",
+      "series": "ix",
+      "categoryKey": "electric-scooters",
+      "priceText": "399 €",
+      "compareAtPriceText": "450 €",
+      "stock": "in_stock",
       "href": "/patinetes/series-ix/w9/",
       "image": "/patinetes/series-ix/w9/img/1.webp",
       "axes": []

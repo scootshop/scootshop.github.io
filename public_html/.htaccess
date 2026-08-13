@@ -66,8 +66,10 @@ AddDefaultCharset UTF-8
     Header set Cache-Control "public, max-age=31536000, immutable"
   </FilesMatch>
 
-  # Archivos dinámicos/bootstrap: sin cache persistente
-  <FilesMatch "^(products\.js|asset-version\.json|index-head\.js|global-assets\.js|asset-sync\.js)$">
+  # Archivos dinámicos/bootstrap: sin cache persistente.
+  # `product-overrides.js` lo escribe el PANEL: un precio cambiado tiene que verse ya,
+  # así que no puede quedarse en la caché del navegador como el resto del JS.
+  <FilesMatch "^(products\.js|product-overrides\.js|asset-version\.json|index-head\.js|global-assets\.js|asset-sync\.js)$">
     Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
     Header set Pragma "no-cache"
     Header set Expires "0"

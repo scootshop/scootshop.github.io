@@ -79,9 +79,21 @@
         return;
       }
 
+      /* La capa operativa ANTES del catálogo: precio, precio tachado y stock que el
+         panel haya cambiado. `async=false` es lo que garantiza el orden entre dos
+         scripts insertados por JS. Si esta no llega, products.js se aplica solo y la
+         tienda enseña los precios de fábrica: vieja quizá, nunca rota. */
+      if (!document.querySelector('script[data-product-overrides="true"]')) {
+        var over = document.createElement('script');
+        over.src = withVer('/data/product-overrides.js', window.ASSET_VER || fallbackVersion());
+        over.async = false;
+        over.dataset.productOverrides = 'true';
+        document.head.appendChild(over);
+      }
+
       var script = document.createElement('script');
       script.src = withVer('/data/products.js', window.ASSET_VER || fallbackVersion());
-      script.defer = true;
+      script.async = false;
       script.dataset.productsCatalog = 'true';
       script.addEventListener('load', function () { resolve(window.SCOOTSHOP_PRODUCTS || []); }, { once: true });
       script.addEventListener('error', function () { resolve([]); }, { once: true });

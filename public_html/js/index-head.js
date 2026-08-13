@@ -193,6 +193,8 @@
     appendDeferredScript('/js/cart-runtime.js', ver);
     appendDeferredScript('/js/mobile-menu.js', ver);
     appendDeferredScript('/js/auth-ui.js', ver);
+    // La capa operativa (precio/stock del panel) va SIEMPRE antes del catálogo.
+    appendDeferredScript('/data/product-overrides.js', ver);
     appendDeferredScript('/data/products.js', ver);
     /* Núcleo de atributos. Va DESPUÉS del catálogo y ANTES de todo lo que pinta
        variantes (products-menu, index.js y, por delegación, variant-pop): es quien
@@ -221,6 +223,7 @@
         // Reload products.js with updated version so price changes appear
         const oldScript = document.querySelector('script[src*="/data/products.js"]');
         if (oldScript) oldScript.remove();
+        appendDeferredScript('/data/product-overrides.js', v);
         appendDeferredScript('/data/products.js', v);
       }
     });

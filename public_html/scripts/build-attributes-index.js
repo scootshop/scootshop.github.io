@@ -82,10 +82,23 @@ function construir() {
       return { key: e.key, label: e.label, type: e.type, options };
     });
     const href = String(p.href || '').trim();
-    // La foto va aquí para que el servidor no necesite un segundo catálogo: era lo
-    // único que le quedaba por resolver de data/products-server.js.
+    /* Aquí va TODO lo que el servidor necesita saber de un producto: la foto y la ruta
+       —era lo único que le quedaba por resolver del catálogo espejo— y además los
+       campos comerciales, para que el panel pueda listar productos sin volver a
+       rastrear `products.js` con expresiones regulares. */
     const image = String(p.image || '').trim();
-    salida.products[sku] = { href, image, axes: ejes };
+    salida.products[sku] = {
+      id: String(p.id || ''),
+      name: String(p.name || ''),
+      series: String(p.series || ''),
+      categoryKey: String(p.categoryKey || ''),
+      priceText: String(p.priceText || ''),
+      compareAtPriceText: String(p.compareAtPriceText || ''),
+      stock: String(p.stock || 'in_stock'),
+      href,
+      image,
+      axes: ejes
+    };
     if (href) salida.byHref[href.replace(/\/+$/, '')] = sku;
   }
   return salida;

@@ -23,6 +23,7 @@ $comprobaciones = @(
   @{ nombre = 'indice de atributos'; script = "$raiz\scripts\build-attributes-index.js"; args = @('--check') },
   @{ nombre = 'catalogo valido';     script = "$qa\catalogo.js";                        args = @() },
   @{ nombre = 'SQL de la API';       script = "$qa\api-sql.js";                         args = @() },
+  @{ nombre = 'capa operativa';    script = "$qa\catalogo-overrides.js";              args = @($BaseUrl) },
   @{ nombre = 'casos A-J';           script = "$qa\variantes-casos.js";                 args = @($BaseUrl) },
   @{ nombre = 'fichas multieje';     script = "$qa\variantes-multieje.js";              args = @($BaseUrl) },
   @{ nombre = 'flujo al carrito';    script = "$qa\variantes-flujo.js";                 args = @($BaseUrl) },

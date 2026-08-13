@@ -43,6 +43,12 @@ function cargar() {
   sandbox.window.document = sandbox.document;
   sandbox.window.addEventListener = () => {};
   vm.createContext(sandbox);
+  /* La capa operativa primero, igual que en el navegador: así se valida el catálogo
+     tal y como lo ve el cliente, con los precios y las bajas del panel aplicados. */
+  const overrides = path.join(RAIZ, 'data', 'product-overrides.js');
+  if (fs.existsSync(overrides)) {
+    vm.runInContext(fs.readFileSync(overrides, 'utf8'), sandbox, { filename: 'data/product-overrides.js' });
+  }
   vm.runInContext(fs.readFileSync(path.join(RAIZ, 'data', 'products.js'), 'utf8'), sandbox, { filename: 'data/products.js' });
   vm.runInContext(fs.readFileSync(path.join(RAIZ, 'js', 'product-attributes.js'), 'utf8'), sandbox, { filename: 'js/product-attributes.js' });
   return sandbox.window;
@@ -79,12 +85,26 @@ for (const p of productos) {
   if (!fs.existsSync(path.join(carpeta, 'index.html'))) sinFicha.push(p.sku + ' -> ' + href);
 }
 
+/* EL INVARIANTE DE ESTA ARQUITECTURA: el backend no escribe el catálogo. Si alguien
+   vuelve a meter un `file_put_contents` sobre data/products.js —o una expresión
+   regular que lo reescriba— esto lo dice aquí y no seis meses después con la tienda
+   caída. Lo operativo (precio, stock, altas, bajas) va a data/product-overrides.*  */
+const php = fs.readFileSync(path.join(RAIZ, 'api', 'index.php'), 'utf8');
+const escrituras = [];
+const reWrite = /(file_put_contents|fwrite|rename)\s*\([^;]*products\.js/g;
+let m;
+while ((m = reWrite.exec(php)) !== null) {
+  const linea = php.slice(0, m.index).split('\n').length;
+  escrituras.push('api/index.php:' + linea + '  ' + m[0].replace(/\s+/g, ' ').slice(0, 70));
+}
+
 for (const w of informe.warnings) console.log('  aviso: ' + w);
+for (const e of escrituras) console.log('  ERROR: el backend escribe el catálogo -> ' + e);
 for (const e of informe.errors) console.log('  ERROR: ' + e);
 for (const f of sinFicha) console.log('  ERROR: ficha inexistente ' + f);
 
-if (informe.errors.length || sinFicha.length) {
-  console.log('CATALOGO_KO  ' + (informe.errors.length + sinFicha.length) + ' problemas');
+if (informe.errors.length || sinFicha.length || escrituras.length) {
+  console.log('CATALOGO_KO  ' + (informe.errors.length + sinFicha.length + escrituras.length) + ' problemas');
   process.exit(1);
 }
 console.log('CATALOGO_OK');
