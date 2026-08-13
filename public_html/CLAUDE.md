@@ -25,9 +25,15 @@ powershell -ExecutionPolicy Bypass -File scripts/bump-assets-version.ps1
 .\scripts\new-series-product.ps1 -SeriesKey n -Slug x5 -Name "X5" -Price 499
 ```
 
-Smoke / QA (expect terminal markers `LOCAL_START_OK`, `GATE_B_OK`/`GATE_B_KO`, `SMOKE_WEB_OK`, `IMG_CACHE_OK`, `IMG_DUPES_OK`):
+Smoke / QA (expect terminal markers `LOCAL_START_OK`, `VARIANTES_OK`, `CATALOGO_OK`, `API_SQL_OK`, `ATTRS_INDEX_OK`, `GATE_B_OK`/`GATE_B_KO`, `SMOKE_WEB_OK`, `IMG_CACHE_OK`, `IMG_DUPES_OK`).
+
+`scripts/qa/variantes.ps1` runs the whole variant system in one go — catalog, SQL bindings, attribute index, cases A–J, multi-axis fichas, cart flow, accessibility/responsive at three widths, the globalisation test, summary chips and readiness — against local or production. It exists because these suites were born in a session's temp folder: a guard nobody can run is not a guard. `variantes-capturas.js` takes per-element screenshots to compare a design before/after a CSS change (`SS_SHOTS` picks the folder).
 
 ```powershell
+powershell -ExecutionPolicy Bypass -File scripts/qa/variantes.ps1                  # TODO el sistema de variantes
+powershell -ExecutionPolicy Bypass -File scripts/qa/variantes.ps1 -BaseUrl https://scootshop.co
+node scripts/qa/catalogo.js                                                        # el catálogo se ejecuta y es válido
+node scripts/qa/api-sql.js                                                         # cada SQL cuadra con sus bindings
 node scripts/build-attributes-index.js --check                                     # el índice de atributos, al día
 node scripts/qa/legacy-metrics.js                                                  # cuánto queda del modelo viejo
 powershell -ExecutionPolicy Bypass -File scripts/gate-b-smoke.ps1                  # cart/order payment flow
