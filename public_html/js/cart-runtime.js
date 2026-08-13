@@ -304,9 +304,9 @@
       var selector = document.querySelector('.color-variants');
       if (!selector) return null;
 
-      var activeButton = selector.querySelector('.color-variant.is-active:not([disabled]):not([aria-disabled="true"])');
+      var activeButton = selector.querySelector('.variant-option.is-active:not([disabled]):not([aria-disabled="true"])');
       if (!activeButton) {
-        var allButtons = selector.querySelectorAll('.color-variant');
+        var allButtons = selector.querySelectorAll('.variant-option');
         for (var i = 0; i < allButtons.length; i++) {
           if (!allButtons[i].disabled && allButtons[i].getAttribute('aria-disabled') !== 'true') {
             activeButton = allButtons[i];

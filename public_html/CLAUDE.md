@@ -108,7 +108,13 @@ Legacy metrics, before → after this block: `colorVariants` runtime readers 80 
 
 **El sistema visual también es único.** Los tokens `--variant-*` (`css/main.css`, junto a `--summary-*`) son los únicos números del selector: tamaño del círculo, radio, bordes, anillo del elegido, punto blanco, elevación del hover, transiciones y opacidad de lo agotado. El círculo tenía dos definiciones —una en `tarjetas.css` para la ficha y otra en `main.css` para la burbuja— con números que habían derivado (anillo 4px/3px, punto 8px/7px, hover 1,05/1,06); ahora hay un bloque y el tamaño se cambia redefiniendo `--variant-size` en el contexto. La píldora ya estaba unificada y ahora consume los mismos tokens. Comprobado con capturas: las cuatro vistas de ficha a 1440 y 390 px salen **idénticas al píxel** antes y después.
 
-Still open, and small: the `.color-variant*` CSS class names are a skin, not semantics — a model pill still carries a class that says "color"; and the `.size-variants` sections of the four two-axis fichas are still painted by their own inline script (stage 4), which is why those fichas call `marcarSeleccion` themselves.
+**Multi-axis fichas are data-driven too (stage 4).** The four two-axis fichas (WAKE, LUNJE, UNO, KOCEVLO) had ~120 lines of inline script each — four copies of the same dance: recombine the key, move the photos of the chosen size, rewrite the cart button and the buy links. All four are deleted; `createVariantSelector()` now renders N axes: it pairs the catalog's axes, in order, with the `.size-variants` sections the ficha provides, and every choice on any axis goes through one `aplicarSeleccion()` that resolves cross-axis availability (`allows`), the photo of the *combination* (`imagenesDe`), the named `attrs`, the buy links and the legacy combined key. A ficha with no swatch axis at all (model + size) takes the same path.
+
+Two things that had to be declared as data for that to work, both documented in `data/products.js`:
+- `legacyKeyAxes` — the order in which option keys are joined into the cart line's identity (`negro-780`). It used to be implicit in each ficha's script; it lives in the catalog so live carts and stored orders keep matching. It disappears when line identity becomes `attrs`.
+- `shortLabel` — a compact label for the control when the long one repeats the unit already shown in the axis header (`MEDIDA: 720 mm` over pills `640 · 680 · 720`). The long label still travels to cart, checkout and order.
+
+**Classes name the control, not the axis.** `.color-variant`/`.size-variant`/`.acc-pop-pill`/`.acc-pop-swatch` are now `.variant-option` + `.variant-option--swatch|--pill`, in CSS, JS and the 12 fichas' markup. With that the `.color-variant:not(.size-variant)` trick — which existed only to tell a pill from a circle — is gone, and a model pill no longer carries a class that says "color".
 
 **STAGE 5 (cart/checkout presentation) IS DONE AND LIVE (13 Aug 2026).** Deployed on top of `20260813-8`: `js/product-attributes.js`, `js/pago.js`, `js/global-assets.js`, `checkout/index.html`, `pago.html`. Verified **against production** with a real browser: chips (4 views × with/without a 2.5 s catalog delay), drawer A–F, 8 fichas, 10-step commercial smoke, invariants intact. Repro: `/tmp/final.js`, `/tmp/smoke.js`, `/tmp/reg.js` (all take a base URL).
 
@@ -122,7 +128,7 @@ The checkout chip printed `Color: G2 PRO VMP` instead of `Modelo: …`. The hypo
 
 On top of that both summaries repaint once on `SS_ATTRS.ready` (the single frontier, as in the drawer), rewriting **only the chip text** — never the list HTML, which would re-download the photos that `check-image-dupes.js` guards.
 
-**Migration status (Aug 2026):** stages 1–3, 5, 6 and 7 done and live. Pending: **stage 4** — multi-axis accessories, i.e. generating the `.size-variants` sections of the four two-axis fichas from the catalog instead of their inline scripts, plus structured `accessoryCategory`/compatibility so a helmet or a bag declares its axes the same way. Also open, cosmetic: renaming the `.color-variant*` CSS classes, which lie about the axis on a pill.
+**Migration status (Aug 2026):** stages 1–7 done and live (`20260813-11`). What is left is not variant architecture: structured `accessoryCategory` + compatibility (so a helmet or a bag declares what it fits the same way it declares its axes) and the containers' class names (`.color-variants` still names the axis, though nothing reads it as such).
 
 Two traps, both hit for real:
 

@@ -13,7 +13,7 @@
  *     <span class="color-variants-label">MODELOS:</span>
  *
  * La ficha se veía bien porque el rótulo y la clase extra estaban puestos a mano allí.
- * El Home no: descubría los ejes parseando el HTML de la ficha, veía `.color-variant`
+ * El Home no: descubría los ejes parseando el HTML de la ficha, veía `.variant-option`
  * y pintaba círculos de color. Mismo producto, dos lecturas distintas.
  *
  * CÓMO SE RESUELVE
@@ -103,6 +103,11 @@
     return {
       key: texto(op.key || op.value || indice),
       label: texto(op.label || op.key || ''),
+      /* Etiqueta CORTA para el control, cuando la larga no cabe o repite la unidad
+         que ya está en la cabecera del eje ("MEDIDA: 720 mm" + píldoras 640/680/720).
+         Es presentación declarada, no una regla escondida en el HTML de una ficha:
+         el texto largo se sigue usando en carrito, checkout y pedido. */
+      shortLabel: texto(op.shortLabel || op.labelCorta || ''),
       swatch: texto(op.swatch || ''),
       images: imagenes,
       // Fotos por combinación con otro eje: { '720': 3, '780': 9 }. Es lo que permite

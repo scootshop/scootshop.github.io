@@ -699,7 +699,7 @@ main{ padding-block:22px 32px; }
    necesitaban una clase-hook en el <body> para pasar a flex. Ese hook era frágil: si el
    HTML se actualiza y el CSS sigue cacheado (los .css van como immutable), el override
    deja de enganchar y los círculos vuelven a partirse. Con flex en la regla base no hay
-   nada que recordar ni nada que se pueda desincronizar. El tamaño lo fija .color-variant
+   nada que recordar ni nada que se pueda desincronizar. El tamaño lo fija .variant-option
    (40px, 38px en móvil), así que con 3 colores se ve exactamente igual que antes. */
 /* El carril de MEDIDA/MODELO es EL MISMO que el de color: mismas reglas, no una
    copia. Antes vivía inline en las cuatro fichas de manillar con `flex-wrap:wrap`, y
@@ -749,8 +749,8 @@ main{ padding-block:22px 32px; }
 }
 
 /* Los círculos NUNCA se encogen para caber: el carril crece y se desliza. */
-.color-variants-grid > .color-variant,
-.size-variants-grid > .size-variant{
+.color-variants-grid > .variant-option,
+.size-variants-grid > .variant-option--pill{
   flex:0 0 auto;
 }
 
@@ -758,7 +758,7 @@ main{ padding-block:22px 32px; }
    de dejar hueco muerto a la derecha (el WAKE y el LUNJE solo tienen dos medidas). La
    clase la pone el mismo controlador que las de borde, después de medir. Es el mismo
    gesto que ya hace la burbuja con .acc-pop-rail.is-fit. */
-.size-variants-grid.is-fit > .size-variant{
+.size-variants-grid.is-fit > .variant-option--pill{
   flex:1 1 auto;
 }
 
@@ -784,10 +784,10 @@ main{ padding-block:22px 32px; }
 }
 
 /* ── Círculo de color ────────────────────────────────────────────────────────
-   `:not(.size-variant)` en todo el bloque porque hay UN selector de ficha que no
+   `:not(.variant-option--pill)` en todo el bloque porque hay UN selector de ficha que no
    elige color sino VERSIÓN: el KUKIRIN G2 PRO (VMP / Normal). Sus dos opciones se
-   leen con su nombre, así que llevan la píldora de main.css (.size-variant) y a la
-   vez la clase .color-variant, que es la que buscan product-enhancements,
+   leen con su nombre, así que llevan la píldora de main.css (.variant-option--pill) y a la
+   vez la clase .variant-option, que es la que buscan product-enhancements,
    cart-runtime y global-assets-app para saber qué versión está elegida.
 
    Con la guardia, la píldora se queda con SU diseño entero (fuente única en
@@ -1572,7 +1572,7 @@ footer a:hover{ color:var(--ink); }
     gap:11px;
   }
 
-  .color-variant:not(.size-variant){
+  .variant-option--swatch{
     width:38px;
     height:38px;
     min-width:38px;
@@ -1816,6 +1816,6 @@ footer a:hover{ color:var(--ink); }
 /* La BURBUJA DE VARIANTES (.acc-pop*) ya no está aquí: se mudó a main.css cuando
    dejó de ser cosa solo de las fichas. Ahora la abren también las tarjetas del
    home, y el home no carga esta hoja. Con ella se fue la regla de la píldora
-   (.acc-pop-pill, .size-variant), así que el selector de medida de los manillares
+   (.variant-option--pill, .variant-option--pill), así que el selector de medida de los manillares
    se pinta desde main.css; el CARRIL sí se queda aquí, junto al de colores. */
 

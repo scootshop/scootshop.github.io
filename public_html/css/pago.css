@@ -2,18 +2,11 @@
       --bg:#f6f7f9;
       --muted:#5f6877;
       --line:#e5eaf1;
-      --line-strong:#d3dce8;
       --soft:#f1f4f8;
       --surface:rgba(255,255,255,.82);
-      --radius:24px;
       --shadow: 0 22px 54px rgba(15,23,42,.05);
-      --wa:#25d366;
 
       /* ? Tabs más suaves */
-      --tab-ink:#5c6472;
-      --tab-bg:transparent;
-      --tab-bg-active:#fff;
-      --tab-ink-active:#111315;
     }
 
     *{ box-sizing:border-box; margin:0; padding:0; }
@@ -22,7 +15,13 @@
       background:var(--bg);
     }
     body{
+      /* svh = viewport con las barras del navegador VISIBLES. Con 100vh (que en
+         móvil equivale al viewport grande, sin barras) el body siempre medía más
+         que lo visible y la página quedaba desplazable "en falso" aunque el
+         contenido cupiera. svh no cambia al ocultarse la barra, así que tampoco
+         reflowea al hacer scroll como haría dvh. El vh queda de reserva. */
       min-height:100vh;
+      min-height:100svh;
       font-family:var(--ui);
       background:var(--bg);
       color:var(--ink);
@@ -30,19 +29,12 @@
       padding-top:calc(var(--header-h, 88px) + var(--sat, 0px));
       position:relative;
     }
-    body::before{
-      content:"";
-      position:fixed;
-      inset:0;
-      background-image:
-        radial-gradient(circle at top left, rgba(255,255,255,.95), transparent 30%),
-        radial-gradient(circle at top right, rgba(230,236,244,.9), transparent 34%),
-        linear-gradient(180deg, #fbfcfd 0%, #f3f5f8 100%);
-      background-repeat:no-repeat;
-      background-size:cover;
-      z-index:-1;
-      pointer-events:none;
-    }
+    /* Aquí había un body::before fijo con degradados (z-index:-1). Se pintaba POR
+       DEBAJO del fondo opaco del body, así que solo se veía donde la caja del body
+       ya no llega — y esa caja termina antes que el documento porque el contenido
+       de la barra lateral desborda el grid. Resultado: al bajar aparecía un salto
+       de color a lo ancho de la página (246,247,249 → 254,254,254) que se leía como
+       una línea. El fondo plano de html/body ya da el color correcto en todo el alto. */
     a{ color:inherit; text-decoration:none; }
 
     a:focus-visible,
@@ -53,11 +45,15 @@
 
     .wrap{
       min-height:calc(100vh - (var(--header-h, 88px) + var(--sat, 0px)));
+      min-height:calc(100svh - (var(--header-h, 88px) + var(--sat, 0px)));
       display:flex;
       justify-content:center;
       padding:28px 0 48px;
       position:relative;
     }
+    /* Desvanecido bajo el header: el contenido que sube se difumina en vez de
+       cortarse en seco contra la barra de pasos. Mismos valores que
+       .ck-wrap::before del checkout, para que las dos pantallas se sientan igual. */
     .wrap::before{
       content:"";
       position:fixed;
@@ -315,18 +311,20 @@
       color:#1a8f4a;
     }
 
+    /* ── Código de descuento · campo único con la acción dentro ─────────────
+       Sin caja tintada, sin etiqueta en mayúsculas y sin botón negro sólido:
+       el placeholder etiqueta, "Aplicar" vive dentro del campo como texto y se
+       apaga mientras está vacío. El mensaje cae debajo, alineado con el campo.
+       El bloque se comporta como una fila más del resumen. */
     .discount-box{
       display:grid;
-      gap:10px;
+      gap:0;
       margin-top:0;
-      padding:12px;
-      border:3px solid rgba(17,19,21,.06);
-      border-radius:var(--summary-box-radius);
-      background:linear-gradient(180deg, rgba(255,255,255,.95) 0%, rgba(246,248,251,.9) 100%);
-      box-shadow:0 1px 0 rgba(255,255,255,.85) inset;
-    }
-    .sum-row:has(+ .discount-box:not([hidden])){
-      border-bottom-color:transparent !important;
+      padding:0;
+      border:0;
+      border-bottom:var(--summary-row-border, 1px solid rgba(17,19,21,.05));
+      border-radius:0;
+      background:none;
     }
     .discount-box[hidden],
     .discount-box.is-force-hidden{
@@ -339,143 +337,252 @@
       height:0 !important;
       overflow:hidden !important;
     }
-    .discount-box label{
-      font-size:.68rem;
-      font-weight:800;
-      letter-spacing:.08em;
-      color:#687385;
-      text-transform:uppercase;
-    }
-    .discount-controls{
-      display:grid;
-      grid-template-columns:minmax(0, 1fr) auto;
-      gap:8px;
-      align-items:stretch;
-    }
-    .discount-input-wrap{
+    .discount-controls[hidden]{ display:none !important; }
+    .discount-field{
       position:relative;
-      flex:1;
+      display:block;
       min-width:0;
     }
-    .discount-controls input{
+    .discount-field input{
       width:100%;
       min-width:0;
-      height:42px;
-      min-height:42px;
-      padding:0 44px 0 14px;
-      border:1px solid rgba(17,19,21,.12);
-      border-radius:12px;
-      background:#fff;
+      /* Misma altura que una fila del resumen: 12px + línea de 23,2px + 12px,
+         que con el borde inferior del bloque suman los 48,2px de "Subtotal". */
+      height:47.2px;
+      min-height:47.2px;
+      padding:0 84px 0 0;
+      border:0;
+      border-radius:0;
+      background:transparent;
       color:#111315;
-      font-size:16px !important;
+      font-size:16px !important; /* iOS: menos de 16px hace zoom al enfocar */
       font-weight:700;
       line-height:1;
-      letter-spacing:.01em;
-      text-transform:none;
+      letter-spacing:.04em;
+      text-transform:uppercase;
       font-family:var(--ui);
       box-sizing:border-box;
       appearance:none;
       -webkit-appearance:none;
       -webkit-tap-highlight-color:transparent;
-      transition:border-color .12s ease, box-shadow .12s ease, background .12s ease;
+      /* El subrayado se pinta con inset box-shadow: al enfocar no mueve nada. */
+      box-shadow:none;
+      transition:box-shadow .14s ease;
     }
-    .discount-controls input:focus{
-      border-color:rgba(17,19,21,.24);
-      box-shadow:0 0 0 3px rgba(17,19,21,.08);
-      outline:none;
-    }
-    .discount-controls input::placeholder{
+    .discount-field input::placeholder{
       text-transform:none;
       letter-spacing:0;
-      font-weight:600;
-      color:#8a93a3;
+      font-weight:700;
+      color:#98a1b0;
     }
-    .discount-controls button{
-      height:42px;
-      min-width:98px;
-      border:1px solid rgba(17,19,21,.14);
-      border-radius:12px;
-      background:linear-gradient(180deg, #fff 0%, #f4f7fb 100%);
-      color:#111315;
-      font:800 .74rem/1 var(--ui);
-      letter-spacing:.05em;
-      text-transform:uppercase;
-      padding:0 14px;
-      box-shadow:0 1px 0 rgba(255,255,255,.9) inset;
-      cursor:pointer;
-      transition:transform .12s ease, border-color .12s ease, box-shadow .12s ease, background .12s ease;
+    .discount-field input:focus{
+      outline:none;
+      box-shadow:inset 0 -2px 0 0 #111315;
     }
-    .discount-controls button:hover:not([disabled]){
-      transform:translateY(-1px);
-      border-color:rgba(17,19,21,.2);
-      background:#fff;
-      box-shadow:
-        0 1px 0 rgba(255,255,255,.9) inset,
-        0 6px 14px rgba(15,23,42,.08);
+    /* Con error, el subrayado se pone rojo además del mensaje */
+    .discount-box:has(.discount-msg.is-error) .discount-field input{
+      box-shadow:inset 0 -2px 0 0 #b42318;
     }
-    .discount-controls button:active:not([disabled]){
-      transform:translateY(0);
-      box-shadow:0 1px 0 rgba(255,255,255,.9) inset;
-    }
-    .discount-controls button[disabled]{
-      opacity:.6;
-      cursor:not-allowed;
-    }
-    #discountRemoveBtn{
+    /* Mismo gesto que el "+ Añadir" de /cuenta → Direcciones (.acct-link-btn):
+       texto azul y píldora azul clara al pasar por encima. El right negativo
+       compensa el padding para que "Aplicar" siga alineado con los importes. */
+    /* ✕ y "Aplicar" van juntos, pegados al borde derecho de la fila. */
+    .discount-actions{
       position:absolute;
-      right:6px;
+      right:-8px;
       top:50%;
       transform:translateY(-50%);
-      width:36px;
-      height:36px;
-      min-width:36px;
+      display:flex;
+      align-items:center;
+      gap:2px;
+    }
+    #discountApplyBtn{
+      position:static;
+      transform:none;
+      height:auto;
+      min-width:0;
+      padding:6px 8px;
+      border:0;
+      border-radius:8px;
+      background:none;
+      color:#1d4ed8;
+      font:800 .93rem/1.2 var(--ui);
+      letter-spacing:.01em;
+      text-transform:none;
+      cursor:pointer;
+      appearance:none;
+      -webkit-appearance:none;
+      -webkit-tap-highlight-color:transparent;
+      transition:color .12s ease, background .12s ease;
+    }
+    #discountApplyBtn:hover:not([disabled]){ background:#eff6ff; }
+    #discountApplyBtn[disabled]{ color:#9aa3b0; cursor:default; background:none; }
+    /* Apagado mientras el campo está vacío, sin depender del JS */
+    .discount-field:has(input:placeholder-shown) #discountApplyBtn{
+      color:#9aa3b0;
+      background:none;
+      pointer-events:none;
+    }
+    /* ✕ para limpiar: el JS solo lo muestra con un código inválido. Va a la
+       izquierda de "Aplicar" y ensancha el hueco reservado dentro del campo. */
+    #discountRemoveBtn{
+      position:static;
+      transform:none;
+      width:28px;
+      height:28px;
+      min-width:28px;
       border:0;
       border-radius:999px;
       background:transparent;
-      color:transparent;
-      font-size:0;
+      color:#5f6877;
       line-height:0;
       padding:0;
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      overflow:hidden;
       appearance:none;
       -webkit-appearance:none;
       -webkit-tap-highlight-color:transparent;
       cursor:pointer;
       flex-shrink:0;
-      z-index:2;
+      transition:color .12s ease, background .12s ease;
     }
-    #discountRemoveBtn::before,
-    #discountRemoveBtn::after{
-      content:"";
-      position:absolute;
-      left:50%;
-      top:50%;
-      width:19px;
-      height:2.2px;
-      border-radius:2px;
-      background:#dc2626;
-      transform-origin:center;
-    }
-    #discountRemoveBtn::before{
-      transform:translate(-50%, -50%) rotate(45deg);
-    }
-    #discountRemoveBtn::after{
-      transform:translate(-50%, -50%) rotate(-45deg);
-    }
+    /* Área táctil de 28px, glifo de 18,5px: notable pero sin competir con "Aplicar". */
+    #discountRemoveBtn svg{ width:18.5px; height:18.5px; }
     #discountRemoveBtn:hover{
-      background:rgba(224,36,36,.1);
+      background:rgba(17,19,21,.07);
+      color:#111315;
     }
+    .discount-field:has(#discountRemoveBtn:not([hidden])) input{
+      padding-right:118px;
+    }
+
     .discount-msg{
-      min-height:17px;
-      font-size:.74rem;
-      font-weight:700;
+      display:flex;
+      align-items:flex-start;
+      gap:6px;
+      padding:7px 0 11px;
+      font-size:.78rem;
+      font-weight:600;
+      line-height:1.35;
       color:#6b7280;
     }
+    .discount-msg[hidden],
+    .discount-msg:empty{ display:none !important; }
     .discount-msg.is-ok{ color:#1a8f4a; }
     .discount-msg.is-error{ color:#b42318; }
+    .discount-msg.is-ok::before,
+    .discount-msg.is-error::before{
+      flex:0 0 auto;
+      width:14px;
+      height:14px;
+      margin-top:1px;
+      border-radius:50%;
+      color:#fff;
+      font-weight:900;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .discount-msg.is-error::before{ content:"!"; background:#b42318; font-size:.6rem; }
+    .discount-msg.is-ok::before{ content:"✓"; background:#1a8f4a; font-size:.58rem; }
+
+    /* -- Descuento aplicado: fila del resumen con un velo verde muy tenue,
+       a ras del ancho de la fila (sin sangrado ni esquinas redondeadas). -- */
+    .discount-applied{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      height:47.2px;          /* misma altura de fila que Subtotal o Envío */
+      /* Sin sangrado: el código aparece exactamente donde estaba escrito en el
+         campo, así al aplicarlo no da un salto lateral. */
+      padding:0;
+      margin:0 0px;
+      border-radius:0;
+      background:rgba(22,163,74,.07);
+      border:0;
+      /* El velo verde entra despacio en vez de aparecer de golpe. */
+      animation:discountVeil .85s cubic-bezier(.22,1,.36,1) both;
+    }
+    @keyframes discountVeil{
+      from{ background-color:rgba(22,163,74,0); }
+      to{   background-color:rgba(22,163,74,.07); }
+    }
+    .discount-applied[hidden]{ display:none !important; }
+    .discount-applied__icon{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:17px;
+      height:17px;
+      flex:0 0 auto;
+      border-radius:0;
+      background:none;
+      color:#1a8f4a;
+      /* Aparece un pelín después del velo, con un leve acercamiento. */
+      animation:discountCheckIn .5s cubic-bezier(.22,1,.36,1) .22s both;
+    }
+    .discount-applied__icon svg{ width:17px; height:17px; }
+    /* El check se dibuja solo: la longitud del trazo del polyline es ~22,6. */
+    .discount-applied__icon polyline{
+      stroke-dasharray:24;
+      stroke-dashoffset:24;
+      animation:discountCheckDraw .6s cubic-bezier(.65,0,.35,1) .3s both;
+    }
+    @keyframes discountCheckIn{
+      from{ opacity:0; transform:scale(.6); }
+      to{   opacity:1; transform:scale(1); }
+    }
+    @keyframes discountCheckDraw{
+      to{ stroke-dashoffset:0; }
+    }
+    @media (prefers-reduced-motion: reduce){
+      .discount-applied,
+      .discount-applied__icon,
+      .discount-applied__icon polyline{ animation:none; }
+      .discount-applied__icon polyline{ stroke-dashoffset:0; }
+    }
+    .discount-applied__text{
+      display:flex;
+      align-items:baseline;
+      gap:7px;
+      flex:0 1 auto;   /* el check va justo detrás del código, no al otro extremo */
+      min-width:0;
+      flex-wrap:wrap;
+    }
+    .discount-applied__text strong{
+      font-size:1rem;
+      font-weight:800;
+      letter-spacing:.03em;
+      color:#111315;
+      text-transform:uppercase;
+      word-break:break-word;
+    }
+    /* Misma ✕ que la del campo con error: mismo tamaño, color y hover. */
+    .discount-applied__remove{
+      flex:0 0 auto;
+      margin-left:auto;
+      width:28px;
+      height:28px;
+      min-width:28px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      line-height:0;
+      padding:0;
+      border:0;
+      border-radius:999px;
+      background:transparent;
+      color:#5f6877;
+      cursor:pointer;
+      appearance:none;
+      -webkit-appearance:none;
+      -webkit-tap-highlight-color:transparent;
+      transition:color .12s ease, background .12s ease;
+    }
+    .discount-applied__remove svg{ width:18.5px; height:18.5px; }
+    .discount-applied__remove:hover:not(:disabled){ background:rgba(17,19,21,.07); color:#111315; }
+    .discount-applied__remove:disabled{ opacity:.5; cursor:not-allowed; }
 
     /* -- Radio-card method selector -- */
     .pay-tabs{
@@ -653,17 +760,6 @@
       background:#ffffff;
     }
     .card--detail .panel[hidden]{ display:none; }
-
-    .card--detail .panel .phead{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      padding:14px 16px 8px;
-      border-bottom:1px solid rgba(229,234,241,.72);
-      background:linear-gradient(180deg, rgba(255,255,255,.9), rgba(247,250,252,.82));
-    }
-    .card--detail .panel .phead strong{ font-weight:900; text-transform:uppercase; letter-spacing:.06em; font-size:.8rem; }
     .card--detail .panel .pbody{ padding:10px 16px 14px; display:grid; gap:10px; }
 
     .kv{
@@ -797,12 +893,6 @@
     #klarna-wrap[hidden]{
       display:none !important;
     }
-    #paypal-buttons, #card-buttons{
-      width:100%;
-      max-width:420px;
-      margin:0 auto;
-    }
-
     #stripe-embedded-checkout,
     #stripe-klarna-checkout,
     #stripe-paypal-checkout{
@@ -815,8 +905,13 @@
       display:block;
       box-shadow:none;
     }
-    .stripe-loading,
-    .paypal-loading{
+    /* Flujo hosted (PayPal/Klarna): solo un botón, sin iframe embebido.
+       Anula el min-height reservado para tarjeta en todos los breakpoints. */
+    .mount--hosted{
+      min-height:0 !important;
+      background:transparent !important;
+    }
+    .stripe-loading{
       display:flex;
       align-items:center;
       justify-content:center;
@@ -835,8 +930,7 @@
       margin:0 auto;
       border:1px solid rgba(10,37,64,.06);
     }
-    .stripe-loading[hidden],
-    .paypal-loading[hidden]{ display:none; }
+    .stripe-loading[hidden]{ display:none; }
     .method-empty{
       display:grid;
       gap:8px;
@@ -870,6 +964,76 @@
       font-size:.8rem;
       line-height:1.45;
     }
+    /* Botón de checkout hosted (Klarna / PayPal): redirige a la pasarela completa de Stripe.
+       El checkout embebido corre en iframe y la redirección a Klarna/PayPal falla en
+       navegadores in-app; el flujo hosted (página completa) es el camino fiable. */
+    .hosted-checkout{
+      display:grid;
+      gap:10px;
+      justify-items:center;
+      padding:14px 8px 16px;
+    }
+    .btn-hosted-pay{
+      appearance:none;
+      -webkit-appearance:none;
+      width:100%;
+      max-width:min(100%, clamp(300px, 58vw, 440px));
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      padding:14px 18px;
+      border:0;
+      border-radius:14px;
+      background:linear-gradient(180deg, #111315 0%, #23262b 100%);
+      color:#fff;
+      font-size:.95rem;
+      font-weight:800;
+      letter-spacing:.01em;
+      cursor:pointer;
+      transition:transform .12s ease, filter .12s ease, box-shadow .16s ease, opacity .12s ease;
+    }
+    .btn-hosted-logo{
+      height:18px;
+      width:auto;
+      display:block;
+      flex:0 0 auto;
+      padding:3px 6px;
+      background:#fff;
+      border-radius:6px;
+      box-sizing:content-box;
+    }
+    .btn-hosted-label{ line-height:1; }
+    .btn-hosted-pay:hover{ transform:translateY(-1px); filter:brightness(1.12); }
+    .btn-hosted-pay--paypal:hover{ box-shadow:0 8px 22px rgba(0,48,135,.22); }
+    .btn-hosted-pay--klarna:hover{ box-shadow:0 8px 22px rgba(255,179,199,.5); }
+    .btn-hosted-pay:active{ transform:translateY(0); }
+    .btn-hosted-pay:disabled{ opacity:.6; cursor:default; transform:none; filter:none; box-shadow:none; }
+
+    /* Fila de señales de confianza bajo el botón hosted */
+    .hosted-trust{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:center;
+      gap:8px 16px;
+      margin-top:2px;
+    }
+    .hosted-trust__item{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      color:#5b6470;
+      font-size:.76rem;
+      font-weight:700;
+      letter-spacing:.01em;
+    }
+    .hosted-trust__item svg{
+      width:14px;
+      height:14px;
+      flex:0 0 auto;
+      opacity:.7;
+    }
     .loading-dots{
       display:inline-flex;
       align-items:center;
@@ -892,6 +1056,7 @@
       0%, 80%, 100%{ opacity:.28; transform:scale(.9); }
       40%{ opacity:1; transform:scale(1.15); }
     }
+    .paypal-note[hidden]{ display:none !important; }
     .paypal-note{
       padding:8px 10px;
       border:1px solid rgba(17,19,21,.05);
@@ -911,77 +1076,6 @@
       color:#7a0b0b;
       font-size:.86rem;
       display:none;
-    }
-    .paypal-checkout-shell{
-      width:100%;
-      max-width:none;
-      margin:0 auto;
-    }
-    .paypal-checkout-card{
-      display:grid;
-      gap:14px;
-      padding:0;
-      border:0;
-      border-radius:0;
-      background:transparent;
-      box-shadow:none;
-    }
-    .paypal-checkout-product{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      padding-bottom:2px;
-    }
-    .paypal-checkout-thumb{
-      width:54px;
-      height:54px;
-      border-radius:14px;
-      object-fit:contain;
-      background:#f8fafc;
-      border:1px solid var(--line);
-      flex:0 0 auto;
-    }
-    .paypal-checkout-product-copy{
-      display:grid;
-      gap:4px;
-      min-width:0;
-    }
-    .paypal-checkout-product-copy strong{
-      color:#111315;
-      font-size:.98rem;
-      font-weight:900;
-      line-height:1.25;
-    }
-    .paypal-checkout-product-copy span{
-      color:#111315;
-      font-size:1.1rem;
-      font-weight:900;
-      letter-spacing:-.01em;
-      line-height:1.1;
-    }
-    .paypal-sdk-stack{
-      width:100%;
-      max-width:420px;
-      display:grid;
-      gap:12px;
-      margin:0 auto;
-    }
-    .paypal-slot{
-      border:0;
-      border-radius:0;
-      background:transparent;
-      padding:0;
-    }
-    .paypal-checkout-footer{
-      display:flex;
-      flex-wrap:wrap;
-      justify-content:flex-start;
-      gap:8px 14px;
-      padding-top:2px;
-      color:var(--muted);
-      font-size:.8rem;
-      text-align:left;
-      line-height:1.45;
     }
     #panel-card .pbody,
     #panel-klarna .pbody,
@@ -1048,7 +1142,8 @@
 
     /* Override main.css .card display:flex that breaks [hidden] */
     .card[hidden]{ display:none !important; }
-    .card:hover{ transform:none; box-shadow:0 14px 34px rgba(15,23,42,.038); border-color:rgba(255,255,255,.78); }
+    /* El hover de tarjeta se anula al final del archivo (ver "SIN HOVER"): aquí
+       la especificidad no bastaba contra .card:not(.order-summary):hover de main.css. */
     /* Override main.css .order-summary__row display:flex that breaks [hidden] on fee/discount rows */
     .order-summary__row[hidden]{ display:none !important; }
 
@@ -1215,21 +1310,15 @@
       .ck-step-sep{ width:18px; }
       
       /* Keep real 16px text on iOS to prevent Safari auto-zoom on focus */
-      .discount-controls input{
-        height:44px;
-        min-height:44px;
+      .discount-field input{
         font-size:16px !important;
         line-height:20px;
-        padding:0 46px 0 14px;
+        /* Sin sangrado izquierdo: el texto arranca en la misma vertical que
+           "Subtotal" o "Comisión pago online". */
+        padding:0 84px 0 0;
       }
-      .discount-controls button{
-        height:44px;
-      }
-      #discountRemoveBtn{
-        right:4px;
-        width:40px;
-        height:40px;
-        min-width:40px;
+      .discount-field:has(#discountRemoveBtn:not([hidden])) input{
+        padding-right:118px;
       }
       
       .card:not(.order-summary){
@@ -1237,7 +1326,6 @@
       }
       .card .head:not(.order-summary__header),
       .card .body:not(.order-summary__body),
-      .panel .phead,
       .panel .pbody{
         padding-left:16px;
         padding-right:16px;
@@ -1323,41 +1411,10 @@
         padding:0;
         border-radius:16px;
       }
-      .paypal-checkout-card{
-        gap:12px;
-      }
-      .paypal-checkout-product{
-        gap:10px;
-      }
-      .paypal-checkout-thumb{
-        width:48px;
-        height:48px;
-        border-radius:12px;
-      }
-      .paypal-checkout-product-copy strong{
-        font-size:.92rem;
-      }
-      .paypal-checkout-product-copy span{
-        font-size:1.55rem;
-      }
-      .paypal-checkout-method{
-        padding:12px;
-        border-radius:16px;
-        font-size:.84rem;
-      }
       .stripe-loading,
-      .paypal-loading{
-        width:100%;
-        max-width:260px;
-        border-radius:16px;
-        padding:12px 14px;
-        font-size:.8rem;
-      }
       #stripeInfo,
       #klarnaInfo,
-      .paypal-note,
-      .paypal-checkout-footer,
-      .paypal-checkout-label{
+      .paypal-note{
         font-size:.78rem;
       }
       .security-badge{
@@ -1380,24 +1437,11 @@
       .order-summary{
         border-radius:24px;
       }
-      .card .head:not(.order-summary__header),
-      .card .body:not(.order-summary__body),
+      /* Las cabeceras y cuerpos de tarjeta siguen la métrica única del final
+         del archivo; aquí solo queda lo que no forma parte de ella. */
       .panel .pbody{
         padding-left:12px;
         padding-right:12px;
-      }
-      .card.card--methods .head:not(.order-summary__header){
-        padding:18px 20px 14px;
-      }
-      .card.card--methods .head:not(.order-summary__header) h1,
-      .card.card--methods .head:not(.order-summary__header) h2{
-        font-size:.92rem;
-        line-height:1.55;
-        letter-spacing:.06em;
-      }
-      .card--methods .body{
-        padding-left:18px;
-        padding-right:18px;
       }
       .pay-tab{
         padding:16px 0;
@@ -1425,13 +1469,6 @@
       }
       #paypal-wrap{
         padding:0;
-      }
-      .paypal-checkout-product-copy span{
-        font-size:1rem;
-      }
-      .paypal-checkout-footer{
-        gap:6px 10px;
-        font-size:.74rem;
       }
       .security-badge{
         gap:5px;
@@ -1596,10 +1633,103 @@
     }
     .assist a:hover{ color:var(--primary, #d11c1c); }
 
-    /* Stepper subtle polish */
-    .stepper .step[aria-current="step"] .step-num,
-    .stepper .step.active .step-num{
-      background:#111315;
-      color:#fff;
+
+    /* ─────────────────────────────────────────────────────────────
+       CABECERA DE TARJETA · métrica ÚNICA de toda la página
+       Mismos valores que .section-heading (checkout) y .acct-cardhead (/cuenta):
+         · título .95rem — 1rem en ≤640px y ≥1201px
+         · caja de línea del título 25,8px (allí la engorda un SVG de 20px)
+         · padding 18px/12px vertical — 20px arriba en ≥1201px
+         · sangrado lateral 20px — 18px en ≤640px y 24px en ≥1201px
+       Va al FINAL del archivo a propósito: las reglas anteriores usan
+       .card .head:not(.order-summary__header) (0,3,0) y sin esto ganarían.
+       ───────────────────────────────────────────────────────────── */
+    .wrap .card .head,
+    .wrap .card--methods .head,
+    .wrap .order-summary__header{
+      padding-top:18px;
+      padding-bottom:12px;
+      padding-left:20px;
+      padding-right:20px;
+    }
+    .wrap .card .head h1,
+    .wrap .card .head h2,
+    .wrap .order-summary__header .order-summary__title{
+      display:flex;
+      align-items:center;
+      min-height:25.8px;
+      font-size:.95rem;
+    }
+    /* El cuerpo sigue al mismo sangrado que su cabecera (solo laterales). */
+    .wrap .card .body,
+    .wrap .card--methods .body,
+    .wrap .order-summary__body{
+      padding-left:20px;
+      padding-right:20px;
     }
 
+    @media (min-width:1201px){
+      .wrap .card .head,
+      .wrap .card--methods .head,
+      .wrap .order-summary__header{
+        padding-top:20px;
+        padding-left:24px;
+        padding-right:24px;
+      }
+      .wrap .card .head h1,
+      .wrap .card .head h2,
+      .wrap .order-summary__header .order-summary__title{
+        font-size:1rem;
+      }
+      .wrap .card .body,
+      .wrap .card--methods .body,
+      .wrap .order-summary__body{
+        padding-left:24px;
+        padding-right:24px;
+      }
+    }
+
+    @media (max-width:640px){
+      .wrap .card .head,
+      .wrap .card--methods .head,
+      .wrap .order-summary__header{
+        padding-left:18px;
+        padding-right:18px;
+      }
+      .wrap .card .head h1,
+      .wrap .card .head h2,
+      .wrap .order-summary__header .order-summary__title{
+        font-size:1rem;
+      }
+      .wrap .card .body,
+      .wrap .card--methods .body,
+      .wrap .order-summary__body{
+        padding-left:18px;
+        padding-right:18px;
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       TARJETAS SIN HOVER
+       Las tarjetas de /pago no son clicables, pero reutilizan la clase .card
+       del catálogo, y main.css le da a esa clase un hover que la ESCALA
+       (.card:not(.order-summary):hover → translateY(-1px) scale(1.03) + sombra
+       + saturate). Aquí se anula por completo: sin movimiento, sin cambio de
+       sombra y sin cursor de mano. Hace falta (0,4,0) para ganarle a main.css.
+       ───────────────────────────────────────────────────────────── */
+    .wrap .card:not(.order-summary){
+      cursor:default;
+    }
+    .wrap .card:not(.order-summary):hover,
+    .wrap .card:not(.order-summary):focus-visible,
+    .wrap .card:not(.order-summary):focus-within{
+      transform:none;
+      filter:none;
+      z-index:auto;
+      /* Misma sombra que en reposo (la de .card:not(.order-summary) de este
+         archivo, no la de main.css): así el hover no cambia absolutamente nada. */
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.9) inset,
+        0 18px 44px rgba(15,23,42,.08),
+        0 6px 18px rgba(15,23,42,.04);
+    }

@@ -214,9 +214,9 @@
     var selector = panel.querySelector('.color-variants');
     if (!selector) return;
 
-    var activeButton = selector.querySelector('.color-variant.is-active:not([disabled]):not([aria-disabled="true"])');
+    var activeButton = selector.querySelector('.variant-option.is-active:not([disabled]):not([aria-disabled="true"])');
     if (!activeButton) {
-      var allButtons = selector.querySelectorAll('.color-variant');
+      var allButtons = selector.querySelectorAll('.variant-option');
       for (var i = 0; i < allButtons.length; i++) {
         if (!allButtons[i].disabled && allButtons[i].getAttribute('aria-disabled') !== 'true') {
           activeButton = allButtons[i];
@@ -451,13 +451,14 @@
     for (var ie = 0; ie < ejes.length; ie++) {
       if (ejes[ie].type === 'swatch') { eje = ejes[ie]; break; }
     }
+    /* SIN EJE DE CÍRCULOS. Un manillar de modelo+medida no tiene ninguno: sus dos ejes
+       viven en secciones `.size-variants`. Antes aquí se abandonaba —los pintaba el
+       script inline de la ficha—; ahora se marcan como "todos secundarios" y los pinta
+       el mismo controlador genérico de más abajo. Si la ficha no trae ninguna sección
+       donde pintarlos, se usa el primer eje como principal, como siempre. */
+    var soloSecundarios = false;
     if (!eje) {
-      /* Sin eje de color: si la ficha ya trae secciones `.size-variants` escritas
-         —los manillares de modelo+medida—, esos ejes ya están pintados y los gobierna
-         su script inline. Crear aquí otro selector los DUPLICABA: la ficha del UNO
-         salía con "MODELO:" dos veces. Se deja para cuando esas secciones también se
-         generen desde el catálogo. */
-      if (panel.querySelector('.size-variants')) return;
+      soloSecundarios = !!panel.querySelector('.size-variants');
       eje = ejes[0];
     }
     var variants = eje.options;
@@ -476,7 +477,7 @@
     if (!originalItems.length) return;
 
     // Reutilizar markup estático si ya existe en el DOM (evita inserción dinámica que causa CLS)
-    var existingSelector = panelInner.querySelector('.color-variants');
+    var existingSelector = soloSecundarios ? null : panelInner.querySelector('.color-variants');
     var selector;
     var isStaticMarkup = false;
 
@@ -811,10 +812,16 @@
       if (layer.complete) run();
     }
 
+    /* `options.indices` permite pintar la galería de una COMBINACIÓN y no solo de una
+       opción: en un manillar la foto depende del acabado Y de la medida (`imagesBy`).
+       Antes esto no existía, y el script de cada ficha lo resolvía reescribiendo a mano
+       `variant.images` del catálogo vivo antes de llamar aquí. */
     function renderGalleryForVariant(variant, options) {
       var allowThumbScroll = !options || options.scrollThumb !== false;
       var animate = !options || options.animate !== false;
-      var indexes = toIndexList(variant, originalItems.length);
+      var indexes = (options && Array.isArray(options.indices) && options.indices.length)
+        ? options.indices.filter(function (n) { return n >= 1 && n <= originalItems.length; })
+        : toIndexList(variant, originalItems.length);
       var selectedItems = indexes.length
         ? indexes.map(function (index) { return originalItems[index - 1]; }).filter(Boolean)
         : [];
@@ -836,7 +843,7 @@
 
       applyVariantContent(variant);
 
-      var activeButton = selector.querySelector('.color-variant.is-active');
+      var activeButton = selector.querySelector('.variant-option.is-active');
       applySeriesAccentForVariant(variant, activeButton);
 
       // data-img se versiona EN CALIENTE (global-assets-app.js y asset-sync.js le
@@ -975,9 +982,16 @@
        mientras su catálogo decía "G2 PRO VMP", y por eso la clase de píldora había
        que ponerla a mano. Generalizado aquí, las 12 fichas pasan a ser consumidoras
        de golpe y sin tratamiento especial para ninguna. */
-    function aplicarDatosAlBoton(button, variant, esPildora, isDefault, isUnavailable) {
-      var nombre = variant.label || variant.name || eje.label;
-      button.classList.toggle('size-variant', esPildora);
+    function aplicarDatosAlBoton(button, variant, esPildora, isDefault, isUnavailable, ejeDeLaOpcion) {
+      // El respaldo del nombre es el rótulo del eje AL QUE PERTENECE la opción, no el
+      // del eje principal: en una ficha de dos ejes eso anunciaba mal la medida.
+      var suEje = ejeDeLaOpcion || eje;
+      var nombre = variant.label || variant.name || (suEje && suEje.label) || '';
+      // Clase BASE siempre, y el modificador segun el tipo del eje: lo que decide
+      // si es circulo o pildora es el dato, no el HTML.
+      button.classList.add('variant-option');
+      button.classList.toggle('variant-option--pill', esPildora);
+      button.classList.toggle('variant-option--swatch', !esPildora);
       button.classList.toggle('is-active', !!isDefault);
       button.classList.toggle('is-disabled', !!isUnavailable);
       button.setAttribute('aria-pressed', isDefault ? 'true' : 'false');
@@ -995,15 +1009,24 @@
       button.disabled = !!isUnavailable;
       if (isUnavailable) button.setAttribute('aria-disabled', 'true');
       else button.removeAttribute('aria-disabled');
-      // La píldora lleva el nombre DENTRO; el círculo, su muestra de color.
-      if (esPildora) button.textContent = nombre;
+      // La píldora lleva el nombre DENTRO; el círculo, su muestra de color. En la
+      // píldora manda la etiqueta corta si el catálogo la declara: el nombre completo
+      // sigue yendo en aria-label y title, así que no se pierde para nadie.
+      if (esPildora) button.textContent = variant.shortLabel || nombre;
       else aplicarSwatch(button, variant.swatch || variant.color || variant.hex || '#111');
     }
 
+    /* Si el producto tiene MÁS de un eje, el clic no lo resuelve el botón por su
+       cuenta: lo resuelve la selección completa (ver montarEjesSecundarios). Se
+       declara aquí para que los dos caminos de abajo puedan delegar. */
+    var aplicarSeleccionCombinada = null;
+
     // Si hay markup estático se REUTILIZAN sus nodos (evita el salto de maquetación
     // de insertarlos), pero su contenido se reescribe desde el catálogo.
-    if (isStaticMarkup && grid) {
-      var existingButtons = grid.querySelectorAll('.color-variant');
+    if (soloSecundarios) {
+      // Nada que pintar aquí: los ejes van todos a las secciones `.size-variants`.
+    } else if (isStaticMarkup && grid) {
+      var existingButtons = grid.querySelectorAll('.variant-option');
       variants.forEach(function (variant, index) {
         var button = existingButtons[index];
         if (!button) return; // fallback: button count mismatch, skip
@@ -1013,9 +1036,11 @@
           button.classList.contains('is-active'),
           !indexesEst.length && !variant.images
         );
+        button.__ssOpcion = variant;
         buttons.push(button);
         button.addEventListener('click', function () {
           if (button.disabled) return;
+          if (aplicarSeleccionCombinada) { aplicarSeleccionCombinada(variant, button); return; }
           for (var i = 0; i < buttons.length; i++) {
             buttons[i].classList.remove('is-active');
             buttons[i].setAttribute('aria-pressed', 'false');
@@ -1027,20 +1052,22 @@
           applySeriesAccentForVariant(variant, button);
         });
       });
-    } else {
+    } else if (grid) {
       variants.forEach(function (variant, index) {
         var indexes = toIndexList(variant, originalItems.length);
         var isUnavailable = !indexes.length;
         var isDefault = variant.default === true || (variant.defaultColor === true) || (!buttons.length && !variants.some(function (item) { return item.default === true || item.defaultColor === true; }) && index === 0);
         var button = document.createElement('button');
         button.type = 'button';
-        button.className = 'color-variant';
+        button.className = 'variant-option variant-option--swatch';
         // Misma función que la rama estática: una sola definición de "cómo se pinta
         // una opción", que además decide píldora o círculo por el TIPO del eje.
         aplicarDatosAlBoton(button, variant, eje.type === 'pill', isDefault, isUnavailable);
+        button.__ssOpcion = variant;
 
         button.addEventListener('click', function () {
           if (button.disabled) return;
+          if (aplicarSeleccionCombinada) { aplicarSeleccionCombinada(variant, button); return; }
           for (var i = 0; i < buttons.length; i++) {
             buttons[i].classList.remove('is-active');
             buttons[i].setAttribute('aria-pressed', 'false');
@@ -1057,7 +1084,7 @@
       });
     }
 
-    if (!isStaticMarkup) {
+    if (!isStaticMarkup && !soloSecundarios) {
       panelInner.insertBefore(selector, ctaCol);
     }
 
@@ -1096,13 +1123,191 @@
     var defaultVariant = (window.SS_ATTRS && typeof window.SS_ATTRS.porDefecto === 'function')
       ? window.SS_ATTRS.porDefecto(eje)
       : (variants.find(function (variant) { return variant.default === true || variant.defaultColor === true; }) || variants[0]);
-    if (defaultVariant) {
+    if (defaultVariant && !soloSecundarios) {
       // Carga inicial: sin animación (no tiene sentido "cambiar" a la foto que
       // ya se está pintando por primera vez).
       renderGalleryForVariant(defaultVariant, { scrollThumb: false, animate: false });
       updateCheckoutUrlWithColor(defaultVariant);
       gallery.dataset.activeColor = defaultVariant.key || defaultVariant.label || 'default';
     }
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       EJES SECUNDARIOS — un producto puede tener N ejes, no uno
+
+       Hasta ahora esta función pintaba UN eje (el de círculos) y las fichas con dos
+       —los manillares: medida + acabado, o modelo + medida— llevaban su propio script
+       inline de ~120 líneas. Cuatro copias del mismo baile: recombinar la clave,
+       recolocar las fotos de la medida elegida, reescribir el botón de carrito y los
+       enlaces de compra. Cada arreglo había que hacerlo cuatro veces, y una ficha
+       nueva de dos ejes exigía escribir una quinta.
+
+       Aquí eso pasa a ser UNA implementación guiada por los datos: los ejes vienen del
+       catálogo, las secciones `.size-variants` del HTML se emparejan EN ORDEN con los
+       ejes que no son el principal, y a partir de ahí toda elección —de cualquier eje—
+       pasa por `aplicarSeleccion()`.
+
+       Lo que sigue viviendo en el HTML de la ficha es solo la maquetación: la sección,
+       su cabecera y su rejilla. Ni una regla.
+       ══════════════════════════════════════════════════════════════════════════ */
+    var seleccionActual = {};
+    if (!soloSecundarios) seleccionActual[eje.key] = defaultVariant;
+
+    (function montarEjesSecundarios() {
+      var otros = [];
+      for (var io = 0; io < ejes.length; io++) {
+        if (soloSecundarios || ejes[io].key !== eje.key) otros.push(ejes[io]);
+      }
+      if (!otros.length) return;
+
+      var secciones = panel.querySelectorAll('.size-variants');
+      if (!secciones.length) return;   // esta ficha no tiene dónde pintarlos
+
+      var controles = [];
+
+      otros.forEach(function (ejeSec, idx) {
+        var seccion = secciones[idx];
+        if (!seccion) return;
+        var rejilla = seccion.querySelector('.size-variants-grid') || seccion.querySelector('.color-variants-grid');
+        if (!rejilla) return;
+
+        // El rótulo lo pone el CATÁLOGO, no el HTML: es justo lo que se estaba
+        // escribiendo a mano y lo que hacía que un eje se anunciara mal.
+        var rotulo = seccion.querySelector('.color-variants-label');
+        if (rotulo && ejeSec.label) rotulo.textContent = String(ejeSec.label).toUpperCase() + ':';
+        var valorActivo = seccion.querySelector('[data-active-size-label]')
+          || seccion.querySelector('[data-active-model-label]')
+          || seccion.querySelector('.color-variants-list');
+
+        var existentes = rejilla.querySelectorAll('button');
+        var botones = [];
+        ejeSec.options.forEach(function (op, i) {
+          var b = existentes[i];
+          if (!b) {
+            b = document.createElement('button');
+            b.type = 'button';
+            rejilla.appendChild(b);
+          }
+          b.className = 'variant-option ' + (ejeSec.type === 'swatch' ? 'variant-option--swatch' : 'variant-option--pill');
+          aplicarDatosAlBoton(b, op, ejeSec.type !== 'swatch', false, false, ejeSec);
+          b.addEventListener('click', function () {
+            if (b.disabled) return;
+            seleccionActual[ejeSec.key] = op;
+            aplicarSeleccion();
+          });
+          botones.push({ op: op, el: b });
+        });
+
+        // Punto de partida: lo que el HTML ya marcaba (así la página no cambia al
+        // cargar) y, si no marcaba nada, lo que diga el catálogo.
+        var activoEstatico = null;
+        botones.forEach(function (x) { if (x.el.classList.contains('is-active')) activoEstatico = x.op; });
+        seleccionActual[ejeSec.key] = activoEstatico
+          || (window.SS_ATTRS.porDefecto ? window.SS_ATTRS.porDefecto(ejeSec) : null)
+          || ejeSec.options[0];
+
+        controles.push({ eje: ejeSec, botones: botones, valorActivo: valorActivo });
+      });
+
+      if (!controles.length) return;
+
+      /* La clave y la etiqueta que van al CARRITO. Siguen siendo las combinadas de
+         siempre ("negro-780", "Negro · 780 mm") porque son la identidad de las líneas
+         ya guardadas: cambiarlas partiría en dos el mismo producto. El ORDEN de esa
+         combinación lo declara el catálogo en `legacyKeyAxes`, en vez de estar
+         escrito en el script de cada ficha. Desaparece cuando la identidad de línea
+         pase a ser `attrs`. */
+      function claveCombinada() {
+        var orden = Array.isArray(product.legacyKeyAxes) && product.legacyKeyAxes.length
+          ? product.legacyKeyAxes
+          : ejes.map(function (e) { return e.key; });
+        var claves = [];
+        var etiquetas = [];
+        orden.forEach(function (k) {
+          var op = seleccionActual[k];
+          if (!op) return;
+          claves.push(op.key);
+          etiquetas.push(op.label || op.key);
+        });
+        return { key: claves.join('-'), label: etiquetas.join(' · ') };
+      }
+
+      function aplicarSeleccion(opciones) {
+        var animar = !opciones || opciones.animate !== false;
+        var principal = soloSecundarios
+          ? (seleccionActual[controles[0].eje.key] || null)
+          : (seleccionActual[eje.key] || defaultVariant);
+
+        // 1) Disponibilidad cruzada: la decide el dato (`allows`), en los dos sentidos.
+        controles.forEach(function (c) {
+          c.botones.forEach(function (x) {
+            var libre = window.SS_ATTRS.disponible(c.eje, x.op, seleccionActual);
+            x.el.disabled = !libre;
+            x.el.classList.toggle('is-disabled', !libre);
+            if (!libre) x.el.setAttribute('aria-disabled', 'true');
+            else x.el.removeAttribute('aria-disabled');
+            var elegido = seleccionActual[c.eje.key] === x.op;
+            x.el.classList.toggle('is-active', elegido);
+            x.el.setAttribute('aria-pressed', elegido ? 'true' : 'false');
+          });
+          if (c.valorActivo) {
+            var op = seleccionActual[c.eje.key];
+            c.valorActivo.textContent = op ? (op.label || op.key) : '';
+          }
+        });
+
+        (soloSecundarios ? [] : buttons).forEach(function (b) {
+          var esActivo = b === (opciones && opciones.boton);
+          if (opciones && opciones.boton) {
+            b.classList.toggle('is-active', esActivo);
+            b.setAttribute('aria-pressed', esActivo ? 'true' : 'false');
+          }
+          var opb = b.__ssOpcion;
+          if (opb) {
+            var libre = window.SS_ATTRS.disponible(eje, opb, seleccionActual);
+            b.disabled = !libre;
+            b.classList.toggle('is-disabled', !libre);
+          }
+        });
+
+        // 2) La foto de la COMBINACIÓN, no la de una opción suelta.
+        var indices = window.SS_ATTRS.imagenesDe(product, seleccionActual)
+          .map(function (n) { return parseInt(n, 10); })
+          .filter(function (n) { return n >= 1; });
+        renderGalleryForVariant(principal, { indices: indices, animate: animar, scrollThumb: animar });
+
+        // 3) Identidad de línea, atributos con nombre y enlaces de compra.
+        var comb = claveCombinada();
+        var foto = window.SS_ATTRS.fotoDe(product, seleccionActual);
+        updateCheckoutLinksColorParams(comb.key, comb.label, foto);
+
+        var cartBtn = panel.querySelector('[data-product-cart-btn="true"]');
+        if (cartBtn) {
+          cartBtn.setAttribute('data-color-key', comb.key);
+          cartBtn.setAttribute('data-color', comb.key);
+          cartBtn.setAttribute('data-color-label', comb.label);
+          if (foto) cartBtn.setAttribute('data-image', foto);
+          var parcial = {};
+          for (var k in seleccionActual) {
+            if (Object.prototype.hasOwnProperty.call(seleccionActual, k) && seleccionActual[k]) {
+              parcial[k] = seleccionActual[k].key;
+            }
+          }
+          window.SS_ATTRS.marcarSeleccion(cartBtn, parcial);
+        }
+
+        if (activeColorLabel) activeColorLabel.textContent = comb.label;
+      }
+
+      aplicarSeleccionCombinada = function (variant, boton) {
+        seleccionActual[eje.key] = variant;
+        aplicarSeleccion({ boton: boton });
+        applySeriesAccentForVariant(variant, boton);
+      };
+
+      // Estado inicial sin animación: la página ya nace con la foto correcta.
+      aplicarSeleccion({ animate: false });
+    })();
+
   }
 
   /* ============================
@@ -1830,8 +2035,8 @@
     var panelInner = panel.querySelector('.panel-inner');
     if (panelInner && window.MutationObserver) {
       // Solo interesan dos cosas: que muevan la sección (childList) y que cambie el
-      // botón activo (class de un .color-variant). Las clases .is-rail* que escribe
-      // esta misma función van en el carril, no en un .color-variant, así que no se
+      // botón activo (class de un .variant-option). Las clases .is-rail* que escribe
+      // esta misma función van en el carril, no en un .variant-option, así que no se
       // realimentan.
       new MutationObserver(function (records) {
         var motivo = '';
@@ -1839,8 +2044,8 @@
           var record = records[i];
           var isActiveSwitch = record.type === 'attributes' &&
                                record.target.classList &&
-                               (record.target.classList.contains('color-variant') ||
-                                record.target.classList.contains('size-variant'));
+                               (record.target.classList.contains('variant-option variant-option--swatch') ||
+                                record.target.classList.contains('variant-option--pill'));
           if (isActiveSwitch) { motivo = 'color'; break; }
           if (record.type === 'childList') motivo = 'layout';
         }

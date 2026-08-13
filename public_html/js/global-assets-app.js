@@ -966,9 +966,9 @@
         var parsed = new URL(nextHref, window.location.origin);
 
         var selector = document.querySelector('.color-variants');
-        var activeButton = selector ? selector.querySelector('.color-variant.is-active:not([disabled]):not([aria-disabled="true"])') : null;
+        var activeButton = selector ? selector.querySelector('.variant-option.is-active:not([disabled]):not([aria-disabled="true"])') : null;
         if (!activeButton && selector) {
-          var allButtons = selector.querySelectorAll('.color-variant');
+          var allButtons = selector.querySelectorAll('.variant-option');
           for (var b = 0; b < allButtons.length; b++) {
             if (!allButtons[b].disabled && allButtons[b].getAttribute('aria-disabled') !== 'true') {
               activeButton = allButtons[b];
@@ -1069,9 +1069,9 @@
           var imageSrc = activeImage ? (activeImage.getAttribute('src') || '') : '';
 
           var colorSelector = document.querySelector('.color-variants');
-          var activeColorButton = colorSelector ? colorSelector.querySelector('.color-variant.is-active:not([disabled]):not([aria-disabled="true"])') : null;
+          var activeColorButton = colorSelector ? colorSelector.querySelector('.variant-option.is-active:not([disabled]):not([aria-disabled="true"])') : null;
           if (!activeColorButton && colorSelector) {
-            var colorButtons = colorSelector.querySelectorAll('.color-variant');
+            var colorButtons = colorSelector.querySelectorAll('.variant-option');
             for (var cb = 0; cb < colorButtons.length; cb++) {
               if (!colorButtons[cb].disabled && colorButtons[cb].getAttribute('aria-disabled') !== 'true') {
                 activeColorButton = colorButtons[cb];
@@ -1092,9 +1092,16 @@
           addToCartBtn.setAttribute('data-price', product.priceText || '');
           addToCartBtn.setAttribute('data-url', product.href || pathname);
           addToCartBtn.setAttribute('data-image', imageSrc || product.image || '');
-          addToCartBtn.setAttribute('data-color-key', activeColorKey);
-          addToCartBtn.setAttribute('data-color', activeColorKey);
-          addToCartBtn.setAttribute('data-color-label', activeColorLabel);
+          /* La variante elegida NO se pisa con vacío. Esta hidratación lee el eje de
+             CÍRCULOS del DOM; una ficha que se elige por modelo y medida no tiene
+             ninguno, así que aquí `activeColorKey` sale vacío y borraba la clave que
+             el selector ya había escrito: la línea entraba al carrito sin variante.
+             Se escribe solo cuando hay algo que escribir. */
+          if (activeColorKey) {
+            addToCartBtn.setAttribute('data-color-key', activeColorKey);
+            addToCartBtn.setAttribute('data-color', activeColorKey);
+          }
+          if (activeColorLabel) addToCartBtn.setAttribute('data-color-label', activeColorLabel);
           addToCartBtn.setAttribute('data-stock', 'in_stock');
           addToCartBtn.setAttribute('aria-label', 'Añadir al carrito ' + (product.name || 'producto'));
           addToCartBtn.innerHTML = '<i class="fa-solid fa-cart-plus" aria-hidden="true"></i> Añadir';

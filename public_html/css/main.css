@@ -3191,17 +3191,17 @@ footer{
    que el selector de modelo de las fichas). La clase la pone el JS después de
    medir; estirar no puede provocar desbordamiento, así que la medida sigue valiendo.
    Solo las píldoras: los círculos de color son redondos y no se estiran. */
-.acc-pop-rail.is-fit .acc-pop-pill{ flex:1 1 auto; }
+.acc-pop-rail.is-fit .variant-option--pill{ flex:1 1 auto; }
 
 /* Círculo de color: el de la ficha a menor tamaño (borde, anillo del activo y
    punto blanco en el centro). */
 /* ── EL CÍRCULO DE VARIANTE — fuente única ────────────────────────────────────
    Vale igual para la ficha y para la burbuja: lo mismo que ya se hizo con la
-   píldora (.acc-pop-pill/.size-variant, más abajo). Antes eran dos bloques
+   píldora (.variant-option--pill/.variant-option--pill, más abajo). Antes eran dos bloques
    calcados en dos archivos, con números que habían derivado por separado.
    El tamaño es lo único que cambia por contexto, y viaja en --variant-size. */
-.acc-pop-swatch,
-.color-variant:not(.size-variant){
+.variant-option--swatch,
+.variant-option--swatch{
   --variant-swatch:#111;
   position:relative;
   flex:0 0 auto;
@@ -3223,29 +3223,29 @@ footer{
   transition:var(--variant-transition);
 }
 
-.acc-pop-swatch:focus-visible,
-.color-variant:not(.size-variant):focus-visible{
+.variant-option--swatch:focus-visible,
+.variant-option--swatch:focus-visible{
   outline:none;
   box-shadow:var(--variant-ring-focus);
 }
 
-.acc-pop-swatch:hover:not([disabled]):not(.is-disabled),
-.color-variant:not(.size-variant):hover:not([disabled]):not(.is-disabled){
+.variant-option--swatch:hover:not([disabled]):not(.is-disabled),
+.variant-option--swatch:hover:not([disabled]):not(.is-disabled){
   transform:var(--variant-lift);
   border-color:var(--variant-border-hover);
   box-shadow:var(--variant-shadow-hover);
 }
 
-.acc-pop-swatch.is-active,
-.color-variant:not(.size-variant).is-active{
+.variant-option--swatch.is-active,
+.variant-option--swatch.is-active{
   border-color:var(--variant-border-selected);
   box-shadow:var(--variant-ring-selected), var(--variant-shadow-selected);
 }
 
 /* El punto blanco del centro marca el círculo elegido; en una píldora el elegido lo
    dice el trazo, y este punto caería encima del texto. */
-.acc-pop-swatch.is-active::after,
-.color-variant:not(.size-variant).is-active::after{
+.variant-option--swatch.is-active::after,
+.variant-option--swatch.is-active::after{
   content:'';
   position:absolute;
   top:50%;
@@ -3263,20 +3263,20 @@ footer{
    en esta combinación" sin depender de lo tenue que sea el color. La diagonal va
    oscura porque al bajar la opacidad sobre fondo blanco TODOS los círculos aclaran,
    también el negro. El overflow:hidden del botón la recorta al círculo. */
-.acc-pop-swatch[disabled],
-.acc-pop-swatch.is-disabled,
-.color-variant:not(.size-variant)[disabled],
-.color-variant:not(.size-variant).is-disabled{
+.variant-option--swatch[disabled],
+.variant-option--swatch.is-disabled,
+.variant-option--swatch[disabled],
+.variant-option--swatch.is-disabled{
   cursor:not-allowed;
   opacity:var(--variant-disabled-opacity);
   transform:none;
   box-shadow:0 1px 4px rgba(0,0,0,.03);
 }
 
-.acc-pop-swatch[disabled]::after,
-.acc-pop-swatch.is-disabled::after,
-.color-variant:not(.size-variant)[disabled]::after,
-.color-variant:not(.size-variant).is-disabled::after{
+.variant-option--swatch[disabled]::after,
+.variant-option--swatch.is-disabled::after,
+.variant-option--swatch[disabled]::after,
+.variant-option--swatch.is-disabled::after{
   content:'';
   position:absolute;
   inset:0;
@@ -3289,9 +3289,9 @@ footer{
   pointer-events:none;
 }
 
-/* En la burbuja el círculo es más pequeño que en la ficha: se cambia LA FICHA,
-   no el bloque. */
-.acc-pop-swatch{ --variant-size:var(--acc-pop-swatch); }
+/* En la burbuja el círculo mide otra cosa que en la ficha: se cambia la FICHA del
+   token en ese contexto, no el bloque entero. */
+.acc-pop .variant-option--swatch{ --variant-size:var(--acc-pop-swatch); }
 
 /* Cuánto trazo NEGRO hay dibujado: 0% = ninguno, o sea el filo gris tenue de reposo;
    100% = anillo negro entero (elegida). En reposo vale 0 a propósito: la píldora que
@@ -3315,8 +3315,8 @@ footer{
 /* ══════════════════════════════════════════════════════════════════════════════
    PÍLDORA DE MODELO/MEDIDA — FUENTE ÚNICA
 
-   La misma regla para la burbuja de accesorios (.acc-pop-pill) y para el selector
-   de las fichas de manillar (.size-variant). Antes eran dos diseños calcados a mano:
+   La misma regla para la burbuja de accesorios (.variant-option--pill) y para el selector
+   de las fichas de manillar (.variant-option--pill). Antes eran dos diseños calcados a mano:
    uno aquí y otro repetido en el <style> inline de las CUATRO fichas, y cada retoque
    —el borde diagonal, el relleno animado— había que copiarlo cinco veces. Ahora se
    toca aquí y cambian los cinco sitios a la vez.
@@ -3326,8 +3326,8 @@ footer{
 
    El texto va centrado porque al estirarse (.is-fit) la píldora es más ancha que
    su contenido. */
-.acc-pop-pill,
-.size-variant{
+.variant-option--pill,
+.variant-option--pill{
   padding:var(--variant-pill-padding);
   border-radius:var(--variant-radius);
   /* El TRAZO, que es lo único que distingue a la elegida. `border` no sabe dibujarse a
@@ -3378,8 +3378,8 @@ footer{
    es idéntico. Las dos vías son EXCLUYENTES: aquí se apaga la capa, y allí la variable
    se queda en el 0% de reposo. */
 @media (hover: hover) and (pointer: fine){
-  .acc-pop-pill,
-  .size-variant{
+  .variant-option--pill,
+  .variant-option--pill{
     /* La animación solo dispara al PONERSE la clase, así que al quitarla el trazo se
        borraba de golpe: la transición es la que corre en los dos sentidos y hace que
        la que deja de estar elegida DESdibuje el borde. Conviven a propósito — la
@@ -3392,16 +3392,16 @@ footer{
   /* El 100% vive AQUÍ DENTRO: en táctil la variable tiene que quedarse en el 0% de
      reposo, porque allí el trazo lo pone la capa. Si además saltara a 100%, el anillo
      se pintaría dos veces. */
-  .acc-pop-pill.is-active,
-  .acc-pop-pill.is-active:hover,
-  .size-variant.is-active,
-  .size-variant.is-active:hover{
+  .variant-option--pill.is-active,
+  .variant-option--pill.is-active:hover,
+  .variant-option--pill.is-active,
+  .variant-option--pill.is-active:hover{
     --borde-relleno:100%;
     animation:acc-pop-rellenar-borde .45s ease;
   }
   /* Con barrido el trazo lo pinta la propia variable: la capa sobra y lo duplicaría. */
-  .acc-pop-pill::after,
-  .size-variant::after{ display:none; }
+  .variant-option--pill::after,
+  .variant-option--pill::after{ display:none; }
 }
 
 /* ── El trazo como CAPA (la vía de táctil) ────────────────────────────────────
@@ -3418,8 +3418,8 @@ footer{
    padding-box—, que es la forma estándar de dejar solo el marco sin tapar el texto.
    `inset:-2px` porque una capa absoluta se coloca respecto al PADDING box: sin eso
    quedaría 2px por dentro y no encajaría con el borde. */
-.acc-pop-pill::after,
-.size-variant::after{
+.variant-option--pill::after,
+.variant-option--pill::after{
   content:'';
   position:absolute;
   inset:-2px;
@@ -3435,8 +3435,8 @@ footer{
   transition:opacity .38s ease;
   pointer-events:none;
 }
-.acc-pop-pill.is-active::after,
-.size-variant.is-active::after{ opacity:1; }
+.variant-option--pill.is-active::after,
+.variant-option--pill.is-active::after{ opacity:1; }
 /* Al apuntar, la píldora SOLO se levanta 1px. Sin sombra: la única diferencia entre
    elegida y no elegida es el trazo, y una sombra al pasar por encima metía un segundo
    relieve que competía con él. Tampoco lleva border-color, que pintaría un anillo
@@ -3449,19 +3449,19 @@ footer{
    justificara. Comprobado en WebKit táctil: tras el toque, transform=translateY(-1px)
    persistente hasta tocar fuera. */
 @media (hover: hover) and (pointer: fine){
-  .acc-pop-pill:hover,
-  .size-variant:hover:not(:disabled){ transform:translateY(-1px); }
-  .acc-pop-pill[disabled]:hover{ transform:none; }
+  .variant-option--pill:hover,
+  .variant-option--pill:hover:not(:disabled){ transform:translateY(-1px); }
+  .variant-option--pill[disabled]:hover{ transform:none; }
 }
 /* El box-shadow que queda es el aro de foco por teclado, y es el ÚNICO del componente:
    por eso no hay ninguna regla que lo apague en la elegida. La había, y como iba
    después de esta y con la misma especificidad, se llevaba por delante el aro de foco
    de la píldora ya elegida. */
-.acc-pop-pill:focus-visible,
-.size-variant:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(17,24,39,.14); }
+.variant-option--pill:focus-visible,
+.variant-option--pill:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(17,24,39,.14); }
 /* .45 y no .32, por lo mismo que el círculo: a 12,5px un texto al 32% no se lee
    como deshabilitado, se lee como un fallo de pintado. */
-.acc-pop-pill[disabled]{ cursor:not-allowed; opacity:var(--variant-disabled-opacity); }
+.variant-option--pill[disabled]{ cursor:not-allowed; opacity:var(--variant-disabled-opacity); }
 
 /* ── Acuse: lo elegido se pone VERDE ─────────────────────────────────────────
    Al añadir, el trazo de la píldora y el anillo del color viran al mismo verde que
@@ -3474,7 +3474,7 @@ footer{
    El fondo se redeclara aquí porque el tramo tiene que ser verde; el tope sigue siendo
    --borde-relleno, que con puntero fino ya vale 100%, así que el anillo verde sale
    cerrado. */
-.acc-pop.is-anadido .acc-pop-pill.is-active{
+.acc-pop.is-anadido .variant-option--pill.is-active{
   animation:none;
   background:
     linear-gradient(#fff, #fff) padding-box,
@@ -3484,11 +3484,11 @@ footer{
 }
 /* En táctil el trazo lo pone la capa, así que también tiene que virar: si no, el acuse
    saldría verde por debajo pero con el aro negro encima, tapándolo. */
-.acc-pop.is-anadido .acc-pop-pill.is-active::after{
+.acc-pop.is-anadido .variant-option--pill.is-active::after{
   background:#15803d border-box;
 }
 
-.acc-pop.is-anadido .acc-pop-swatch.is-active{
+.acc-pop.is-anadido .variant-option--swatch.is-active{
   border-color:#15803d;
   box-shadow:0 0 0 3px rgba(21,128,61,.16), 0 4px 12px rgba(21,128,61,.14);
 }
@@ -3553,9 +3553,9 @@ footer{
 
 @media (prefers-reduced-motion: reduce){
   .acc-pop{ transition:none; transform:none; }
-  .acc-pop-swatch, .acc-pop-pill, .size-variant{ transition:none; }
+  .variant-option--swatch, .variant-option--pill, .variant-option--pill{ transition:none; }
   /* El trazo aparece ya puesto, sin gesto. Hay que cortar las TRES vías: la animación
      y la transición del barrido (puntero fino) y el fundido de la capa (táctil). */
-  .acc-pop-pill.is-active, .size-variant.is-active{ animation:none; }
-  .acc-pop-pill::after, .size-variant::after{ transition:none; }
+  .variant-option--pill.is-active, .variant-option--pill.is-active{ animation:none; }
+  .variant-option--pill::after, .variant-option--pill::after{ transition:none; }
 }

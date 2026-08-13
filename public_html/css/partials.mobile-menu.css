@@ -2,18 +2,30 @@
    MENÚ MÓVIL — Drawer + Drill-down
    ============================================ */
 
+/* Los tokens del menú se alinean con los del carrito y los del header
+   (main.css): misma curva, misma duración, mismos anchos, mismos grises. Antes
+   este bloque definía su propia paleta paralela (fondo #f3f4f6, líneas
+   rgba(17,24,39,.08), texto #111827) que no coincidía con --surface/--line/--ink,
+   y por eso el menú parecía de otra web. */
 :root {
   --mm-ease: cubic-bezier(0.32, 0.72, 0, 1);
-  --mm-dur: 320ms;
-  --mm-w: min(390px, 92vw);
-  --mm-bg: #f3f4f6;
-  --mm-surface: #ffffff;
-  --mm-line: rgba(17, 24, 39, 0.08);
-  --mm-text: #111827;
-  --mm-muted: #6b7280;
+  --mm-dur: 280ms;                    /* = .ss-cart-panel */
+  --mm-w: min(460px, 100vw);          /* = .ss-cart-panel */
+  --mm-bg: #ffffff;                   /* = --surface */
+  --mm-line: var(--line, #E6E9EF);
+  --mm-line-soft: rgba(17, 19, 21, 0.06);
+  --mm-text: var(--ink, #111315);
+  --mm-muted: #667085;
   --mm-focus: #0a84ff;
-  --mm-accent: #d11c1c;
+  --mm-accent: var(--primary, #d11c1c);
   --mm-accent-soft: rgba(209, 28, 28, 0.08);
+
+  /* Estos dos solo ordenan panel vs backdrop DENTRO del menú. Quien decide que
+     el menú esté por encima de todo el sitio es el z-index:300 de
+     #mobile-menu-slot en main.css — no subas estos números esperando ganar
+     altura, no sirve de nada fuera de su contexto. */
+  --mm-z-backdrop: 1;
+  --mm-z-panel: 2;
 }
 
 body.mm-lock-scroll {
@@ -22,19 +34,35 @@ body.mm-lock-scroll {
   overflow: hidden;
 }
 
-/* ── Backdrop (sin blur = mejor rendimiento gama baja) ── */
+/* ── Backdrop: idéntico al del carrito, incluido el desenfoque ──
+   El prefijo -webkit- es necesario: Safari lo exigió hasta la versión 18. */
+/* CRÍTICO: el desenfoque SOLO puede existir con el menú abierto.
+   Este backdrop, a diferencia del carrito (que se oculta con el atributo
+   `hidden`), permanece en el árbol con `opacity:0`. Al ponerle el filtro sin
+   condición, el navegador capturaba y desenfocaba TODO el viewport en cada
+   frame, en todas las páginas y todo el rato, aunque no se viera nada: causó
+   artefactos de pintado en la portada. Con `visibility:hidden` el elemento sale
+   del renderizado y no compone nada; el filtro solo se declara en `.active`.
+   La visibilidad cambia sin transición al abrir y con retardo al cerrar, para
+   no cortar el fundido de salida. */
 .mm-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 9998;
-  background: rgba(17, 24, 39, 0.34);
+  z-index: var(--mm-z-backdrop);
+  background: rgba(15, 23, 42, 0.32);
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
-  transition: opacity var(--mm-dur) var(--mm-ease);
+  transition: opacity 0.22s ease-out, visibility 0s linear 0.22s;
 }
 .mm-backdrop.active {
   opacity: 1;
+  visibility: visible;
   pointer-events: auto;
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  will-change: opacity;
+  transition: opacity 0.22s ease-out, visibility 0s;
 }
 
 /* ── Panel: drawer desde la derecha ── */
@@ -42,64 +70,133 @@ body.mm-lock-scroll {
   position: fixed;
   top: 0;
   right: 0;
-  bottom: 0;
-  z-index: 9999;
+  z-index: var(--mm-z-panel);
   width: var(--mm-w);
+  height: 100dvh;
   background: var(--mm-bg);
-  display: flex;
-  flex-direction: column;
-  transform: translateX(100%);
+  border-left: 1px solid rgba(15, 23, 42, 0.1);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  /* 102% en vez de 100%: así el borde y la sombra quedan fuera de pantalla
+     cuando está cerrado, sin asomar una línea en el canto derecho. */
+  transform: translateX(102%);
   pointer-events: none;
-  transition: transform var(--mm-dur) var(--mm-ease);
-  box-shadow: -10px 0 36px rgba(15, 23, 42, 0.12);
-  will-change: transform;
+  /* Igual que el backdrop: fuera del renderizado mientras está cerrado. Antes
+     quedaba un panel a pantalla completa con capa de composición permanente
+     (will-change) en TODAS las páginas. El will-change solo se declara al
+     abrir, que es cuando hace falta. */
+  visibility: hidden;
+  transition: transform var(--mm-dur) var(--mm-ease),
+              visibility 0s linear var(--mm-dur);
+  box-shadow: -18px 0 40px rgba(15, 23, 42, 0.12);
   overflow: hidden;
+  contain: layout style;
   font-family: var(--ui, 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif);
   background-image: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mm-panel,
+  .mm-backdrop {
+    transition-duration: 0.01ms;
+  }
 }
 .mm-panel.active {
   transform: translateX(0);
   pointer-events: auto;
+  visibility: visible;
+  will-change: transform;
+  transition: transform var(--mm-dur) var(--mm-ease), visibility 0s;
 }
 
 /* ── Header ── */
+/* Misma cabecera que .ss-cart-head, incluida la reserva de la zona segura del
+   notch: sin ella el título quedaba bajo la barra de estado en iPhone. */
 .mm-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 15px 18px;
-  border-bottom: 1px solid var(--mm-line);
-  flex-shrink: 0;
+  gap: 10px;
+  padding: 16px 20px;
+  padding-top: calc(16px + env(safe-area-inset-top, 0px));
+  border-bottom: 1px solid var(--mm-line-soft);
   background: var(--mm-bg);
 }
 
-.mm-head-title {
-  font-family: inherit;
-  font-weight: 700;
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #8f95a3;
-}
-
-.mm-close {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  border: 1px solid var(--mm-line);
-  background: var(--mm-surface);
-  color: var(--mm-text);
-  font-size: 1.05rem;
-  cursor: pointer;
+.mm-head-left {
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: background 120ms ease, color 120ms ease;
+  gap: 10px;
+  min-width: 0;
 }
-.mm-close:hover,
-.mm-close:active {
-  background: #f3f4f6;
+
+/* Volver: mismo botón circular del sistema que .mm-close, en espejo. Solo
+   existe dentro de Productos; la clase la pone drillToProducts() sobre el panel
+   porque .mm-head es hermano ANTERIOR del viewport y ningún combinador CSS
+   llega hasta aquí desde .mm-viewport.mm-drilled. */
+.mm-back {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  border: 1px solid var(--mm-line);
+  background: #fff;
+  color: #0f172a;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: none;
+  place-items: center;
+  flex: 0 0 auto;
+  padding: 0;
+  transition: background 0.16s ease;
+}
+.mm-panel.is-drilled .mm-back {
+  display: grid;
+}
+.mm-back:active {
+  background: rgba(15, 23, 42, 0.07);
+}
+@media (hover: hover) {
+  .mm-back:hover {
+    background: rgba(15, 23, 42, 0.04);
+  }
+}
+.mm-back:focus-visible {
+  outline: 2px solid var(--mm-focus);
+  outline-offset: 2px;
+}
+
+/* Mismo tratamiento que el "TU CARRITO" del carrito. */
+.mm-head-title {
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
   color: var(--mm-text);
+}
+
+/* Botón circular del sistema: el mismo de la cabecera (cuenta/carrito) y del
+   cerrar del carrito. 44px es además el objetivo táctil mínimo recomendado. */
+.mm-close {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--mm-line);
+  background: #fff;
+  color: #0f172a;
+  font-size: 1rem;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 0.16s ease;
+}
+.mm-close:active {
+  background: rgba(15, 23, 42, 0.07);
+}
+@media (hover: hover) {
+  .mm-close:hover {
+    background: rgba(15, 23, 42, 0.04);
+  }
 }
 .mm-close:focus-visible {
   outline: 2px solid var(--mm-focus);
@@ -118,6 +215,15 @@ body.mm-lock-scroll {
   inset: 0;
   display: flex;
   flex-direction: column;
+  /* OPACO, y no es decorativo: las dos vistas se superponen (position:absolute,
+     inset:0) y durante los 280 ms del deslizamiento las DOS están en pantalla a la
+     vez. Sin fondo, el nivel que sale se veía a través del que entra: al tocar
+     Productos, las filas del menú principal se leían corriéndose hacia la izquierda
+     por debajo de las series, chocaban contra el borde y desaparecían. Parecía un
+     rebote, y en realidad eran dos niveles pintados uno encima de otro. Con fondo, el
+     que entra tapa al que sale y solo se ve un nivel, que es de lo que va un
+     drill-down. */
+  background: var(--mm-bg);
   transition: transform var(--mm-dur) var(--mm-ease),
               opacity var(--mm-dur) var(--mm-ease);
   will-change: transform, opacity;
@@ -146,25 +252,38 @@ body.mm-lock-scroll {
   transform: translateX(0);
 }
 
-/* ── Primary nav ── */
+/* ── Tarjeta: PRIMITIVA ÚNICA de todo el menú ── */
+/* .mm-nav + .mm-link son la tarjeta y la fila de los DOS niveles: la nav
+   principal y los grupos de series de Productos. Antes el nivel 2 tenía su
+   propio componente (.mm-sub-category-card + .mm-sub-link) que divergía en
+   borde, radio, sombra, fondo y peso del separador, y por eso al entrar en
+   Productos parecía otra web. No vuelvas a crear una tarjeta paralela: si el
+   nivel 2 necesita algo, es que lo necesita la primitiva.
+
+   Mismo lenguaje que .ss-cart-item: radio 20, blanco sólido y UNA sombra.
+   Se retiró el `backdrop-filter: blur(10px)` que tenía: el panel que hay detrás
+   es blanco opaco, así que desenfocaba algo que no se ve, y aun así el
+   navegador lo componía en cada frame de la animación de entrada.
+   `overflow:hidden` para que el fondo de :active de la primera y la última fila
+   no se salga de las esquinas redondeadas. */
 .mm-nav {
   display: flex;
   flex-direction: column;
   gap: 0;
-  border: 1px solid var(--mm-line);
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.06);
-  overflow: visible;
-  backdrop-filter: blur(10px);
+  border: 0;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
 }
 
 .mm-link {
   appearance: none;
   width: 100%;
+  min-height: 56px;          /* objetivo táctil holgado, sin cambiar la altura visual */
   text-align: left;
   border: none;
-  border-bottom: 1px solid var(--mm-line);
+  border-bottom: 1px solid var(--mm-line-soft);
   background: transparent;
   padding: 16px 18px;
   border-radius: 0;
@@ -177,11 +296,19 @@ body.mm-lock-scroll {
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
-  transition: background 120ms ease;
+  /* Respuesta inmediata al dedo, sin el retardo del resaltado nativo. */
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.16s ease;
 }
-.mm-link:hover,
+/* :active sí en táctil (feedback al pulsar); :hover solo con puntero real,
+   donde no se queda pegado tras tocar. */
 .mm-link:active {
-  background: rgba(15, 23, 42, 0.04);
+  background: rgba(15, 23, 42, 0.07);
+}
+@media (hover: hover) {
+  .mm-link:hover {
+    background: rgba(15, 23, 42, 0.04);
+  }
 }
 .mm-link:focus-visible {
   outline: 2px solid var(--mm-focus);
@@ -205,51 +332,41 @@ body.mm-lock-scroll {
   color: #9ca3af;
 }
 
-/* Productos: highlighted */
-.mm-link--products {
-  background: linear-gradient(90deg, var(--mm-accent-soft), rgba(255, 255, 255, 0));
-  border: 0;
-  border-bottom: 1px solid var(--mm-line);
-  color: var(--mm-accent);
-  font-weight: 800;
-  font-size: 1.05rem;
-}
-.mm-link--products .mm-ico {
-  color: var(--mm-accent);
-}
-.mm-link--products:hover,
-.mm-link--products:active {
-  background: linear-gradient(90deg, rgba(209, 28, 28, 0.12), rgba(255, 255, 255, 0));
-  border-color: var(--mm-line);
-}
-
+/* "Productos" es una fila más: sin fondo rojo, sin texto ni icono de acento y
+   sin peso propio. Lo único que la distingue es el chevron, que no es adorno —
+   es lo que avisa de que abre otra pantalla en vez de navegar. */
 .mm-arrow {
   font-size: 0.68rem;
   color: rgba(0, 0, 0, 0.25);
   transition: transform 180ms ease;
 }
-.mm-link--products:hover .mm-arrow,
-.mm-link--products:active .mm-arrow {
+.mm-link:hover .mm-arrow,
+.mm-link:active .mm-arrow {
   transform: translateX(3px);
 }
 
 /* ── Products scroll area ── */
+/* Mismo padding lateral y superior que .mm-view--main: los dos niveles deben
+   arrancar en la misma línea, si no la tarjeta "salta" al entrar en Productos. */
 .mm-products-scroll {
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 14px 16px 24px;
+  padding: 16px 16px 24px;
 }
 
+/* El cajón corta en la serie: no lista modelos. Cada .mm-sub-group es una
+   categoría — rótulo FUERA de la tarjeta (antes había doble encabezado: uno
+   fuera y otro dentro) y una .mm-nav con sus series. */
 .mm-sub-shell {
   display: grid;
-  gap: 12px;
+  gap: 18px;
   padding: 2px 0 20px;
 }
 
-/* Sub-title (CATEGORIAS / SERIES) */
+/* Rótulo de grupo (nombre de la categoría). */
 .mm-sub-title {
-  padding: 4px 10px 2px;
+  padding: 0 8px 8px;
   font-family: inherit;
   font-weight: 900;
   font-size: 0.72rem;
@@ -258,159 +375,26 @@ body.mm-lock-scroll {
   color: #8b919d;
 }
 
-/* Category separators */
-.mm-sub-category + .mm-sub-category {
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-  margin-top: 10px;
-  padding-top: 12px;
-}
-
-.mm-sub-category-title {
-  padding: 12px 6px 8px;
-  font-family: inherit;
-  font-size: 0.72rem;
-  font-weight: 900;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #8b919d;
-}
-
-.mm-sub-category-card {
-  padding: 0;
-  border: 1px solid var(--mm-line);
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.06);
-  overflow: hidden;
-}
-
-.mm-sub-category-card + .mm-sub-category-card {
-  margin-top: 10px;
-}
-
-.mm-sub-category-title--compact {
-  padding: 16px 18px 8px;
-}
-
-/* Series buttons */
-.mm-sub-link {
-  appearance: none;
-  width: 100%;
-  text-align: left;
-  border: none;
-  background: transparent;
-  padding: 16px 18px;
-  border-radius: 0;
-  border-bottom: 1px solid var(--mm-line);
-  font-family: inherit;
-  font-weight: 800;
-  font-size: 1rem;
-  letter-spacing: 0.02em;
-  color: #0b0c0f;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-  transition: background 120ms ease, color 120ms ease;
-  position: relative;
-}
-.mm-sub-link:hover {
-  background: rgba(15, 23, 42, 0.04);
-}
-.mm-sub-link:focus-visible {
-  outline: 2px solid var(--mm-accent);
-  outline-offset: -2px;
-}
-
-.mm-sub-link.active {
-  color: var(--mm-accent);
-  background: linear-gradient(90deg, var(--mm-accent-soft), rgba(255, 255, 255, 0));
-}
-.mm-sub-link.active::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 8px;
-  bottom: 8px;
-  width: 3px;
-  background: var(--mm-accent);
-  border-radius: 999px;
-}
-
-.mm-chevron-sm {
-  font-size: 0.72rem;
-  color: rgba(0, 0, 0, 0.26);
-  transition: transform 250ms var(--mm-ease),
-              color 120ms ease;
-}
-.mm-sub-link.active .mm-chevron-sm {
-  transform: rotate(180deg);
-  color: var(--mm-accent);
-}
-
-/* Model links (sub2) */
-.mm-sub2 {
-  max-height: 0;
-  overflow: hidden;
-  opacity: 0;
-  padding: 0;
-  transition: max-height 280ms var(--mm-ease),
-              opacity 200ms ease,
-              padding 200ms ease;
-}
-.mm-sub2.active {
-  max-height: 600px;
-  opacity: 1;
-  padding: 0;
-}
-
-.mm-sub2-link {
+/* Lado derecho de la fila de serie: cuántos modelos hay + chevron. */
+.mm-link-aside {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 13px 18px;
-  margin-top: 0;
-  border-radius: 0;
-  background: transparent;
-  border: 0;
-  border-bottom: 1px solid var(--mm-line);
-  font-family: inherit;
-  font-weight: 700;
-  font-size: 0.92rem;
-  letter-spacing: 0.02em;
-  color: #0b0c0f;
-  text-decoration: none;
-  transition: background 120ms ease, transform 80ms ease, box-shadow 120ms ease;
+  flex: 0 0 auto;
 }
-.mm-sub2-link:first-child {
-  margin-top: 0;
-}
-.mm-sub2-link:hover {
-  background: rgba(15, 23, 42, 0.04);
-}
-.mm-sub2-link:active {
-  background: rgba(209, 28, 28, 0.06);
-  transform: scale(0.99);
-}
-.mm-sub2-link::before {
-  content: "";
-  width: 2px;
-  height: 14px;
-  background: rgba(209, 28, 28, 0.55);
-  border-radius: 999px;
-  flex-shrink: 0;
-}
-.mm-sub2-link:focus-visible {
-  outline: 2px solid var(--mm-accent);
-  outline-offset: -2px;
+
+.mm-count {
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--mm-muted);
 }
 
 /* ── Footer (botones de redes SIN CAMBIOS) ── */
 .mm-foot {
   padding: 16px 20px calc(env(safe-area-inset-bottom, 0px) + 16px);
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: 1px solid var(--mm-line-soft);
   background: #fff;
-  flex-shrink: 0;
 }
 
 .mm-icons {
@@ -419,24 +403,33 @@ body.mm-lock-scroll {
   gap: 20px;
 }
 
+/* Mismo botón circular que la cabecera del sitio: 44px, blanco, borde --line.
+   `transition: all` animaba también color y sombra sin necesidad. */
 .mm-icons a {
   width: 44px;
   height: 44px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.04);
-  color: #0b0c0f;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.3rem;
+  border-radius: 999px;
+  border: 1px solid var(--mm-line);
+  background: #fff;
+  color: #0f172a;
+  display: grid;
+  place-items: center;
+  font-size: 1.15rem;
   text-decoration: none;
-  transition: all 180ms ease;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.16s ease, color 0.16s ease;
 }
 
-.mm-icons a:hover {
-  background: rgba(225, 6, 0, 0.1);
-  color: #e10600;
-  transform: scale(1.05);
+.mm-icons a:active {
+  background: rgba(15, 23, 42, 0.07);
+}
+
+@media (hover: hover) {
+  .mm-icons a:hover {
+    background: var(--mm-accent-soft);
+    color: var(--mm-accent);
+    border-color: rgba(209, 28, 28, 0.28);
+  }
 }
 
 /* ── Responsive ── */

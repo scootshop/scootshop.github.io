@@ -10,7 +10,7 @@
   <meta name="format-detection" content="telephone=no" />
 
   <link rel="canonical" href="https://scootshop.co/patinetes/series-k/g2-pro/" />
-  <meta name="asset-version" content="20260813-10" />
+  <meta name="asset-version" content="20260813-11" />
   <!-- Ficha SIEMPRE arriba: reset al tope en inline + DOMContentLoaded + 2 frames (vence el carry de scroll del WebView de apps, que aparece al renderizar). Sin lock ni guard. -->
   <script>(function(){try{if('scrollRestoration' in history)history.scrollRestoration='manual';var t=function(){try{window.scrollTo(0,0);}catch(e){}};t();document.addEventListener('DOMContentLoaded',function(){t();requestAnimationFrame(function(){t();requestAnimationFrame(t);});},{once:true});addEventListener('pageshow',function(e){if(e&&e.persisted)t();});}catch(e){}})();</script>
 
@@ -21,7 +21,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  <link rel="manifest" href="/site.webmanifest?v=20260813-10">
+  <link rel="manifest" href="/site.webmanifest?v=20260813-11">
   <meta name="theme-color" content="#ffffff">
   <meta name="apple-mobile-web-app-title" content="SCOOT SHOP">
   <meta name="application-name" content="SCOOT SHOP">
@@ -48,11 +48,11 @@
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" media="print" onload="this.media='all'" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" /></noscript>
-  <link rel="stylesheet" href="/css/icons.css?v=20260813-10">
+  <link rel="stylesheet" href="/css/icons.css?v=20260813-11">
 
-  <link rel="stylesheet" href="/css/main.css?v=20260813-10">
-  <link rel="stylesheet" href="/css/partials.mobile-menu.css?v=20260813-10">
-  <link rel="stylesheet" href="/css/tarjetas.css?v=20260813-10">
+  <link rel="stylesheet" href="/css/main.css?v=20260813-11">
+  <link rel="stylesheet" href="/css/partials.mobile-menu.css?v=20260813-11">
+  <link rel="stylesheet" href="/css/tarjetas.css?v=20260813-11">
 
   <script src="/js/global-assets.js?v=20260605-2" defer></script>
 </head>
@@ -167,14 +167,14 @@
             <!-- Este patinete no se elige por COLOR sino por MODELO: VMP (homologado
                  DGT, limitado a 25 km/h) o Normal. Dos versiones no se distinguen por
                  un círculo de color, así que las opciones se leen con su nombre en la
-                 píldora compartida (.size-variant, la misma de las fichas de manillar
+                 píldora compartida (.variant-option--pill, la misma de las fichas de manillar
                  y de la burbuja del home: fuente única en main.css).
 
-                 La clase .color-variant se conserva porque es la que buscan
+                 La clase .variant-option se conserva porque es la que buscan
                  product-enhancements.js (cambia galería, descripción y sello DGT),
                  cart-runtime.js y global-assets-app.js para saber qué versión está
                  elegida; tarjetas.css deja fuera de la geometría de círculo a todo
-                 .color-variant que además sea .size-variant, así que la píldora manda.
+                 .variant-option que además sea .variant-option--pill, así que la píldora manda.
 
                  El --variant-swatch no pinta nada aquí, pero se queda: es lo que lee
                  variant-pop.js para la burbuja de la tarjeta del home. -->
@@ -193,8 +193,8 @@
                        sigue en la cabecera, en el title y en la línea del carrito. Mismo
                        criterio que las medidas del manillar ("720" en la píldora,
                        "720 mm" en la cabecera). -->
-                  <button type="button" class="color-variant size-variant is-active" aria-pressed="true" aria-label="KG2 PRO (VMP)" title="KG2 PRO (VMP)" data-color-key="vmp" style="--variant-swatch:#1d4ed8">G2 PRO VMP</button>
-                  <button type="button" class="color-variant size-variant" aria-pressed="false" aria-label="KG2 PRO (Normal)" title="KG2 PRO (Normal)" data-color-key="normal" style="--variant-swatch:#111111">G2 PRO Normal</button>
+                  <button type="button" class="variant-option variant-option--pill  is-active" aria-pressed="true" aria-label="KG2 PRO (VMP)" title="KG2 PRO (VMP)" data-color-key="vmp" style="--variant-swatch:#1d4ed8">G2 PRO VMP</button>
+                  <button type="button" class="variant-option variant-option--pill " aria-pressed="false" aria-label="KG2 PRO (Normal)" title="KG2 PRO (Normal)" data-color-key="normal" style="--variant-swatch:#111111">G2 PRO Normal</button>
                 </div>
               </div>
             </section>
@@ -362,13 +362,14 @@
   }
   </script>
 
-  <script src="/data/products.js?v=20260813-10"></script>
+  <script src="/data/products.js?v=20260813-11"></script>
   <!-- Bust localizado: solo esta ficha necesita la lógica de variante VMP/Normal
        (desc + badge DGT). Subiendo solo su ?v se evita el bump global y la trampa
        de recarga. Ver memoria project_local_asset_bust. -->
-  <script src="/js/product-enhancements.js?v=20260813-10"></script>
+  <script src="/js/product-enhancements.js?v=20260813-11"></script>
 </body>
 </html>
+
 
 
 

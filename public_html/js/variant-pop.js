@@ -203,11 +203,11 @@
           if (esSwatch) {
             /* El nombre va en title y aria-label, no solo en el color: una opción no
                puede identificarse ÚNICAMENTE por su color (accesibilidad, punto 23). */
-            return '<button type="button" class="acc-pop-swatch' + activa + '"' + comun +
+            return '<button type="button" class="variant-option variant-option--swatch' + activa + '"' + comun +
               ' title="' + esc(op.label) + '" aria-label="' + esc(op.label) + '"' +
               ' style="--variant-swatch:' + esc(op.swatch || '#cbd5e1') + '">' + esc(op.label) + '</button>';
           }
-          return '<button type="button" class="acc-pop-pill' + activa + '"' + comun + '>' +
+          return '<button type="button" class="variant-option variant-option--pill' + activa + '"' + comun + '>' +
             esc(op.label) + '</button>';
         }).join('')
       );
@@ -264,7 +264,7 @@
        nada aquí. Los botones se localizan por el carril del eje, que lleva su clave. */
     estado.ejes.forEach(function (eje) {
       var elegidaAqui = estado.seleccion[eje.key];
-      var botones = pop.querySelectorAll('.acc-pop-' + eje.key + ' .acc-pop-pill, .acc-pop-' + eje.key + ' .acc-pop-swatch');
+      var botones = pop.querySelectorAll('.acc-pop-' + eje.key + ' .variant-option--pill, .acc-pop-' + eje.key + ' .variant-option--swatch');
       for (var i = 0; i < botones.length; i++) {
         var op = eje.options[i];
         if (!op) continue;

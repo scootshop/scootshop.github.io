@@ -56,18 +56,19 @@
 .fa-xmark::before          { content: "\f00d"; }
 .fa-chevron-down::before   { content: "\f078"; }
 .fa-chevron-right::before  { content: "\f054"; }
-.fa-arrow-left::before     { content: "\f060"; }
+/* La flecha de VOLVER del cajon movil (#mmBack). Faltaba en el subset: el boton
+   se pintaba -el circulo estaba ahi- pero sin glifo dentro, o sea un hueco
+   redondo vacio en la cabecera de Productos y ninguna forma de retroceder. */
+.fa-chevron-left::before   { content: "\f053"; }
 .fa-arrow-right::before    { content: "\f061"; }
 .fa-bolt::before           { content: "\f0e7"; }
 .fa-shield-halved::before  { content: "\f3ed"; }
 .fa-rotate-left::before    { content: "\f2ea"; }
 .fa-receipt::before        { content: "\f543"; }
-.fa-screwdriver-wrench::before { content: "\f7d9"; }
 .fa-bag-shopping::before   { content: "\f290"; }
 .fa-bicycle::before        { content: "\f206"; }
 .fa-box-open::before       { content: "\f49e"; }
 .fa-box::before            { content: "\f466"; }
-.fa-clock::before          { content: "\f017"; }
 .fa-comments::before       { content: "\f086"; }
 .fa-lightbulb::before      { content: "\f0eb"; }
 .fa-lock::before           { content: "\f023"; }

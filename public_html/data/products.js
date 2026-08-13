@@ -1319,7 +1319,12 @@
       rotationGroup: 'manillar',
       href: '/accesorios/manillar-wake/',
       accessoryCategory: 'handlebars',
-      attributes: [
+            /* Orden en que se combinan las claves para la IDENTIDAD de la linea de
+         carrito ("negro-780"). Estaba escrito en el script de la ficha; vive aqui
+         para no partir en dos los carritos y pedidos ya guardados. Se borra cuando
+         la identidad pase a ser `attrs`. */
+      legacyKeyAxes: ['color', 'size'],
+attributes: [
         {
           key: 'size',
           label: 'Medida',
@@ -1554,7 +1559,12 @@
       rotationGroup: 'manillar',
       href: '/accesorios/manillar-uno/',
       accessoryCategory: 'handlebars',
-      attributes: [
+            /* Orden en que se combinan las claves para la IDENTIDAD de la linea de
+         carrito ("negro-780"). Estaba escrito en el script de la ficha; vive aqui
+         para no partir en dos los carritos y pedidos ya guardados. Se borra cuando
+         la identidad pase a ser `attrs`. */
+      legacyKeyAxes: ['model', 'size'],
+attributes: [
         {
           key: 'model',
           label: 'Modelo',
@@ -1602,32 +1612,39 @@
           options: [
             {
               key: '640',
-              label: '640 mm'
+              label: '640 mm',
+              shortLabel: '640'
             },
             {
               key: '680',
-              label: '680 mm'
+              label: '680 mm',
+              shortLabel: '680'
             },
             {
               key: '720',
               default: true,
-              label: '720 mm'
+              label: '720 mm',
+              shortLabel: '720'
             },
             {
               key: '740',
-              label: '740 mm'
+              label: '740 mm',
+              shortLabel: '740'
             },
             {
               key: '760',
-              label: '760 mm'
+              label: '760 mm',
+              shortLabel: '760'
             },
             {
               key: '780',
-              label: '780 mm'
+              label: '780 mm',
+              shortLabel: '780'
             },
             {
               key: '800',
-              label: '800 mm'
+              label: '800 mm',
+              shortLabel: '800'
             }
           ]
         }
@@ -1754,7 +1771,12 @@
       rotationGroup: 'manillar',
       href: '/accesorios/manillar-kocevlo/',
       accessoryCategory: 'handlebars',
-      attributes: [
+            /* Orden en que se combinan las claves para la IDENTIDAD de la linea de
+         carrito ("negro-780"). Estaba escrito en el script de la ficha; vive aqui
+         para no partir en dos los carritos y pedidos ya guardados. Se borra cuando
+         la identidad pase a ser `attrs`. */
+      legacyKeyAxes: ['model', 'size'],
+attributes: [
         {
           key: 'model',
           label: 'Modelo',
@@ -1802,24 +1824,29 @@
           options: [
             {
               key: '680',
-              label: '680 mm'
+              label: '680 mm',
+              shortLabel: '680'
             },
             {
               key: '700',
-              label: '700 mm'
+              label: '700 mm',
+              shortLabel: '700'
             },
             {
               key: '720',
               default: true,
-              label: '720 mm'
+              label: '720 mm',
+              shortLabel: '720'
             },
             {
               key: '740',
-              label: '740 mm'
+              label: '740 mm',
+              shortLabel: '740'
             },
             {
               key: '760',
-              label: '760 mm'
+              label: '760 mm',
+              shortLabel: '760'
             }
           ]
         }
@@ -1860,7 +1887,12 @@
       rotationGroup: 'manillar',
       href: '/accesorios/manillar-lunje/',
       accessoryCategory: 'handlebars',
-      attributes: [
+            /* Orden en que se combinan las claves para la IDENTIDAD de la linea de
+         carrito ("negro-780"). Estaba escrito en el script de la ficha; vive aqui
+         para no partir en dos los carritos y pedidos ya guardados. Se borra cuando
+         la identidad pase a ser `attrs`. */
+      legacyKeyAxes: ['color', 'size'],
+attributes: [
         {
           key: 'size',
           label: 'Medida',
