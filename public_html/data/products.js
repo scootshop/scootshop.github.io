@@ -1482,37 +1482,47 @@ attributes: [
               key: 'negro-blanco',
               label: 'Negro y blanco',
               swatch: 'linear-gradient(135deg,#1a1a1a 0 50%,#e9edf0 50%)',
+              /* Su foto limpia es la 7, pero ABRE con la 1 porque es la que pinta el
+                 HTML estático de la ficha: arrancar con otra provoca un cambio de foto
+                 visible en cuanto hidrata. La primera de la lista es la que manda. */
+              images: [1, 7],
               default: true
             },
             {
               key: 'negro-rojo',
               label: 'Negro y rojo',
-              swatch: 'linear-gradient(135deg,#1a1a1a 0 50%,#a8362f 50%)'
+              swatch: 'linear-gradient(135deg,#1a1a1a 0 50%,#a8362f 50%)',
+              images: [8]
             },
             {
               key: 'negro-morado',
               label: 'Negro y morado',
-              swatch: 'linear-gradient(135deg,#1a1a1a 0 50%,#7b2f8e 50%)'
+              swatch: 'linear-gradient(135deg,#1a1a1a 0 50%,#7b2f8e 50%)',
+              images: [9]
             },
             {
               key: 'negro-verde',
               label: 'Negro y verde',
-              swatch: 'linear-gradient(135deg,#1a1a1a 0 50%,#a5b938 50%)'
+              swatch: 'linear-gradient(135deg,#1a1a1a 0 50%,#a5b938 50%)',
+              images: [10]
             },
             {
               key: 'rojo',
               label: 'Rojo',
-              swatch: '#b02a22'
+              swatch: '#b02a22',
+              images: [11]
             },
             {
               key: 'dorado',
               label: 'Dorado',
-              swatch: '#c9a92c'
+              swatch: '#c9a92c',
+              images: [12]
             },
             {
               key: 'azul',
               label: 'Azul',
-              swatch: '#1987c0'
+              swatch: '#1987c0',
+              images: [13]
             }
                 ]
         }
@@ -1701,31 +1711,40 @@ attributes: [
           label: 'Acabado',
           type: 'swatch',
           options: [
+            /* Cada acabado dice qué foto le toca (5-9 son las limpias, una por
+               acabado). Sin esto el selector no cambiaba ni la foto NI el rótulo: la
+               función que aplica la variante se iba de vacío al no encontrar imagen.
+               El de por defecto abre con la 1, que es la que trae el HTML estático. */
             {
               key: 'tornasol-negro',
               label: 'Tornasol negro · alza 25 mm',
               swatch: 'linear-gradient(135deg,#a855f7 0%,#3b82f6 28%,#06b6d4 50%,#111111 50%)',
+              images: [1, 5],
               default: true
             },
             {
               key: 'tornasol-blanco',
               label: 'Tornasol blanco · alza 25 mm',
-              swatch: 'linear-gradient(135deg,#a855f7 0%,#3b82f6 28%,#06b6d4 50%,#f8fafc 50%)'
+              swatch: 'linear-gradient(135deg,#a855f7 0%,#3b82f6 28%,#06b6d4 50%,#f8fafc 50%)',
+              images: [6]
             },
             {
               key: 'tornasol-freedom',
               label: 'Tornasol Freedom · alza 25 mm',
-              swatch: 'linear-gradient(135deg,#a855f7 0%,#3b82f6 38%,#06b6d4 68%,#22c55e 100%)'
+              swatch: 'linear-gradient(135deg,#a855f7 0%,#3b82f6 38%,#06b6d4 68%,#22c55e 100%)',
+              images: [7]
             },
             {
               key: 'tornasol-024-negro',
               label: 'Tornasol 024 negro · alza 50 mm',
-              swatch: 'linear-gradient(135deg,#22c55e 0%,#0ea5e9 28%,#7c3aed 50%,#111111 50%)'
+              swatch: 'linear-gradient(135deg,#22c55e 0%,#0ea5e9 28%,#7c3aed 50%,#111111 50%)',
+              images: [8]
             },
             {
               key: 'tornasol-024-blanco',
               label: 'Tornasol 024 blanco · alza 50 mm',
-              swatch: 'linear-gradient(135deg,#22c55e 0%,#0ea5e9 28%,#7c3aed 50%,#f8fafc 50%)'
+              swatch: 'linear-gradient(135deg,#22c55e 0%,#0ea5e9 28%,#7c3aed 50%,#f8fafc 50%)',
+              images: [9]
             }
           ]
         }

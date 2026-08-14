@@ -47,6 +47,7 @@ python scripts/build-icon-fonts.py --check                                      
 python scripts/qa/carga-no-bloqueante.py                                           # ningún script bloquea el pintado
 node scripts/qa/volver-atras.js [base]                                             # volver atrás deja donde tocaba
 node scripts/qa/compat-variantes.js [base]                                         # nadie con ejes se añade de un clic
+node scripts/qa/fotos-por-variante.js                                              # mover un color cambia la foto
 ```
 
 Deploy is FTP via `deploy.py` (also wired into VS Code tasks: "Deploy dry-run", "Deploy whitelist", "Deploy selected files"). **Deploy selectively** — `--all-changed` is intentionally gated behind `--allow-bulk`. Secrets come from `.env`/`.env.local` (`SCOOTSHOP_FTP_PASSWORD`), never the command line.
@@ -139,6 +140,18 @@ The checkout chip printed `Color: G2 PRO VMP` instead of `Modelo: …`. The hypo
 3. **`SS_ATTRS.ready` was resolving without a catalogue** — the note "proven correct" only held for fichas. `anunciar()` decided "this page has no catalogue" by looking for the `products.js` tag **once, at t=0**. On `/checkout` the catalogue is appended later by `global-assets-app.js` (measured: core 67 ms, tag ~78 ms), so `ready` resolved with 0 products and any repaint hanging off it ran too early. Same class as the two dead ends already burned (transient state read as permanent), third disguise. Now the terminal condition is a document **milestone**: resolve when the catalogue appears, or when `load` fires without it. `load` waits for dynamically inserted scripts (measured with the catalogue delayed 2.5 s: load 2866 ms, catalogue 2876 ms, `ready` 2876 ms with 44 products). Do **not** go back to listening on the tag's own `load`/`error`: the tag is discovered by polling, so its `error` can have fired already — measured with the catalogue aborted, `ready` then never resolved at all and the drawer never repainted.
 
 On top of that both summaries repaint once on `SS_ATTRS.ready` (the single frontier, as in the drawer), rewriting **only the chip text** — never the list HTML, which would re-download the photos that `check-image-dupes.js` guards.
+
+**Una opción sin `images` dejaba el selector MUDO, no solo sin foto.** En
+`applyVariant` había un `if (!selectedItems.length) return;` y se llevaba por delante
+todo lo que venía después: el rótulo del valor elegido, el contenido de la variante y el
+acento de serie. El manillar WAKE Downhill y el NANLIO —los dos únicos productos cuyo eje
+principal no declaraba `images`— se veían así: pulsabas «Azul», el círculo se marcaba, y
+el rótulo seguía diciendo «Negro y blanco» con la misma foto. Dos arreglos, porque eran
+dos fallos: el dato (cada opción declara su foto) y el código (sin foto solo se deja de
+cambiar la foto). Ojo con el respaldo del núcleo: `fotoDe()` cae a la foto de portada, así
+que "hay foto" no basta como comprobación — la regla es que **mover un círculo cambie la
+foto**, y eso es lo que mide `scripts/qa/fotos-por-variante.js` (solo ejes `swatch`: una
+medida puede compartir foto con toda legitimidad).
 
 **Preguntarle al núcleo antes de que exista devuelve "no hay ejes", y eso vende mal.**
 En una ficha, `product-enhancements.js` se enlaza con etiqueta estática y el núcleo lo

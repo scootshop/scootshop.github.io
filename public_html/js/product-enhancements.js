@@ -833,12 +833,19 @@
         ? indexes.map(function (index) { return originalItems[index - 1]; }).filter(Boolean)
         : [];
 
-      if (!selectedItems.length) return;
-
-      if (animate) {
-        swapMainImageAnimated(withVersion(selectedItems[0].src), selectedItems[0].alt);
-      } else {
-        setMainImageSrc(withVersion(selectedItems[0].src), selectedItems[0].alt);
+      /* SIN FOTO NO SE VUELVE UNO POR DONDE HA VENIDO. Aquí había un
+         `if (!selectedItems.length) return;` y se llevaba por delante todo lo que viene
+         después: el rótulo del valor elegido, el contenido de la variante y el acento
+         de serie. Una opción sin fotos declaradas dejaba el selector mudo — se marcaba
+         el círculo, pero el rótulo seguía diciendo el color anterior. Pasó con el
+         manillar WAKE Downhill y con el NANLIO, los dos únicos productos cuyo eje
+         principal no declaraba `images`. Lo único que depende de la foto es la foto. */
+      if (selectedItems.length) {
+        if (animate) {
+          swapMainImageAnimated(withVersion(selectedItems[0].src), selectedItems[0].alt);
+        } else {
+          setMainImageSrc(withVersion(selectedItems[0].src), selectedItems[0].alt);
+        }
       }
 
       if (activeColorLabel) {
@@ -859,14 +866,16 @@
       // color no se marcaba ninguna miniatura y, de paso, el centrado de abajo
       // no llegaba a ejecutarse. Se comparan las rutas sin la query.
       var sinVersion = function (value) { return String(value || '').split('?')[0]; };
-      var objetivo = sinVersion(selectedItems[0].src);
-      var thumbButtons = thumbsWrap.querySelectorAll('.thumb');
       var activeThumb = null;
-      for (var i = 0; i < thumbButtons.length; i++) {
-        var thumbButton = thumbButtons[i];
-        var isActive = sinVersion(thumbButton.getAttribute('data-img')) === objetivo;
-        if (isActive) activeThumb = thumbButton;
-        thumbButton.classList.toggle('active', isActive);
+      if (selectedItems.length) {
+        var objetivo = sinVersion(selectedItems[0].src);
+        var thumbButtons = thumbsWrap.querySelectorAll('.thumb');
+        for (var i = 0; i < thumbButtons.length; i++) {
+          var thumbButton = thumbButtons[i];
+          var isActive = sinVersion(thumbButton.getAttribute('data-img')) === objetivo;
+          if (isActive) activeThumb = thumbButton;
+          thumbButton.classList.toggle('active', isActive);
+        }
       }
 
       if (allowThumbScroll && activeThumb && thumbsWrap.scrollTo) {
