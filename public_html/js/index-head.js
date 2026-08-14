@@ -205,7 +205,7 @@
     // Los `defer` se ejecutan en orden de documento, así que el orden manda.
     appendDeferredScript('/js/products-menu.js', ver);
     // Subir SIEMPRE esta revisión al tocar js/index.js (se sirve como inmutable).
-    appendDeferredScript('/js/index.js', ver, '20260814-1');
+    appendDeferredScript('/js/index.js', ver, '20260814-2');
   };
 
   const boot = () => {

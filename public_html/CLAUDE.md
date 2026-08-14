@@ -228,6 +228,26 @@ Reglas que no se pueden romper:
   aparece en una vuelta real, y dura ~670 ms en móvil lento (antes 816 ms en TODA carga
   de la home). Desaparecerá del todo el día que la parrilla venga en el HTML.
 
+**Hornear la parrilla de la home: probado, medido y DESCARTADO (por ahora).** La causa
+raíz de todo esto es que `index.html` trae `[data-home-catalog-root]` **vacío** y los 44
+productos —12 600 px— los pinta el JS. `scripts/build-home-catalog.js` los mete en el
+HTML pidiéndole el marcado al mismo código que lo pinta, y `renderHomeCatalog()` se
+salta el repintado cuando la firma coincide (reescribir `innerHTML` con lo mismo tira
+las `<img>` y las vuelve a pedir). Funciona: primer frame con 44 tarjetas y 12 489 px de
+alto, cero fotos duplicadas, animación de entrada intacta, y el velo de la vuelta baja
+de 670 a 340 ms. **Y aun así sale perdiendo**, A/B con servidores concurrentes, 4 tomas:
+
+| | score | FCP | LCP | SI |
+|---|---|---|---|---|
+| sin hornear | 72/71/69/69 | 2418 | 10704 | 2959 |
+| horneada | 69/66/67/67 | 2865 | 12613 | 4393 |
+
+84 KB más de HTML, 44 subárboles más que maquetar y una decena de fotos de tarjeta que
+el navegador descubre a los 220 ms y le disputan el ancho de banda a la portada, que es
+el LCP. Como la vuelta atrás YA acierta al píxel sin esto, no compensa. Se conserva el
+generador —y el `ss-sin-entrada` que necesita— por si algún día el SEO de la home pesa
+más que cuatro puntos: es un comando y desplegar `index.html`.
+
 `node scripts/qa/volver-atras.js [base]` recorre los cinco caminos con un navegador de
 verdad y dice `VOLVER_OK`. Dos trampas al escribir pruebas de scroll, las dos pisadas:
 `elemento.click()` de Playwright **centra el elemento antes de pulsarlo** y mueve el

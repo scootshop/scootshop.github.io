@@ -676,18 +676,34 @@
     rail.innerHTML = items.join('');
   };
 
-  const renderHomeCatalog = (categoryKey = activeHomeCategoryKey) => {
-    const root = document.querySelector('[data-home-catalog-root]');
-    if (!root) return;
+  /* Firma corta y estable del marcado. No es criptografía: solo tiene que cambiar
+     cuando cambie una coma, para saber si lo que ya hay pintado en el HTML es
+     EXACTAMENTE lo que este código pintaría. */
+  const firmaDeMarcado = (html) => {
+    let h1 = 0x811c9dc5;
+    let h2 = 0x01000193;
+    for (let i = 0; i < html.length; i++) {
+      const c = html.charCodeAt(i);
+      h1 = ((h1 ^ c) * 16777619) >>> 0;
+      h2 = ((h2 + c) * 31 + (h2 >>> 7)) >>> 0;
+    }
+    return h1.toString(36) + '-' + h2.toString(36) + '-' + html.length.toString(36);
+  };
 
-    activeHomeCategoryKey = normalizeHomeCategoryKey(categoryKey);
-    syncHomeCategoryButtons();
+  /* El marcado del catálogo, como TEXTO. Está separado del pintado porque hay dos
+     consumidores: este archivo, que lo mete en el DOM, y scripts/build-home-catalog.js,
+     que lo guarda dentro de index.html para que la parrilla exista desde el primer
+     pintado. Un solo generador, dos destinos — el mismo patrón que attributes-index. */
+  const buildHomeCatalogMarkup = (categoryKey) => {
+    const clave = normalizeHomeCategoryKey(categoryKey);
+    const orderedCategories = getOrderedHomeCategories(clave);
+    const hasSelectedCategory = orderedCategories.some((category) => category.key === clave);
+    const leadingMarkup = hasSelectedCategory ? '' : buildHomeEmptyStateMarkup(clave);
+    return { clave, orderedCategories, html: leadingMarkup + marcadoDeCategorias(orderedCategories) };
+  };
 
-    const orderedCategories = getOrderedHomeCategories(activeHomeCategoryKey);
-    const hasSelectedCategory = orderedCategories.some((category) => category.key === activeHomeCategoryKey);
-    const leadingMarkup = hasSelectedCategory ? '' : buildHomeEmptyStateMarkup(activeHomeCategoryKey);
-
-    root.innerHTML = leadingMarkup + orderedCategories.map((category) => {
+  const marcadoDeCategorias = (orderedCategories) => {
+    return orderedCategories.map((category) => {
       const categoryHeader = category.showHeaderOnHome
         ? '<section class="catalog-category"><div class="container"><h2>' + esc(category.homeTitle || category.label || '') + '</h2>' + (category.homeDescription ? '<p>' + esc(category.homeDescription) + '</p>' : '') + '</div></section>'
         : '';
@@ -718,7 +734,31 @@
         + categoryFallback
       + '</section>';
     }).join('');
+  };
 
+  const renderHomeCatalog = (categoryKey = activeHomeCategoryKey) => {
+    const root = document.querySelector('[data-home-catalog-root]');
+    if (!root) return;
+
+    activeHomeCategoryKey = normalizeHomeCategoryKey(categoryKey);
+    syncHomeCategoryButtons();
+
+    const { orderedCategories, html } = buildHomeCatalogMarkup(activeHomeCategoryKey);
+    const firma = firmaDeMarcado(html);
+
+    /* Si la parrilla YA viene en el HTML y es exactamente esta, no se toca. Reescribir
+       `innerHTML` con lo mismo no sería inocuo: el navegador tira las <img> y las vuelve
+       a pedir (es justo lo que vigila scripts/qa/check-image-dupes.js), y de paso
+       destruiría el elemento al que la vuelta atrás se está anclando.
+       La firma cambia si cambia un precio en el panel, y entonces sí se repinta. */
+    if (root.getAttribute('data-home-catalog-firma') === firma && root.firstElementChild) {
+      root.classList.add('is-hydrated');
+      renderHomeSeriesRail(orderedCategories);
+      return;
+    }
+
+    root.innerHTML = html;
+    root.setAttribute('data-home-catalog-firma', firma);
     root.classList.add('is-hydrated');
 
     renderHomeSeriesRail(orderedCategories);
@@ -1608,6 +1648,13 @@
   // API compartida para reutilizar el mismo render/hidratación de tarjetas fuera de Home.
   window.SCOOTSHOP_HOME_CARD_API = {
     buildCardMarkup: (product, productIndex) => buildCardMarkup(product, Number(productIndex) || 0),
+    /* Lo usa scripts/build-home-catalog.js para hornear la parrilla dentro de
+       index.html: pide el marcado y su firma al MISMO código que lo pinta, así no hay
+       dos generadores de la misma verdad que puedan separarse. */
+    catalogoHorneable: (categoryKey) => {
+      const { clave, html } = buildHomeCatalogMarkup(categoryKey);
+      return { clave, html, firma: firmaDeMarcado(html) };
+    },
     hydrate: () => {
       initCards();
       initDgtTooltips();

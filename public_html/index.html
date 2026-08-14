@@ -20,8 +20,13 @@
        es el único que mueve el scroll. `history.state` distingue una vuelta de una
        visita nueva: la marca global de antes no podía, y entrar por el logo te
        dejaba a mitad del catálogo. -->
-  <style>html.ss-volviendo body{visibility:hidden}</style>
-  <script>(function(){try{if('scrollRestoration' in history)history.scrollRestoration='manual';var s=history.state,v=!!(s&&s.ss&&(s.ss.id||s.ss.y>0));window.SS_SCROLL={volviendo:v};var d=document.documentElement;if(v){d.classList.add('ss-volviendo');setTimeout(function(){d.classList.remove('ss-volviendo');},1800);return;}if(location.hash)return;var t=function(){try{window.scrollTo(0,0);}catch(e){}};t();document.addEventListener('DOMContentLoaded',function(){t();requestAnimationFrame(function(){t();requestAnimationFrame(t);});},{once:true});}catch(e){}})();</script>
+  <!-- `ss-sin-entrada`: la parrilla viene horneada en el HTML con la clase de la
+       animación de entrada (opacidad 0), y al VOLVER atrás esa animación no se
+       reproduce —nadie quiere que le presenten otra vez lo que ya había visto—, así que
+       las tarjetas se enseñan sin transición. Va aquí y no en main.css porque este HTML
+       se sirve sin caché: cambiarlo no obliga a subir la versión global. -->
+  <style>html.ss-volviendo body{visibility:hidden}html.ss-sin-entrada .card.reveal-ready{opacity:1;transform:none;transition:none}</style>
+  <script>(function(){try{if('scrollRestoration' in history)history.scrollRestoration='manual';var s=history.state,v=!!(s&&s.ss&&(s.ss.id||s.ss.y>0));window.SS_SCROLL={volviendo:v};var d=document.documentElement;if(v){d.classList.add('ss-volviendo');d.classList.add('ss-sin-entrada');setTimeout(function(){d.classList.remove('ss-volviendo');},1800);return;}if(location.hash)return;var t=function(){try{window.scrollTo(0,0);}catch(e){}};t();document.addEventListener('DOMContentLoaded',function(){t();requestAnimationFrame(function(){t();requestAnimationFrame(t);});},{once:true});}catch(e){}})();</script>
 
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
