@@ -1664,9 +1664,6 @@
     // solo existe en index.html.
     if (!document.querySelector('[data-hero-carousel]')) return;
 
-    // Disable browser's scroll restoration — we handle it ourselves after render
-    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-
     initHomeCategoryNav();
     renderHomeCatalog(activeHomeCategoryKey);
     // Fija la posición sticky del rail antes del primer paint para que no salte.
@@ -1692,73 +1689,19 @@
       hashTarget = document.getElementById(hashId);
     }
 
-    const savedY = sessionStorage.getItem('ss_scrollY');
-    let isBack = false;
-
+    /* El ancla de la URL (p. ej. /#faq desde el menú) sí es cosa de la home: se
+       calcula tras pintar el catálogo, porque antes el destino no existe. Volver
+       atrás NO se toca aquí — de eso se ocupa js/scroll-memoria.js, el único dueño
+       del scroll, que además sabe distinguir una vuelta de una visita nueva. */
     if (hashTarget) {
-      // El ancla tiene PRIORIDAD sobre la restauración: si no, al cargar la home
-      // con #faq la restauración de ss_scrollY nos dejaría en otra posición
-      // (y el scroll nativo cae mal porque el catálogo lo pinta JS). Se calcula tras
-      // renderizar el catálogo, descontando la cabecera fija, y de forma instantánea.
-      sessionStorage.removeItem('ss_scrollY');
       const header = document.getElementById('siteHeader');
       const headerOffset = header ? header.offsetHeight : 0;
       jumpInstant(hashTarget.getBoundingClientRect().top + window.scrollY - headerOffset);
-    } else if (savedY) {
-      // Volver a la home: restaurar la posición previa de forma instantánea
-      // (p. ej. seguías en serie IX).
-      isBack = true;
-      const targetY = parseInt(savedY, 10) || 0;
-      jumpInstant(targetY);
-      sessionStorage.removeItem('ss_scrollY');
-
-      // Reaseguro agnóstico del navegador: en móvil (iOS Safari no soporta
-      // overflow-anchor; la barra de direcciones y las fuentes recolocan la
-      // maquetación) la posición puede desviarse justo tras restaurar. Re-aplicamos
-      // durante unos frames y tras cargar las fuentes, deteniéndonos en cuanto el
-      // usuario hace scroll para no secuestrar su interacción.
-      let userMoved = false;
-      const onUserMove = function () { userMoved = true; };
-      window.addEventListener('wheel', onUserMove, { passive: true, once: true });
-      window.addEventListener('touchmove', onUserMove, { passive: true, once: true });
-      window.addEventListener('keydown', onUserMove, { once: true });
-      let frame = 0;
-      const reassert = function () {
-        if (userMoved) return;
-        if (Math.abs(window.scrollY - targetY) > 1) jumpInstant(targetY);
-        if (++frame < 10) requestAnimationFrame(reassert);
-      };
-      requestAnimationFrame(reassert);
-      if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {
-        document.fonts.ready.then(function () {
-          if (!userMoved && Math.abs(window.scrollY - targetY) > 1) jumpInstant(targetY);
-        }).catch(function () {});
-      }
     }
 
-    // Revelamos el contenido (oculto por el inline de <head>) SOLO cuando la
-    // maquetación está estable (fuentes cargadas). Clave en móvil: iOS WebKit no
-    // tiene scroll anchoring, así que el reflow de fuentes tras restaurar movía el
-    // contenido bajo el scroll fijo y se veía el salto. Al revelar ya estabilizado,
-    // aparece directamente en su sitio. Failsafe por tiempo (además del del <head>).
-    (function revealWhenStable() {
-      var de = document.documentElement;
-      if (!de.classList.contains('ss-restoring')) return;
-      var done = false;
-      var reveal = function () { if (done) return; done = true; de.classList.remove('ss-restoring'); };
-      var afterPaint = function () { requestAnimationFrame(function () { requestAnimationFrame(reveal); }); };
-      if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {
-        document.fonts.ready.then(afterPaint).catch(reveal);
-      } else {
-        afterPaint();
-      }
-      setTimeout(reveal, 600);
-    })();
-
-    // Save scroll position before leaving the page
-    window.addEventListener('pagehide', () => {
-      sessionStorage.setItem('ss_scrollY', String(window.scrollY));
-    });
+    // Al volver, las tarjetas no se presentan con su animación de entrada: el cliente
+    // ya las había visto. Lo decide el arranque en línea del <head>.
+    const isBack = !!(window.SS_SCROLL && window.SS_SCROLL.volviendo);
 
     renderSharedProductMenus();
     initDesktopProductsMenu();

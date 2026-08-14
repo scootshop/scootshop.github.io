@@ -2163,6 +2163,11 @@
     relatedEl.className = 'related-products';
     relatedEl.setAttribute('aria-label', 'Productos relacionados');
     relatedEl.setAttribute('data-home-catalog-root', '');
+    /* Estas tarjetas se barajan en cada carga (`shuffle` unas líneas más arriba), así
+       que su `id` NO es una posición estable de la página: al volver atrás, la que
+       estabas mirando puede no existir. js/scroll-memoria.js se salta esta zona al
+       elegir dónde anclar la vuelta. */
+    relatedEl.setAttribute('data-scroll-volatil', '');
     var relatedMounted = false;
     var loadFallbackTimer = 0;
 

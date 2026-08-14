@@ -45,6 +45,7 @@ node scripts/qa/check-image-dupes.js                                            
 python scripts/build-web-fonts.py --check                                          # cada hoja de fuentes, con sus .woff2
 python scripts/build-icon-fonts.py --check                                         # ningún icono sin glifo
 python scripts/qa/carga-no-bloqueante.py                                           # ningún script bloquea el pintado
+node scripts/qa/volver-atras.js [base]                                             # volver atrás deja donde tocaba
 ```
 
 Deploy is FTP via `deploy.py` (also wired into VS Code tasks: "Deploy dry-run", "Deploy whitelist", "Deploy selected files"). **Deploy selectively** — `--all-changed` is intentionally gated behind `--allow-bulk`. Secrets come from `.env`/`.env.local` (`SCOOTSHOP_FTP_PASSWORD`), never the command line.
@@ -186,6 +187,53 @@ When editing CSS/JS, bump the version (`bump-assets-version.ps1`) so clients pic
 - **Duplicate downloads.** When HTML and JS disagree on the URL shape (one with `?v=`, one without), the browser starts fetching one, some code rewrites the `src`, it discards the in-flight request and fetches the other. The image goes blank in between — that is the flicker users report. It peaked at 25 photos downloaded twice on a single page.
 
 The bump script leaves images alone by default (`-ConImagenes` re-versions them, and reintroduces the mismatch above). Two guards enforce this, both listed under Smoke / QA: `check-image-cache.ps1` (static) and `check-image-dupes.js` (drives a real browser and watches traffic — needed because the worst offender never contained the string `?v=`; it was a generic `bumpAttr(img, "src", ver)` in `global-assets-app.js`). Run both after touching anything that emits image URLs.
+
+### Volver atrás: `js/scroll-memoria.js` es el ÚNICO que mueve el scroll (14 Aug 2026)
+
+Antes había **cinco** trozos de código tocando la posición, cada uno colgado de un
+evento distinto y sin nadie que arbitrase: un `<script>` en línea que escondía la home
+entera si existía `sessionStorage.ss_scrollY`; un bloque de 68 líneas en `index.js` que
+saltaba al píxel guardado y lo re-aplicaba diez frames; el inline de cada ficha, que
+forzaba el tope cuatro veces; `global-assets.js`, con `scrollRestoration='manual'`
+global más otro tope forzado en `pageshow`; y dos comprobadores de versión que pueden
+hacer `location.reload()`. Ganaba el que llegase más tarde, y de ahí las quejas: unas
+veces volvías a tu sitio, otras arriba, otras a un sitio cualquiera.
+
+Todo eso está **borrado**. Ahora manda un módulo, con tres decisiones:
+
+1. **La posición vive en `history.state`, no en una marca global de la pestaña.** Ese
+   estado viaja con SU entrada del historial: al pulsar "atrás" está, en una visita
+   nueva no está. Antes era imposible distinguirlo y entrar por el logo te devolvía a
+   mitad del catálogo — medido, y ahora es un caso del guardián.
+2. **Se guarda un ELEMENTO, no un píxel** (`{id, dy}` con el desplazamiento respecto al
+   borde superior). Las tarjetas ya traen identidad estable (`id="p-s3"`). El píxel se
+   aplica igualmente al instante como aproximación, y el elemento manda en cuanto
+   existe: en la home lo pinta el JS del catálogo ~800 ms después de la aproximación.
+3. **Se re-ancla hasta agotar el plazo (3 s), no hasta que la altura parezca quieta.**
+   Parar en cuanto la altura llevaba tres frames igual estaba mal: se queda quieta un
+   instante mientras las fotos siguen cargando. Medido: paraba a 853 px del sitio.
+
+Reglas que no se pueden romper:
+
+- **Nadie más llama a `window.scrollTo()` para posicionar una página.** El ancla de la
+  URL (`/#faq`) sí sigue en `index.js`, porque el destino no existe hasta que el
+  catálogo se pinta; es la única excepción y está comentada allí.
+- **Si `pageshow.persisted` es true no se hace nada**: el navegador ya ha restaurado, y
+  lo hace mejor. Forzar el tope ahí era justo lo contrario de lo que el cliente quiere.
+- **Una zona cuyo contenido cambia en cada carga se marca con `data-scroll-volatil`.**
+  "También te puede interesar" hace `shuffle(related)`: su `id` no es una posición, y
+  anclar ahí te lleva a otro producto. Está puesto en `product-enhancements.js`.
+- El velo (`html.ss-volviendo`) lo pone el inline del `<head>` —hay que decidirlo antes
+  del primer pintado— y lo quita el módulo en cuanto la posición es creíble. Solo
+  aparece en una vuelta real, y dura ~670 ms en móvil lento (antes 816 ms en TODA carga
+  de la home). Desaparecerá del todo el día que la parrilla venga en el HTML.
+
+`node scripts/qa/volver-atras.js [base]` recorre los cinco caminos con un navegador de
+verdad y dice `VOLVER_OK`. Dos trampas al escribir pruebas de scroll, las dos pisadas:
+`elemento.click()` de Playwright **centra el elemento antes de pulsarlo** y mueve el
+scroll que estás midiendo (parecía un fallo de 1 488 px y era la prueba); y la tarjeta
+de la home **no es un enlace**, es un `<article>` con `location.href` en el manejador,
+así que buscar `a.card` no encuentra nada.
 
 ### Rendimiento: qué se hizo y qué NO se puede tocar (13 Aug 2026)
 

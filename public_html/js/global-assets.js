@@ -1,24 +1,13 @@
 ﻿(function () {
   "use strict";
 
-  // En todas las pÃ¡ginas (no solo el home): desactivar la restauraciÃ³n de scroll
-  // nativa del navegador. Sin esto, las fichas hacÃ­an su propia restauraciÃ³n â€”que
-  // con scroll-behavior:smooth se ve ANIMADA y a veces deja la pÃ¡gina en una
-  // posiciÃ³n previa (p. ej. abajo)â€” al volver/entrar en iOS WebKit. Con 'manual',
-  // las fichas abren arriba; el bfcache sigue restaurando el atrÃ¡s/adelante real.
-  try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch (e) {}
-
-  // En fichas de producto: abrir SIEMPRE arriba. Al re-entrar desde el bfcache
-  // (volver/adelante en iOS WebKit) el navegador las restauraba en una posiciÃ³n
-  // previa (p. ej. los botones de compra); forzamos el tope solo en ese caso
-  // (pageshow persistido), sin arrancar al usuario que ya estÃ¡ leyendo.
-  try {
-    window.addEventListener('pageshow', function (e) {
-      if (e && e.persisted && isProductDetailPath()) {
-        try { window.scrollTo(0, 0); } catch (_) {}
-      }
-    });
-  } catch (e) {}
+  /* AQUI NO SE TOCA EL SCROLL. Antes habia dos cosas: `scrollRestoration = manual`
+     para todo el sitio y un `scrollTo(0,0)` al volver del bfcache en las fichas. Las
+     dos se han ido a js/scroll-memoria.js, que es el unico dueno de la posicion.
+     Forzar el tope al volver del bfcache era ademas lo contrario de lo que el cliente
+     quiere: leyendo una ficha, tocar un accesorio y volver le devolvia arriba
+     (medido: -2341 px). Las paginas que no participan (checkout, cuenta, pago,
+     pedido) se quedan con la restauracion nativa del navegador, que ahi acierta. */
 
   function enforceLightColorScheme() {
     if (!document || !document.head || !document.documentElement) return;
