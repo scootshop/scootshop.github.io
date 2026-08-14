@@ -1173,7 +1173,6 @@
       var summaryCard = document.getElementById('summaryCard');
       var methodsCard = document.getElementById('methodsCard');
       var methodDetailCard = document.getElementById('methodDetailCard');
-      var securityBadge = document.getElementById('securityBadge');
 
 
       function buildCheckoutStepUrl(){
@@ -1209,7 +1208,6 @@
         if(summaryCard) summaryCard.hidden = true;
         if(methodsCard) methodsCard.hidden = true;
         if(methodDetailCard) methodDetailCard.hidden = true;
-        if(securityBadge) securityBadge.style.display = 'none';
       } else {
         if(sumName) sumName.textContent = name;
         if(sumSku && sku) {
@@ -2215,18 +2213,6 @@
         });
 
         wrap.appendChild(btn);
-
-        // Señales de confianza bajo el botón.
-        var trust = document.createElement('div');
-        trust.className = 'hosted-trust';
-        trust.innerHTML =
-          '<span class="hosted-trust__item">'
-          + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'
-          + 'Pago cifrado SSL</span>'
-          + '<span class="hosted-trust__item">'
-          + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>'
-          + (mode === 'klarna' ? 'Compra protegida' : 'Protección al comprador') + '</span>';
-        wrap.appendChild(trust);
 
         ui.mount.appendChild(wrap);
         // El flujo hosted solo monta un botón: libera el min-height reservado

@@ -87,8 +87,7 @@
       margin-top:0 !important;
     }
     #methodsCard,
-    #methodDetailCard,
-    #securityBadge{
+    #methodDetailCard{
       grid-column:1;
     }
 
@@ -255,22 +254,6 @@
       white-space:nowrap;
       opacity:.82;
     }
-    .sum-trust{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:6px;
-      color:var(--muted);
-      font-size:.74rem;
-      font-weight:700;
-      opacity:.82;
-    }
-    .sum-trust svg{
-      width:12px;
-      height:12px;
-      flex:0 0 auto;
-    }
-
     .order-summary__product-list{
       display:grid;
       gap:10px;
@@ -1010,30 +993,6 @@
     .btn-hosted-pay:active{ transform:translateY(0); }
     .btn-hosted-pay:disabled{ opacity:.6; cursor:default; transform:none; filter:none; box-shadow:none; }
 
-    /* Fila de señales de confianza bajo el botón hosted */
-    .hosted-trust{
-      display:flex;
-      flex-wrap:wrap;
-      align-items:center;
-      justify-content:center;
-      gap:8px 16px;
-      margin-top:2px;
-    }
-    .hosted-trust__item{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      color:#5b6470;
-      font-size:.76rem;
-      font-weight:700;
-      letter-spacing:.01em;
-    }
-    .hosted-trust__item svg{
-      width:14px;
-      height:14px;
-      flex:0 0 auto;
-      opacity:.7;
-    }
     .loading-dots{
       display:inline-flex;
       align-items:center;
@@ -1147,22 +1106,6 @@
     /* Override main.css .order-summary__row display:flex that breaks [hidden] on fee/discount rows */
     .order-summary__row[hidden]{ display:none !important; }
 
-    /* Security badge */
-    .security-badge{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      flex-wrap:wrap;
-      gap:7px;
-      padding:10px 0 2px;
-      color:#0f7a3e;
-      font-size:.78rem;
-      font-weight:800;
-      text-align:center;
-      line-height:1.4;
-    }
-    .security-badge svg{ width:14px; height:14px; flex:0 0 auto; opacity:.7; }
-
     footer{
       text-align:center;
       color:var(--muted);
@@ -1228,7 +1171,6 @@
       }
       #methodsCard,
       #methodDetailCard,
-      #securityBadge,
       #emptyState{
         grid-column:auto;
       }
@@ -1417,10 +1359,6 @@
       .paypal-note{
         font-size:.78rem;
       }
-      .security-badge{
-        padding:8px 8px 0;
-        font-size:.72rem;
-      }
       footer{
         font-size:.8rem;
       }
@@ -1470,9 +1408,6 @@
       #paypal-wrap{
         padding:0;
       }
-      .security-badge{
-        gap:5px;
-      }
     }
 
     /* ==========================================================
@@ -1513,40 +1448,6 @@
     }
     .pay-tab[aria-selected="true"] .pay-radio::after{
       background:#111315;
-    }
-
-    /* Summary card hierarchy handled by /css/main.css */
-
-    /* Trust line */
-    .sum-trust{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:6px;
-      color:var(--muted);
-      font-size:.74rem;
-      font-weight:700;
-      opacity:.82;
-    }
-    .sum-trust svg{
-      width:12px;
-      height:12px;
-      flex:0 0 auto;
-    }
-
-    /* Security badge */
-    .security-badge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:8px 14px;
-      border-radius:999px;
-      background:rgba(17,143,74,.08);
-      color:#0f7a3e;
-      font-weight:800;
-      font-size:.78rem;
-      letter-spacing:.02em;
-      border:1px solid rgba(17,143,74,.18);
     }
 
     /* Back catalog link */

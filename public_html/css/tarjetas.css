@@ -1711,7 +1711,10 @@ footer a:hover{ color:var(--ink); }
 
 /* Los SELLOS de confianza (.trust-badges / .ship-trust) se eliminaron: el de "Envío
    gratis" repetía la primera línea del bloque de envío, que está justo encima con el
-   mismo icono, y los otros dos no añadían nada que la ficha no diga ya. */
+   mismo icono, y los otros dos no añadían nada que la ficha no diga ya.
+   En agosto de 2026 se quitaron también los del checkout (.trust-bar) y los de /pago
+   (.sum-trust, .security-badge, .hosted-trust). No quedan sellos en ninguna página: si
+   alguien va a añadir uno, esta es la tercera vez que se retiran. */
 
 /* ── 5) Related Products ── */
 .related-products{
