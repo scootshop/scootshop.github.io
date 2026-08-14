@@ -1515,7 +1515,17 @@
      OJO: NO lleva data-product-cart-btn="true". Ese atributo significa "este
      botón es dueño del selector de color de la ficha"; puesto aquí, el mando
      limitador se añadiría con el color elegido para el patinete. */
-  (function compatibleAccessories() {
+  /* SE ESPERA AL NÚCLEO ANTES DE DECIDIR NADA. Esto se pintaba en cuanto se ejecutaba
+     el archivo, y para entonces `window.SS_ATTRS` todavía no existe: lo añade
+     global-assets.js y llega unos 200 ms más tarde (medido en la ficha: este archivo a
+     los 380 ms, el núcleo a los 586). Preguntarle a un núcleo que no está devolvía cero
+     ejes, o sea "este accesorio no tiene nada que elegir", y el manillar WAKE Downhill
+     —siete colores— salía con el botón «+» de añadir directo. Un pedido así llega sin
+     saber qué color enviar.
+     Los demás accesorios con ejes se libraban por casualidad: declaran `variantHint`,
+     que es un texto del catálogo y no necesita núcleo. Ese campo estaba tapando el
+     fallo, no arreglándolo. */
+  ssListo().then(function compatibleAccessories() {
     var panelInner = panel.querySelector('.panel-inner');
     var desc = panelInner && panelInner.querySelector('.desc');
     if (!panelInner || !desc) return;
@@ -1881,7 +1891,7 @@
       precargarSiguientes();
       arrancar();
     })();
-  })();
+  });
 
 
   /* ══════════════════════════════════════════════════════════════════════════

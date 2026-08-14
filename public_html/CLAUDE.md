@@ -46,6 +46,7 @@ python scripts/build-web-fonts.py --check                                       
 python scripts/build-icon-fonts.py --check                                         # ningún icono sin glifo
 python scripts/qa/carga-no-bloqueante.py                                           # ningún script bloquea el pintado
 node scripts/qa/volver-atras.js [base]                                             # volver atrás deja donde tocaba
+node scripts/qa/compat-variantes.js [base]                                         # nadie con ejes se añade de un clic
 ```
 
 Deploy is FTP via `deploy.py` (also wired into VS Code tasks: "Deploy dry-run", "Deploy whitelist", "Deploy selected files"). **Deploy selectively** — `--all-changed` is intentionally gated behind `--allow-bulk`. Secrets come from `.env`/`.env.local` (`SCOOTSHOP_FTP_PASSWORD`), never the command line.
@@ -138,6 +139,18 @@ The checkout chip printed `Color: G2 PRO VMP` instead of `Modelo: …`. The hypo
 3. **`SS_ATTRS.ready` was resolving without a catalogue** — the note "proven correct" only held for fichas. `anunciar()` decided "this page has no catalogue" by looking for the `products.js` tag **once, at t=0**. On `/checkout` the catalogue is appended later by `global-assets-app.js` (measured: core 67 ms, tag ~78 ms), so `ready` resolved with 0 products and any repaint hanging off it ran too early. Same class as the two dead ends already burned (transient state read as permanent), third disguise. Now the terminal condition is a document **milestone**: resolve when the catalogue appears, or when `load` fires without it. `load` waits for dynamically inserted scripts (measured with the catalogue delayed 2.5 s: load 2866 ms, catalogue 2876 ms, `ready` 2876 ms with 44 products). Do **not** go back to listening on the tag's own `load`/`error`: the tag is discovered by polling, so its `error` can have fired already — measured with the catalogue aborted, `ready` then never resolved at all and the drawer never repainted.
 
 On top of that both summaries repaint once on `SS_ATTRS.ready` (the single frontier, as in the drawer), rewriting **only the chip text** — never the list HTML, which would re-download the photos that `check-image-dupes.js` guards.
+
+**Preguntarle al núcleo antes de que exista devuelve "no hay ejes", y eso vende mal.**
+En una ficha, `product-enhancements.js` se enlaza con etiqueta estática y el núcleo lo
+añade `global-assets.js` de forma diferida: medido, el archivo corre a los 380 ms y
+`SS_ATTRS` llega a los 586. El selector de variantes ya esperaba con `ssListo()`; la caja
+de "Añade algo más" **no**, y por eso decidía con cero ejes que un accesorio no tenía nada
+que elegir. El manillar WAKE Downhill —siete colores— salía con el botón «+» de añadir
+directo: un pedido sin saber qué color enviar. Los demás accesorios con ejes se libraban
+por casualidad, porque declaran `variantHint`, que es texto plano del catálogo y no
+necesita núcleo; ese campo estaba TAPANDO el fallo, no arreglándolo. Regla: **todo lo que
+pregunte por ejes va dentro de `ssListo().then(...)`**, y `scripts/qa/compat-variantes.js`
+lo comprueba contra el DOM ya pintado (`COMPAT_OK`).
 
 **Compatibility and accessory families are declared too.** `UNIVERSAL_ACCESSORIES_BY_CATEGORY` — a table inside `data/products.js` listing which SKUs are offered for each product category — is gone: an accessory now declares `fitsCategories: ['electric-scooters', …]` and `getCompatibleAccessories()` asks the accessories instead of consulting a list nobody remembers to update. All 15 accessories declare `accessoryCategory`, there is a real table of families (`accessoryCategoryDefinitions` + `SCOOTSHOP_getAccessoryCategories()`), and the catalog validator now fails if an accessory has no family, names one that doesn't exist, or points `compatibleSkus`/`fitsCategories` at something that isn't in the catalog. Verified invariant: the compatible list of all 26 products is identical before and after.
 
