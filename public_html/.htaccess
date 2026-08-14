@@ -69,9 +69,23 @@ AddDefaultCharset UTF-8
   # Archivos dinámicos/bootstrap: sin cache persistente.
   # `product-overrides.js` lo escribe el PANEL: un precio cambiado tiene que verse ya,
   # así que no puede quedarse en la caché del navegador como el resto del JS.
-  <FilesMatch "^(products\.js|product-overrides\.js|asset-version\.json|index-head\.js|global-assets\.js|asset-sync\.js)$">
+  <FilesMatch "^(product-overrides\.js|asset-version\.json|index-head\.js|global-assets\.js|asset-sync\.js)$">
     Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
     Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+
+  # `data/products.js` SÍ se guarda, pero se revalida siempre.
+  # Estaba en el grupo de arriba desde cuando el panel lo reescribía con expresiones
+  # regulares. Ya no: el panel escribe `product-overrides.js` y este fichero solo cambia
+  # cuando una persona lo edita y despliega. Prohibir guardarlo costaba 121 KB (19,7 KB
+  # comprimidos) en CADA vista de CADA página, porque lo carga el sitio entero. Con
+  # `no-cache` el navegador lo guarda y pregunta en cada visita; el servidor responde
+  # 304 con unos cientos de bytes salvo que haya cambiado de verdad.
+  # Es la línea que peor escala: con cinco veces más productos serían ~100 KB por vista.
+  <FilesMatch "^products\.js$">
+    Header set Cache-Control "no-cache, must-revalidate, max-age=0"
+    Header unset Pragma
     Header set Expires "0"
   </FilesMatch>
 

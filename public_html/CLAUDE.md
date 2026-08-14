@@ -168,6 +168,38 @@ Reglas:
 
 `python scripts/qa/panel-precio.py [base]` hace el viaje completo contra el sitio real: cambia un precio por la ruta del panel, comprueba que la web lo refleja y que `products.js` no ha cambiado, y lo devuelve a su valor. **Ojo con el formato al probar**: el backend normaliza `1.111 €` a `1,11 €`.
 
+### Va a haber MUCHOS más productos: qué escala y qué no
+
+Hoy son 44. Las decisiones de arriba están medidas con 44, y varias cambian de signo al
+crecer. Lo que se sabe, con números reales:
+
+| pieza | hoy (44 productos) | qué pasa al multiplicar |
+|---|---|---|
+| `data/products.js` | 121 KB (19,7 KB gz) | **ya resuelto**: se cachea con revalidación (304) |
+| parrilla de la home | 90 KB de marcado, 12 600 px, ~800 ms de pintado | crece lineal: el velo de la vuelta atrás también |
+| fotos de la home | 32 imágenes, 513 KB en la vista por defecto | crece lineal; el `loading="lazy"` no basta en redes lentas |
+| hornear el HTML | cuesta 4 puntos | cuesta MÁS: la decisión no se invierte, empeora |
+| `scroll-memoria.js` | ancla por `id` | escala bien: es O(1), no depende de cuántos haya |
+| `attributes-index.json` | generado | crece, pero es del backend y no viaja al cliente |
+
+**`data/products.js` era la línea que peor escalaba y ya está arreglada.** Estaba en el
+grupo `no-store` del `.htaccess` desde cuando el panel lo reescribía con expresiones
+regulares. Desde el cambio a un solo escritor el panel toca `product-overrides.js` y no
+este fichero, así que prohibir guardarlo solo servía para reenviar 121 KB en **cada vista
+de cada página** — lo carga el sitio entero. Ahora es `no-cache`: el navegador lo guarda
+y pregunta siempre, y el servidor contesta **304 con el cuerpo vacío**. Medido: home
+121 046 B → ficha 0 B → checkout 0 B. `product-overrides.js` (535 B) y
+`asset-version.json` (30 B) siguen en `no-store`, que es donde tienen que estar.
+Comprobado con `panel-precio.py` que un precio cambiado desde el panel se sigue viendo al
+instante (`PANEL_E2E_OK`).
+
+**Lo que habrá que hacer y todavía no toca: dejar de pintar el catálogo entero de una
+vez.** Ni hornearlo ni pintarlo por JS aguantan 200 productos en una sola parrilla; la
+salida es paginar o cargar por tramos, y el sitio ya tiene el eje natural para hacerlo
+(las pestañas de categoría). Cuando llegue ese día, la memoria de scroll está preparada:
+ancla a un `id` de producto, no a un píxel, así que sobrevive a que la lista cambie de
+tamaño — solo habrá que guardar en `history.state` cuántos tramos había cargados.
+
 ### Asset versioning & cache-busting (important, easy to break)
 There is no content hashing. Cache-busting is a single global version string in `asset-version.json` (`{"v":"YYYYMMDD-N"}`) mirrored into each page's `<meta name="asset-version">`.
 
