@@ -6154,6 +6154,18 @@ switch ($route) {
     if ($sku === '' || $name === '' || $amount === '' || !preg_match('/^\d+(\.\d{2})?$/', $amount)) {
       json_out(['ok' => false, 'error' => 'bad_request'], 400);
     }
+
+    // Misma regla que stripe_checkout: un pedido SIN DATOS no se crea. Esta es la ruta
+    // PUBLICA de bizum y transferencia (la llama js/pago.js), no una ruta de admin.
+    $faltanEnvio = [];
+    if ($shipName === '')    $faltanEnvio[] = 'fullName';
+    if ($shipEmail === '' || !filter_var($shipEmail, FILTER_VALIDATE_EMAIL)) $faltanEnvio[] = 'email';
+    if ($shipAddress === '') $faltanEnvio[] = 'addressLine1';
+    if ($shipPostal === '')  $faltanEnvio[] = 'postalCode';
+    if ($shipCity === '')    $faltanEnvio[] = 'city';
+    if ($faltanEnvio) {
+      json_out(['ok' => false, 'error' => 'missing_shipping', 'fields' => $faltanEnvio], 400);
+    }
     if (!preg_match('/^[a-z]{3}$/', $currency)) {
       json_out(['ok' => false, 'error' => 'bad_currency'], 400);
     }
@@ -6226,10 +6238,17 @@ switch ($route) {
             payment_method = :payment_method,
             user_id = COALESCE(:user_id, user_id),
             payer_email = COALESCE(NULLIF(:payer_email, ''), payer_email),
-            ship_name = :ship_name, ship_email = :ship_email, ship_phone = :ship_phone,
-            ship_address = :ship_address, ship_address2 = :ship_address2, ship_city = :ship_city,
-            ship_province = :ship_province, ship_postal = :ship_postal, ship_country = :ship_country,
-            ship_notes = :ship_notes, updated_at = :updated_at
+            ship_name = COALESCE(NULLIF(:ship_name, ''), ship_name),
+            ship_email = COALESCE(NULLIF(:ship_email, ''), ship_email),
+            ship_phone = COALESCE(NULLIF(:ship_phone, ''), ship_phone),
+            ship_address = COALESCE(NULLIF(:ship_address, ''), ship_address),
+            ship_address2 = COALESCE(NULLIF(:ship_address2, ''), ship_address2),
+            ship_city = COALESCE(NULLIF(:ship_city, ''), ship_city),
+            ship_province = COALESCE(NULLIF(:ship_province, ''), ship_province),
+            ship_postal = COALESCE(NULLIF(:ship_postal, ''), ship_postal),
+            ship_country = COALESCE(NULLIF(:ship_country, ''), ship_country),
+            ship_notes = COALESCE(NULLIF(:ship_notes, ''), ship_notes),
+            updated_at = :updated_at
           WHERE id = :id
         ");
         $upd->execute([
@@ -6647,44 +6666,15 @@ switch ($route) {
   }
 
   case 'orders_create': {
-    $b = get_json_body();
-
-    $sku = trim((string)($b['sku'] ?? ''));
-    $name = trim((string)($b['name'] ?? ''));
-    $amount = trim((string)($b['amount'] ?? ''));
-    $currency = strtoupper(trim((string)($b['currency'] ?? 'EUR')));
-
-    if ($sku === '' || $name === '' || $amount === '' || !preg_match('/^\d+(\.\d{2})?$/', $amount)) {
-      json_out(['ok'=>false,'error'=>'bad_request'], 400);
-    }
-
-    $orderId = new_order_id();
-    $token = new_token();
-    $now = date('Y-m-d H:i:s');
-    $sessionUser = customer_current_user();
-    $customerUserId = (int)($sessionUser['id'] ?? 0);
-    $customerEmail = strtolower(trim((string)($sessionUser['email'] ?? '')));
-    $pdo = get_pdo($CFG);
-
-    $st = $pdo->prepare("\n      INSERT INTO orders (id, token, sku, name, amount, currency, status, user_id, payer_email, created_at, updated_at)\n      VALUES (:id, :token, :sku, :name, :amount, :currency, 'pending_payment', :user_id, :payer_email, :created_at, :updated_at)\n    ");
-    $st->execute([
-      ':id' => $orderId,
-      ':token' => $token,
-      ':sku' => $sku,
-      ':name' => $name,
-      ':amount' => $amount,
-      ':currency' => $currency,
-      ':user_id' => $customerUserId > 0 ? $customerUserId : null,
-      ':payer_email' => $customerEmail !== '' ? $customerEmail : null,
-      ':created_at' => $now,
-      ':updated_at' => $now,
-    ]);
-
-    if ($customerUserId > 0 && $customerEmail !== '') {
-      customer_link_orders_by_email($pdo, $customerUserId, $customerEmail);
-    }
-
-    json_out(['ok'=>true, 'orderId'=>$orderId, 'token'=>$token]);
+    // RETIRADA (8 sep 2026). Insertaba un pedido con sku/name/amount y NI UNA sola
+    // columna de envio: ni nombre, ni correo, ni direccion. No la llamaba nadie —la web
+    // paga por stripe_checkout (tarjeta, Klarna, PayPal, Scalapay) o por
+    // manual_order_create (bizum, transferencia)— pero seguia abierta al publico, asi
+    // que cualquiera podia llenar el panel de pedidos vacios. Se contesta 410 en vez de
+    // borrar el case para que, si algo la llamaba sin que se sepa, se vea en los logs y
+    // no en un pedido fantasma.
+    error_log('orders_create_retirada: alguien sigue llamando a esta ruta');
+    json_out(['ok'=>false,'error'=>'gone','detail'=>'usa stripe_checkout o manual_order_create'], 410);
     break;
   }
 
