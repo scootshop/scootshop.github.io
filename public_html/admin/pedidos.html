@@ -4829,16 +4829,43 @@
     if(!adminKey) return;
     if(!forzado && !arEnabled) return;
     if(!forzado && shouldPauseAutoRefresh()){ updateRefreshLabel(); return; }
-    if(!$('detailView').hidden&&currentOrderId){
-      const data=await apiGet('admin_order_detail&id='+encodeURIComponent(currentOrderId));
-      if(data&&data.ok&&data.order){
+    await arRefrescarVista(!!forzado);
+    updateLastRefresh(); updateRefreshLabel();
+  }
+
+  /* Repinta LO QUE SE ESTA MIRANDO. Antes esto solo sabia de dos vistas —el detalle de
+     un pedido y la lista— y salia por la puerta de atras (`activeTab!=='orders'`) en
+     todas las demas: guardabas el stock de un producto, un descuento o reenviabas un
+     correo desde Clientes y no se refrescaba nada, aunque el guardado hubiera ido bien.
+     Esa era la sensacion de "en algunos sitios no se actualiza".
+
+     El reloj sigue sondeando SOLO pedidos, y a proposito: es lo unico que cambia sin que
+     lo toque un admin (entra un pedido, se confirma un pago). Un producto, un descuento o
+     una ficha de cliente solo cambian cuando alguien los guarda, y ese caso lo cubre el
+     forzado; sondearlos cada 3 s seria parpadeo a cambio de ninguna noticia. */
+  async function arRefrescarVista(forzado){
+    if(!$('detailView').hidden && currentOrderId){
+      const data = await apiGet('admin_order_detail&id='+encodeURIComponent(currentOrderId));
+      if(data && data.ok && data.order){
         currentOrderEmailHistory = Array.isArray(data.emailHistory) ? data.emailHistory : [];
         renderOrder(data.order, currentOrderEmailHistory);
       }
-      updateLastRefresh(); updateRefreshLabel(); return;
+      return;
     }
-    if($('appView').hidden||activeTab!=='orders') return;
-    await fetchOrders(currentPage); renderOrdersList(); updateLastRefresh(); updateRefreshLabel();
+    if($('appView').hidden) return;
+    if(activeTab === 'orders'){ await fetchOrders(currentPage); renderOrdersList(); return; }
+    /* De aqui para abajo, solo cuando lo pide un guardado. `openCustomer` y los dos
+       loaders pintan su "Cargando...", asi que sondearlos cada 3 s seria un parpadeo
+       constante a cambio de ninguna noticia. */
+    if(!forzado) return;
+    if(activeTab === 'customers'){
+      await loadCustomers();
+      // La ficha del cliente abierta es una vista mas: si no, se queda con lo de antes.
+      if(currentCustomerId) await openCustomer(currentCustomerId);
+      return;
+    }
+    if(activeTab === 'products'){ await loadProducts(); return; }
+    if(activeTab === 'discounts'){ await loadDiscounts(); return; }
   }
   setInterval(updateRefreshLabel, 500);
 

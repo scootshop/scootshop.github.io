@@ -25,13 +25,14 @@ powershell -ExecutionPolicy Bypass -File scripts/bump-assets-version.ps1
 .\scripts\new-series-product.ps1 -SeriesKey n -Slug x5 -Name "X5" -Price 499
 ```
 
-Smoke / QA (expect terminal markers `LOCAL_START_OK`, `VARIANTES_OK`, `CATALOGO_OK`, `API_SQL_OK`, `ATTRS_INDEX_OK`, `GATE_B_OK`/`GATE_B_KO`, `SMOKE_WEB_OK`, `IMG_CACHE_OK`, `IMG_DUPES_OK`).
+Smoke / QA (expect terminal markers `LOCAL_START_OK`, `VARIANTES_OK`, `CATALOGO_OK`, `API_SQL_OK`, `ATTRS_INDEX_OK`, `GATE_B_OK`/`GATE_B_KO`, `PANEL_REFRESCO_OK`, `SMOKE_WEB_OK`, `IMG_CACHE_OK`, `IMG_DUPES_OK`).
 
 `scripts/qa/variantes.ps1` runs the whole variant system in one go — catalog, SQL bindings, attribute index, cases A–J, multi-axis fichas, cart flow, accessibility/responsive at three widths, the globalisation test, summary chips and readiness — against local or production. It exists because these suites were born in a session's temp folder: a guard nobody can run is not a guard. `variantes-capturas.js` takes per-element screenshots to compare a design before/after a CSS change (`SS_SHOTS` picks the folder).
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/qa/variantes.ps1                  # TODO el sistema de variantes
 python scripts/qa/panel-precio.py https://scootshop.co                             # el panel cambia un precio de verdad
+node scripts/qa/panel-refresco.js [base]                                           # el panel se entera solo, y no te borra lo escrito
 powershell -ExecutionPolicy Bypass -File scripts/qa/variantes.ps1 -BaseUrl https://scootshop.co
 node scripts/qa/catalogo.js                                                        # el catálogo se ejecuta y es válido
 node scripts/qa/api-sql.js                                                         # cada SQL cuadra con sus bindings
@@ -42,12 +43,22 @@ powershell -ExecutionPolicy Bypass -File scripts/qa/smoke-web.ps1               
 powershell -ExecutionPolicy Bypass -File scripts/qa/smoke-web.ps1 -IncludeApiRoutes
 powershell -ExecutionPolicy Bypass -File scripts/qa/check-image-cache.ps1          # images must carry no ?v=
 node scripts/qa/check-image-dupes.js                                               # no image downloaded twice
+node scripts/qa/rutas-img.js                                                      # ninguna ruta /img/ rota ni huerfana
+node scripts/qa/logo-piezas.js                                                    # las piezas del logotipo, y que el CSS y ellas cuadren
+node scripts/build-logo-pie.js --check                                            # la marca negra del pie, recortada del original
+python scripts/optimiza-imagenes-fijas.py --check                                 # las imagenes que no son de producto, dentro de su presupuesto
+node scripts/qa/fotos-mini.js                                                     # toda portada tiene su medida pequeña
+node scripts/build-filtros.js --check                                             # cada patinete, con sus numeros de filtro al dia
 python scripts/build-web-fonts.py --check                                          # cada hoja de fuentes, con sus .woff2
 python scripts/build-icon-fonts.py --check                                         # ningún icono sin glifo
+node scripts/build-mail-track-icons.js --check                                      # los hitos del correo, iguales a los de /pedido
 python scripts/qa/carga-no-bloqueante.py                                           # ningún script bloquea el pintado
 node scripts/qa/volver-atras.js [base]                                             # volver atrás deja donde tocaba
 node scripts/qa/compat-variantes.js [base]                                         # nadie con ejes se añade de un clic
 node scripts/qa/fotos-por-variante.js                                              # mover un color cambia la foto
+node scripts/qa/portada-click.js [base]                                            # la portada se pulsa y se arrastra
+node scripts/qa/paginas-categoria.js [base]                                       # cada categoria en su pagina, y solo la suya
+python scripts/build-categorias.py --check                                        # /patinetes, /accesorios y /repuestos al dia
 ```
 
 Deploy is FTP via `deploy.py` (also wired into VS Code tasks: "Deploy dry-run", "Deploy whitelist", "Deploy selected files"). **Deploy selectively** — `--all-changed` is intentionally gated behind `--allow-bulk`. Secrets come from `.env`/`.env.local` (`SCOOTSHOP_FTP_PASSWORD`), never the command line.
@@ -219,12 +230,188 @@ y pregunta siempre, y el servidor contesta **304 con el cuerpo vacío**. Medido:
 Comprobado con `panel-precio.py` que un precio cambiado desde el panel se sigue viendo al
 instante (`PANEL_E2E_OK`).
 
-**Lo que habrá que hacer y todavía no toca: dejar de pintar el catálogo entero de una
-vez.** Ni hornearlo ni pintarlo por JS aguantan 200 productos en una sola parrilla; la
-salida es paginar o cargar por tramos, y el sitio ya tiene el eje natural para hacerlo
-(las pestañas de categoría). Cuando llegue ese día, la memoria de scroll está preparada:
-ancla a un `id` de producto, no a un píxel, así que sobrevive a que la lista cambie de
-tamaño — solo habrá que guardar en `history.state` cuántos tramos había cargados.
+**Hecho el 1 de septiembre de 2026: la portada dejó de pintar el catálogo entero.**
+Era lo que quedaba anotado aquí como «lo que habrá que hacer y todavía no toca», y el
+eje para hacerlo resultó ser el que ya estaba previsto: las categorías. Ver la sección
+siguiente.
+
+### Cada categoría, en su página (1 Sep 2026)
+
+La portada pintaba **las tres categorías a la vez** —59 patinetes + 22 accesorios + 1
+repuesto, 82 tarjetas y 22 342 px— porque las píldoras de categoría **solo llevaban el
+scroll** de una sección a otra: no cambiaban lo pintado. Ahora hay tres páginas:
+
+| | tarjetas | alto |
+|---|---|---|
+| portada, antes | 82 | 22 342 px |
+| portada, ahora | 12 (8 del escaparate + 4 del pack) | 8 551 px |
+| `/patinetes` | 59 | 9 909 px |
+| `/accesorios` | 22 | 5 620 px |
+| `/repuestos` | 1 | 1 573 px |
+
+**No hay un motor nuevo.** Las tres páginas las pinta el mismo `js/index.js`; lo único
+que cambia es que su root declara `data-solo-categoria="electric-scooters"`, y
+`getOrderedHomeCategories()` filtra por ahí. La portada no lo declara y se comporta como
+siempre. `normalizeHomeCategoryKey()` devuelve esa clave sin mirar nada más: en
+`/patinetes` no hay píldoras que pulsar ni categoría guardada que recuperar.
+
+**El HTML de las tres lo genera `scripts/build-categorias.py`** (`--check` falla si están
+desfasadas). La cabecera, el menú móvil y el pie se **leen de `index.html`**, y el panel
+de filtros de `partials/filtros.html`: copiados a mano, cada arreglo en la portada habría
+que repetirlo en cuatro sitios y el cuarto se olvidaría. Lo propio de cada página son sus
+textos y su clave.
+
+Cinco cosas que costaron, todas medidas:
+
+- **`boot()` preguntaba «¿soy index.html?» mirando `[data-hero-carousel]`.** Valía
+  mientras la portada fuese la única página con catálogo. `/patinetes` cargaba sus diez
+  scripts y se quedaba con el hueco vacío, sin un solo error en consola. Ahora son dos
+  marcadores, porque son dos trabajos: el carrusel es la portada, `#comprar` es una
+  parrilla. Y `#comprar` y no `[data-home-catalog-root]` a secas: ese atributo es el
+  contrato de estilo de la tarjeta y lo llevan también el escaparate y los relacionados.
+- **`initMarcasRiel()` estaba detrás del `return` de `initHomeCategoryNav()`**, que sale
+  si no hay barra de píldoras. En una página de categoría —que no las tiene— elegir una
+  marca no hacía nada.
+- **La cabecera de categoría NO puede ser un `<header>`.** Ya estaba avisado aquí por los
+  rótulos de tramo: `header{position:fixed; z-index:80}` en `main.css` **es** la cabecera
+  del sitio y convierte en barra fija cualquier `<header>` del documento. Con uno, la caja
+  tapaba el botón de filtros y el clic no llegaba nunca.
+- **El ancla de la URL se calculaba restando solo el alto de la cabecera** y se saltaba
+  **una** vez. Debajo hay otra barra pegajosa (60 px), así que el rótulo quedaba tapado; y
+  lo que hay por encima sigue creciendo un rato, así que `/patinetes/#ecoxtrem` acababa
+  95 px por debajo. Ahora se resta `getHomeStickyOffset()` y se re-ancla 900 ms o hasta
+  que el cliente toque la página. Esto empezó a importar de verdad porque el menú de
+  Productos pasó a usar ese camino.
+- **Los menús enlazaban a `/#series-joyor`**, un ancla de la portada. La ruta de cada
+  categoría se declara ahora en `data/products.js` (`pageUrl`) y se pregunta con
+  `SCOOTSHOP_getCategoryUrl()`: un solo sitio donde está escrita.
+
+La portada dejó de titularse «Patinetes eléctricos»: ese término ya tiene su página y dos
+URL del mismo sitio compitiendo por la misma búsqueda se estorban.
+
+**El menú son las categorías.** Donde había «Productos · Preguntas · Legal» hay
+**Patinetes · Accesorios · Repuestos**, con la actual marcada (`aria-current="page"`, que
+es la píldora roja que antes llevaba «Inicio»). Preguntas y Legal siguen enteras en el
+pie, que es donde se buscan; sus enlaces del menú eran anclas de la portada. En **móvil**
+cada categoría es una fila con **dos objetivos**: el nombre navega a la página y la flecha
+abre el cajón con sus marcas (`data-mm-cat` → `SS_PRODUCT_MENUS.panelDeCategoria()`), cuya
+primera fila es «Ver todos». Antes había un solo cajón, «Productos», con las tres
+categorías apiladas dentro: ese nivel intermedio dejó de tener sentido el día que cada una
+tuvo página.
+
+Dos cosas que costaron aquí:
+
+- **El menú móvil está DOS VECES**: la portada lo lleva en línea (`data-inline="true"`) y
+  las demás páginas lo piden a `partials/mobile-menu.html`. Se cambió uno y no el otro, y
+  la portada se quedó con el menú viejo mientras las fichas ya tenían el nuevo, **sin que
+  fallara nada**. Ahora `build-categorias.py --check` compara los dos y falla si divergen.
+- **El desplegable de escritorio ya no se monta** (`[data-products-desktop-root]` no existe
+  en ningún HTML). `initDesktop()` está delegado en `document`, así que no rompe nada, pero
+  `renderDesktop()` en `products-menu.js` quedó sin consumidores.
+
+**Motos y bicicletas siguen apagadas y NO tienen página.** `podarCategoriasOcultas()`
+borra sus tarjetas al arrancar. El día que se enciendan son dos líneas en `CATEGORIAS`
+(dentro de `build-categorias.py`) más su `pageUrl` en el catálogo.
+
+**La parte alta de cada categoría, en orden (2 Sep 2026):** migas → titular → riel de
+marcas → barra de filtros → parrilla, y la entradilla **al final** de la página. Antes la
+barra de filtros iba *antes* del riel —se pedía filtrar sin haber enseñado todavía entre
+qué se elige— y la entradilla eran tres líneas entre el titular y las marcas.
+
+- El titular va en **Russo One**, versalitas e inclinado. La inclinación es `skewX(-7deg)`
+  sobre un `<span>` interior, **no `font-style:italic`**: Russo One no tiene cursiva, así
+  que el navegador se la inventa y cada uno de forma distinta. El `<span>` existe porque el
+  skew necesita una caja propia; sobre el `<h1>` arrastraría su margen y su ancho de bloque.
+- **El riel se MUEVE, no se repinta.** `colocarBarraTrasElRiel()` traslada la barra al DOM
+  una vez pintado el catálogo. El riel tiene que seguir colgando de
+  `.home-category-section`, que es donde `aplicarFiltroDeMarca()` busca sus placas y su
+  línea de descripción; sacarlo de ahí lo deja sin filtro.
+- Arriba hay **una sola franja blanca** (titular + marcas + barra). El riel es transparente
+  y dejaba ver el gris del `body`, así que la página salía a rayas justo donde más se mira.
+  Solo en categoría: en la portada ese gris es lo que separa una categoría de la siguiente.
+- Y por eso mismo la placa elegida lleva ahí un filo `inset`: es blanca al 68 %
+  (`#ffffffad`, elegido a mano) y sobre blanco se quedaba sin contorno — «TODOS» flotaba.
+
+**La miga de pan es UNA pieza, y su segundo eslabón es una PÁGINA.** Estaba definida dos
+veces —`.breadcrumb` (tarjetas.css, fichas) y `.cat-miga` (index.css, categorías)— y habían
+derivado: 16 px y peso 800 contra 13,1 px y peso normal, la misma navegación con dos voces.
+Todo lo suyo vive ahora en `main.css`, que lo cargan todas las páginas (**las fichas no
+cargan `index.css`**): la letra y también el hueco. El reparto es el de la ficha —26 px
+arriba, 10 abajo—, porque la miga **pertenece al titular**: tiene que estar más cerca de él
+que del borde de la cabecera. Con 17/15, como estaba la categoría, flotaba a medio camino
+sin pertenecer a nada, y eso es lo que se leía como «está más arriba».
+
+Los 26 son UN número (`--miga-arriba`), pero cada página llega por su lado: la ficha cuelga
+de un `.page-wrap` que ya pone 8 px y solo necesita 18; la categoría no tiene ese envoltorio
+y los pone todos. Se descuenta en el propio CSS, no a ojo en cada hoja.
+
+En **móvil la miga cabe en una línea siempre**: lo que cede es el último eslabón, que se
+recorta con puntos suspensivos. No es un enlace —solo dice dónde estás, y eso lo repite el
+titular justo debajo—, y con un nombre largo rompía en dos líneas dejando el separador
+colgando solo al final de la primera (54 px de alto contra 23).
+
+Y el contenido estaba peor: **las 87 fichas apuntaban a anclas de la portada que murieron**
+cuando dejó de pintar el catálogo (`/#comprar` ×74, `/#series-motos` ×3, `/#series-k` ×2), y
+el segundo eslabón decía lo que le parecía — «ROVORON» (una marca), «Serie N» (una serie),
+«Productos» (nada). Ahora dice la **categoría**, que es la única con página propia, y la
+categoría sale del catálogo, no de la ruta del fichero. Motos y bicicletas, apagadas y sin
+página, se quedan en dos niveles: no se inventa un eslabón que no lleva a ningún sitio.
+
+`node scripts/qa/paginas-categoria.js [base]` es el guardián (`CATPAG_OK`): una sola
+sección por página, todos sus productos, sin píldoras, canonical y h1 propios, el riel
+filtrando, el panel diciendo de quién es y con los mandos que tocan, el carrito, y que la
+**portada no vuelva a pintar catálogo**. Comprueba además **la barra a 12 anchos**, con los
+dos lados de cada corte: el menú crece cada vez que cambia un nombre o la letra, y cuando
+ya no cabe no falla de forma visible — se monta encima del logotipo y ahí se queda. Y
+comprueba, leyendo el disco sin navegador, que **ninguna miga de ficha apunte a algo que no
+sea una de las tres páginas de categoría**.
+
+**Lo que sigue sin tocar: dentro de una categoría se siguen pintando todos de una vez.**
+59 caben; 200 no. La salida es la misma de siempre —paginar o cargar por tramos— y la
+memoria de scroll está preparada: ancla a un `id` de producto, no a un píxel, así que
+sobrevive a que la lista cambie de tamaño; solo habrá que guardar en `history.state`
+cuántos tramos había cargados.
+
+### Los packs: una oferta con precio REAL, no un cupon (5 Sep 2026)
+
+Un **pack** es un conjunto de articulos que, comprados juntos, valen otra cosa. Se
+declara en `data/products.js` (`SCOOTSHOP_PACKS`) y lo lee **todo el mundo desde ahi**:
+
+```
+data/products.js  (PACKS + SCOOTSHOP_resolverPacks)
+  -> portada, cajon del carrito, /checkout, /pago     lo PINTAN
+  -> scripts/build-attributes-index.js  ->  data/attributes-index.json
+       -> api/index.php  packs_apply_to_cart()        lo COBRA
+```
+
+Reglas, escritas una vez y aplicadas en los dos lados: el pack se aplica solo si estan
+**todos** sus articulos con su cantidad; `precioPack` es por unidad y `precioPackTotal`
+por el lote entero («3 por 10 €» no es «a 3,33»); lo que sobre de una linea se cobra al
+precio de siempre; y un articulo puede valer **0 dentro del pack** aunque como precio de
+catalogo el 0 este prohibido (*«nunca precio 0 silencioso»*).
+
+**Antes esto era un codigo de descuento** (`PACKTANKDUAL`, ya desactivado), porque el
+backend tarifa con el precio de catalogo y descarta el del navegador. Cuadraba el total,
+pero convertia una oferta en un vale: el resumen decia «Descuento −36,99 €» en vez de
+enseñar la bolsa GRATIS y el manillar a 32,99, el pedido guardaba un descuento en vez de
+una oferta, y bastaba que el cupon no validara para cobrar el precio suelto — que es
+justo lo que pasaba.
+
+Dos trampas, las dos pisadas:
+
+- **`attributes_index()` tiene una LISTA BLANCA.** Copia `labels`, `products`, `byHref`
+  (y ahora `packs`) y **tira en silencio todo lo demas**. El indice del servidor traia
+  los packs, `catalog_packs()` veia una lista vacia y el pedido se cobraba a 849,98 €
+  con la pantalla diciendo 812,99. Al añadir algo al indice hay que añadirlo *tambien*
+  a esa lista.
+- **`/checkout` y `/pago` se pintan ANTES de que llegue el catalogo** (lo añade
+  `global-assets-app.js` de forma diferida), asi que el pack no se puede resolver al
+  cargar. Las dos repintan sus cifras al cumplirse `SS_READY` — solo cifras y chips,
+  nunca el HTML de la lista, que volveria a pedir las fotos.
+
+Y una que NO es trampa sino diseño: **`order_pricing_preview` ignora `cart_items`**
+(tarifa solo el `sku` suelto), asi que no sirve para comprobar lo que se va a cobrar por
+un carrito. Quien tarifa de verdad es `resolve_order_pricing()`.
 
 ### Asset versioning & cache-busting (important, easy to break)
 There is no content hashing. Cache-busting is a single global version string in `asset-version.json` (`{"v":"YYYYMMDD-N"}`) mirrored into each page's `<meta name="asset-version">`.
@@ -352,6 +539,179 @@ de accesorios ahorra 30 ms de LCP (medido, no estimado); el prefetch de la galer
 acotado a 4 fotos y va en tiempo de inactividad. Lo que Lighthouse sigue pidiendo —minificar
 JS y CSS, 320 + 140 ms— exigiría un paso de compilación, y este sitio no tiene ninguno a
 propósito: lo que se lee en el repositorio es lo que corre en producción.
+
+### Rendimiento: la cuarta tanda (4 Sep 2026)
+
+Medido con Lighthouse móvil contra producción, **antes → después**. El *score* de esta
+máquina oscila 63–94 entre pasadas por el artefacto de TBT ya conocido
+(`_lighthouse-eval.js`, ~1 850 ms, sale también en páginas que no llevan el módulo que se
+esté midiendo), así que lo que se mira aquí es **LCP y peso**, que sí son estables:
+
+| | peso | LCP |
+|---|---|---|
+| portada | 1 593 → **957 KiB** (−40 %) | 4,1 → **3,5 s** |
+| /patinetes | 524 → **498 KiB** | 2,7 → 2,7 s |
+| ficha M41 Armored | 1 797 → **1 401 KiB** (−22 %) | 4,1 → **3,5 s** |
+
+Nada de esto exigió un paso de compilación: lo que Lighthouse sigue pidiendo —minificar
+JS y CSS— se sigue descartando por lo mismo de siempre.
+
+**1. Tangerine, recortada a la palabra que escribe (−21,6 KB en TODAS las páginas).**
+Esa familia pinta UNA cosa en todo el sitio: el «Versátil» de la cabecera
+(`.brand span`). Su `.woff2` completo pesaba 24,8 KB y viajaba en todas partes; el
+recorte con `text=` pesa 3,2 KB. Se pide **aparte** en `build-web-fonts.py`, porque
+`text=` se aplica a todas las familias de la consulta y metido en la grande recortaría
+también Plus Jakarta Sans y Russo One, que sí pintan texto variable. Su URL no acaba en
+`.woff2` (Google la sirve desde `/l/font?kit=`), así que necesita su propia expresión.
+Se **conserva** el `unicode-range` que devuelve Google: si algún día se pinta en
+Tangerine otro texto, el navegador cae a la cursiva de reserva en vez de dibujar huecos.
+
+**2. `scripts/optimiza-imagenes-fijas.py` — las imágenes que no son de producto.** Las de
+producto las cuida `convert-to-webp.py`; estas otras no las miraba nadie y por eso
+engordaban. Cada entrada declara de dónde sale, a qué tamaño se sirve, con qué calidad y
+su **presupuesto** en bytes, y `--check` es el guardián. Es idempotente: varios trabajos
+leen del mismo fichero que escriben, y sin eso cada pasada recomprimía sobre lo ya
+comprimido.
+
+- **Los dos grafitis de la oferta: 234 → 39 KB.** No cedían recomprimiendo (7 % a lo
+  sumo) porque lo que pesaba era el **canal alfa**. Se **precomponen sobre `#1c1c1c`** y
+  se guardan sin alfa: se ve idéntico, y es aritmética, no un apaño — el navegador pinta
+  `0,17·imagen + 0,83·fondo`, y donde la imagen era transparente el resultado ya era el
+  fondo. **Si cambia el fondo de `.home-featured` hay que cambiar `FONDO_OFERTA` y
+  regenerar**, o aparecen dos rectángulos.
+- **Las tres tarjetas de categoría: 262 → 141 KB.** Se ven a 421×360 y estaban a 860×750.
+  A 700 siguen siendo 2× en el móvil. **Se rehacen desde el WebP y NO desde el PNG
+  original**: el original es 4:3 y el WebP es un recorte 7:6 hecho a mano cuyo encuadre
+  nadie apuntó — partir del PNG cambia el encuadre de las tres (probado).
+- **Los logos de marca: 155 → 68 KB.** Se pintan como mucho a 240 px y venían a
+  1 000–1 561. Conservan el alfa (son recortes sobre la placa), así que el script no los
+  aplana. Al cambiar de tamaño hay que actualizar las medidas intrínsecas que declaran
+  16 HTML y `js/index.js` (`logoW`/`logoH` de rovoron y dualtron).
+
+**3. `SCOOTSHOP_miniatura()` — la foto pequeña (−620 KB en la ficha).** Una miniatura de
+56 px estaba bajando la foto original: en la caja de «Añade algo más» del M41 había
+620 KB de foto para nueve cuadraditos, la mayor de 107 KB para 3 136 píxeles de pantalla.
+El accesor vive en `data/products.js` —quien sabe cómo se llaman las fotos de un producto
+es el catálogo— y lo usan la caja de compatibles (56×56), el cajón del carrito (70×70) y
+los resúmenes de `/checkout` y `/pago`. Cambia `…/img/N.webp` por `…/img/N-400.webp` solo
+en rutas de carpeta de producto, y **`node scripts/qa/fotos-mini.js` comprueba que las 87
+portadas tienen su medida**, porque desde el navegador no se puede preguntar al disco.
+
+**4. La cartelera ya no baja las ocho creatividades (−320 KB en móvil).** Pesaban 547 KB y
+se bajaban **todas** al abrir para enseñar una. `loading="lazy"` no las paraba: el raíl es
+horizontal, las ocho están a la misma altura y para el navegador entran todas en el margen
+de carga. De la tercera en adelante la foto va en `data-src`/`data-srcset` y la pone el
+carrusel cuando la diapositiva se acerca (`hidratarLoVisible`, `js/index.js`). Se hidrata
+**por geometría y sobre todos los hijos del raíl, clones incluidos** —un clon se copia con
+su `data-src`, así que sabe hidratarse solo; sin eso, los clones que asoman por la
+izquierda en escritorio salían en blanco—. El margen es **medio** ancho de ventana: con
+uno entero, en escritorio se volvían a pedir las ocho. No añade un modo de fallo nuevo:
+sin JS el carrusel no se mueve de todas formas. Medido: móvil 7 creatividades → 3, cero
+huecos en blanco, `PORTADA_CLICK_OK`.
+
+**5. La precarga de galería se salta también el 3g.** Son cuatro fotos completas (326 KB
+en el M41) y su único premio es que pulsar una miniatura sea instantáneo; en 3g tardan más
+en llegar de lo que el cliente tarda en pulsar. Ya se saltaba `saveData` y 2g.
+
+**Lo que sigue pendiente y es lo próximo que más pesa:** solo **96 de las 747 fotos de
+galería** tienen medidas responsive, así que pulsar una miniatura baja el original de
+1 400 px incluso en el móvil (`setMainImageSrc` quita el `srcset` a propósito, porque el
+inicial describe la portada). Generarlas para todas son ~650 ficheros y ~29 MB de
+despliegue; hasta entonces, la precarga acotada es la mitigación.
+
+**Limpieza de la misma tanda:** fuera `.section-header`, `.feature-*`, `.f-icon`,
+`.about-*`, `.cat-showcase-grid` y `.home-catalog-*` (muertas desde que las categorías
+tuvieron página y desde la fusión de secciones de hoy), y seis glifos de Font Awesome sin
+consumidor —regenerando las fuentes de icono, que quedan en 3,5 KB—. El detector deja seis
+avisos y **los seis son falsos positivos ya conocidos**: `.btn-hosted-pay--*` y
+`.header-account-dot--*` se componen por concatenación, y `.menu-products-host` es el
+desplegable de escritorio que ya no se monta (2,2 KB; se deja, quitarlo es una decisión de
+producto, no de rendimiento).
+
+### `img/` — una carpeta por oficio (25 Aug 2026)
+
+`img/` es el almacén de las imágenes que NO son de un producto (las de producto viven
+en la carpeta del producto: `patinetes/series-n/n7/img/1.webp`). Tenía 65 ficheros
+sueltos en la raíz y ahora tiene seis carpetas y tres ficheros:
+
+| carpeta | quién la pide |
+|---|---|
+| `img/portada/` | el carrusel de la home (`index.html`, 6 creatividades × 4 anchos) |
+| `img/pago/` | los logos de método de pago (`pago.html`, `js/pago.js`) |
+| `img/marcas/` | logos de serie y el sello DGT (`js/index.js`, `js/product-enhancements.js`, 10 fichas) |
+| `img/deco/` | texturas de fondo del CSS (`css/index.css`) |
+| `img/limitadores/` | las fotos compartidas por los 4 mandos limitadores |
+| `img/mail/track/` | los hitos del correo, generados por `build-mail-track-icons.js` |
+| `img/logo/` | el logotipo: `marca-barra.webp` (cabecera), `marca-pie.webp` (la marca en negro que firma el pie) y las dos piezas que escriben el nombre en el titular de la bienvenida |
+| `img/cart-collage/` | **caché** que escribe el backend (miniatura del carrito en Stripe); gitignorada |
+
+En la raíz quedan solo tres, y ninguno por descuido: `0-removebg-preview.png` (lo
+enlazan los correos YA ENVIADOS), `0-removebg-preview.webp` (es el `og:image` de varias
+páginas, y una URL social cacheada no se puede mover) y `0.jpg` (la foto de relleno que
+copia `new-series-product.ps1`).
+
+Se borraron 20 ficheros que no pedía nadie: las creatividades anchas 2,33:1 de la
+portada (`portada_1..4` con sus ‑480/‑800/‑1200), sustituidas por el arte 4:5, y cuatro
+huérfanos —`0.webp`, `card.svg` y, ojo, `logo.webp` y `favicon.ico`, que eran **copias
+byte a byte de `0.jpg`**: un JPEG con la extensión cambiada. El favicon de verdad está
+en la raíz del sitio (`/favicon.ico`), que es lo que enlazan las 65 páginas.
+
+Dos cosas que hay que saber antes de volver a mover una imagen de aquí:
+
+- **Mover una imagen de `img/` obliga a un bump global.** `css/index.css` y los `js/`
+  se sirven `immutable`: un visitante con el CSS viejo en caché sigue pidiendo la ruta
+  vieja, así que borrarla le rompe el fondo. Y para CSS **no hay bust localizado** (el
+  runtime resella los stylesheet desde `asset-version.json`). Por eso este cambio fue
+  bump + los 65 HTML + CSS + JS + las imágenes nuevas, y solo después el borrado.
+- **Nunca se mueve lo que ya salió por correo o como `og:image`.** Ese enlace está en
+  buzones y en cachés de terceros; no hay redespliegue que lo arregle.
+
+**El nombre de la marca son DOS RECORTES del logotipo original.** `img/logo/scoot-foto.webp`
+y `shop-foto.webp` escriben «SCOOT SHOP» en el titular de la bienvenida, y salen de
+`img/logo/letras-perfectas.png` — el logotipo en alta resolución, que se queda ahí como
+material de partida aunque ninguna página lo pida (declarado en `SIN_CONSUMIDOR` de
+`rutas-img.js`, y **no se despliega**).
+
+Antes esto eran trazados SVG hechos siguiendo el contorno de un bitmap de 400 px
+(`scripts/logo-a-trazados.js` y `logo-regulariza.js`, que siguen en el repo pero ya no se
+usan). Se descartaron porque el material de partida era pobre: por bien que se regularicen
+los bordes, un trazado calcado nunca recupera los cortes y muescas propios de estas letras.
+Con el original en condiciones, recortar gana de calle.
+
+Tres cosas que hay que saber antes de volver a tocarlas:
+
+- **El fondo del original NO es transparente** (es `#f6f7f8`), así que no vale con borrar un
+  color: cada píxel del borde es una mezcla de tinta y fondo. El recorte recupera la tinta
+  pura y calcula la opacidad por la distancia al fondo; sin eso queda una orla gris
+  alrededor de las letras. `logo-piezas.js` la mide y falla si aparece.
+- **Las dos piezas no admiten las mismas medidas.** En SCOOT el dibujo son solo letras; SHOP
+  lleva la barra roja debajo, así que 60 de sus 192 px cuelgan por debajo de la línea base.
+  De ahí las dos fracciones del CSS —`192/132` de alto y `-60/132` de caída—, escritas sin
+  redondear: con 1,4545 el apoyo se iba 1 px. `vertical-align: baseline` apoya el borde
+  inferior de la imagen; el margen negativo baja justo la barra, de modo que lo que queda
+  apoyado son las LETRAS.
+- **Se sirven al doble de lo que se ven** (368 y 313 px en el titular): 760 y 650 px de
+  ancho, 61 KB entre las dos. Guardar los 1122 px del original sería pagar peso por píxeles
+  que nadie llega a ver.
+
+`node scripts/qa/logo-piezas.js` es el guardián: comprueba que las piezas existen, que SHOP
+conserva sus dos tintas, que no hay orla de recorte y —lo importante— que **las fracciones
+que el CSS declara son las que las imágenes miden**. Si alguien vuelve a recortar con otro
+encuadre, salta ahí y no en producción.
+
+**La marca del pie sale del mismo original y en NEGRO** (`img/logo/marca-pie.webp`, 18 KB),
+con `node scripts/build-logo-pie.js`. No vale el fichero de la cabecera: `marca-barra.webp`
+es rojo y negro, está hecho para la barra, y en un pie que ya no es oscuro la marca tiene que
+firmar, no navegar. El recorte es el problema de siempre —fondo `#f6f7f8`, ningún píxel de
+borde es tinta pura—, así que el script **despeja la opacidad**: sabe que cada píxel es
+`a·tinta + (1−a)·fondo` con la tinta siendo el rojo o el negro del logotipo, saca la `a` y lo
+repinta en `#0b0c0f`. Borrar un color dejaría una orla gris alrededor de cada letra. Su
+`--check` regenera y compara byte a byte, así que es su propio guardián.
+
+`node scripts/qa/rutas-img.js` es el guardián: cruza toda ruta `/img/...` escrita en
+HTML/CSS/JS/PHP/PS1/PY contra el disco, en los dos sentidos (rota y huérfana). Su
+trampa, ya pisada: `"/patinetes/series-n/n7/img/1.webp"` **termina en** `/img/1.webp`, así
+que sin un límite por delante las 44 fichas salen todas rotas.
 
 ### .htaccess routing
 Apache rewrites give the clean-URL behavior the static pages depend on: `/algo.html` → 301 → `/algo`, and `/algo` internally serves `algo.html`. It also forces HTTPS, sets the cache/security headers above, and blocks direct access to `.env`, `api/config.php`, and the local-only `server.ps1`/`server.py`/`router.php`. Local PHP dev does not run Apache, so URL rewriting differs locally vs. prod — test clean URLs against the deployed/`.htaccess`-aware path when in doubt.
