@@ -722,13 +722,20 @@
           <option value="payment_failed">&#x1F4B3; Pago fallido</option>
           <option value="error">&#x1F534; Error</option>
         </select>
+        <!-- Los valores son los que se guardan de verdad en `payment_method`. Antes
+             aqui ponia "stripe", "transferencia" y "manual": ninguno de los tres
+             coincidia con nada (lo guardado es card/klarna/scalapay/bank), y faltaban
+             Tarjeta, Klarna y Scalapay, que son mas de la mitad de los pedidos. -->
         <select id="filterPayment">
           <option value="">Todos los pagos</option>
-          <option value="stripe">Stripe</option>
-          <option value="bizum">Bizum</option>
-          <option value="transferencia">Transferencia</option>
+          <option value="card">Tarjeta</option>
+          <option value="klarna">Klarna</option>
+          <option value="scalapay">Scalapay</option>
           <option value="paypal">PayPal</option>
-          <option value="manual">Manual</option>
+          <option value="bizum">Bizum</option>
+          <option value="transfer">Transferencia</option>
+          <option value="stripe">Stripe (sin detallar)</option>
+          <option value="_none">Sin metodo</option>
         </select>
         <select id="filterShippingState">
           <option value="">Todos los envios</option>
@@ -1499,6 +1506,21 @@
     const m={pending_payment:'\u23F3',paid:'\u2705',preparing:'\uD83D\uDCE6',reserved:'\uD83D\uDCC5',shipped:'\uD83D\uDE9A',delivered:'\uD83C\uDFE0',canceled:'\u274C',refunded:'\u21A9\uFE0F',dispute:'\u26A0\uFE0F',payment_failed:'\uD83D\uDCB3',error:'\uD83D\uDD34'};
     return m[st]||'';
   }
+  /* Que valores guardados cuenta cada opcion del filtro. Un pedido pagado con tarjeta
+     por Stripe guarda 'card'; los antiguos guardaban 'stripe' a secas, y los de
+     transferencia guardan 'bank' o 'transfer' segun la epoca. */
+  const PAGO_GRUPOS = {
+    card: ['card'],
+    klarna: ['klarna'],
+    scalapay: ['scalapay'],
+    paypal: ['paypal'],
+    bizum: ['bizum'],
+    transfer: ['transfer', 'bank', 'bank_transfer'],
+    stripe: ['stripe'],
+    _none: ['']
+  };
+  function PAGO_ALIAS(opcion){ return PAGO_GRUPOS[opcion] || [opcion]; }
+
   function paymentLabel(method){
     const key = String(method||'').trim().toLowerCase();
     const m = {
@@ -1508,6 +1530,7 @@
       scalapay: 'Scalapay',
       bizum: 'Bizum',
       transfer: 'Transferencia',
+      bank: 'Transferencia',
       bank_transfer: 'Transferencia',
       card: 'Tarjeta',
       cash_on_delivery: 'Contra reembolso'
@@ -1941,8 +1964,11 @@
 
       if(status && o.status !== status) return false;
       if(payment){
+        /* Exacta y con alias. Con `includes` "transferencia" no encontraba "bank" ni
+           "transfer", y un dia "card" encontraria "discard": un filtro de pago no puede
+           ser una busqueda de texto. */
         const pm = normalizeText(o.payment_method||'');
-        if(!pm.includes(payment)) return false;
+        if(!PAGO_ALIAS(payment).includes(pm)) return false;
       }
       if(shippingState === 'with_tracking' && !track) return false;
       if(shippingState === 'without_tracking' && track) return false;
@@ -3093,7 +3119,7 @@
       originalTotal: oTotal,
       status: o.status || '',
       settled: ['paid','preparing','shipped','delivered','refunded','dispute'].indexOf(o.status) !== -1,
-      methodLabel: 'Comision ' + (o.payment_method ? String(o.payment_method) : 'pago')
+      methodLabel: 'Comision ' + (o.payment_method ? paymentLabel(o.payment_method) : 'pago')
     };
     arPonerValor('editShipping', oShipping ? money(oShipping) : '');
     renderShipCostBreakdown();

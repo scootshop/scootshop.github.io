@@ -171,6 +171,34 @@ async function hasta(pag, fn, arg, plazo) {
     });
     comprobar(limpio, 'E · tras guardar, el aviso de desfase se apaga');
 
+    /* ---- G · el filtro de metodo de pago encuentra los pedidos ------------------
+       El desplegable ofrecia stripe / transferencia / manual: ninguno coincidia con lo
+       que se guarda de verdad (card, klarna, scalapay, bank), y Klarna, Scalapay y
+       Tarjeta ni estaban. Se comprueba pulsando cada opcion y contando filas contra lo
+       que dice la API: un filtro que no encuentra nada es peor que no tenerlo. */
+    await pag.click('#btnBack');
+    await pag.waitForSelector('#appView:not([hidden])', { timeout: 20000 });
+    const porMetodo = {};
+    for (const o of (await api('admin_orders_list&limit=300')).orders || []) {
+      const k = String(o.payment_method || '');
+      porMetodo[k] = (porMetodo[k] || 0) + 1;
+    }
+    const GRUPOS = { card:['card'], klarna:['klarna'], scalapay:['scalapay'], paypal:['paypal'],
+                     bizum:['bizum'], transfer:['transfer','bank','bank_transfer'],
+                     stripe:['stripe'], _none:[''] };
+    let vacios = [];
+    for (const [op, alias] of Object.entries(GRUPOS)) {
+      const esperados = alias.reduce((a, v) => a + (porMetodo[v] || 0), 0);
+      if (!esperados) continue;                       // no hay pedidos de ese tipo: nada que exigir
+      await pag.selectOption('#filterPayment', op);
+      await esperar(400);
+      const filas = await pag.$$eval('#ordersList tr[data-id]', t => t.length);
+      if (!filas) vacios.push(op + ' (habia ' + esperados + ')');
+    }
+    await pag.selectOption('#filterPayment', '');
+    comprobar(vacios.length === 0, 'G · cada metodo de pago encuentra sus pedidos',
+      vacios.length ? 'sin resultados: ' + vacios.join(', ') : Object.keys(GRUPOS).length + ' opciones');
+
     /* ---- F · el refresco alcanza a TODAS las vistas ------------------------------
        Esto se lee del HTML servido, no se pulsa: comprobarlo de verdad exigiria
        guardar un producto o un descuento REALES en la tienda en produccion, y una
