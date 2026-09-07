@@ -4669,14 +4669,56 @@
   /* ---- AUTO-REFRESH ---- */
   let arInterval = null, arEnabled = true;
   const AR_INT = 3000;
-  let arPauseUntil = 0;
+  /* La pausa es de ESTADO, no un cronometro.
+     Antes cualquier `pointerdown` dentro de #appView —o sea, en cualquier sitio del
+     panel— congelaba 6 s, y cada clic renovaba la cuenta: usando el panel con
+     normalidad el refresco automatico no llegaba a correr casi nunca y la chapa
+     amarilla vivia encendida. Un clic no es motivo para congelar nada.
+     Lo que SI lo es, y solo mientras dura:
+       - un modal abierto (estas en mitad de una decision),
+       - texto seleccionado (estas copiando un id o un correo y el repintado lo pierde),
+       - un campo de texto con el foco dentro de lo que el repintado REHACE
+         (#detailView y los modales; la caja de busqueda de la lista no se rehace),
+       - los 4 s siguientes a la ultima tecla en cualquier campo, por si acaso.
+     Todas se apagan solas en cuanto dejas de hacer eso: no hay cuenta atras que
+     esperar. */
+  let arUltimaTecla = 0;
+  const AR_GRACIA_TECLA = 4000;
+
+  function arCampoDeTexto(el){
+    if(!el) return false;
+    if(el.isContentEditable) return true;
+    const tag = el.tagName;
+    if(tag === 'TEXTAREA') return true;
+    // SELECT queda fuera a proposito: no guarda nada que se pueda perder, y se queda
+    // con el foco despues de elegir un filtro (pausa eterna).
+    return tag === 'INPUT' && !/^(checkbox|radio|button|submit|file)$/i.test(el.type || 'text');
+  }
+  function arEditandoDondeSeRepinta(){
+    const a = document.activeElement;
+    if(!arCampoDeTexto(a)) return false;
+    if(a.isContentEditable) return true;
+    return !!(a.closest && a.closest('#detailView, #confirmOv, #priceModal, #createProductModal'));
+  }
+  function arHaySeleccion(){
+    const sel = window.getSelection ? window.getSelection() : null;
+    return !!(sel && !sel.isCollapsed && String(sel).trim());
+  }
   function getAutoRefreshPauseState(){
     if($('confirmOv').classList.contains('open')) return {paused:true, reason:'modal', seconds:0};
     if(!$('priceModal').hidden) return {paused:true, reason:'modal', seconds:0};
     if(!$('createProductModal').hidden) return {paused:true, reason:'modal', seconds:0};
-    const left = arPauseUntil - Date.now();
-    if(left > 0) return {paused:true, reason:'interaction', seconds:Math.max(1, Math.ceil(left/1000))};
+    if(arEditandoDondeSeRepinta()) return {paused:true, reason:'campo', seconds:0};
+    if(arHaySeleccion()) return {paused:true, reason:'seleccion', seconds:0};
+    const left = (arUltimaTecla + AR_GRACIA_TECLA) - Date.now();
+    if(left > 0) return {paused:true, reason:'tecleando', seconds:Math.max(1, Math.ceil(left/1000))};
     return {paused:false, reason:'', seconds:0};
+  }
+  function arTextoDePausa(st){
+    if(st.reason === 'modal') return 'Pausado: modal abierto';
+    if(st.reason === 'campo') return 'Pausado: editando un campo';
+    if(st.reason === 'seleccion') return 'Pausado: texto seleccionado';
+    return 'Pausado: escribiendo (' + st.seconds + 's)';
   }
   function updateRefreshLabel(){
     const st = getAutoRefreshPauseState();
@@ -4703,11 +4745,11 @@
       $('refreshDot').style.animation = 'none';
       if(bar) bar.classList.add('refresh-bar--paused');
       pill.hidden = false;
-      pill.textContent = st.reason === 'modal' ? 'Pausado: modal abierto' : ('Pausa por interaccion: ' + st.seconds + 's');
+      pill.textContent = arTextoDePausa(st);
       if(detailPill){
         detailPill.hidden = false;
         detailPill.classList.remove('refresh-pause-pill--off');
-        detailPill.textContent = st.reason === 'modal' ? 'Pausado: modal abierto' : ('Pausa por interaccion: ' + st.seconds + 's');
+        detailPill.textContent = arTextoDePausa(st);
       }
       return;
     }
@@ -4721,15 +4763,14 @@
     }
   }
   function updateLastRefresh(){ $('lastRefresh').textContent=new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
-  function touchAutoRefreshPause(ms){ arPauseUntil = Math.max(arPauseUntil, Date.now() + (ms || 5000)); updateRefreshLabel(); }
   function shouldPauseAutoRefresh(){
     return getAutoRefreshPauseState().paused;
   }
   /* `forzado` = lo pide un guardado, no el reloj. Se salta las dos guardas del
-     refresco automatico a proposito: la pausa existe para no mover la lista bajo el
-     raton mientras seleccionas o escribes —y pulsar "Guardar" dispara esa misma pausa
-     por el pointerdown—, y el interruptor OFF dice "no me refresques SOLO", no "no me
-     enseñes lo que acabo de guardar". */
+     refresco automatico a proposito: la pausa protege lo que estas escribiendo o
+     seleccionando, y guardar es justo el momento en que eso ya no importa; y el
+     interruptor OFF dice "no me refresques SOLO", no "no me enseñes lo que acabo de
+     guardar". */
   async function arTick(forzado){
     if(!adminKey) return;
     if(!forzado && !arEnabled) return;
@@ -4745,21 +4786,14 @@
     if($('appView').hidden||activeTab!=='orders') return;
     await fetchOrders(currentPage); renderOrdersList(); updateLastRefresh(); updateRefreshLabel();
   }
-  document.addEventListener('selectionchange', ()=>{
-    const sel = window.getSelection ? window.getSelection() : null;
-    if(sel && !sel.isCollapsed && String(sel).trim()) touchAutoRefreshPause(6000);
-  });
-  document.addEventListener('pointerdown', e=>{
-    const t = e.target;
-    if(t && t.closest && t.closest('#detailView, #appView, #confirmOv, #priceModal, #createProductModal')) touchAutoRefreshPause(6000);
-  }, true);
+  /* La seleccion y el foco ya se leen en vivo en getAutoRefreshPauseState; aqui solo
+     queda anotar la ultima tecla. NO hay escuchador de `pointerdown`: un clic ya no
+     congela nada. */
   document.addEventListener('input', e=>{
-    const t = e.target;
-    if(t && t.matches && t.matches('input, textarea, select, [contenteditable="true"]')) touchAutoRefreshPause(8000);
+    if(arCampoDeTexto(e.target)){ arUltimaTecla = Date.now(); updateRefreshLabel(); }
   }, true);
   document.addEventListener('keydown', e=>{
-    const t = e.target;
-    if(t && t.matches && t.matches('input, textarea, select, [contenteditable="true"]')) touchAutoRefreshPause(8000);
+    if(arCampoDeTexto(e.target)){ arUltimaTecla = Date.now(); updateRefreshLabel(); }
   }, true);
   setInterval(updateRefreshLabel, 500);
 
