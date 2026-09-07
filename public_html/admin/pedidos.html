@@ -121,6 +121,8 @@
     .refresh-bar--paused{background:#fffbeb;border-color:#fde68a;color:#92400e}
     .refresh-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
     .refresh-pause-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:999px;background:#fef3c7;color:#92400e;border:1px solid #fcd34d;font-size:.67rem;font-weight:800;letter-spacing:.02em;white-space:nowrap}
+    .ar-desfase{margin:0 0 12px;padding:9px 12px;border-radius:10px;background:#fef3c7;border:1px solid #fcd34d;color:#92400e;font-size:.78rem;line-height:1.45}
+    .ar-desfase .btn{margin-left:8px}
     .refresh-pause-pill--off{background:#f1f5f9;color:#475569;border-color:#cbd5e1}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
     .refresh-toggle{background:none;border:0;color:var(--accent);font-size:.74rem;cursor:pointer;font-family:inherit;padding:0}
@@ -976,6 +978,9 @@
     <div class="card" id="updateCard" style="display:none">
       <div class="card-head">&#x270F;&#xFE0F; Actualizar pedido</div>
       <div class="card-body">
+        <!-- Solo aparece si el pedido cambio en el servidor mientras editabas un campo:
+             tu texto se respeta, pero tienes que saberlo para no guardar algo viejo. -->
+        <div id="arDesfase" class="ar-desfase" hidden></div>
         <div class="form-grid">
           <div class="fg">
             <label class="flbl" for="status">Estado</label>
@@ -2649,6 +2654,10 @@
   }
   async function loadOrderDetail(id){
     currentOrderId = id;
+    // Otro pedido: ni campos tocados ni firma anterior que valgan.
+    arLimpiarSucios();
+    arValorServidor = Object.create(null);
+    arFirmaDetalle = '';
     currentOrderEmailHistory = [];
     currentOrderCustomerEmail = '';
     showView('detail');
@@ -2662,7 +2671,7 @@
     const data = await apiGet('admin_order_detail&id='+encodeURIComponent(id));
     if(!data||!data.ok||!data.order){ $('detail').innerHTML='<div class="msg msg--err">No se encontr\u00F3 el pedido</div>'; return; }
     currentOrderEmailHistory = Array.isArray(data.emailHistory) ? data.emailHistory : [];
-    renderOrder(data.order, currentOrderEmailHistory);
+    renderOrder(data.order, currentOrderEmailHistory, true);
   }
 
   /* STATUS FLOW */
@@ -2704,7 +2713,79 @@
 
   function kv(label, val, cls){ return '<div class="kv'+(cls?' '+cls:'')+'"><span class="lbl">'+esc(label)+'</span><span class="val">'+val+'</span></div>'; }
 
-  function renderOrder(o, emailHistory){
+  /* ---- REPINTADO NO DESTRUCTIVO DEL DETALLE ----
+     El detalle se repinta cada 3 s para que un cambio del cliente (direccion, metodo
+     de pago, un pago que entra) se vea en vivo. Antes eso se pagaba con una pausa por
+     interaccion, porque el repintado te borraba lo que estabas escribiendo. La pausa
+     era el parche; el fallo era el repintado. Dos reglas y deja de haber conflicto:
+
+     1. Si NADA ha cambiado, no se repinta. Se compara la firma de lo que se dibuja
+        (el pedido + su historial de correos). Estando quieto dentro de un pedido el
+        panel no toca el DOM ni una vez, asi que no hay nada que destruir. Solo se
+        repinta cuando de verdad hay algo nuevo, que es justo cuando quieres verlo.
+     2. Un campo que estas editando NO se pisa nunca. Los siete campos de trabajo son
+        HTML estatico (viven fuera de #detail, asi que el innerHTML no los toca): lo
+        unico que los machacaba eran siete `.value =`. Ahora solo se asignan si el
+        campo no tiene el foco y no lo has tocado desde la ultima carga. Si mientras
+        escribias cambio el valor del servidor, se avisa en vez de pisarlo a la
+        callada: pisar seria perder tu texto, y callar seria que guardaras algo viejo. */
+  const AR_CAMPOS_TRABAJO = ['status','tracking','message','editShipping','editProductName','editImage','adminNotes'];
+  let arSucios = Object.create(null);      // campos que ha tocado el admin
+  let arValorServidor = Object.create(null); // ultimo valor que mando el servidor
+  let arFirmaDetalle = '';
+
+  function arMarcarSucio(id){ arSucios[id] = true; }
+  function arLimpiarSucios(){ arSucios = Object.create(null); arAvisarDesfase(); }
+  function arCampoOcupado(id){
+    const el = $(id);
+    if(!el) return false;
+    return document.activeElement === el || !!arSucios[id];
+  }
+  /* Asigna solo si el campo esta libre. Devuelve true si lo dejo sin tocar por estar
+     ocupado y ademas el servidor traia otra cosa: eso es un desfase que hay que contar. */
+  function arPonerValor(id, valor){
+    const el = $(id);
+    if(!el) return false;
+    const nuevo = valor == null ? '' : String(valor);
+    arValorServidor[id] = nuevo;
+    if(!arCampoOcupado(id)){ el.value = nuevo; return false; }
+    return String(el.value) !== nuevo;
+  }
+  function arAvisarDesfase(){
+    const aviso = $('arDesfase');
+    if(!aviso) return;
+    const cambiados = AR_CAMPOS_TRABAJO.filter(id=>{
+      const el = $(id);
+      if(!el || !arCampoOcupado(id)) return false;
+      return arValorServidor[id] != null && String(el.value) !== String(arValorServidor[id]);
+    });
+    if(!cambiados.length){ aviso.hidden = true; return; }
+    aviso.hidden = false;
+    aviso.innerHTML = 'El pedido cambio en el servidor mientras editabas. Se ha respetado lo que escribiste en: <b>'
+      + cambiados.map(id=>esc(AR_NOMBRES_CAMPO[id]||id)).join(', ')
+      + '</b>. <button type="button" id="arDesfaseTomar" class="btn btn--sm">Descartar lo mio y tomar lo del servidor</button>';
+    const btn = $('arDesfaseTomar');
+    if(btn) btn.onclick = ()=>{
+      cambiados.forEach(id=>{ const el=$(id); if(el && arValorServidor[id]!=null) el.value = arValorServidor[id]; delete arSucios[id]; });
+      arAvisarDesfase();
+    };
+  }
+  const AR_NOMBRES_CAMPO = {
+    status:'Estado', tracking:'Tracking', message:'Mensaje', editShipping:'Envio',
+    editProductName:'Producto', editImage:'Imagen', adminNotes:'Notas'
+  };
+  AR_CAMPOS_TRABAJO.forEach(id=>{
+    document.addEventListener('input', e=>{ if(e.target && e.target.id===id) arMarcarSucio(id); }, true);
+    document.addEventListener('change', e=>{ if(e.target && e.target.id===id) arMarcarSucio(id); }, true);
+  });
+
+  function renderOrder(o, emailHistory, forzar){
+    /* Regla 1: sin cambios, ni un repintado. */
+    try {
+      const firma = JSON.stringify([o, emailHistory || []]);
+      if(!forzar && firma === arFirmaDetalle){ arAvisarDesfase(); return; }
+      arFirmaDetalle = firma;
+    } catch(_) { arFirmaDetalle = ''; }
     currentOrderObj = o || null;
     const emailHist = Array.isArray(emailHistory) ? emailHistory : [];
     const orderItems = orderItemsFromOrder(o);
@@ -2994,9 +3075,9 @@
     $('deleteCard').style.display = '';
     renderReceiptState(o.receipt_url || '');
     $('deleteOut').innerHTML = '';
-    $('status').value = o.status;
-    $('tracking').value = o.tracking || '';
-    $('message').value = o.message || '';
+    arPonerValor('status', o.status);
+    arPonerValor('tracking', o.tracking || '');
+    arPonerValor('message', o.message || '');
     var oShipping = Number(o.shipping_amount || 0) || 0;
     var oFee = Number(o.payment_fee_amount || 0) || 0;
     var oDiscount = Number(o.discount_amount || 0) || 0;
@@ -3014,11 +3095,12 @@
       settled: ['paid','preparing','shipped','delivered','refunded','dispute'].indexOf(o.status) !== -1,
       methodLabel: 'Comision ' + (o.payment_method ? String(o.payment_method) : 'pago')
     };
-    $('editShipping').value = oShipping ? money(oShipping) : '';
+    arPonerValor('editShipping', oShipping ? money(oShipping) : '');
     renderShipCostBreakdown();
-    $('editProductName').value = o.name || '';
-    $('editImage').value = o.product_image_url || '';
-    $('adminNotes').value = o.admin_notes || '';
+    arPonerValor('editProductName', o.name || '');
+    arPonerValor('editImage', o.product_image_url || '');
+    arPonerValor('adminNotes', o.admin_notes || '');
+    arAvisarDesfase();
     updateImagePreview();
     renderUpdateItemsSummary(orderItems);
   }
@@ -4669,57 +4751,29 @@
   /* ---- AUTO-REFRESH ---- */
   let arInterval = null, arEnabled = true;
   const AR_INT = 3000;
-  /* La pausa es de ESTADO, no un cronometro.
-     Antes cualquier `pointerdown` dentro de #appView —o sea, en cualquier sitio del
-     panel— congelaba 6 s, y cada clic renovaba la cuenta: usando el panel con
-     normalidad el refresco automatico no llegaba a correr casi nunca y la chapa
-     amarilla vivia encendida. Un clic no es motivo para congelar nada.
-     Lo que SI lo es, y solo mientras dura:
-       - un modal abierto (estas en mitad de una decision),
-       - texto seleccionado (estas copiando un id o un correo y el repintado lo pierde),
-       - un campo de texto con el foco dentro de lo que el repintado REHACE
-         (#detailView y los modales; la caja de busqueda de la lista no se rehace),
-       - los 4 s siguientes a la ultima tecla en cualquier campo, por si acaso.
-     Todas se apagan solas en cuanto dejas de hacer eso: no hay cuenta atras que
-     esperar. */
-  let arUltimaTecla = 0;
-  const AR_GRACIA_TECLA = 4000;
-
-  function arCampoDeTexto(el){
-    if(!el) return false;
-    if(el.isContentEditable) return true;
-    const tag = el.tagName;
-    if(tag === 'TEXTAREA') return true;
-    // SELECT queda fuera a proposito: no guarda nada que se pueda perder, y se queda
-    // con el foco despues de elegir un filtro (pausa eterna).
-    return tag === 'INPUT' && !/^(checkbox|radio|button|submit|file)$/i.test(el.type || 'text');
-  }
-  function arEditandoDondeSeRepinta(){
-    const a = document.activeElement;
-    if(!arCampoDeTexto(a)) return false;
-    if(a.isContentEditable) return true;
-    return !!(a.closest && a.closest('#detailView, #confirmOv, #priceModal, #createProductModal'));
-  }
-  function arHaySeleccion(){
-    const sel = window.getSelection ? window.getSelection() : null;
-    return !!(sel && !sel.isCollapsed && String(sel).trim());
-  }
+  /* La pausa casi ha desaparecido, y esa es la idea.
+     Primero fue un cronometro que arrancaba con cualquier clic dentro de #appView
+     (6 s, renovables): el refresco no llegaba a correr casi nunca. Luego paso a leer
+     el estado —foco, seleccion, tecla reciente—, mejor pero con el mismo defecto de
+     fondo: seguia sin poder ver en vivo un cambio del cliente mientras rellenabas el
+     tracking, y una cuenta atras que se agota mientras escribes es justo lo que borra
+     lo escrito.
+     El fallo nunca fue CUANDO se repinta, sino que el repintado DESTRUIA. Arreglado
+     eso en renderOrder (firma + campos protegidos), no hay nada de lo que proteger al
+     admin y la pausa sobra. Queda una sola, la unica que no es de datos sino de
+     atencion: un modal abierto. */
   function getAutoRefreshPauseState(){
+    /* Lo unico que queda pausando: un modal abierto, porque decide sobre algo concreto
+       y repintar por debajo cambia la pregunta. Escribir y seleccionar YA NO pausan:
+       el repintado no puede hacerles daño (ver renderOrder — firma + campos
+       protegidos), y pausar por eso era lo que impedia ver en vivo un cambio del
+       cliente mientras rellenabas el tracking. */
     if($('confirmOv').classList.contains('open')) return {paused:true, reason:'modal', seconds:0};
     if(!$('priceModal').hidden) return {paused:true, reason:'modal', seconds:0};
     if(!$('createProductModal').hidden) return {paused:true, reason:'modal', seconds:0};
-    if(arEditandoDondeSeRepinta()) return {paused:true, reason:'campo', seconds:0};
-    if(arHaySeleccion()) return {paused:true, reason:'seleccion', seconds:0};
-    const left = (arUltimaTecla + AR_GRACIA_TECLA) - Date.now();
-    if(left > 0) return {paused:true, reason:'tecleando', seconds:Math.max(1, Math.ceil(left/1000))};
     return {paused:false, reason:'', seconds:0};
   }
-  function arTextoDePausa(st){
-    if(st.reason === 'modal') return 'Pausado: modal abierto';
-    if(st.reason === 'campo') return 'Pausado: editando un campo';
-    if(st.reason === 'seleccion') return 'Pausado: texto seleccionado';
-    return 'Pausado: escribiendo (' + st.seconds + 's)';
-  }
+  function arTextoDePausa(){ return 'Pausado: modal abierto'; }
   function updateRefreshLabel(){
     const st = getAutoRefreshPauseState();
     const on = arEnabled ? 'ON' : 'OFF';
@@ -4786,15 +4840,6 @@
     if($('appView').hidden||activeTab!=='orders') return;
     await fetchOrders(currentPage); renderOrdersList(); updateLastRefresh(); updateRefreshLabel();
   }
-  /* La seleccion y el foco ya se leen en vivo en getAutoRefreshPauseState; aqui solo
-     queda anotar la ultima tecla. NO hay escuchador de `pointerdown`: un clic ya no
-     congela nada. */
-  document.addEventListener('input', e=>{
-    if(arCampoDeTexto(e.target)){ arUltimaTecla = Date.now(); updateRefreshLabel(); }
-  }, true);
-  document.addEventListener('keydown', e=>{
-    if(arCampoDeTexto(e.target)){ arUltimaTecla = Date.now(); updateRefreshLabel(); }
-  }, true);
   setInterval(updateRefreshLabel, 500);
 
   /* ---- REFRESCO AL GUARDAR ----
@@ -4816,8 +4861,17 @@
     arPendiente = setTimeout(()=>{ arPendiente=null; arTick(true); loadDashboard(); }, 150);
   }
 
+  /* Que campos deja de "proteger" cada guardado: solo los que esa ruta envia. Limpiar
+     todos seria perder un tracking a medio escribir por haber guardado una nota. */
+  const AR_CAMPOS_POR_RUTA = {
+    admin_status: ['status','tracking','message','editProductName','editImage'],
+    admin_order_amounts: ['editShipping'],
+    admin_order_notes: ['adminNotes']
+  };
   function notificarCambioAdmin(ruta){
     if(AR_RUTAS_SIN_CAMBIO.indexOf(ruta) !== -1) return;
+    const guardados = AR_CAMPOS_POR_RUTA[ruta];
+    if(guardados){ guardados.forEach(id=>{ delete arSucios[id]; }); arAvisarDesfase(); }
     refrescarYa();
     // Otras pestañas del panel abiertas en este navegador.
     try { localStorage.setItem(AR_CANAL, String(Date.now())); } catch(_){}
