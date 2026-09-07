@@ -6,7 +6,7 @@
   <title>Pago | SCOOT SHOP</title>
   <meta name="description" content="Pago seguro: Stripe, PayPal, Bizum o transferencia bancaria." />
   <link rel="canonical" href="https://scootshop.co/pago" />
-  <meta name="asset-version" content="20260814-4" />
+  <meta name="asset-version" content="20260907-1" />
 
   <meta property="og:url" content="https://scootshop.co/pago" />
   <meta property="og:title" content="Pago | SCOOT SHOP" />
@@ -34,17 +34,23 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-  <link rel="manifest" href="/site.webmanifest?v=20260814-4" />
+  <link rel="manifest" href="/site.webmanifest?v=20260907-1" />
 
   <link rel="preload" as="font" type="font/woff2" href="/fonts/plus-jakarta-sans-latin.woff2" crossorigin />
   <link rel="preload" as="font" type="font/woff2" href="/fonts/russo-one-latin.woff2" crossorigin />
-  <link rel="stylesheet" href="/css/fuentes-500-800.css?v=20260814-4" />
-  <link rel="stylesheet" href="/css/icons.css?v=20260814-4" />
-  <link rel="stylesheet" href="/css/main.css?v=20260814-4" />
+  <link rel="stylesheet" href="/css/fuentes-500-800.css?v=20260907-1" />
+  <link rel="stylesheet" href="/css/icons.css?v=20260907-1" />
+  <link rel="stylesheet" href="/css/main.css?v=20260907-1" />
+  <!-- El menú móvil se PINTA desde sessionStorage antes de que el runtime
+       inyecte su hoja (ver primeCachedPartials + ensureCss en global-assets*.js).
+       Sin esta etiqueta estática, esa fracción de segundo se veía el cajón crudo
+       arriba a la izquierda. Enlazada aquí, el CSS bloquea el pintado y no hay
+       ningún frame sin estilos. -->
+  <link rel="stylesheet" href="/css/partials.mobile-menu.css?v=20260907-1">
   <script src="/js/asset-sync.js?v=20260605-2"></script>
   <script src="/js/global-assets.js?v=20260605-2"></script>
 
-  <link rel="stylesheet" href="/css/pago.css?v=20260814-4" />
+  <link rel="stylesheet" href="/css/pago.css?v=20260907-1" />
 
   <script id="stripe-js" src="https://js.stripe.com/v3/" async></script>
 </head>
@@ -172,12 +178,12 @@
                 <span class="tab-title">
                   <span class="tab-brands" aria-label="Visa, Amex, Mastercard, Apple Pay, Amazon Pay y JCB">
                     <span class="brand-carousel" aria-hidden="true">
-                      <img src="/img/visa.svg" alt="" loading="lazy" decoding="async">
-                      <img src="/img/amex.svg" alt="" loading="lazy" decoding="async">
-                      <img src="/img/mastercard.svg" alt="" loading="lazy" decoding="async">
-                      <img src="/img/apple-pay.svg" alt="" loading="lazy" decoding="async">
-                      <img src="/img/amazon-pay.svg" alt="" loading="lazy" decoding="async">
-                      <img src="/img/jcb.svg" alt="" loading="lazy" decoding="async">
+                      <img src="/img/pago/visa.svg" alt="" loading="lazy" decoding="async">
+                      <img src="/img/pago/amex.svg" alt="" loading="lazy" decoding="async">
+                      <img src="/img/pago/mastercard.svg" alt="" loading="lazy" decoding="async">
+                      <img src="/img/pago/apple-pay.svg" alt="" loading="lazy" decoding="async">
+                      <img src="/img/pago/amazon-pay.svg" alt="" loading="lazy" decoding="async">
+                      <img src="/img/pago/jcb.svg" alt="" loading="lazy" decoding="async">
                     </span>
                   </span>
                   Pago online <span class="tab-badge">Recomendado</span>
@@ -192,7 +198,7 @@
               <span class="pay-radio" aria-hidden="true"></span>
               <span class="tab-body">
                 <span class="tab-title">
-                  <img class="tab-logo" src="/img/klarna.webp" alt="Klarna" loading="lazy" decoding="async">
+                  <img class="tab-logo" src="/img/pago/klarna.webp" alt="Klarna" loading="lazy" decoding="async">
                   Klarna
                 </span>
                 <span class="tab-desc">Pago a plazos si aplica · <span class="tab-fee" data-fee-method="klarna"></span></span>
@@ -205,7 +211,7 @@
               <span class="pay-radio" aria-hidden="true"></span>
               <span class="tab-body">
                 <span class="tab-title">
-                  <img class="tab-logo" src="/img/scalapay.svg" alt="Scalapay" loading="lazy" decoding="async">
+                  <img class="tab-logo" src="/img/pago/scalapay.svg" alt="Scalapay" loading="lazy" decoding="async">
                   Scalapay
                 </span>
                 <span class="tab-desc">Paga en 3 plazos sin intereses · <span class="tab-fee" data-fee-method="scalapay"></span></span>
@@ -218,7 +224,7 @@
               <span class="pay-radio" aria-hidden="true"></span>
               <span class="tab-body">
                 <span class="tab-title">
-                  <img class="tab-logo" src="/img/paypal-svgrepo-com.svg" alt="PayPal" loading="lazy" decoding="async">
+                  <img class="tab-logo" src="/img/pago/paypal-svgrepo-com.svg" alt="PayPal" loading="lazy" decoding="async">
                   PayPal
                 </span>
                 <span class="tab-desc">PayPal o plazos · <span class="tab-fee" data-fee-method="paypal"></span></span>
@@ -231,7 +237,7 @@
               <span class="pay-radio" aria-hidden="true"></span>
               <span class="tab-body">
                 <span class="tab-title">
-                  <img class="tab-logo" src="/img/bizum.svg" alt="Bizum" loading="lazy" decoding="async">
+                  <img class="tab-logo" src="/img/pago/bizum.svg" alt="Bizum" loading="lazy" decoding="async">
                   Bizum
                 </span>
                 <span class="tab-desc">Pago instantáneo</span>
@@ -457,9 +463,269 @@
        —que se sirve como immutable— se vuelve a bajar. El sufijo &r solo hace falta
        para tocar pago.js SIN bump, y entonces hay que escribirlo con & literal: el
        script de bump reescribe el ?v y convertía un &amp; en un parámetro basura. -->
-  <script src="/js/pago.js?v=20260814-4" defer></script>
+  <script src="/js/pago.js?r=20260908-1&v=20260907-1" defer></script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

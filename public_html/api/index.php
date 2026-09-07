@@ -941,7 +941,19 @@ function versioned_local_url(string $url, string $version): string {
 
   $path = (string)($parts['path'] ?? '');
   $ext = strtolower((string)pathinfo($path, PATHINFO_EXTENSION));
-  $allowed = ['css','js','json','webmanifest','xml','ico','png','jpg','jpeg','svg','webp','woff','woff2'];
+  /* SOLO hoja de estilos, script y metadatos. Las IMÁGENES y las FUENTES quedan fuera
+     a propósito, igual que en scripts/bump-assets-version.ps1 (que sin -ConImagenes
+     versiona `css|webmanifest` y los `<script src>` y nada más).
+     Estaban dentro y el 24-ago-2026 se vio lo que costaba: un cambio de precio desde el
+     panel llama a bump_asset_version(), que reescribe TODO el HTML, y las dos fichas
+     tocadas salieron con `?v=` en 24 miniaturas, la foto grande, og:image, twitter:image,
+     los seis favicons, el SVG de la DGT y los dos preload de fuentes. Eso es exactamente
+     el fallo documentado del PARPADEO por descarga doble (HTML y JS discrepan en la forma
+     de la URL, el navegador tira la petición en vuelo y pide la otra) y además invalida
+     1,5 MB de fotos por cada bump. Lo vigilan scripts/qa/check-image-cache.ps1 y
+     scripts/qa/check-image-dupes.js, que corren contra el repo: si el servidor reescribe
+     el HTML por su cuenta, ningún guardián local se entera. */
+  $allowed = ['css','js','json','webmanifest','xml'];
   if ($ext === '' || !in_array($ext, $allowed, true)) return $url;
 
   $query = [];
@@ -1170,7 +1182,17 @@ function bump_asset_version(): ?array {
   $versionFile = __DIR__ . '/../asset-version.json';
   if (!is_file($versionFile)) return null;
 
-  $data = json_decode(file_get_contents($versionFile), true);
+  /* El BOM fuera ANTES de decodificar: `Set-Content -Encoding UTF8` de Windows
+     PowerShell 5.1 lo escribe, y `json_decode` con BOM devuelve null. Entonces el
+     patrón de abajo no casa, se cae en "$hoy-1" y la numeración RETROCEDE. Pasó el
+     24-ago-2026: el sitio estaba en 20260824-3 y dos cambios de precio lo dejaron en
+     -2, o sea reutilizando una versión ya servida con OTRO css; como el css es
+     `immutable` un año, el que ya tuviera esa versión en caché se quedaba con la hoja
+     vieja para siempre. El script de PowerShell ya no escribe BOM; esto es el cinturón. */
+  $crudo = (string)file_get_contents($versionFile);
+  $bom = chr(239) . chr(187) . chr(191);   // EF BB BF, sin escapes que se puedan estropear
+  if (str_starts_with($crudo, $bom)) $crudo = substr($crudo, strlen($bom));
+  $data = json_decode($crudo, true);
   $current = trim((string)($data['v'] ?? ''));
   $today = date('Ymd');
 
@@ -2428,6 +2450,38 @@ function email_money_eur(float $value): string {
   return number_format($value, 2, '.', '') . ' €';
 }
 
+/* Un nombre largo no puede estirar la tarjeta. En un correo no hay `text-overflow` que
+   valga —Gmail y Outlook lo ignoran— y lo unico que queda del CSS es el `white-space:
+   nowrap`, que ensancha la tabla entera hasta que quepa el nombre. Asi que el nombre se
+   corta aqui, en el texto: "Mando limitador de velocidad para..." se queda en "Mando
+   limitador de...". Se corta por palabra si el corte cae cerca del final; si no, a hueso.
+   El nombre completo sigue viajando en el `alt` de la foto y en el pedido. */
+function email_truncate(string $value, int $max): string {
+  $value = trim(preg_replace('/\s+/u', ' ', $value));
+  if ($max < 4 || $value === '' || mb_strlen($value, 'UTF-8') <= $max) return $value;
+  $cut = mb_substr($value, 0, $max - 1, 'UTF-8');
+  $space = mb_strrpos($cut, ' ', 0, 'UTF-8');
+  if ($space !== false && $space >= (int)floor(($max - 1) * 0.66)) {
+    $cut = mb_substr($cut, 0, $space, 'UTF-8');
+  }
+  $cut = preg_replace('/[\s.,;:\-\x{2014}\x{2013}\x{00b7}]+$/u', '', $cut);
+  if ($cut === '') $cut = mb_substr($value, 0, $max - 1, 'UTF-8');
+  return $cut . '…';
+}
+
+/* El mismo texto en dos tallas: la corta —la que cabe en un movil— y la larga, que solo
+   se destapa donde hay sitio de verdad (de 601 px en adelante, o sea escritorio y
+   webmail). El correo se manda UNA vez y lo abre quien sea, asi que recortar por el movil
+   dejaba el nombre cortado en una pantalla donde sobraba medio palmo. Medido en el correo
+   ya montado: el hueco del texto pasa de 159 px a 345 al cruzar esa raya.
+   El cliente que no entienda media queries (Outlook de escritorio, Gmail de cuentas
+   ajenas) se queda con la corta: mas breve, nunca rota. */
+function email_two_widths(string $corto, string $ancho): string {
+  if ($ancho === '' || $ancho === $corto) return email_html_escape($corto);
+  return '<span class="ss-a" style="display:none;max-height:0;overflow:hidden;mso-hide:all;">' . email_html_escape($ancho) . '</span>'
+    . '<span class="ss-e">' . email_html_escape($corto) . '</span>';
+}
+
 function email_append_query_params(string $url, array $params): string {
   $url = trim($url);
   if ($url === '') return $url;
@@ -2473,6 +2527,128 @@ function email_append_query_params(string $url, array $params): string {
   return $rebuilt;
 }
 
+/* ---------------------------------------------------------------------------
+   El estado del pedido, contado UNA vez y en su sitio.
+
+   Antes se decia tres veces seguidas —pildora, titular y primer parrafo— y aun
+   asi el correo no decia DONDE estaba el pedido: la franja roja de arriba era la
+   misma para "entregado" que para "pago fallido". Ahora el estado es una
+   POSICION en el recorrido, con el mismo color y las mismas cinco etapas que ya
+   usa la pagina del pedido (/pedido), y el titular pasa a decir la accion.
+   --------------------------------------------------------------------------- */
+
+/* Un color por estado. Misma paleta que /pedido y que el panel. */
+function email_status_accent(string $status): string {
+  switch ($status) {
+    case 'pending_payment': return '#9a3412';
+    case 'paid':            return '#15803d';
+    case 'processing':
+    case 'preparing':       return '#7c3aed';
+    case 'reserved':        return '#5b21b6';
+    case 'shipped':         return '#2563eb';
+    case 'delivered':       return '#16a34a';
+    case 'canceled':
+    case 'cancelled':
+    case 'refunded':
+    case 'payment_failed':
+    case 'dispute':
+    case 'error':           return '#991b1b';
+  }
+  return '#475569';
+}
+
+/* En que etapa del recorrido esta (0..4). Mismo mapa que stageIndex() en /pedido: un
+   pedido cancelado se queda en 0 y su primer hito se pinta como aviso. */
+function email_status_stage(string $status): int {
+  switch ($status) {
+    case 'paid':            return 1;
+    case 'processing':
+    case 'preparing':       return 2;
+    case 'shipped':         return 3;
+    case 'delivered':       return 4;
+  }
+  return 0;
+}
+
+/* El titular dice QUE HAY QUE HACER o que acaba de pasar; el estado ya lo canta
+   la barra. Si aparece un estado nuevo, se queda con el titulo de siempre. */
+function email_status_headline(string $status, string $fallback): string {
+  $h = [
+    'pending_payment' => 'Pendiente de pago',
+    'paid'            => 'Pago confirmado',
+    'processing'      => 'En preparación',
+    'preparing'       => 'En preparación',
+    'shipped'         => 'Tu pedido va en camino',
+    'delivered'       => 'Tu pedido está entregado',
+    'canceled'        => 'Pedido cancelado',
+    'cancelled'       => 'Pedido cancelado',
+    'refunded'        => 'Reembolso en camino',
+    'payment_failed'  => 'No pudimos confirmar el pago',
+    'error'           => 'No pudimos confirmar el pago',
+    'dispute'         => 'Tu pedido está en revisión',
+  ];
+  return $h[$status] ?? $fallback;
+}
+
+/* La MISMA linea de tiempo que /pedido, hito por hito: cuatro circulos unidos por tres
+   segmentos, el reloj que pasa a check al cobrar, y el tramo que se enciende al alcanzar
+   el hito siguiente. Aqui los circulos son PNG horneados por
+   scripts/build-mail-track-icons.js a partir de los MISMOS SVG de la pagina: en un correo
+   no se puede pintar de otra forma —Gmail borra el SVG y Outlook de escritorio ignora el
+   `border-radius`, que nos cuadraria los circulos—. Cada PNG trae ya su circulo y su
+   borde, asi que al correo solo le queda colocarlo. */
+function email_stage_bar(array $CFG, string $status, string $color, int $stage): string {
+  $cancelado = in_array($status, ['canceled', 'cancelled', 'refunded', 'payment_failed', 'dispute', 'error'], true);
+  $hitos = [
+    ['at' => 1, 'icono' => 'hourglass', 'rotulo' => 'Pendiente de pago', 'iconoHecho' => 'check', 'rotuloHecho' => 'Pagado'],
+    ['at' => 2, 'icono' => 'box',       'rotulo' => 'Preparando'],
+    ['at' => 3, 'icono' => 'truck',     'rotulo' => 'Enviado'],
+    ['at' => 4, 'icono' => 'house',     'rotulo' => 'Entregado'],
+  ];
+  $apagado = '64748b';
+  $celdas = '';
+
+  foreach ($hitos as $i => $hito) {
+    $hecho = $stage >= $hito['at'];
+    if ($i > 0) {
+      $celdas .= '<td style="padding:0 6px;vertical-align:middle;">'
+        . '<div style="height:10px;line-height:10px;font-size:0;border-radius:999px;background:' . ($hecho ? $color : '#e7ebf0') . ';">&nbsp;</div>'
+        . '</td>';
+    }
+    /* En un pedido cancelado el primer hito deja de ser «pendiente de pago» y pasa a ser
+       el aviso, con el color del estado; los siguientes se quedan apagados porque el
+       recorrido se interrumpio ahi. Igual que en /pedido. */
+    $esAviso = $cancelado && $i === 0;
+    $icono = $esAviso ? 'alert' : (($hecho && isset($hito['iconoHecho'])) ? $hito['iconoHecho'] : $hito['icono']);
+    $rotulo = $esAviso ? 'Incidencia' : (($hecho && isset($hito['rotuloHecho'])) ? $hito['rotuloHecho'] : $hito['rotulo']);
+    $tinta = ($hecho || $esAviso) ? ltrim($color, '#') : $apagado;
+    $src = absolute_url($CFG['public_base'], '/img/mail/track/track-' . $icono . '-' . strtolower($tinta) . '.png');
+    $celdas .= '<td width="29" style="width:29px;padding:0;vertical-align:middle;">'
+      . '<img src="' . email_html_escape($src) . '" width="29" height="29" alt="' . email_html_escape($rotulo) . '" title="' . email_html_escape($rotulo) . '" style="display:block;width:29px;height:29px;border:0;">'
+      . '</td>';
+  }
+
+  return '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width:100%;border-collapse:collapse;">'
+    . '<tr>' . $celdas . '</tr>'
+    . '</table>';
+}
+
+/* El icono que acompana al titular. En /pedido la palabra va SIEMPRE en negro y el color
+   lo pone solo el icono; aqui igual. */
+function email_status_icon(array $CFG, string $status, string $color): string {
+  $iconos = [
+    'pending_payment' => 'hourglass',
+    'paid' => 'check',
+    'processing' => 'box',
+    'preparing' => 'box',
+    'shipped' => 'truck',
+    'delivered' => 'house',
+  ];
+  $icono = $iconos[$status] ?? 'alert';
+  $src = absolute_url($CFG['public_base'], '/img/mail/track/ico-' . $icono . '-' . strtolower(ltrim($color, '#')) . '.png');
+  return '<img src="' . email_html_escape($src) . '" width="26" height="26" alt="" style="display:block;width:26px;height:26px;border:0;">';
+}
+
 function build_order_status_email_html(array $CFG, string $orderId, string $title, string $statusLabel, array $paragraphs, array $context = []): string {
   $customerName = trim((string)($context['customerName'] ?? ($context['payerName'] ?? '')));
   $productName = trim((string)($context['productName'] ?? ''));
@@ -2492,8 +2668,6 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
   $line = '#e5eaf1';
   $accent = '#b91e1e';
   $accentSoft = '#f9e8ea';
-  $segment = '<div style="width:40px;height:3px;border-radius:999px;background:' . $accent . ';"></div>';
-  $miniSegment = '<div style="width:40px;height:3px;border-radius:999px;background:' . $accent . ';"></div>';
 
   if ($productImageUrl !== '') {
     $productImageUrl = absolute_url($CFG['public_base'], $productImageUrl);
@@ -2544,18 +2718,18 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
   $statusPreheader = [
     'pending_payment' => 'Tu pedido sigue activo. Entra para completarlo cuando quieras.',
     'paid' => 'Pago confirmado. Te avisaremos cuando el pedido avance al siguiente paso.',
-    'preparing' => 'Tu pedido ya esta en preparacion. Te avisaremos cuando se envie.',
+    'preparing' => 'Tu pedido ya está en preparación. Te avisaremos cuando se envíe.',
     'shipped' => 'Tu pedido ya fue enviado. Revisa el estado y seguimiento cuando quieras.',
     'delivered' => 'Tu pedido figura como entregado. Si necesitas ayuda, estamos disponibles.',
     'canceled' => 'Tu pedido fue cancelado. Podemos ayudarte a tramitar uno nuevo.',
-    'refunded' => 'Reembolso procesado. El abono puede reflejarse en los proximos dias.',
-    'dispute' => 'Tu pedido esta en revision. Te contactaremos si necesitamos mas datos.',
+    'refunded' => 'Reembolso procesado. El abono puede reflejarse en los próximos días.',
+    'dispute' => 'Tu pedido está en revisión. Te contactaremos si necesitamos más datos.',
     'payment_failed' => 'No se pudo confirmar el pago. Retoma el pedido para completarlo.',
     'error' => 'Hubo una incidencia con el pago. Retoma el pedido para completarlo.',
   ];
   $preheader = trim((string)($context['preheader'] ?? ''));
   if ($preheader === '') {
-    $preheader = $statusPreheader[$status] ?? ('Tu pedido ' . $orderId . ' ahora esta ' . $statusLabel . '.');
+    $preheader = $statusPreheader[$status] ?? ('Tu pedido ' . $orderId . ' ahora está ' . $statusLabel . '.');
   }
 
   $subtotal = null;
@@ -2635,61 +2809,43 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
     'order' => $orderId,
   ]);
 
-  $pillBg = $accentSoft;
-  $pillBorder = '#f0cfd4';
-  $pillColor = $accent;
-  if ($status === 'preparing') {
-    $pillBg = '#eef4ff';
-    $pillBorder = '#d9e5ff';
-    $pillColor = '#2563eb';
-  } elseif (in_array($status, ['shipped', 'delivered'], true)) {
-    $pillBg = '#eaf8ef';
-    $pillBorder = '#d4ebdd';
-    $pillColor = '#1a8f4a';
-  } elseif (in_array($status, ['canceled', 'refunded', 'payment_failed', 'error', 'dispute'], true)) {
-    $pillBg = '#fee2e2';
-    $pillBorder = '#f0cfd4';
-    $pillColor = '#991b1b';
-  }
+  /* El estado manda en la cabecera: pinta la franja de arriba, el rotulo del
+     pedido y —si el pedido va por el camino normal— la barra de etapas. */
+  $statusAccent = email_status_accent($status);
+  /* El separador de seccion: un filete de 1 px a todo el ancho POR ENCIMA del rotulo.
+     Antes era un guion de 40 px debajo, que no separaba nada —el rotulo ya abre seccion—
+     y que repetia cuatro veces el color del estado, gastando el unico color que de verdad
+     informa. Asi cada seccion empieza donde termina la anterior y el color se queda en la
+     cabecera. */
+  $miniSegment = '<div style="width:100%;height:1px;line-height:1px;font-size:0;background:#e4e8ee;"></div>';
+  $statusStage = email_status_stage($status);
+  $headline = email_status_headline($status, $title);
+  $statusVisual = email_stage_bar($CFG, $status, $statusAccent, $statusStage);
+  $statusIconHtml = email_status_icon($CFG, $status, $statusAccent);
 
-  $details = [
-    'Pedido' => $orderId,
-    'Estado' => $statusLabel,
-  ];
-
-  if ($productName !== '') {
-    $details['Producto'] = $productName;
-  }
-
+  /* El seguimiento va en su propia caja y no en un parrafo: es un numero para copiar y
+     pegar en la web del transportista. Mismo recuadro que el resumen economico —borde de
+     1 px y esquinas redondeadas— con el rotulo del color del estado. La tabla va sin
+     `width` y con `align="left"` para que abrace al numero en vez de estirarse a todo el
+     ancho, y detras lleva un `clear` para que la seccion siguiente no se le suba al lado.
+     El `word-break` es por los transportistas de codigos larguisimos: sin el, el numero
+     ensancharia el correo entero. */
+  $trackingHtml = '';
   if ($tracking !== '') {
-    $details['Seguimiento'] = $tracking;
-  }
-
-  if (!empty($orderItems)) {
-    $itemsCount = 0;
-    foreach ($orderItems as $item) {
-      $itemsCount += max(1, (int)($item['qty'] ?? 1));
-    }
-    $details['Articulos'] = (string)$itemsCount;
+    $trackingHtml = '<div style="padding:2px 0 14px 0;">'
+      . '<table role="presentation" align="left" cellspacing="0" cellpadding="0" style="border-collapse:separate;border:1px solid #d6dee9;border-radius:14px;background:#f8fbff;">'
+      . '<tr><td style="padding:10px 16px 11px 14px;font-family:Arial,Helvetica,sans-serif;">'
+      . '<p style="margin:0 0 3px 0;font-size:10.5px;font-weight:700;line-height:1.4;letter-spacing:.12em;text-transform:uppercase;color:' . $statusAccent . ';">Tracking</p>'
+      . '<p style="margin:0;font-size:16px;font-weight:800;line-height:1.35;letter-spacing:.02em;color:' . $ink . ';word-break:break-all;">' . email_html_escape($tracking) . '</p>'
+      . '</td></tr>'
+      . '</table>'
+      . '<div style="clear:both;font-size:0;line-height:0;">&nbsp;</div>'
+      . '</div>';
   }
 
   $paragraphHtml = '';
   foreach ($paragraphs as $paragraph) {
     $paragraphHtml .= '<p class="copy" style="margin:0 0 12px 0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.72;color:' . $ink . ';">' . nl2br(email_html_escape($paragraph)) . '</p>';
-  }
-
-  $detailRows = '';
-  $detailCount = count($details);
-  $detailIndex = 0;
-  foreach ($details as $label => $value) {
-    $detailIndex++;
-    $detailRows .= '<tr><td style="padding:0 0 10px 0;">'
-      . '<p class="detail-key" style="margin:0 0 4px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;line-height:1.4;color:' . $muted . ';text-transform:uppercase;letter-spacing:.08em;">' . email_html_escape($label) . '</p>'
-      . '<p class="detail-val" style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;line-height:1.55;color:' . $ink . ';">' . email_html_escape($value) . '</p>'
-      . '</td></tr>';
-    if ($detailIndex < $detailCount) {
-      $detailRows .= '<tr><td style="padding:0 0 10px 0;"><div style="width:28px;height:1px;background:' . $line . ';"></div></td></tr>';
-    }
   }
 
   $productSectionHtml = '';
@@ -2708,6 +2864,11 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
          del cliente como si fuera un color. */
       $itemVariantText = trim((string)($item['variant_text'] ?? ''));
       if ($itemVariantText === '' && is_array($item)) $itemVariantText = order_item_variant_text($item);
+      /* Regla global del sitio: una linea sin variantes muestra "Único" en vez de
+         quedarse sin chip —lo hacen el carrito, el checkout, /pago, la ficha y /pedido—,
+         para que todas las filas pesen lo mismo y no parezca que falta un dato.
+         order_item_variant_text() devuelve '' a proposito: quien pinta decide. */
+      if ($itemVariantText === '') $itemVariantText = 'Único';
       $itemLineTotalLabel = '';
       $itemPrice = trim((string)($item['price'] ?? ''));
       if ($itemPrice !== '') {
@@ -2724,7 +2885,7 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
       }
 
       $itemsHtml .= '<tr><td style="padding:0 0 10px 0;">'
-        . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width:100%;border:0;border-radius:22px;background:linear-gradient(180deg, rgba(255,255,255,.998) 0%, rgba(252,253,255,.996) 100%);box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 18px 44px rgba(15,23,42,.08),0 6px 18px rgba(15,23,42,.04);">'
+        . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width:100%;border:2.5px solid #e6eaf0;border-radius:22px;background:linear-gradient(180deg, rgba(255,255,255,.998) 0%, rgba(252,253,255,.996) 100%);box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 10px 26px rgba(15,23,42,.06),0 3px 10px rgba(15,23,42,.04);">'
         . '<tr>';
 
       if ($itemImage !== '') {
@@ -2741,15 +2902,15 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
         . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width:100%;">'
         . '<tr>'
         . '<td style="padding:0;vertical-align:top;">'
-        . '<p style="display:inline-block;margin:0 0 4px 0;padding:4px 10px;border-radius:10px;background:#1f2937;color:#ffffff !important;-webkit-text-fill-color:#ffffff !important;font-family:\'Plus Jakarta Sans\',Arial,Helvetica,sans-serif;font-size:14px;font-weight:800;line-height:1.22;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' . email_html_escape($itemName) . '</p>';
+        . '<p style="display:inline-block;margin:0 0 4px 0;padding:4px 10px;border-radius:10px;background:#1f2937;color:#ffffff !important;-webkit-text-fill-color:#ffffff !important;font-family:\'Plus Jakarta Sans\',Arial,Helvetica,sans-serif;font-size:14px;font-weight:800;line-height:1.22;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' . email_two_widths(email_truncate($itemName, 20), email_truncate($itemName, 40)) . '</p>';
       if ($itemSku !== '') {
         $itemsHtml .= '<p style="margin:0 0 2px 0;">'
-          . '<span style="display:inline-block;padding:4px 9px;border-radius:999px;background:rgba(17,19,21,.045);font-family:\'Plus Jakarta Sans\',Arial,Helvetica,sans-serif;font-size:11.52px;font-weight:800;line-height:1.2;color:#6b7280 !important;letter-spacing:0;text-transform:none;">Ref: ' . email_html_escape($itemSku) . '</span>'
+          . '<span style="display:inline-block;padding:4px 9px;border-radius:999px;background:rgba(17,19,21,.045);font-family:\'Plus Jakarta Sans\',Arial,Helvetica,sans-serif;font-size:11.52px;font-weight:800;line-height:1.2;color:#6b7280 !important;letter-spacing:0;text-transform:none;white-space:nowrap;">' . email_two_widths(email_truncate('Ref: ' . $itemSku, 22), email_truncate('Ref: ' . $itemSku, 40)) . '</span>'
           . '</p>';
       }
       if ($itemVariantText !== '') {
         $itemsHtml .= '<p style="margin:0 0 1px 0;">'
-          . '<span style="display:inline-block;padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.82);box-shadow:0 8px 18px rgba(15,23,42,.06);font-family:\'Plus Jakarta Sans\',Arial,Helvetica,sans-serif;font-size:11.52px;font-weight:800;line-height:1.2;color:#667085 !important;letter-spacing:.06em;text-transform:uppercase;">' . email_html_escape($itemVariantText) . '</span>'
+          . '<span style="display:inline-block;padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.82);box-shadow:0 8px 18px rgba(15,23,42,.06);font-family:\'Plus Jakarta Sans\',Arial,Helvetica,sans-serif;font-size:11.52px;font-weight:800;line-height:1.2;color:#667085 !important;letter-spacing:.06em;text-transform:uppercase;">' . email_two_widths(email_truncate($itemVariantText, 17), email_truncate($itemVariantText, 38)) . '</span>'
           . '</p>';
       }
       $itemsHtml .= '<p style="margin:0;font-family:\'Plus Jakarta Sans\',Arial,Helvetica,sans-serif;font-size:11.52px;font-weight:800;line-height:1.2;color:#6b7280 !important;display:none;">Precio: ' . email_html_escape(number_format((float)$itemPrice, 2, '.', '')) . ' €</p>';
@@ -2769,8 +2930,8 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
     }
 
     $productSectionHtml = '<tr><td class="pad-x" style="padding:2px 28px 18px 28px;">'
-      . '<p class="section-kicker" style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;line-height:1.35;color:' . $muted . ';text-transform:uppercase;letter-spacing:.12em;">Productos del pedido</p>'
-      . '<div style="margin:0 0 10px 0;">' . $miniSegment . '</div>'
+      . '<div style="margin:0 0 13px 0;">' . $miniSegment . '</div>'
+      . '<p class="section-kicker" style="margin:0 0 10px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;line-height:1.35;color:' . $muted . ';text-transform:uppercase;letter-spacing:.12em;">Productos del pedido</p>'
       . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width:100%;">'
       . $itemsHtml
       . '</table>'
@@ -2779,8 +2940,8 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
 
   $messagePanelInnerHtml = '';
   if ($customMessage !== '') {
-    $messagePanelInnerHtml = '<p class="section-kicker" style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;line-height:1.35;color:' . $muted . ';text-transform:uppercase;letter-spacing:.12em;">Mensaje adicional</p>'
-      . '<div style="margin:0 0 10px 0;">' . $miniSegment . '</div>'
+    $messagePanelInnerHtml = '<div style="margin:0 0 13px 0;">' . $miniSegment . '</div>'
+      . '<p class="section-kicker" style="margin:0 0 10px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;line-height:1.35;color:' . $muted . ';text-transform:uppercase;letter-spacing:.12em;">Mensaje adicional</p>'
       . '<p class="copy" style="margin:0 0 10px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.7;color:' . $ink . ';">' . nl2br(email_html_escape($customMessage)) . '</p>';
   }
 
@@ -2791,12 +2952,12 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
     $summaryValueColor = '#0f172a';
     $summaryTotalColor = '#0b1220';
     $amountSummaryHtml = '<tr><td class="pad-x" style="padding:0 28px 18px 28px;">'
-      . '<p class="section-kicker" style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;line-height:1.35;color:' . $muted . ';text-transform:uppercase;letter-spacing:.12em;">Resumen economico</p>'
-      . '<div style="margin:0 0 10px 0;">' . $miniSegment . '</div>'
+      . '<div style="margin:0 0 13px 0;">' . $miniSegment . '</div>'
+      . '<p class="section-kicker" style="margin:0 0 10px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;line-height:1.35;color:' . $muted . ';text-transform:uppercase;letter-spacing:.12em;">Resumen económico</p>'
       . '<table role="presentation" class="amount-box" width="100%" cellspacing="0" cellpadding="0" style="width:100%;border:1px solid ' . $summaryLineColor . ';border-radius:14px;background:#f8fbff;">'
       . '<tr><td class="amount-label" style="padding:10px 12px;border-bottom:1px solid ' . $summaryLineColor . ';font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;line-height:1.4;color:' . $summaryLabelColor . ' !important;-webkit-text-fill-color:' . $summaryLabelColor . ' !important;">Subtotal</td><td class="amount-value" align="right" style="padding:10px 12px;border-bottom:1px solid ' . $summaryLineColor . ';font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:800;line-height:1.4;color:' . $summaryValueColor . ' !important;-webkit-text-fill-color:' . $summaryValueColor . ' !important;"><span style="color:' . $summaryValueColor . ' !important;-webkit-text-fill-color:' . $summaryValueColor . ' !important;">' . email_html_escape($subtotalLabel) . '</span></td></tr>'
-      . '<tr><td class="amount-label" style="padding:10px 12px;border-bottom:1px solid ' . $summaryLineColor . ';font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;line-height:1.4;color:' . $summaryLabelColor . ' !important;-webkit-text-fill-color:' . $summaryLabelColor . ' !important;">Envio</td><td class="amount-value" align="right" style="padding:10px 12px;border-bottom:1px solid ' . $summaryLineColor . ';font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:800;line-height:1.4;color:' . $summaryValueColor . ' !important;-webkit-text-fill-color:' . $summaryValueColor . ' !important;"><span style="color:' . $summaryValueColor . ' !important;-webkit-text-fill-color:' . $summaryValueColor . ' !important;">' . email_html_escape($shippingLabel) . '</span></td></tr>'
-      . ($showPaymentFee ? ('<tr><td class="amount-label" style="padding:10px 12px;border-bottom:1px solid ' . $summaryLineColor . ';font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;line-height:1.4;color:' . $summaryLabelColor . ' !important;-webkit-text-fill-color:' . $summaryLabelColor . ' !important;">Comision de pago</td><td class="amount-value" align="right" style="padding:10px 12px;border-bottom:1px solid ' . $summaryLineColor . ';font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:800;line-height:1.4;color:' . $summaryValueColor . ' !important;-webkit-text-fill-color:' . $summaryValueColor . ' !important;"><span style="color:' . $summaryValueColor . ' !important;-webkit-text-fill-color:' . $summaryValueColor . ' !important;">' . email_html_escape($paymentFeeLabel) . '</span></td></tr>') : '')
+      . '<tr><td class="amount-label" style="padding:10px 12px;border-bottom:1px solid ' . $summaryLineColor . ';font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;line-height:1.4;color:' . $summaryLabelColor . ' !important;-webkit-text-fill-color:' . $summaryLabelColor . ' !important;">Envío</td><td class="amount-value" align="right" style="padding:10px 12px;border-bottom:1px solid ' . $summaryLineColor . ';font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:800;line-height:1.4;color:' . $summaryValueColor . ' !important;-webkit-text-fill-color:' . $summaryValueColor . ' !important;"><span style="color:' . $summaryValueColor . ' !important;-webkit-text-fill-color:' . $summaryValueColor . ' !important;">' . email_html_escape($shippingLabel) . '</span></td></tr>'
+      . ($showPaymentFee ? ('<tr><td class="amount-label" style="padding:10px 12px;border-bottom:1px solid ' . $summaryLineColor . ';font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;line-height:1.4;color:' . $summaryLabelColor . ' !important;-webkit-text-fill-color:' . $summaryLabelColor . ' !important;">Comisión de pago</td><td class="amount-value" align="right" style="padding:10px 12px;border-bottom:1px solid ' . $summaryLineColor . ';font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:800;line-height:1.4;color:' . $summaryValueColor . ' !important;-webkit-text-fill-color:' . $summaryValueColor . ' !important;"><span style="color:' . $summaryValueColor . ' !important;-webkit-text-fill-color:' . $summaryValueColor . ' !important;">' . email_html_escape($paymentFeeLabel) . '</span></td></tr>') : '')
       . '<tr><td class="amount-total-label" style="padding:10px 12px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:800;line-height:1.4;color:' . $summaryTotalColor . ' !important;-webkit-text-fill-color:' . $summaryTotalColor . ' !important;">Total</td><td class="amount-total-value" align="right" style="padding:10px 12px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:900;line-height:1.35;color:' . $summaryTotalColor . ' !important;-webkit-text-fill-color:' . $summaryTotalColor . ' !important;"><span style="color:' . $summaryTotalColor . ' !important;-webkit-text-fill-color:' . $summaryTotalColor . ' !important;">' . email_html_escape($totalLabel) . '</span></td></tr>'
       . '</table>'
       . '</td></tr>';
@@ -2804,28 +2965,18 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
 
   $actionHintInnerHtml = '';
 
-  $detailsPanelHtml = '<table role="presentation" class="details-panel" width="100%" cellspacing="0" cellpadding="0" style="width:100%;border:0;background:transparent;">'
-    . '<tr><td style="padding:0;">'
-    . '<p class="section-kicker" style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;line-height:1.35;color:' . $muted . ';text-transform:uppercase;letter-spacing:.12em;">Detalle del estado</p>'
-    . '<div style="margin:0 0 10px 0;">' . $miniSegment . '</div>'
-    . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width:100%;">'
-    . $detailRows
-    . '</table>'
-    . '</td></tr>'
-    . '</table>';
-
   $actionsPanelHtml = '<table role="presentation" class="actions-panel" width="100%" cellspacing="0" cellpadding="0" style="width:100%;border:0;background:transparent;">'
     . '<tr><td style="padding:0;">'
     . $messagePanelInnerHtml
     . $actionHintInnerHtml
-    . '<table role="presentation" class="stack-cta" cellspacing="0" cellpadding="0" style="margin-top:6px;border-collapse:separate;border-spacing:10px 0;">'
+    . '<table role="presentation" class="stack-cta" cellspacing="0" cellpadding="0" style="margin-top:10px;border-collapse:collapse;">'
     . '<tr>'
     . '<td style="padding:0;vertical-align:middle;white-space:nowrap;">'
     . '<a href="' . email_html_escape($ctaUrl) . '" style="display:inline-block;white-space:nowrap;min-height:46px;line-height:46px;padding:0 20px;border:1px solid #ff7d67;border-radius:999px;background-color:#ff6b57;background:#ff6b57;background-image:linear-gradient(180deg,#ff8a73 0%,#ff5b43 100%);font-family:\'Plus Jakarta Sans\',Arial,Helvetica,sans-serif;font-size:12.9px;font-weight:900;letter-spacing:.03em;text-transform:uppercase;color:#111111 !important;-webkit-text-fill-color:#111111 !important;text-decoration:none !important;text-align:center;">'
     . '<span style="color:#111111 !important;-webkit-text-fill-color:#111111 !important;text-decoration:none !important;display:inline-block;-webkit-text-stroke:0.45px rgba(255,255,255,.28);text-shadow:0 1px 0 rgba(255,255,255,.34),0 0 1px rgba(0,0,0,.35);">' . email_html_escape($ctaLabel) . '</span>'
     . '</a>'
     . '</td>'
-    . '<td style="padding:0 0 0 16px;vertical-align:middle;white-space:nowrap;">'
+    . '<td style="padding:0 0 0 12px;vertical-align:middle;white-space:nowrap;">'
     . '<a href="' . email_html_escape($supportUrl) . '" style="display:inline-block;white-space:nowrap;min-height:46px;line-height:46px;padding:0 16px;border:1px solid #4b5563;border-radius:999px;background-color:#1f2937;background:#1f2937;font-family:\'Plus Jakarta Sans\',Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;letter-spacing:.01em;color:#ffffff !important;-webkit-text-fill-color:#ffffff !important;text-decoration:none !important;text-align:center;">'
     . '<span style="color:#ffffff !important;-webkit-text-fill-color:#ffffff !important;text-decoration:none !important;display:inline-block;">Soporte WhatsApp</span>'
     . '</a>'
@@ -2835,20 +2986,12 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
     . '</td></tr>'
     . '</table>';
 
-  $postSummaryTwoColsHtml = '<tr><td class="pad-x" style="padding:0 28px 14px 28px;">'
-    . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width:100%;">'
-    . '<tr>'
-    . '<td class="stack-col stack-pad" width="50%" style="width:50%;padding:0;vertical-align:top;">' . $detailsPanelHtml . '</td>'
-    . '<td class="stack-gap" width="16" style="width:16px;padding:0;font-size:0;line-height:0;">&nbsp;</td>'
-    . '<td class="stack-col" width="50%" style="width:50%;padding:0;vertical-align:top;">' . $actionsPanelHtml . '</td>'
-    . '</tr>'
-    . '</table>'
-    . '</td></tr>';
+  $postSummaryTwoColsHtml = '<tr><td class="pad-x" style="padding:0 28px 14px 28px;">' . $actionsPanelHtml . '</td></tr>';
 
   $greeting = $customerName !== '' ? 'Hola ' . email_html_escape($customerName) . ',' : 'Hola,';
 
   return '<!DOCTYPE html>'
-    . '<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>' . email_html_escape($title) . ' &middot; SCOOT SHOP</title><style>:root{color-scheme:light;supported-color-schemes:light;}body{-webkit-text-size-adjust:100% !important;-ms-text-size-adjust:100% !important;}a[x-apple-data-detectors]{color:inherit !important;text-decoration:none !important;}@media screen and (max-width:760px){.mail-wrap{padding:10px 4px !important;}.mail-card{border-radius:20px !important;}.hero-pad{padding:18px 16px 12px 16px !important;}.pad-x{padding-left:16px !important;padding-right:16px !important;}.title{font-size:30px !important;line-height:1.1 !important;}.lead{font-size:16px !important;line-height:1.6 !important;}.copy{font-size:16px !important;line-height:1.62 !important;}.small{font-size:16px !important;line-height:1.64 !important;}.section-kicker{font-size:13px !important;line-height:1.35 !important;letter-spacing:.12em !important;}.detail-key{font-size:13px !important;line-height:1.38 !important;}.detail-val{font-size:16px !important;line-height:1.55 !important;}.stack-col{display:block !important;width:100% !important;padding-left:0 !important;padding-right:0 !important;}.stack-gap{display:none !important;width:0 !important;}.stack-pad{padding-right:0 !important;padding-left:0 !important;padding-bottom:12px !important;}.details-panel,.actions-panel{border-radius:0 !important;}.details-panel td,.actions-panel td{padding:0 !important;}.stack-cta{width:auto !important;border-spacing:14px 0 !important;}.stack-cta td{display:inline-block !important;width:auto !important;padding:0 !important;vertical-align:middle !important;}.stack-cta a{display:inline-block !important;width:auto !important;min-height:46px !important;line-height:46px !important;padding:0 16px !important;font-size:13.5px !important;text-align:center !important;}.amount-box td{padding:12px 14px !important;}.amount-label{font-size:15px !important;color:#4b5563 !important;-webkit-text-fill-color:#4b5563 !important;}.amount-value{font-size:16px !important;color:#0f172a !important;-webkit-text-fill-color:#0f172a !important;}.amount-total-label{font-size:16px !important;color:#0b1220 !important;-webkit-text-fill-color:#0b1220 !important;}.amount-total-value{font-size:18px !important;color:#0b1220 !important;-webkit-text-fill-color:#0b1220 !important;}}</style></head>'
+    . '<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>' . email_html_escape($title) . ' &middot; SCOOT SHOP</title><style>:root{color-scheme:light;supported-color-schemes:light;}body{-webkit-text-size-adjust:100% !important;-ms-text-size-adjust:100% !important;}a[x-apple-data-detectors]{color:inherit !important;text-decoration:none !important;}@media screen and (min-width:601px){.ss-a{display:inline !important;max-height:none !important;overflow:visible !important;}.ss-e{display:none !important;}}@media screen and (max-width:760px){.mail-wrap{padding:10px 4px !important;}.mail-card{border-radius:20px !important;}.hero-pad{padding:18px 16px 12px 16px !important;}.pad-x{padding-left:16px !important;padding-right:16px !important;}.title{font-size:30px !important;line-height:1.1 !important;}.lead{font-size:16px !important;line-height:1.6 !important;}.copy{font-size:16px !important;line-height:1.62 !important;}.small{font-size:16px !important;line-height:1.64 !important;}.section-kicker{font-size:13px !important;line-height:1.35 !important;letter-spacing:.12em !important;}.detail-key{font-size:13px !important;line-height:1.38 !important;}.detail-val{font-size:16px !important;line-height:1.55 !important;}.stack-cta{width:auto !important;border-spacing:0 !important;}.stack-cta td{display:inline-block !important;width:auto !important;vertical-align:middle !important;}.stack-cta a{display:inline-block !important;width:auto !important;min-height:46px !important;line-height:46px !important;padding:0 16px !important;font-size:13.5px !important;text-align:center !important;}.amount-box td{padding:12px 14px !important;}.amount-label{font-size:15px !important;color:#4b5563 !important;-webkit-text-fill-color:#4b5563 !important;}.amount-value{font-size:16px !important;color:#0f172a !important;-webkit-text-fill-color:#0f172a !important;}.amount-total-label{font-size:16px !important;color:#0b1220 !important;-webkit-text-fill-color:#0b1220 !important;}.amount-total-value{font-size:18px !important;color:#0b1220 !important;-webkit-text-fill-color:#0b1220 !important;}}</style></head>'
     . '<body style="margin:0;padding:0;background:' . $bg . ';">'
     . '<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">' . email_html_escape($preheader) . '</div>'
     . '<table role="presentation" class="mail-wrap" width="100%" cellspacing="0" cellpadding="0" style="width:100%;background:' . $bg . ';padding:22px 12px;">'
@@ -2859,20 +3002,25 @@ function build_order_status_email_html(array $CFG, string $orderId, string $titl
     . '<img src="' . email_html_escape($logoUrl) . '" alt="SCOOT SHOP" width="140" style="display:block;margin:0 auto;width:140px;height:auto;border:0;font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:700;color:#111315;">'
     . '</a>'
     . '</td></tr>'
-    . '<tr><td style="padding:0;"><div style="width:100%;height:3px;background:' . $accent . ';"></div></td></tr>'
+    . '<tr><td style="padding:0;font-size:0;line-height:0;"><div style="width:100%;height:3px;line-height:3px;font-size:0;background:' . $statusAccent . ';"></div></td></tr>'
     . '<tr><td class="pad-x" style="padding:18px 28px 18px 28px;">'
     . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width:100%;">'
     . '<tr><td style="padding-top:0;">'
-    . '<p style="margin:0 0 14px 0;"><span style="display:inline-block;background:' . $pillBg . ';color:' . $pillColor . ';border:1px solid ' . $pillBorder . ';border-radius:999px;padding:8px 14px;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;line-height:1.2;text-transform:uppercase;letter-spacing:.08em;">' . email_html_escape($statusLabel) . '</span></p>'
-    . '<h1 class="title" style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:28px;font-weight:700;line-height:1.08;color:' . $ink . ';">' . email_html_escape($title) . '</h1>'
-    . '<p class="lead" style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.68;color:' . $muted . ';">Pedido ' . email_html_escape($orderId) . '</p>'
-    . '<div style="padding-top:14px;">' . $segment . '</div>'
+    . '<p style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:10.5px;font-weight:700;line-height:1.4;letter-spacing:.12em;text-transform:uppercase;color:' . $statusAccent . ';">Pedido &middot; ' . email_html_escape($orderId) . '</p>'
+    . '<table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;"><tr>'
+    . '<td width="26" style="width:26px;padding:0 9px 0 0;vertical-align:middle;">' . $statusIconHtml . '</td>'
+    . '<td style="padding:0;vertical-align:middle;">'
+    . '<h1 class="title" style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:26px;font-weight:800;line-height:1.1;color:' . $ink . ';">' . email_html_escape($headline) . '</h1>'
+    . '</td>'
+    . '</tr></table>'
+    . '<div style="padding-top:16px;">' . $statusVisual . '</div>'
     . '</td></tr>'
     . '</table>'
     . '</td></tr>'
     . '<tr><td class="pad-x" style="padding:6px 28px 0 28px;">'
     . '<p class="copy" style="margin:0 0 14px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.72;color:' . $ink . ';">' . $greeting . '</p>'
     . $paragraphHtml
+    . $trackingHtml
     . '</td></tr>'
     . $productSectionHtml
     . $amountSummaryHtml
@@ -2899,67 +3047,54 @@ function build_order_status_email_content(array $CFG, string $orderId, string $s
     case 'pending_payment':
       $subject = "SCOOT SHOP - Tu pedido {$orderId} está pendiente de pago";
       $title = 'Pedido pendiente de pago';
-      $paragraphs[] = "Hemos recibido tu pedido ({$orderId}), pero el pago todavía no figura como completado.";
-      $paragraphs[] = 'En cuanto el pago se confirme, recibirás una nueva actualización automática por correo.';
+      $paragraphs[] = 'Tu pedido está guardado: puedes retomarlo y pagarlo cuando quieras desde el enlace de abajo, y en cuanto entre el pago te avisamos.';
       break;
 
     case 'paid':
       $subject = "SCOOT SHOP - Hemos recibido el pago de tu pedido {$orderId}";
       $title = 'Pago confirmado';
-      $paragraphs[] = "Ya hemos confirmado el pago de tu pedido ({$orderId}).";
-      $paragraphs[] = 'Nuestro equipo ya ha iniciado la preparación para dejarlo listo lo antes posible.';
+      $paragraphs[] = 'Hemos recibido tu pago correctamente. Tu pedido entra ahora en la cola de preparación y te avisamos en cuanto empecemos. Gracias por confiar en nosotros.';
       break;
 
     case 'preparing':
       $subject = "SCOOT SHOP - Tu pedido {$orderId} ya está en preparación";
-      $title = 'Pedido en preparación';
-      $paragraphs[] = "Tu pedido ({$orderId}) ya está en preparación.";
-      $paragraphs[] = 'Te avisaremos de nuevo en cuanto quede entregado al transportista.';
+      $title = 'En preparación';
+      $paragraphs[] = 'Ya lo tenemos entre manos: estamos revisando lo que llevas y embalándolo bien protegido para que te llegue perfecto.';
       break;
 
     case 'shipped':
       $subject = "SCOOT SHOP - Tu pedido {$orderId} ya ha sido enviado";
       $title = 'Pedido enviado';
-      $paragraphs[] = "Tu pedido ({$orderId}) ya ha salido de nuestras instalaciones.";
-      if ($tracking !== '') {
-        $paragraphs[] = "Tu número de seguimiento es: {$tracking}";
-      }
-      $paragraphs[] = 'En breve deberías empezar a ver movimientos en el seguimiento del transporte.';
+      $paragraphs[] = 'Tu pedido ya ha salido del almacén y va de camino a tu dirección. El seguimiento puede tardar unas horas en dar su primera señal.';
       break;
 
     case 'delivered':
       $subject = "SCOOT SHOP - Tu pedido {$orderId} figura como entregado";
       $title = 'Pedido entregado';
-      $paragraphs[] = "La empresa de transporte marca tu pedido ({$orderId}) como entregado.";
-      $paragraphs[] = 'Si todo está correcto, ya puedes disfrutarlo.';
-      $paragraphs[] = 'Si detectas cualquier incidencia, responde a este correo y lo revisamos.';
+      $paragraphs[] = 'El transportista nos confirma la entrega de tu pedido. Que lo disfrutes.';
       break;
 
     case 'canceled':
       $subject = "SCOOT SHOP - Tu pedido {$orderId} ha sido cancelado";
       $title = 'Pedido cancelado';
-      $paragraphs[] = "El pedido ({$orderId}) ha sido cancelado.";
       $paragraphs[] = 'Si necesitas ayuda para tramitar uno nuevo o resolver una incidencia, contáctanos.';
       break;
 
     case 'refunded':
       $subject = "SCOOT SHOP - Tu pedido {$orderId} ha sido reembolsado";
       $title = 'Reembolso procesado';
-      $paragraphs[] = "Hemos tramitado el reembolso de tu pedido ({$orderId}).";
       $paragraphs[] = 'El abono puede tardar unos días en reflejarse según tu banco o método de pago.';
       break;
 
     case 'dispute':
       $subject = "SCOOT SHOP - Estamos revisando tu pedido {$orderId}";
       $title = 'Pedido en revisión';
-      $paragraphs[] = "Tu pedido ({$orderId}) ha pasado a revisión.";
       $paragraphs[] = 'Nuestro equipo lo revisará y te contactará si necesitamos más información.';
       break;
 
     case 'payment_failed':
       $subject = "SCOOT SHOP - No hemos podido confirmar el pago de tu pedido {$orderId}";
       $title = 'Pago no confirmado';
-      $paragraphs[] = "No hemos podido confirmar el pago de tu pedido ({$orderId}).";
       $paragraphs[] = 'Si has intentado pagar recientemente, revisaremos la incidencia y te avisaremos si necesitamos algo más.';
       break;
 
@@ -2973,12 +3108,12 @@ function build_order_status_email_content(array $CFG, string $orderId, string $s
   $preheaderByStatus = [
     'pending_payment' => 'Tu pedido sigue activo. Entra para completarlo cuando quieras.',
     'paid' => 'Pago confirmado. Te avisaremos cuando el pedido avance al siguiente paso.',
-    'preparing' => 'Tu pedido ya esta en preparacion. Te avisaremos cuando se envie.',
+    'preparing' => 'Tu pedido ya está en preparación. Te avisaremos cuando se envíe.',
     'shipped' => 'Tu pedido ya fue enviado. Revisa el estado y seguimiento cuando quieras.',
     'delivered' => 'Tu pedido figura como entregado. Si necesitas ayuda, estamos disponibles.',
     'canceled' => 'Tu pedido fue cancelado. Podemos ayudarte a tramitar uno nuevo.',
-    'refunded' => 'Reembolso procesado. El abono puede reflejarse en los proximos dias.',
-    'dispute' => 'Tu pedido esta en revision. Te contactaremos si necesitamos mas datos.',
+    'refunded' => 'Reembolso procesado. El abono puede reflejarse en los próximos días.',
+    'dispute' => 'Tu pedido está en revisión. Te contactaremos si necesitamos más datos.',
     'payment_failed' => 'No se pudo confirmar el pago. Retoma el pedido para completarlo.',
     'error' => 'Hubo una incidencia con el pago. Retoma el pedido para completarlo.',
   ];
@@ -3438,6 +3573,31 @@ const BACKEND_PAYMENT_FEES = [
 ];
 
 /**
+ * Gastos de envío por umbral (15 ago 2026).
+ *
+ * Hasta hoy el envío era gratis siempre y el frontend mandaba '0.00'. Con
+ * accesorios de 5 € en el catálogo, un pedido suelto no paga ni el sobre. A
+ * partir de SHIPPING_FREE_FROM el envío sigue siendo gratis; por debajo se
+ * cobra SHIPPING_FEE.
+ *
+ * El umbral se mide sobre el SUBTOTAL que calcula el backend desde el catálogo,
+ * NO sobre lo que manda el navegador: si dependiera del cliente, cualquiera se
+ * lo quitaría editando la petición. Tampoco se mide después del descuento, a
+ * propósito: un código de descuento no debería hacer aparecer un gasto de envío
+ * que el cliente no veía al añadir al carrito.
+ */
+const SHIPPING_FREE_FROM = 10.00;   // € de subtotal a partir de los cuales es gratis
+const SHIPPING_FEE       = 2.99;    // € que se cobran por debajo del umbral
+
+function shipping_fee_for_subtotal(string $subtotal): string {
+  $sub = round((float)$subtotal, 2);
+  // Un subtotal de 0 (pedido vacío o error de catálogo) no cobra envío: sin
+  // productos no hay nada que enviar, y cobrar 2,99 € por nada sería absurdo.
+  if ($sub <= 0) return '0.00';
+  return number_format($sub >= SHIPPING_FREE_FROM ? 0.0 : SHIPPING_FEE, 2, '.', '');
+}
+
+/**
  * Migración idempotente de tablas y columnas del sistema de descuentos.
  * SOLO se llama desde rutas de descuento, NUNCA desde ensure_schema().
  * Cada operación va en su propio try/catch: un fallo no rompe el resto.
@@ -3753,6 +3913,101 @@ function catalog_override_set(string $productId, array $cambios): bool {
 
 /** El catálogo tal y como lo ve el cliente: estructura + capa operativa. Lo usa el
  *  panel para listar, así que lo que se ve en el panel es lo que se ve en la web. */
+/* ── LOS PACKS ───────────────────────────────────────────────────────────────
+   Un pack es un conjunto de articulos que, comprados juntos, valen otra cosa.
+   Lo declara el catalogo (`data/products.js`) y llega aqui por el indice
+   generado, igual que los ejes de variante: `node scripts/build-attributes-index.js`.
+   AQUI NO HAY REGLA ESCRITA A MANO, solo la aritmetica de aplicarla.
+
+   Antes esto lo hacia un codigo de descuento (`PACKTANKDUAL`) porque el precio
+   se tarifa SIEMPRE desde el catalogo y nunca desde el navegador. Un cupon
+   servia para cuadrar el total, pero convertia una oferta en un vale: el pedido
+   guardaba «descuento 36,99» en vez de «la bolsa iba de regalo», y si el codigo
+   dejaba de valer el cliente pagaba el precio suelto sin enterarse.
+
+   Reglas, las mismas que `SCOOTSHOP_resolverPacks()` en el catalogo:
+   - el pack se aplica solo si estan TODOS sus articulos con su cantidad;
+   - `precioPack` es por unidad, `precioPackTotal` por el lote entero;
+   - lo que sobre de una linea se cobra al precio de siempre;
+   - un articulo puede valer 0 DENTRO del pack aunque como producto no pueda.
+   ────────────────────────────────────────────────────────────────────────── */
+function catalog_packs(): array {
+  $packs = attributes_index()['packs'] ?? [];
+  return is_array($packs) ? $packs : [];
+}
+
+/**
+ * Aplica los packs a un carrito.
+ *
+ * @param array $cartItems  lineas [['sku'=>..,'qty'=>..], ...]
+ * @param callable $precioDe  sku => precio unitario de catalogo (float), 0 si no hay
+ * @return array ['subtotal'=>float, 'packs'=>[ids], 'lineas'=>[i=>importe]]
+ */
+function packs_apply_to_cart(array $cartItems, callable $precioDe): array {
+  $hay = [];
+  foreach ($cartItems as $item) {
+    $sku = strtoupper(trim((string)($item['sku'] ?? '')));
+    if ($sku === '') continue;
+    $hay[$sku] = ($hay[$sku] ?? 0) + max(1, (int)($item['qty'] ?? 1));
+  }
+
+  $cubre = [];      // sku => ['unidades'=>int, 'importe'=>float]
+  $aplicados = [];
+  foreach (catalog_packs() as $pack) {
+    $articulos = is_array($pack['articulos'] ?? null) ? $pack['articulos'] : [];
+    if (empty($articulos)) continue;
+
+    $completo = true;
+    foreach ($articulos as $a) {
+      $sku = strtoupper(trim((string)($a['sku'] ?? '')));
+      $n = max(1, (int)($a['cantidad'] ?? 1));
+      if ($sku === '' || ($hay[$sku] ?? 0) < $n) { $completo = false; break; }
+    }
+    if (!$completo) continue;
+
+    $aplicados[] = (string)($pack['id'] ?? '');
+    foreach ($articulos as $a) {
+      $sku = strtoupper(trim((string)($a['sku'] ?? '')));
+      $n = max(1, (int)($a['cantidad'] ?? 1));
+      if (array_key_exists('precioPackTotal', $a)) {
+        $imp = (float)$a['precioPackTotal'];
+      } elseif (array_key_exists('precioPack', $a)) {
+        $imp = (float)$a['precioPack'] * $n;
+      } else {
+        // sin precio declarado: dentro del pack vale lo de siempre
+        $imp = (float)$precioDe($sku) * $n;
+      }
+      if (!is_finite($imp) || $imp < 0) continue;
+      if (!isset($cubre[$sku])) $cubre[$sku] = ['unidades' => 0, 'importe' => 0.0];
+      $cubre[$sku]['unidades'] += $n;
+      $cubre[$sku]['importe'] += $imp;
+    }
+  }
+
+  $subtotal = 0.0;
+  $lineas = [];
+  foreach ($cartItems as $i => $item) {
+    $sku = strtoupper(trim((string)($item['sku'] ?? '')));
+    $qty = max(1, (int)($item['qty'] ?? 1));
+    $unidad = (float)$precioDe($sku);
+    $importe = $unidad * $qty;
+
+    if (isset($cubre[$sku]) && $cubre[$sku]['unidades'] > 0) {
+      $cubiertas = min($qty, $cubre[$sku]['unidades']);
+      $porUnidad = $cubre[$sku]['importe'] / $cubre[$sku]['unidades'];
+      $importe = $porUnidad * $cubiertas + $unidad * ($qty - $cubiertas);
+      $cubre[$sku]['importe'] -= $porUnidad * $cubiertas;
+      $cubre[$sku]['unidades'] -= $cubiertas;
+    }
+
+    $importe = round($importe, 2);
+    $lineas[$i] = $importe;
+    $subtotal += $importe;
+  }
+
+  return ['subtotal' => round($subtotal, 2), 'packs' => $aplicados, 'lineas' => $lineas];
+}
+
 function catalog_products_merged(): array {
   $indice = attributes_index();
   $over = catalog_overrides_read();
@@ -3855,7 +4110,7 @@ function lookup_product_media_by_sku(string $sku, string $productsFile): ?array 
 function attributes_index(): array {
   static $indice = null;
   if ($indice !== null) return $indice;
-  $indice = ['labels' => [], 'products' => [], 'byHref' => []];
+  $indice = ['labels' => [], 'products' => [], 'byHref' => [], 'packs' => []];
   $file = __DIR__ . '/../data/attributes-index.json';
   if (is_file($file) && is_readable($file)) {
     $raw = @file_get_contents($file);
@@ -3865,6 +4120,11 @@ function attributes_index(): array {
         'labels' => is_array($parsed['labels'] ?? null) ? $parsed['labels'] : [],
         'products' => is_array($parsed['products'] ?? null) ? $parsed['products'] : [],
         'byHref' => is_array($parsed['byHref'] ?? null) ? $parsed['byHref'] : [],
+        /* Los packs. Esta lista blanca es la que decide QUE del indice llega al
+           backend: lo que no este aqui se tira en silencio, y eso fue exactamente
+           lo que paso — el indice del servidor traia los packs y `catalog_packs()`
+           veia una lista vacia, asi que el pedido se cobraba a precio suelto. */
+        'packs' => is_array($parsed['packs'] ?? null) ? $parsed['packs'] : [],
       ];
     }
   }
@@ -4536,7 +4796,10 @@ function resolve_order_pricing(array $input): array {
   $cartCategoryCandidates = [];
 
   if ($isCartMode) {
-    $cartSubtotal = 0.0;
+    /* Los precios de catalogo, una sola vez. El subtotal NO se suma aqui:
+       lo calcula `packs_apply_to_cart()`, que es quien sabe si estas lineas
+       forman un pack completo y a que precio va entonces cada una. */
+    $precioUnitario = [];
     foreach ($cartItems as $item) {
       $entry = lookup_product_price_by_sku($item['sku'], $productsFile);
       if ($entry === null) {
@@ -4549,7 +4812,15 @@ function resolve_order_pricing(array $input): array {
       }
       $entryCategory = trim((string)($entry['category'] ?? ''));
       if ($entryCategory !== '') $cartCategoryCandidates[$entryCategory] = true;
-      $cartSubtotal += (float)$entry['price'] * (int)$item['qty'];
+      $precioUnitario[strtoupper(trim((string)$item['sku']))] = (float)$entry['price'];
+    }
+
+    $resueltoPacks = packs_apply_to_cart($cartItems, static function (string $sku) use ($precioUnitario): float {
+      return (float)($precioUnitario[$sku] ?? 0.0);
+    });
+    $cartSubtotal = (float)$resueltoPacks['subtotal'];
+    if (!empty($resueltoPacks['packs'])) {
+      $warnings[] = 'pack_applied:' . implode(',', $resueltoPacks['packs']);
     }
 
     if ($cartSubtotal <= 0) {
@@ -4734,6 +5005,17 @@ function resolve_order_pricing(array $input): array {
       }
     }
   }
+
+  /* Envío: lo decide el umbral sobre el subtotal REAL de catálogo, no el navegador.
+     Se coge el MAYOR entre lo que llega y lo que toca por umbral, y ese orden
+     importa: un ajuste manual del panel (recargo por envío internacional, que
+     viaja en `shipping_amount` vía pending_order_shipping_override) sigue ganando,
+     mientras que un cliente que manipule la petición para mandar '0.00' —o '0.01',
+     que es por donde se colaría un "si llega positivo lo respeto"— paga igual. */
+  $shippingAmount = number_format(
+    max((float)$shippingAmount, (float)shipping_fee_for_subtotal($backendBaseAmount)),
+    2, '.', ''
+  );
 
   $breakdown = ($discountValid === true)
     ? calc_discount_engine($backendBaseAmount, $discountType, $discountValue, $paymentMethodForFees, $shippingAmount)
@@ -5439,6 +5721,22 @@ switch ($route) {
       json_out(['ok' => false, 'error' => 'bad_request'], 400);
     }
 
+    // Un pedido SIN DATOS no se crea. El formulario de /checkout ya los pide, pero la
+    // direccion viaja en sessionStorage y esa copia se pierde (pestana restaurada,
+    // enlace abierto en otra pestana, Safari purgando la sesion): entonces /pago
+    // llegaba aqui con `shipping` vacio y nacia un pedido sin nombre, sin correo y sin
+    // direccion, imposible de preparar y de avisar. Aqui es donde se puede garantizar,
+    // porque el navegador no manda.
+    $faltanEnvio = [];
+    if ($shipName === '')    $faltanEnvio[] = 'fullName';
+    if ($shipEmail === '' || !filter_var($shipEmail, FILTER_VALIDATE_EMAIL)) $faltanEnvio[] = 'email';
+    if ($shipAddress === '') $faltanEnvio[] = 'addressLine1';
+    if ($shipPostal === '')  $faltanEnvio[] = 'postalCode';
+    if ($shipCity === '')    $faltanEnvio[] = 'city';
+    if ($faltanEnvio) {
+      json_out(['ok' => false, 'error' => 'missing_shipping', 'fields' => $faltanEnvio], 400);
+    }
+
     if (!preg_match('/^[a-z]{3}$/', $currency)) {
       json_out(['ok' => false, 'error' => 'bad_currency'], 400);
     }
@@ -5512,10 +5810,17 @@ switch ($route) {
             payment_method = :payment_method,
             user_id = COALESCE(:user_id, user_id),
             payer_email = COALESCE(NULLIF(:payer_email, ''), payer_email),
-            ship_name = :ship_name, ship_email = :ship_email, ship_phone = :ship_phone,
-            ship_address = :ship_address, ship_address2 = :ship_address2, ship_city = :ship_city,
-            ship_province = :ship_province, ship_postal = :ship_postal, ship_country = :ship_country,
-            ship_notes = :ship_notes, updated_at = :updated_at
+            ship_name = COALESCE(NULLIF(:ship_name, ''), ship_name),
+            ship_email = COALESCE(NULLIF(:ship_email, ''), ship_email),
+            ship_phone = COALESCE(NULLIF(:ship_phone, ''), ship_phone),
+            ship_address = COALESCE(NULLIF(:ship_address, ''), ship_address),
+            ship_address2 = COALESCE(NULLIF(:ship_address2, ''), ship_address2),
+            ship_city = COALESCE(NULLIF(:ship_city, ''), ship_city),
+            ship_province = COALESCE(NULLIF(:ship_province, ''), ship_province),
+            ship_postal = COALESCE(NULLIF(:ship_postal, ''), ship_postal),
+            ship_country = COALESCE(NULLIF(:ship_country, ''), ship_country),
+            ship_notes = COALESCE(NULLIF(:ship_notes, ''), ship_notes),
+            updated_at = :updated_at
           WHERE id = :id
         ");
         $upd->execute([
@@ -8382,9 +8687,12 @@ switch ($route) {
       'electric-bikes' => 'electric-bike',
       'electric-motorcycles' => 'electric-motorcycle',
       'accessories' => 'accessory',
+      // Un repuesto NO es un vehículo: sin esto, un recambio dado de alta desde el
+      // panel salía como patinete y con ficha de vehículo.
+      'spare-parts' => 'accessory',
     ];
     $productType = $categoryToType[$categoryKey] ?? 'electric-scooter';
-    $catalogType = ($categoryKey === 'accessories') ? 'accessory' : 'vehicle';
+    $catalogType = in_array($categoryKey, ['accessories', 'spare-parts'], true) ? 'accessory' : 'vehicle';
 
     if ($alt === '') {
       $alt = ($categoryKey === 'accessories') ? ('Accesorio ' . $name) : ('Producto ' . $name);
@@ -9035,6 +9343,14 @@ switch ($route) {
       $override = pending_order_shipping_override(get_pdo($CFG), $previewOrderId);
       if ($override !== null) $previewShipping = $override;
     }
+    /* Sin ajuste manual, el envío lo decide el umbral — la MISMA regla que
+       resolve_order_pricing(). Si esta previsualización dijera "gratis" y el
+       pedido cobrase 2,99 €, el cliente vería un importe al aceptar y otro al
+       pagar: exactamente el fallo que hay que evitar. */
+    $previewShipping = number_format(
+      max((float)$previewShipping, (float)shipping_fee_for_subtotal($backendBaseAmt)),
+      2, '.', ''
+    );
 
     // ── Sin código: breakdown base ────────────────────────────────────────────
     if ($discountCode === '') {

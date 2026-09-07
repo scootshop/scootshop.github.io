@@ -21,14 +21,20 @@
   <meta name="twitter:image" content="https://scootshop.co/img/0-removebg-preview.webp" />
   <meta name="robots" content="noindex,nofollow" />
   <title>Estado del pedido | SCOOT SHOP</title>
-  <meta name="asset-version" content="20260814-4" />
+  <meta name="asset-version" content="20260907-1" />
 
   <!-- Fuente (non-blocking) -->
   <link rel="preload" as="font" type="font/woff2" href="/fonts/plus-jakarta-sans-latin.woff2" crossorigin />
   <link rel="preload" as="font" type="font/woff2" href="/fonts/russo-one-latin.woff2" crossorigin />
-  <link rel="stylesheet" href="/css/fuentes-400-600-700-800.css?v=20260814-4" />
-  <link rel="stylesheet" href="/css/icons.css?v=20260814-4" />
-  <link rel="stylesheet" href="/css/main.css?v=20260814-4" />
+  <link rel="stylesheet" href="/css/fuentes-400-600-700-800.css?v=20260907-1" />
+  <link rel="stylesheet" href="/css/icons.css?v=20260907-1" />
+  <link rel="stylesheet" href="/css/main.css?v=20260907-1" />
+  <!-- El menú móvil se PINTA desde sessionStorage antes de que el runtime
+       inyecte su hoja (ver primeCachedPartials + ensureCss en global-assets*.js).
+       Sin esta etiqueta estática, esa fracción de segundo se veía el cajón crudo
+       arriba a la izquierda. Enlazada aquí, el CSS bloquea el pintado y no hay
+       ningún frame sin estilos. -->
+  <link rel="stylesheet" href="/css/partials.mobile-menu.css?v=20260907-1">
   <script src="/js/asset-sync.js?v=20260605-2" defer></script>
 
   <style>
@@ -194,10 +200,17 @@
     }
     .order-empty-state strong{
       font-family:var(--sport);
+      /* El titular del sitio (ver la regla en css/main.css): peso real, trazo
+         dibujado e inclinado. Va aqui y no alli porque este <style> es de la
+         propia pagina y gana por ir despues en el documento. */
       font-weight:400;
+      -webkit-text-stroke:.04em currentColor;
       font-size:.86rem;
       letter-spacing:.06em;
       text-transform:uppercase;
+      transform:skewX(-7deg);
+      transform-origin:left bottom;
+      display:inline-block;
       color:#9f1d1d;
     }
     .order-empty-state p{
@@ -571,9 +584,15 @@
     .pedido-upd b{ color:#334155; font-variant-numeric:tabular-nums; }
 
     /* Etiqueta de sección "sport" con tick del color de estado */
+    /* El titular del sitio (ver css/main.css). */
     .pedido-label{ display:flex; align-items:center; gap:9px; margin:0 0 14px;
-      font-size:.82rem; font-weight:800; letter-spacing:.13em; text-transform:uppercase; color:#334155; }
-    .pedido-label::before{ content:""; width:16px; height:3px; border-radius:2px; background:var(--acc,#2563eb); }
+      font-size:.93rem; font-weight:400; letter-spacing:.13em; text-transform:uppercase; color:#000000;
+      font-family:'Russo One', sans-serif; -webkit-text-stroke:.04em currentColor; }
+    .pedido-label{ transform:skewX(-7deg); transform-origin:left bottom; }
+    /* El tick vuelve a su sitio con el skew contrario: la fila se inclina entera
+       —es un <h2> sin envoltorio dentro— y el rayita de color no debe inclinarse. */
+    .pedido-label::before{ content:""; width:16px; height:3px; border-radius:2px; background:var(--acc,#2563eb);
+      transform:skewX(7deg); }
 
     /* Cuerpo: productos (ancho) + total/entrega (estrecho).
        align-items:start evita que la columna de productos se estire para
@@ -1080,6 +1099,26 @@
         if (!order || !order.id) return;
 
         if (previewActive) {
+          /* La vista previa no pasa por /api/orders/resume-payment, asi que nadie deja
+             la direccion en sessionStorage y /pago —que ya no se fia de `checkout=1`—
+             rebotaria al formulario. Se copia del propio pedido, con los nombres que
+             usa el checkout. */
+          const ship = (order.shipping && typeof order.shipping === 'object') ? order.shipping : {};
+          saveResumeSessionPayload({
+            shipping: {
+              fullName: String(order.customer_name || ship.name || order.payer_name || ''),
+              email: String(order.customer_email || ship.email || order.payer_email || ''),
+              phone: String(ship.phone || ''),
+              addressLine1: String(ship.address || ''),
+              addressLine2: String(ship.address2 || ''),
+              city: String(ship.city || ''),
+              province: String(ship.province || ''),
+              postalCode: String(ship.postal || ''),
+              country: String(ship.country || 'Spain'),
+              notes: String(ship.notes || '')
+            },
+            cartItems: Array.isArray(order.order_items) ? order.order_items : null
+          });
           window.location.href = buildPreviewResumeUrl(order);
           return;
         }
@@ -1169,7 +1208,7 @@
         const shipNotes = String(ship.notes || '').trim();
         if (shipNotes) facts.push('<div class="pedido-fact"><dt>Notas de entrega</dt><dd class="pedido-note">' + esc(shipNotes) + '</dd></div>');
         const entregaBlock = facts.length
-          ? ('<h2 class="pedido-label">Entrega</h2><dl class="pedido-facts">' + facts.join('') + '</dl>')
+          ? ('<h2 class="pedido-label"><span>Entrega</span></h2><dl class="pedido-facts">' + facts.join('') + '</dl>')
           : '';
         // "Pagado con" solo si el pedido está realmente cobrado; si sigue
         // pendiente (o cancelado) el método es el elegido, no uno ya pagado.
@@ -1198,7 +1237,7 @@
           '  </section>',
           '  <div class="pedido-grid">',
           '    <section class="pedido-products">',
-          '      <h2 class="pedido-label">Productos</h2>',
+          '      <h2 class="pedido-label"><span>Productos</span></h2>',
           '      ' + renderItems(order),
           '    </section>',
           '    <aside class="pedido-panel pedido-side">',
@@ -1543,6 +1582,266 @@
   <script src="/js/global-assets.js?v=20260605-2"></script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

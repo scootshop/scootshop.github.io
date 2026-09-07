@@ -458,7 +458,6 @@
       var colorLabel = safeText(getParam('colorLabel')) || '';
       var priceRaw = safeText(getParam('price')) || '';
       var priceNum = null;
-      var checkoutCompleted = getParam('checkout') === '1';
       var resumeOrderIdParam = safeText(getParam('order')) || safeText(getParam('existingOrderId')) || '';
       var isCartMode = getParam('cart') === '1';
       var cartItems = isCartMode ? loadCheckoutCart() : [];
@@ -548,7 +547,7 @@
         }
       }
 
-      var priceLabel = priceNum ? (priceNum.toFixed(2) + ' €') : (priceRaw ? priceRaw : '€');
+      var priceLabel = priceNum ? fmtEur(priceNum) : (priceRaw ? priceRaw : '€');
 
       // -- Comisiones Stripe por método de pago --
       // Fórmula inversa: total = (base + fixedFee) / (1 - pct)
@@ -587,10 +586,19 @@
         return method === 'bank' ? 'transfer' : (method || 'card');
       }
 
+      /* EL DINERO SE ESCRIBE COMO EN TODO EL SITIO: coma decimal y los enteros
+         sin decimales — «10 €», no «10.00 €»; «32,99 €», no «32.99 €». Es la misma
+         regla que `formatMoney()` en /checkout, y esta pagina era la unica que
+         ponia punto y arrastraba dos ceros: el cliente pasa de una pantalla a la
+         otra en un clic y las cifras cambiaban de forma por el camino.
+
+         Solo para ENSEÑAR. Lo que viaja en una URL o en una peticion sigue siendo
+         `toFixed(2)`, que es formato de maquina. */
       function fmtEur(value){
         var num = Number(value);
         if(!Number.isFinite(num)) return '—';
-        return num.toFixed(2) + ' €';
+        var txt = Number.isInteger(num) ? String(num) : num.toFixed(2).replace('.', ',');
+        return txt + ' €';
       }
 
       function parseMoney(value){
@@ -598,16 +606,32 @@
         return Number.isFinite(num) ? num : 0;
       }
 
+      /* Envío por umbral. Espejo de SHIPPING_FREE_FROM / SHIPPING_FEE en
+         api/index.php: aquí solo sirve para ENSEÑAR el importe mientras el cliente
+         elige método; el que cobra es el backend, que lo recalcula desde el
+         catálogo y se queda con el mayor. Si cambian los números, se cambian en
+         los dos sitios y manda el de PHP.
+         Ojo al orden: la comisión de pasarela se calcula sobre el neto SIN envío
+         —igual que calc_discount_engine— y el envío se suma después. */
+      var ENVIO_GRATIS_DESDE = 10;
+      var ENVIO_IMPORTE = 2.99;
+      function envioPorUmbral(subtotal){
+        var s = Number(subtotal);
+        if (!Number.isFinite(s) || s <= 0) return 0;
+        return s >= ENVIO_GRATIS_DESDE ? 0 : ENVIO_IMPORTE;
+      }
+
       function localBreakdown(method){
         var base = Number.isFinite(priceNum) ? priceNum : 0;
         var surcharge = calcSurcharge(base, method);
+        var envio = envioPorUmbral(base);
         return {
           subtotal_amount: base.toFixed(2),
           discount_amount: '0.00',
           amount_after_discount: base.toFixed(2),
           payment_fee_amount: (surcharge.surcharge || 0).toFixed(2),
-          shipping_amount: '0.00',
-          total_amount: (surcharge.total || base).toFixed(2)
+          shipping_amount: envio.toFixed(2),
+          total_amount: (+((surcharge.total || base) + envio).toFixed(2)).toFixed(2)
         };
       }
 
@@ -621,16 +645,56 @@
         var discount = +(base * 0.10).toFixed(2);
         var amountAfterDiscount = +(Math.max(0, base - discount)).toFixed(2);
         var fee = +(surcharge.surcharge || 0).toFixed(2);
-        var total = +(amountAfterDiscount + fee).toFixed(2);
+        var envio = envioPorUmbral(base);
+        var total = +(amountAfterDiscount + fee + envio).toFixed(2);
 
         return {
           subtotal_amount: base.toFixed(2),
           discount_amount: discount.toFixed(2),
           amount_after_discount: amountAfterDiscount.toFixed(2),
           payment_fee_amount: fee.toFixed(2),
-          shipping_amount: '0.00',
+          shipping_amount: envio.toFixed(2),
           total_amount: total.toFixed(2)
         };
+      }
+
+      /* ── LOS PACKS ─────────────────────────────────────────────────────
+         Una oferta de pack cambia lo que cuesta cada linea cuando estan
+         TODAS. La regla la declara el catalogo (`SCOOTSHOP_resolverPacks`) y
+         la aplica el backend al tarifar; aqui solo se pinta lo mismo.
+
+         Antes esto lo hacia un codigo de descuento y el resumen decia
+         «Descuento -36,99 €» en vez de enseñar la bolsa a cero y el manillar
+         a 32,99, que es lo que el cliente vio en la oferta.
+
+         `null` mientras el catalogo no ha llegado: entonces cada linea vale
+         lo que trae, que es su precio de catalogo. Se recalcula en cuanto
+         `SS_READY` se cumple.  */
+      var packResuelto = null;
+
+      function resolverPacksDelCarrito(){
+        try{
+          if(!isCartMode || !cartItems.length) return null;
+          if(typeof window.SCOOTSHOP_resolverPacks !== 'function') return null;
+          var r = window.SCOOTSHOP_resolverPacks(cartItems);
+          return (r && r.packs && r.packs.length) ? r : null;
+        }catch(e){ return null; }
+      }
+
+      /* Lo que vale la linea `i` y, si el pack la rebaja, lo que se tacha. */
+      function importeDeLinea(i){
+        var item = cartItems[i] || {};
+        var suelto = +(((Number(item.price) || 0) * (Number(item.qty) || 1)).toFixed(2));
+        var l = packResuelto && packResuelto.lineas && packResuelto.lineas[i];
+        if(!l) return { ahora: suelto, antes: 0, enPack: false };
+        return { ahora: l.importe, antes: l.importeSuelto || 0, enPack: !!l.enPack };
+      }
+
+      function textoDeLinea(i){
+        var v = importeDeLinea(i);
+        var tachado = v.antes ? ('<s class="order-summary__product-was">' + fmtEur(v.antes) + '</s>') : '';
+        if(v.ahora <= 0) return '<span class="order-summary__product-free">Gratis</span>' + tachado;
+        return fmtEur(v.ahora) + tachado;
       }
 
       function buildCartLinePricing(method){
@@ -640,32 +704,20 @@
         var type = safeText(appliedDiscountMeta && appliedDiscountMeta.type).toLowerCase();
         var rawValue = Number(String((appliedDiscountMeta && appliedDiscountMeta.value) == null ? '' : appliedDiscountMeta.value).replace(',', '.'));
         var discountValue = Number.isFinite(rawValue) ? rawValue : 0;
-        var appliesTo = safeText(appliedDiscountMeta && appliedDiscountMeta.appliesTo).toLowerCase();
-        var targetSkus = Array.isArray(appliedDiscountMeta && appliedDiscountMeta.targetSkus)
-          ? appliedDiscountMeta.targetSkus.map(function(s){ return safeText(s).toUpperCase(); }).filter(Boolean)
-          : [];
 
         for (var i = 0; i < cartItems.length; i++) {
           var item = cartItems[i] || {};
           var qty = Number(item.qty) || 1;
-          var unitPrice = Number(item.price) || 0;
-          var lineBase = +(unitPrice * qty).toFixed(2);
-          var skuKey = safeText(item.sku).toUpperCase();
-          var eligible = false;
+          var lineBase = importeDeLinea(i).ahora;
 
-          if (appliedDiscountCode && appliedDiscountMeta) {
-            if (!appliesTo || appliesTo === 'all') {
-              eligible = true;
-            } else if (appliesTo === 'selected_products') {
-              eligible = targetSkus.length ? (targetSkus.indexOf(skuKey) > -1) : true;
-            }
-          }
-
+          /* Cada linea, a su precio de catalogo. Aqui se marcaba cual era
+             «elegible» para el codigo y se le restaba su parte; ya no, porque el
+             backend no reparte nada por lineas: la rebaja es una sola cifra sobre
+             el subtotal y asi se guarda en el pedido. */
           lines.push({
             base: lineBase,
             discounted: lineBase,
             discount: 0,
-            eligible: eligible,
             qty: qty
           });
           subtotal += lineBase;
@@ -673,44 +725,40 @@
 
         subtotal = +subtotal.toFixed(2);
 
+        /* LA MISMA CUENTA QUE LA CAJA, Y NO OTRA.
+
+           El backend (`calc_discount_engine`) trata el subtotal entero como
+           importe elegible —«V1: eligible = subtotal completo»— y resta UNA vez:
+           un porcentaje sobre todo el subtotal, o un importe fijo acotado a el.
+           `applies_to` decide si el codigo SE PUEDE usar, no sobre cuanto.
+
+           Aqui se repartia el importe fijo POR LINEA y POR UNIDAD. Con el pack de
+           la semana —cinco SKU elegibles, uno de ellos con 3 unidades— eso son
+           36,99 x 7 = 258,93 EUR de rebaja donde la caja resta 36,99: la pantalla
+           prometia mucho menos de lo que se cobra, que es el peor lado del error.
+           Y con un porcentaje pasaba lo contrario, se quedaba corta, porque solo
+           contaba las lineas elegibles.
+
+           Las lineas se quedan a su precio de catalogo y la rebaja va en su propia
+           fila, igual que en /checkout. Repartirla por lineas seria inventarse un
+           reparto que el pedido no guarda. */
         if (appliedDiscountCode && appliedDiscountMeta && discountValue > 0) {
           if (type === 'percent') {
-            for (var p = 0; p < lines.length; p++) {
-              if (!lines[p].eligible) continue;
-              lines[p].discount = +(lines[p].base * (discountValue / 100)).toFixed(2);
-              lines[p].discounted = +(Math.max(0, lines[p].base - lines[p].discount)).toFixed(2);
-              discountTotal += lines[p].discount;
-            }
+            discountTotal = +(subtotal * (discountValue / 100)).toFixed(2);
           } else if (type === 'amount') {
-            // selected_products/selected_categories: fixed amount is applied per unit on each eligible line.
-            if (appliesTo === 'selected_products' || appliesTo === 'selected_categories') {
-              for (var a = 0; a < lines.length; a++) {
-                if (!lines[a].eligible) continue;
-                var perLine = +(discountValue * (Number(lines[a].qty) || 1)).toFixed(2);
-                var take = +Math.min(lines[a].base, perLine).toFixed(2);
-                lines[a].discount = take;
-                lines[a].discounted = +(Math.max(0, lines[a].base - take)).toFixed(2);
-                discountTotal += take;
-              }
-            } else {
-              var remaining = +discountValue.toFixed(2);
-              for (var r = 0; r < lines.length; r++) {
-                if (!lines[r].eligible || remaining <= 0) continue;
-                var takeRemaining = +Math.min(lines[r].base, remaining).toFixed(2);
-                lines[r].discount = takeRemaining;
-                lines[r].discounted = +(Math.max(0, lines[r].base - takeRemaining)).toFixed(2);
-                remaining = +(remaining - takeRemaining).toFixed(2);
-                discountTotal += takeRemaining;
-              }
-            }
+            discountTotal = +Math.min(discountValue, subtotal).toFixed(2);
           }
+          discountTotal = Math.max(0, discountTotal);
         }
-
         discountTotal = +discountTotal.toFixed(2);
         var net = +(Math.max(0, subtotal - discountTotal)).toFixed(2);
         var surcharge = calcSurcharge(net, method);
         var fee = +(surcharge.surcharge || 0).toFixed(2);
-        var total = +(net + fee).toFixed(2);
+        /* El umbral se mide sobre el SUBTOTAL, no sobre el neto: igual que en el
+           backend, un descuento no debe hacer aparecer un gasto de envío que el
+           cliente no veía al añadir al carrito. */
+        var envio = envioPorUmbral(subtotal);
+        var total = +(net + fee + envio).toFixed(2);
 
         return {
           lines: lines,
@@ -719,7 +767,7 @@
             discount_amount: discountTotal.toFixed(2),
             amount_after_discount: net.toFixed(2),
             payment_fee_amount: fee.toFixed(2),
-            shipping_amount: '0.00',
+            shipping_amount: envio.toFixed(2),
             total_amount: total.toFixed(2)
           }
         };
@@ -733,9 +781,24 @@
         var pricing = buildCartLinePricing(method || currentPaymentMethod || 'card');
         var priceEls = list.querySelectorAll('.sum-cart-item__total');
         for (var i = 0; i < priceEls.length; i++) {
-          var line = pricing.lines[i] || { discounted: 0, discount: 0 };
-          priceEls[i].textContent = line.discounted.toFixed(2) + ' €';
-          priceEls[i].classList.toggle('is-discounted', line.discount > 0);
+          priceEls[i].innerHTML = textoDeLinea(i);
+          priceEls[i].classList.toggle('is-discounted', importeDeLinea(i).antes > 0);
+        }
+
+        /* Y la chapa: «Ref: ACC-BAG» pasa a ser la chapa roja del pack. La misma
+           caja, solo cambia clase y texto — igual que en /checkout, que es esta
+           misma pantalla un paso antes. */
+        var infos = list.querySelectorAll('.order-summary__product-info');
+        for (var k = 0; k < infos.length && k < cartItems.length; k++) {
+          var chapa = infos[k].querySelector('.order-summary__product-meta--ref, .order-summary__product-meta--pack');
+          if (!chapa) continue;
+          if (importeDeLinea(k).enPack) {
+            chapa.className = 'order-summary__product-meta order-summary__product-meta--pack';
+            chapa.textContent = 'Pack de la semana';
+          } else {
+            chapa.className = 'order-summary__product-meta order-summary__product-meta--ref';
+            chapa.textContent = 'Ref: ' + (cartItems[k].sku || '');
+          }
         }
       }
 
@@ -757,7 +820,20 @@
           appliedDiscountCode = '';
           appliedDiscountMeta = null;
           discountCodeState = 'idle';
-          saveDiscountInSession('');
+          /* AQUI NO SE BORRA LO GUARDADO.
+
+             Esta funcion se llama con `false` como *valor por defecto seguro*
+             antes de preguntarle al backend si los descuentos estan encendidos
+             (initDiscountUi), y tambien ante un error de red pasajero. Borrar
+             `ss_checkout_discount` ahi se llevaba por delante el codigo que la
+             portada acababa de dejar: la sonda contestaba «si» un instante
+             despues, `loadDiscountFromSession()` leia y no habia nada.
+
+             Medido: el pack de la semana llegaba a /pago sin su -36,99 EUR y el
+             cliente veia 863,18 EUR donde el carrito y el checkout decian 812,99.
+             Quien SI debe borrar es el que sabe que el codigo ya no vale: el
+             cliente al quitarlo (clearDiscountCode) o el backend al decir
+             `feature_disabled` o `valid:false`. Los tres lo hacen a mano. */
           if(input) input.value = '';
           updateDiscountControls();
           setDiscountMessage('', '');
@@ -825,6 +901,18 @@
         }catch(e){}
       }
 
+      /* Espera a que haya metodo de pago y entonces revalida el codigo que venia
+         guardado, con el mismo camino que si el cliente lo hubiera tecleado. El
+         tope son 4 s: si en ese tiempo no hay metodo, no hay nada que tarifar. */
+      function reaplicarCodigoGuardado(){
+        var intentos = 0;
+        (function espera(){
+          if(currentPaymentMethod){ applyDiscountCode(); return; }
+          if(++intentos > 40) return;
+          setTimeout(espera, 100);
+        })();
+      }
+
       function loadDiscountFromSession(){
         try{
           var raw = readStorageValue(SESSION_DISCOUNT_KEY);
@@ -866,6 +954,35 @@
           shipping_amount: (src && src.shipping_amount != null) ? String(src.shipping_amount) : '0.00',
           total_amount: (src && src.total_amount != null) ? String(src.total_amount) : '0.00'
         };
+      }
+
+      /* LA COMISION DE CADA METODO, SOBRE LO QUE SE VA A COBRAR.
+
+         Cada fila de metodo lleva su «+13,20 €» para que se pueda comparar antes
+         de elegir. Se calculaba sobre `priceNum` —el subtotal— y con un codigo
+         aplicado eso deja dos cifras distintas para la MISMA comision en la misma
+         pantalla: la fila decia +13,20 y el resumen +12,64. Ahora la base es el
+         neto tras el descuento, que es sobre lo que la pasarela cobra.
+
+         Se llama desde `renderSummaryFromBreakdown()` y no en el arranque: asi se
+         repinta sola cada vez que cambia el precio (aplicar o quitar un codigo,
+         cambiar de metodo) sin que nadie tenga que acordarse. */
+      function pintarComisionesDeMetodo(base){
+        var neto = Number(base);
+        if(!Number.isFinite(neto) || neto <= 0){
+          neto = (currentPricingSnapshot && Number.isFinite(currentPricingSnapshot.net))
+            ? currentPricingSnapshot.net
+            : (Number.isFinite(priceNum) ? priceNum : 0);
+        }
+        if(!neto) return;
+        var casillas = document.querySelectorAll('.tab-fee[data-fee-method]');
+        for(var f = 0; f < casillas.length; f++){
+          var metodo = casillas[f].getAttribute('data-fee-method');
+          var r = calcSurcharge(neto, metodo);
+          casillas[f].textContent = r.surcharge > 0
+            ? ('+' + fmtEur(r.surcharge))
+            : 'sin comisión';
+        }
       }
 
       function renderSummaryFromBreakdown(method, breakdown){
@@ -916,6 +1033,7 @@
           total: total
         };
 
+        pintarComisionesDeMetodo(currentPricingSnapshot.net);
         refreshManualConceptTexts();
         refreshSupportContactLinks();
       }
@@ -1200,8 +1318,21 @@
 
       // Estado vacío: si no hay nombre ni precio, mostrar pantalla vacía
       var hasProduct = (safeText(getParam('name')) || safeText(getParam('price')) || safeText(getParam('sku')) || (isCartMode && cartItems.length));
-      if(hasProduct && !checkoutCompleted && (!savedShipping || !savedShipping.fullName || !savedShipping.addressLine1 || !savedShipping.postalCode || !savedShipping.city)) {
+      /* Sin direccion no se paga, VENGA DE DONDE VENGA. Antes esta comprobacion se
+         saltaba si la URL traia `checkout=1` —la que escribe /checkout—, dando por
+         hecho que quien la lleva ya rellenó el formulario. Pero la direccion vive en
+         sessionStorage y la URL sobrevive a la sesion: pestana restaurada tras cerrar
+         el navegador, enlace reabierto, Safari purgando la sesion. En esos casos se
+         pagaba con `shipping` vacio y el pedido nacia sin nombre, sin correo y sin
+         direccion. La marca `checkout=1` dice de donde vienes, no que tengas datos. */
+      function faltanDatosDeEnvio(){
+        if(!savedShipping) return true;
+        return !savedShipping.fullName || !savedShipping.email || !savedShipping.addressLine1
+            || !savedShipping.postalCode || !savedShipping.city;
+      }
+      if(hasProduct && faltanDatosDeEnvio()) {
         location.replace(buildCheckoutStepUrl());
+        return;
       }
       if(!hasProduct){
         if(emptyState) emptyState.hidden = false;
@@ -1244,7 +1375,7 @@
             list.id = 'sumCartItemsList';
             list.className = 'order-summary__product-list';
 
-            list.innerHTML = cartItems.map(function(item){
+            list.innerHTML = cartItems.map(function(item, indiceLinea){
               var itemName = escapeHtml(item.name || 'Producto');
               var itemRef = item.sku ? ('<span class="order-summary__product-meta order-summary__product-meta--ref">Ref: ' + escapeHtml(item.sku) + '</span>') : '';
               /* Regla global: una linea sin variantes muestra "Unico" (el chip --color
@@ -1254,9 +1385,9 @@
               var itemColorText = describirVariantes(item);
               var itemColor = '<span class="order-summary__product-meta order-summary__product-meta--color">' + (itemColorText ? escapeHtml(itemColorText) : 'Único') + '</span>';
               var itemQty = (Number(item.qty) > 1) ? ('<span class="order-summary__product-meta order-summary__product-meta--qty">Cant: ' + escapeHtml(item.qty) + '</span>') : '';
-              var lineTotal = ((Number(item.price) || 0) * (Number(item.qty) || 1)).toFixed(2) + ' €';
+              var lineTotal = textoDeLinea(indiceLinea);
               var itemImage = item.image
-                ? ('<img class="order-summary__product-image" src="' + escapeHtml(item.image) + '" alt="' + itemName + '" loading="lazy" decoding="async" />')
+                ? ('<img class="order-summary__product-image" src="' + escapeHtml(window.SCOOTSHOP_miniatura ? window.SCOOTSHOP_miniatura(item.image) : item.image) + '" alt="' + itemName + '" loading="lazy" decoding="async" />')
                 : ('<div class="order-summary__product-image" aria-hidden="true"></div>');
 
               return '' +
@@ -1305,23 +1436,18 @@
           if(!window.SS_READY && typeof Promise === 'function'){
             window.SS_READY = new Promise(function(res){ window.__ssResolverReady = res; });
           }
-          if(window.SS_READY) window.SS_READY.then(repintarVariantes);
-          else repintarVariantes();
+          /* Y con el catalogo ya cargado se resuelven los packs: hasta aqui las
+             lineas valian su precio de catalogo, que es lo unico verdadero que se
+             puede decir sin catalogo. */
+          var repintarPrecios = function(){
+            packResuelto = resolverPacksDelCarrito();
+            refreshPricingForMethod(currentPaymentMethod || 'card', { showNetworkMessage: false });
+          };
+          if(window.SS_READY) window.SS_READY.then(function(){ repintarVariantes(); repintarPrecios(); });
+          else { repintarVariantes(); repintarPrecios(); }
         } catch(_){}
 
-        // Populate fee hints in tabs
-        if(priceNum){
-          var feeSpans = document.querySelectorAll('.tab-fee[data-fee-method]');
-          for(var f = 0; f < feeSpans.length; f++){
-            var fMethod = feeSpans[f].getAttribute('data-fee-method');
-            var fResult = calcSurcharge(priceNum, fMethod);
-            if(fResult.surcharge > 0){
-              feeSpans[f].textContent = '+' + fResult.surcharge.toFixed(2) + ' €';
-            } else {
-              feeSpans[f].textContent = 'sin comisión';
-            }
-          }
-        }
+        pintarComisionesDeMetodo();
 
         if (savedShipping && sumAddressText) {
           var fullAddress = [
@@ -1524,6 +1650,15 @@
           if(appliedDiscountCode) {
             input.value = appliedDiscountCode;
             discountCodeState = 'valid';
+            /* Y SE REVALIDA. El codigo a secas no descuenta nada: en modo
+               carrito quien calcula es `buildCartLinePricing()`, y necesita
+               `appliedDiscountMeta` —tipo, valor— que solo sabe el backend.
+               Antes se restauraba el nombre del codigo y se dejaba la caja
+               puesta, pero el resumen seguia sumando el precio entero.
+               `applyDiscountCode()` pide el metodo de pago elegido, y quien lo
+               elige (setActiveTab) tambien va por su cuenta, asi que se espera
+               a que exista en vez de dar por hecho un orden. */
+            reaplicarCodigoGuardado();
           }
           updateDiscountControls();
         });
@@ -1948,7 +2083,7 @@
             if(data.status === 'complete' || data.payment_status === 'paid'){
               // Clear session order on successful payment
               removeStorageValue(SESSION_ORDER_KEY);
-              try { sessionStorage.removeItem('ss_checkout_shipping'); } catch(e){}
+              try { sessionStorage.removeItem('ss_checkout_shipping'); localStorage.removeItem('ss_checkout_shipping'); } catch(e){}
               location.href = buildStripeDoneUrl(data.orderId || orderId, data.token);
               return true;
             }
@@ -2177,7 +2312,7 @@
         if(paypalMount && mode !== 'paypal') paypalMount.innerHTML = '';
 
         var labelMap = { klarna: 'Continuar con Klarna', paypal: 'Continuar con PayPal', scalapay: 'Continuar con Scalapay' };
-        var logoMap = { klarna: '/img/klarna.webp', paypal: '/img/paypal-svgrepo-com.svg', scalapay: '/img/scalapay.svg' };
+        var logoMap = { klarna: '/img/pago/klarna.webp', paypal: '/img/pago/paypal-svgrepo-com.svg', scalapay: '/img/pago/scalapay.svg' };
         var label = labelMap[mode] || 'Continuar con el pago';
         var logoSrc = logoMap[mode] || '';
 
@@ -2266,7 +2401,7 @@
             btn.textContent = 'Simular pago completado';
             btn.addEventListener('click', function(){
               removeStorageValue(SESSION_ORDER_KEY);
-              try { sessionStorage.removeItem('ss_checkout_shipping'); } catch(e){}
+              try { sessionStorage.removeItem('ss_checkout_shipping'); localStorage.removeItem('ss_checkout_shipping'); } catch(e){}
               var doneUrl = '/pedido/?order=' + encodeURIComponent(ref || 'LOCAL')
                 + '&status=' + encodeURIComponent('paid')
                 + '&method=' + encodeURIComponent(mode)
@@ -2381,7 +2516,7 @@
               }
               // Clear session order on successful payment
               removeStorageValue(SESSION_ORDER_KEY);
-              try { sessionStorage.removeItem('ss_checkout_shipping'); } catch(e){}
+              try { sessionStorage.removeItem('ss_checkout_shipping'); localStorage.removeItem('ss_checkout_shipping'); } catch(e){}
               var doneUrl = buildStripeDoneUrl(stripeSessionMeta && stripeSessionMeta.orderId ? stripeSessionMeta.orderId : '');
               var sid = stripeSessionMeta && stripeSessionMeta.sessionId;
               if(sid){
