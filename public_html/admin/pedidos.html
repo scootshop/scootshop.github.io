@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Admin | SCOOT SHOP</title>
   <meta name="robots" content="noindex,nofollow" />
-  <meta name="asset-version" content="20260814-4" />
+  <meta name="asset-version" content="20260907-1" />
   <script src="/js/asset-sync.js?v=20260605-2" defer></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
@@ -999,7 +999,7 @@
           </div>
           <div class="fg" style="grid-column:1/-1">
             <label class="flbl" for="message">Mensaje al cliente</label>
-            <input id="message" type="text" class="fc" placeholder="Se enviar&#xE1; en el correo de notificaci&#xF3;n">
+            <input id="message" type="text" class="fc" placeholder="Opcional: si lo dejas vac&#xED;o, no sale nada en el correo">
           </div>
         </div>
         <details class="collapse adv-edit">
@@ -1377,30 +1377,6 @@
   let currentOrderCustomerEmail = '';
   const actionLocks = { save:false, resend:false, notes:false, receipt:false, delete:false, cache:false, ultraCache:false };
 
-  function defaultCustomerMessageForStatus(status){
-    switch(String(status || '')){
-      case 'pending_payment': return 'Tu pedido está pendiente de pago. Puedes completarlo cuando quieras desde el enlace de pago.';
-      case 'paid': return 'Hemos confirmado tu pago correctamente. Tu pedido ya ha sido recibido y pasa a preparación.';
-      case 'preparing': return 'Tu pedido está en preparación. Te avisaremos en cuanto salga de almacén.';
-      case 'reserved': return 'Hemos registrado tu reserva. Te contactaremos para confirmar los siguientes pasos.';
-      case 'shipped': return 'Tu pedido ya ha sido enviado. Puedes seguirlo con el número de seguimiento cuando esté disponible.';
-      case 'delivered': return 'Tu pedido figura como entregado. Esperamos que lo disfrutes.';
-      case 'canceled': return 'Tu pedido ha sido cancelado. Si necesitas ayuda, contáctanos y lo revisamos contigo.';
-      case 'refunded': return 'Hemos registrado el reembolso de tu pedido. Si tienes dudas sobre los plazos, contáctanos.';
-      case 'dispute': return 'Tu pedido está siendo revisado por una incidencia. Te contactaremos con una actualización lo antes posible.';
-      case 'payment_failed': return 'No hemos podido confirmar el pago de tu pedido. Puedes intentarlo de nuevo o contactar con soporte.';
-      case 'error': return 'Se ha detectado una incidencia con el pago de tu pedido. Nuestro equipo lo está revisando.';
-      default: return '';
-    }
-  }
-
-  function applyDefaultCustomerMessage(){
-    var statusEl = $('status');
-    var messageEl = $('message');
-    if(!statusEl || !messageEl) return;
-    messageEl.value = defaultCustomerMessageForStatus(statusEl.value);
-  }
-
   /* ---- UTILS ---- */
   function esc(s){ if(s==null)return''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function normalizeOrderItemImage(url){
@@ -1751,6 +1727,9 @@
       const r = await fetch('/api/?route='+route+extra+'&_t='+Date.now(),{method:'POST',headers:{'Content-Type':'application/json','X-Admin-Key':adminKey},body:JSON.stringify(body),cache:'no-store'});
       const data = await r.json();
       if(!r.ok) console.error('apiPost',r.status,data);
+      /* Un solo enganche para los 17 guardados del panel: apiPost es por donde pasan
+         todos. Poner el repintado en cada manejador seria olvidarse en el siguiente. */
+      if(r.ok && data && data.ok !== false) notificarCambioAdmin(path.split('&')[0]);
       return data;
     }catch(e){console.error('apiPost',e);return null;}
   }
@@ -3018,7 +2997,6 @@
     $('status').value = o.status;
     $('tracking').value = o.tracking || '';
     $('message').value = o.message || '';
-    if(!$('message').value.trim()) applyDefaultCustomerMessage();
     var oShipping = Number(o.shipping_amount || 0) || 0;
     var oFee = Number(o.payment_fee_amount || 0) || 0;
     var oDiscount = Number(o.discount_amount || 0) || 0;
@@ -3085,7 +3063,6 @@
       + rows;
   }
   $('editImage').addEventListener('input', updateImagePreview);
-  $('status').addEventListener('change', applyDefaultCustomerMessage);
 
   /* ---- COSTE DE ENVIO ----
      El importe de un pedido solo se puede tocar por aqui: el subtotal lo manda
@@ -4748,9 +4725,15 @@
   function shouldPauseAutoRefresh(){
     return getAutoRefreshPauseState().paused;
   }
-  async function arTick(){
-    if(!adminKey||!arEnabled) return;
-    if(shouldPauseAutoRefresh()){ updateRefreshLabel(); return; }
+  /* `forzado` = lo pide un guardado, no el reloj. Se salta las dos guardas del
+     refresco automatico a proposito: la pausa existe para no mover la lista bajo el
+     raton mientras seleccionas o escribes —y pulsar "Guardar" dispara esa misma pausa
+     por el pointerdown—, y el interruptor OFF dice "no me refresques SOLO", no "no me
+     enseñes lo que acabo de guardar". */
+  async function arTick(forzado){
+    if(!adminKey) return;
+    if(!forzado && !arEnabled) return;
+    if(!forzado && shouldPauseAutoRefresh()){ updateRefreshLabel(); return; }
     if(!$('detailView').hidden&&currentOrderId){
       const data=await apiGet('admin_order_detail&id='+encodeURIComponent(currentOrderId));
       if(data&&data.ok&&data.order){
@@ -4779,6 +4762,41 @@
     if(t && t.matches && t.matches('input, textarea, select, [contenteditable="true"]')) touchAutoRefreshPause(8000);
   }, true);
   setInterval(updateRefreshLabel, 500);
+
+  /* ---- REFRESCO AL GUARDAR ----
+     El reloj (cada 3 s) es la red para lo que pasa FUERA del panel: un pedido nuevo,
+     un pago que entra. Pero para lo que guardas tu mismo esperar al reloj no tiene
+     sentido, y encima tu propio clic activaba la pausa de 6 s: guardabas un estado y
+     la lista seguia diciendo lo de antes. Ahora cualquier guardado con exito repinta
+     al momento, y avisa a las demas pestañas del panel. Sigue sin haber SSE ni
+     websockets: no los aguanta el hosting compartido. */
+  const AR_CANAL = 'ss_admin_cambio';
+  // Lo unico que se POSTea sin cambiar pedidos ni productos: no merece repintado.
+  const AR_RUTAS_SIN_CAMBIO = ['admin_product_autofill_url','admin_bust_cache','admin_bust_cache_ultra'];
+  let arPendiente = null;
+
+  function refrescarYa(){
+    /* Coalescencia: un borrado en lote son N peticiones seguidas, y guardar el detalle
+       puede tocar importes y estado. Todas caen en UN solo repintado. */
+    if(arPendiente) clearTimeout(arPendiente);
+    arPendiente = setTimeout(()=>{ arPendiente=null; arTick(true); loadDashboard(); }, 150);
+  }
+
+  function notificarCambioAdmin(ruta){
+    if(AR_RUTAS_SIN_CAMBIO.indexOf(ruta) !== -1) return;
+    refrescarYa();
+    // Otras pestañas del panel abiertas en este navegador.
+    try { localStorage.setItem(AR_CANAL, String(Date.now())); } catch(_){}
+  }
+
+  window.addEventListener('storage', e=>{
+    if(e.key !== AR_CANAL || !e.newValue) return;
+    /* Aqui SI se respeta el interruptor: quien lo puso en OFF en esa pestaña no ha
+       guardado nada, solo esta mirando. */
+    if(!arEnabled) return;
+    refrescarYa();
+  });
+
   function startAutoRefresh(){ stopAutoRefresh(); arEnabled=true; updateRefreshLabel(); updateLastRefresh(); arInterval=setInterval(arTick,AR_INT); }
   function stopAutoRefresh(){ if(arInterval){clearInterval(arInterval);arInterval=null;} }
   $('toggleRefresh').onclick = ()=>{ arEnabled=!arEnabled; updateRefreshLabel(); if(arEnabled){arInterval=setInterval(arTick,AR_INT);arTick();}else stopAutoRefresh(); };
@@ -4881,6 +4899,266 @@
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
