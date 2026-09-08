@@ -6132,7 +6132,15 @@ switch ($route) {
     $orderItems = normalize_order_items_input($cartItems, $CFG['public_base']);
     $orderItemsJson = !empty($orderItems) ? json_encode($orderItems, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : null;
 
-    if (!in_array($paymentMethod, ['bizum', 'bank', 'transfer'], true)) {
+    /* Klarna, Scalapay y PayPal se apuntan aqui aunque acaben cobrando por Stripe.
+       No es que paguen "manualmente": es que su boton lleva a una pasarela alojada y
+       hasta que el cliente lo pulsa NADIE le habia dicho al servidor que habia cambiado
+       de metodo. Tarjeta (checkout embebido) y bizum/transferencia si lo hacian al
+       pulsar su pestaña, y por eso solo esos tres se veian cambiar en el panel.
+       Esta ruta no manda correos ni cobra: crea o actualiza el pedido pendiente y lo
+       vuelve a tarifar con `resolve_order_pricing`, que es justo lo que hace falta
+       porque el recargo de Klarna y el de tarjeta no se parecen en nada. */
+    if (!in_array($paymentMethod, ['bizum', 'bank', 'transfer', 'klarna', 'scalapay', 'paypal'], true)) {
       json_out(['ok' => false, 'error' => 'bad_payment_method'], 400);
     }
     // Normalize alias

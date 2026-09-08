@@ -1560,7 +1560,7 @@
             updateDiscountControls();
             setDiscountMessage(discountMessageFromReason(data.reason_code, data.message), 'error');
             return refreshPricingForMethod(currentPaymentMethod, { showNetworkMessage: false }).then(function(){
-              if(currentPaymentMethod === 'card' || currentPaymentMethod === 'klarna' || currentPaymentMethod === 'paypal') {
+              if(currentPaymentMethod === 'card' || currentPaymentMethod === 'klarna' || currentPaymentMethod === 'paypal' || currentPaymentMethod === 'scalapay') {
                 reloadStripeCheckout(currentPaymentMethod);
               }
               if(currentPaymentMethod === 'bizum' || currentPaymentMethod === 'bank') {
@@ -1591,7 +1591,7 @@
           } else {
             renderSummaryFromBreakdown(effectivePaymentMethod(currentPaymentMethod), normalizeBreakdownResponse(data));
           }
-          if(currentPaymentMethod === 'card' || currentPaymentMethod === 'klarna' || currentPaymentMethod === 'paypal') {
+          if(currentPaymentMethod === 'card' || currentPaymentMethod === 'klarna' || currentPaymentMethod === 'paypal' || currentPaymentMethod === 'scalapay') {
             reloadStripeCheckout(currentPaymentMethod);
           }
           if(currentPaymentMethod === 'bizum' || currentPaymentMethod === 'bank') {
@@ -1618,7 +1618,7 @@
         updateDiscountControls();
         setDiscountMessage('', '');
         refreshPricingForMethod(currentPaymentMethod, { showNetworkMessage: false });
-        if(currentPaymentMethod === 'card' || currentPaymentMethod === 'klarna' || currentPaymentMethod === 'paypal') {
+        if(currentPaymentMethod === 'card' || currentPaymentMethod === 'klarna' || currentPaymentMethod === 'paypal' || currentPaymentMethod === 'scalapay') {
           reloadStripeCheckout(currentPaymentMethod);
         }
         if(currentPaymentMethod === 'bizum' || currentPaymentMethod === 'bank') {
@@ -1911,9 +1911,14 @@
         ].join('::');
       }
 
+      /* Metodos que se apuntan en el servidor NADA MAS elegirlos. Tarjeta no esta porque
+         ya lo hace su checkout embebido; los tres alojados si, porque su boton no habla
+         con el servidor hasta que el cliente lo pulsa. */
+      var METODOS_A_REGISTRAR = ['bizum', 'bank', 'klarna', 'scalapay', 'paypal'];
+
       function flushManualOrderSync(){
         if(manualOrderSync.inflight) return;
-        if(manualOrderSync.desiredMethod !== 'bizum' && manualOrderSync.desiredMethod !== 'bank') return;
+        if(METODOS_A_REGISTRAR.indexOf(manualOrderSync.desiredMethod) === -1) return;
         if(!priceNum) return;
 
         var method = manualOrderSync.desiredMethod;
@@ -1976,7 +1981,7 @@
       }
 
       function ensureManualOrder(method){
-        if(method !== 'bizum' && method !== 'bank') return;
+        if(METODOS_A_REGISTRAR.indexOf(method) === -1) return;
         if(!priceNum) return; // no valid price -> nothing to register
         manualOrderSync.desiredMethod = method;
         flushManualOrderSync();
@@ -2029,9 +2034,9 @@
         var label = ui.loading.querySelector('[data-loading-label]');
         var sr = ui.loading.querySelector('[data-loading-sr]');
         if(label) label.textContent = message || ui.label;
-        if(sr) sr.textContent = mode === 'klarna'
-          ? 'Cargando checkout de Klarna'
-          : (mode === 'paypal' ? 'Cargando checkout de PayPal' : 'Cargando checkout de Stripe');
+        // ui.label ya sabe de quien es el panel; el ternario encadenado se habia quedado
+        // sin Scalapay y le anunciaba "Cargando checkout de Stripe".
+        if(sr) sr.textContent = 'Cargando checkout de ' + (ui.label || 'Stripe');
         ui.loading.hidden = !keepVisible;
       }
 
@@ -2135,6 +2140,11 @@
         if(key === 'scalapay'){ ensureScalapayButtons(); }
         if(key === 'paypal'){ ensurePaypalButtons(); }
         if(key === 'bizum' || key === 'bank'){ ensureManualOrder(key); }
+        /* Y los tres alojados apuntan su metodo en el pedido pendiente, como hacen los
+           demas. Sin esto el pedido se quedaba con el metodo anterior y con SU importe
+           —el recargo de Klarna no se parece al de tarjeta—, y en el panel parecia que
+           elegir Klarna, Scalapay o PayPal no hacia nada. */
+        if(key === 'klarna' || key === 'scalapay' || key === 'paypal'){ ensureManualOrder(key); }
       }
 
       tabs.forEach(function(t){
@@ -2355,9 +2365,14 @@
         ui.mount.classList.add('mount--hosted');
 
         if(ui.info){
-          ui.info.textContent = mode === 'klarna'
-            ? 'Paga a plazos con Klarna. Te llevaremos a la pasarela segura de Stripe para completar el pago.'
-            : 'Te llevaremos a la pasarela segura de Stripe para completar el pago con PayPal.';
+          /* Este texto decia "para completar el pago con PayPal" TAMBIEN en el panel de
+             Scalapay: el ternario se escribio antes de que Scalapay existiera. */
+          var textos = {
+            klarna: 'Paga a plazos con Klarna. Te llevaremos a la pasarela segura de Stripe para completar el pago.',
+            scalapay: 'Paga en 3 plazos con Scalapay. Te llevaremos a la pasarela segura de Stripe para completar el pago.',
+            paypal: 'Te llevaremos a la pasarela segura de Stripe para completar el pago con PayPal.'
+          };
+          ui.info.textContent = textos[mode] || 'Te llevaremos a la pasarela segura de Stripe para completar el pago.';
         }
       }
 
