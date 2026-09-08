@@ -5810,16 +5810,22 @@ switch ($route) {
             payment_method = :payment_method,
             user_id = COALESCE(:user_id, user_id),
             payer_email = COALESCE(NULLIF(:payer_email, ''), payer_email),
+            /* Los OBLIGATORIOS con red: la validacion de arriba ya garantiza que
+               llegan llenos, asi que el COALESCE nunca actua — esta por si algun dia
+               entra una peticion por otro sitio, para que no vacie un pedido vivo. */
             ship_name = COALESCE(NULLIF(:ship_name, ''), ship_name),
             ship_email = COALESCE(NULLIF(:ship_email, ''), ship_email),
-            ship_phone = COALESCE(NULLIF(:ship_phone, ''), ship_phone),
             ship_address = COALESCE(NULLIF(:ship_address, ''), ship_address),
-            ship_address2 = COALESCE(NULLIF(:ship_address2, ''), ship_address2),
             ship_city = COALESCE(NULLIF(:ship_city, ''), ship_city),
-            ship_province = COALESCE(NULLIF(:ship_province, ''), ship_province),
             ship_postal = COALESCE(NULLIF(:ship_postal, ''), ship_postal),
+            /* Los OPCIONALES, tal cual llegan: si el cliente vuelve al formulario y
+               BORRA el piso o la nota, tiene que quedar borrado. Con COALESCE se le
+               ignoraba y volvia a aparecer lo viejo. */
+            ship_phone = :ship_phone,
+            ship_address2 = :ship_address2,
+            ship_province = :ship_province,
             ship_country = COALESCE(NULLIF(:ship_country, ''), ship_country),
-            ship_notes = COALESCE(NULLIF(:ship_notes, ''), ship_notes),
+            ship_notes = :ship_notes,
             updated_at = :updated_at
           WHERE id = :id
         ");
@@ -6246,16 +6252,22 @@ switch ($route) {
             payment_method = :payment_method,
             user_id = COALESCE(:user_id, user_id),
             payer_email = COALESCE(NULLIF(:payer_email, ''), payer_email),
+            /* Los OBLIGATORIOS con red: la validacion de arriba ya garantiza que
+               llegan llenos, asi que el COALESCE nunca actua — esta por si algun dia
+               entra una peticion por otro sitio, para que no vacie un pedido vivo. */
             ship_name = COALESCE(NULLIF(:ship_name, ''), ship_name),
             ship_email = COALESCE(NULLIF(:ship_email, ''), ship_email),
-            ship_phone = COALESCE(NULLIF(:ship_phone, ''), ship_phone),
             ship_address = COALESCE(NULLIF(:ship_address, ''), ship_address),
-            ship_address2 = COALESCE(NULLIF(:ship_address2, ''), ship_address2),
             ship_city = COALESCE(NULLIF(:ship_city, ''), ship_city),
-            ship_province = COALESCE(NULLIF(:ship_province, ''), ship_province),
             ship_postal = COALESCE(NULLIF(:ship_postal, ''), ship_postal),
+            /* Los OPCIONALES, tal cual llegan: si el cliente vuelve al formulario y
+               BORRA el piso o la nota, tiene que quedar borrado. Con COALESCE se le
+               ignoraba y volvia a aparecer lo viejo. */
+            ship_phone = :ship_phone,
+            ship_address2 = :ship_address2,
+            ship_province = :ship_province,
             ship_country = COALESCE(NULLIF(:ship_country, ''), ship_country),
-            ship_notes = COALESCE(NULLIF(:ship_notes, ''), ship_notes),
+            ship_notes = :ship_notes,
             updated_at = :updated_at
           WHERE id = :id
         ");

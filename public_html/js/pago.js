@@ -1812,21 +1812,13 @@
       // --- Persistent order ID across payment method switches ---
       var SESSION_ORDER_KEY = 'ss_active_order';
 
-      function shippingContextFingerprint(){
-        if(!savedShipping) return '';
-        return [
-          safeText(savedShipping.fullName),
-          safeText(savedShipping.email),
-          safeText(savedShipping.phone),
-          safeText(savedShipping.addressLine1),
-          safeText(savedShipping.addressLine2),
-          safeText(savedShipping.postalCode),
-          safeText(savedShipping.city),
-          safeText(savedShipping.province),
-          safeText(savedShipping.country)
-        ].join('|');
-      }
-
+      /* QUE hace que esto sea OTRO pedido, y no el mismo actualizado.
+         Lo que se COMPRA: el producto o el carrito y su importe. La direccion NO.
+         Corregir la ciudad, el piso o una letra del nombre y volver a "Continuar al
+         pago" es una ACTUALIZACION del mismo pedido pendiente — el backend reescribe
+         los ship_* en su rama de reutilizacion—, no una compra distinta. Estando la
+         direccion en la huella, cada correccion tiraba el id guardado y nacia un pedido
+         nuevo: tres del mismo cliente en quince minutos, y ninguno pagado. */
       function checkoutSessionFingerprint(){
         var baseAmount = Number.isFinite(priceNum) ? priceNum.toFixed(2) : '';
         var cartFingerprint = isCartMode
@@ -1837,8 +1829,7 @@
           safeText(sku || name),
           safeText(name),
           baseAmount,
-          cartFingerprint,
-          shippingContextFingerprint()
+          cartFingerprint
         ].join('::');
       }
 

@@ -25,7 +25,7 @@ powershell -ExecutionPolicy Bypass -File scripts/bump-assets-version.ps1
 .\scripts\new-series-product.ps1 -SeriesKey n -Slug x5 -Name "X5" -Price 499
 ```
 
-Smoke / QA (expect terminal markers `LOCAL_START_OK`, `VARIANTES_OK`, `CATALOGO_OK`, `API_SQL_OK`, `ATTRS_INDEX_OK`, `GATE_B_OK`/`GATE_B_KO`, `PANEL_REFRESCO_OK`, `PAGO_METODO_OK`, `SMOKE_WEB_OK`, `IMG_CACHE_OK`, `IMG_DUPES_OK`).
+Smoke / QA (expect terminal markers `LOCAL_START_OK`, `VARIANTES_OK`, `CATALOGO_OK`, `API_SQL_OK`, `ATTRS_INDEX_OK`, `GATE_B_OK`/`GATE_B_KO`, `PANEL_REFRESCO_OK`, `PAGO_METODO_OK`, `PEDIDO_UNICO_OK`, `SMOKE_WEB_OK`, `IMG_CACHE_OK`, `IMG_DUPES_OK`).
 
 `scripts/qa/variantes.ps1` runs the whole variant system in one go — catalog, SQL bindings, attribute index, cases A–J, multi-axis fichas, cart flow, accessibility/responsive at three widths, the globalisation test, summary chips and readiness — against local or production. It exists because these suites were born in a session's temp folder: a guard nobody can run is not a guard. `variantes-capturas.js` takes per-element screenshots to compare a design before/after a CSS change (`SS_SHOTS` picks the folder).
 
@@ -34,6 +34,7 @@ powershell -ExecutionPolicy Bypass -File scripts/qa/variantes.ps1               
 python scripts/qa/panel-precio.py https://scootshop.co                             # el panel cambia un precio de verdad
 node scripts/qa/panel-refresco.js [base]                                           # el panel se entera solo, y no te borra lo escrito
 node scripts/qa/pago-metodo.js [base]                                              # elegir metodo deja el pedido con SU metodo y SU importe
+node scripts/qa/pedido-unico.js [base]                                             # corregir la direccion actualiza el pedido, no crea otro
 powershell -ExecutionPolicy Bypass -File scripts/qa/variantes.ps1 -BaseUrl https://scootshop.co
 node scripts/qa/catalogo.js                                                        # el catálogo se ejecuta y es válido
 node scripts/qa/api-sql.js                                                         # cada SQL cuadra con sus bindings
