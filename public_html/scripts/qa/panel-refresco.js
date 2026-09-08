@@ -105,6 +105,14 @@ async function hasta(pag, fn, arg, plazo) {
     await pag.waitForSelector('#appView:not([hidden])', { timeout: 25000 });
     await pag.waitForSelector('#ordersList tr[data-id]', { timeout: 25000 });
 
+    /* La pausa por interaccion a CERO durante toda la prueba. Con ella puesta, casi
+       todo lo de abajo aprobaria sin refrescarse una sola vez: estaria midiendo la
+       pausa, no la proteccion. Lo que se quiere saber es que el repintado NO destruye
+       aunque llegue en el peor momento. */
+    await pag.selectOption('#refreshPauseSecs', '0');
+    await pag.selectOption('#refreshEvery', '3');
+    await esperar(500);
+
     // Se abre como lo abre una persona: pulsando su fila.
     await pag.click('#ordersList tr[data-id="' + ID + '"]');
     await pag.waitForSelector('#detailView:not([hidden]) #adminNotes', { timeout: 25000 });

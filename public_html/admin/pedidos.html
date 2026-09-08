@@ -125,6 +125,11 @@
     .ar-desfase .btn{margin-left:8px}
     .refresh-pause-pill--off{background:#f1f5f9;color:#475569;border-color:#cbd5e1}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+    .refresh-btn{background:var(--accent,#2563eb);color:#fff;border:0;border-radius:7px;padding:4px 10px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:inherit}
+    .refresh-btn:hover{filter:brightness(1.08)}
+    .refresh-btn:disabled{opacity:.55;cursor:default}
+    .refresh-cfg{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;color:var(--subtle,#64748b);white-space:nowrap}
+    .refresh-cfg select{font-family:inherit;font-size:.72rem;padding:2px 4px;border:1px solid #cbd5e1;border-radius:6px;background:#fff;color:inherit;cursor:pointer}
     .refresh-toggle{background:none;border:0;color:var(--accent);font-size:.74rem;cursor:pointer;font-family:inherit;padding:0}
     .refresh-toggle:hover{text-decoration:underline}
     .refresh-actions{margin-left:auto;display:flex;align-items:center;gap:10px}
@@ -698,6 +703,27 @@
         <span id="refreshLabel">Auto-refresh: ON</span>
         <span class="refresh-pause-pill" id="refreshPausePill" hidden></span>
         <div class="refresh-actions">
+          <button class="refresh-btn" id="btnRefreshNow" title="Traer los datos ahora mismo">&#x1F504; Refrescar</button>
+          <label class="refresh-cfg" title="Cada cuanto se refresca solo">
+            cada
+            <select id="refreshEvery">
+              <option value="3">3 s</option>
+              <option value="10">10 s</option>
+              <option value="30">30 s</option>
+              <option value="60">1 min</option>
+              <option value="0">nunca (manual)</option>
+            </select>
+          </label>
+          <label class="refresh-cfg" title="Al tocar la pantalla, esperar antes de refrescar (para que no se te mueva nada mientras trabajas)">
+            pausa al usar
+            <select id="refreshPauseSecs">
+              <option value="0">sin pausa</option>
+              <option value="6">6 s</option>
+              <option value="15">15 s</option>
+              <option value="30">30 s</option>
+              <option value="60">1 min</option>
+            </select>
+          </label>
           <button class="refresh-toggle" id="toggleRefresh">Pausar</button>
           <span class="refresh-time" id="lastRefresh"></span>
         </div>
@@ -4807,9 +4833,32 @@
     if(alert) alert.addEventListener('click',()=>{ $('filterStatus').value='paid'; $('filterSearch').value=''; reloadAndRender(1); });
   }
 
-  /* ---- AUTO-REFRESH ---- */
+  /* ---- AUTO-REFRESH ----
+     El ritmo y la pausa los decide QUIEN USA EL PANEL, no yo. Tres mandos en la barra:
+     "Refrescar" (ahora mismo), "cada N s" (0 = solo a mano) y "pausa al usar" (al tocar
+     la pantalla, esperar N s antes de volver a refrescar, para que no se mueva nada
+     mientras trabajas). Se guardan en este navegador. */
   let arInterval = null, arEnabled = true;
-  const AR_INT = 3000;
+  const AR_CFG_KEY = 'ss_admin_refresh_cfg';
+  let arCadaMs = 3000;       // cada cuanto se refresca solo (0 = nunca)
+  let arPausaMs = 15000;     // cuanto se espera tras tocar la pantalla (0 = no esperar)
+
+  function cargarCfgRefresco(){
+    try {
+      const c = JSON.parse(localStorage.getItem(AR_CFG_KEY) || '{}');
+      if(Number.isFinite(c.cada)) arCadaMs = Math.max(0, c.cada);
+      if(Number.isFinite(c.pausa)) arPausaMs = Math.max(0, c.pausa);
+      if(typeof c.on === 'boolean') arEnabled = c.on;
+    } catch(_){}
+  }
+  function guardarCfgRefresco(){
+    try { localStorage.setItem(AR_CFG_KEY, JSON.stringify({ cada: arCadaMs, pausa: arPausaMs, on: arEnabled })); } catch(_){}
+  }
+  function aplicarRitmo(){
+    if(arInterval){ clearInterval(arInterval); arInterval = null; }
+    if(arEnabled && arCadaMs > 0) arInterval = setInterval(arTick, arCadaMs);
+    updateRefreshLabel();
+  }
   /* La pausa casi ha desaparecido, y esa es la idea.
      Primero fue un cronometro que arrancaba con cualquier clic dentro de #appView
      (6 s, renovables): el refresco no llegaba a correr casi nunca. Luego paso a leer
@@ -4821,27 +4870,52 @@
      eso en renderOrder (firma + campos protegidos), no hay nada de lo que proteger al
      admin y la pausa sobra. Queda una sola, la unica que no es de datos sino de
      atencion: un modal abierto. */
+  let arPauseUntil = 0;
+  function touchAutoRefreshPause(){
+    if(arPausaMs <= 0) return;
+    arPauseUntil = Math.max(arPauseUntil, Date.now() + arPausaMs);
+    updateRefreshLabel();
+  }
   function getAutoRefreshPauseState(){
-    /* Lo unico que queda pausando: un modal abierto, porque decide sobre algo concreto
-       y repintar por debajo cambia la pregunta. Escribir y seleccionar YA NO pausan:
-       el repintado no puede hacerles daño (ver renderOrder — firma + campos
-       protegidos), y pausar por eso era lo que impedia ver en vivo un cambio del
-       cliente mientras rellenabas el tracking. */
     if($('confirmOv').classList.contains('open')) return {paused:true, reason:'modal', seconds:0};
     if(!$('priceModal').hidden) return {paused:true, reason:'modal', seconds:0};
     if(!$('createProductModal').hidden) return {paused:true, reason:'modal', seconds:0};
+    const left = arPauseUntil - Date.now();
+    if(left > 0) return {paused:true, reason:'interaccion', seconds:Math.max(1, Math.ceil(left/1000))};
     return {paused:false, reason:'', seconds:0};
   }
-  function arTextoDePausa(){ return 'Pausado: modal abierto'; }
+  function arTextoDePausa(st){
+    return st && st.reason === 'interaccion'
+      ? ('En pausa ' + st.seconds + ' s (estás usando el panel)')
+      : 'Pausado: modal abierto';
+  }
+  /* Tocar el panel aplaza el refresco los segundos elegidos. Con "sin pausa" no aplaza
+     nada: el repintado ya no destruye ni lo que escribes ni lo que marcas. */
+  document.addEventListener('pointerdown', e=>{
+    const t = e.target;
+    if(t && t.closest && t.closest('#detailView, #appView, #confirmOv, #priceModal, #createProductModal')) touchAutoRefreshPause();
+  }, true);
+  document.addEventListener('input', e=>{
+    const t = e.target;
+    if(t && t.matches && t.matches('input, textarea, select, [contenteditable="true"]')) touchAutoRefreshPause();
+  }, true);
+  document.addEventListener('keydown', e=>{
+    const t = e.target;
+    if(t && t.matches && t.matches('input, textarea, select, [contenteditable="true"]')) touchAutoRefreshPause();
+  }, true);
+  document.addEventListener('selectionchange', ()=>{
+    const sel = window.getSelection ? window.getSelection() : null;
+    if(sel && !sel.isCollapsed && String(sel).trim()) touchAutoRefreshPause();
+  });
   function updateRefreshLabel(){
     const st = getAutoRefreshPauseState();
-    const on = arEnabled ? 'ON' : 'OFF';
+    const on = arEnabled ? (arCadaMs > 0 ? ('cada ' + Math.round(arCadaMs/1000) + ' s') : 'solo a mano') : 'OFF';
     $('refreshLabel').textContent = 'Auto-refresh: ' + on;
     $('toggleRefresh').textContent = arEnabled ? 'Pausar' : 'Activar';
     const bar = $('refreshLabel').closest('.refresh-bar');
     const pill = $('refreshPausePill');
     const detailPill = $('detailRefreshPill');
-    if(!arEnabled){
+    if(!arEnabled || arCadaMs === 0){
       $('refreshDot').style.background = '#cbd5e1';
       $('refreshDot').style.animation = 'none';
       if(bar) bar.classList.remove('refresh-bar--paused');
@@ -4849,7 +4923,7 @@
       if(detailPill){
         detailPill.hidden = false;
         detailPill.classList.add('refresh-pause-pill--off');
-        detailPill.textContent = 'Auto-refresh OFF';
+        detailPill.textContent = arEnabled ? 'Refresco solo a mano' : 'Auto-refresh OFF';
       }
       return;
     }
@@ -4971,9 +5045,48 @@
     refrescarYa();
   });
 
-  function startAutoRefresh(){ stopAutoRefresh(); arEnabled=true; updateRefreshLabel(); updateLastRefresh(); arInterval=setInterval(arTick,AR_INT); }
+  function startAutoRefresh(){
+    cargarCfgRefresco();
+    if($('refreshEvery')) $('refreshEvery').value = String(Math.round(arCadaMs/1000));
+    if($('refreshPauseSecs')) $('refreshPauseSecs').value = String(Math.round(arPausaMs/1000));
+    updateLastRefresh();
+    aplicarRitmo();
+  }
   function stopAutoRefresh(){ if(arInterval){clearInterval(arInterval);arInterval=null;} }
-  $('toggleRefresh').onclick = ()=>{ arEnabled=!arEnabled; updateRefreshLabel(); if(arEnabled){arInterval=setInterval(arTick,AR_INT);arTick();}else stopAutoRefresh(); };
+
+  $('toggleRefresh').onclick = ()=>{
+    arEnabled = !arEnabled;
+    guardarCfgRefresco();
+    aplicarRitmo();
+    if(arEnabled) arTick(true);
+  };
+
+  /* Refrescar AHORA: se salta la pausa y el interruptor —lo has pedido tu— y ademas
+     cancela la pausa en curso, porque si acabas de pedir datos nuevos no tiene sentido
+     que el panel siga esperando. */
+  if($('btnRefreshNow')) $('btnRefreshNow').onclick = async ()=>{
+    const b = $('btnRefreshNow');
+    b.disabled = true;
+    const antes = b.textContent;
+    b.textContent = 'Refrescando...';
+    arPauseUntil = 0;
+    try { await arTick(true); } finally {
+      b.disabled = false; b.textContent = antes;
+      updateLastRefresh(); updateRefreshLabel();
+    }
+  };
+
+  if($('refreshEvery')) $('refreshEvery').onchange = ()=>{
+    arCadaMs = (Number($('refreshEvery').value) || 0) * 1000;
+    guardarCfgRefresco();
+    aplicarRitmo();
+  };
+  if($('refreshPauseSecs')) $('refreshPauseSecs').onchange = ()=>{
+    arPausaMs = (Number($('refreshPauseSecs').value) || 0) * 1000;
+    if(arPausaMs === 0) arPauseUntil = 0;
+    guardarCfgRefresco();
+    updateRefreshLabel();
+  };
 
   /* ---- NOTES ---- */
   $('btnSaveNotes').onclick = async ()=>{
