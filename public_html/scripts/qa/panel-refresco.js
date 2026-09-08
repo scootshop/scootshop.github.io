@@ -171,13 +171,30 @@ async function hasta(pag, fn, arg, plazo) {
     });
     comprobar(limpio, 'E · tras guardar, el aviso de desfase se apaga');
 
+    /* ---- H · marcar pedidos para borrarlos SOBREVIVE al refresco ----------------
+       La seleccion vivia solo en el DOM y el repintado reconstruye la tabla, asi que
+       cada refresco la borraba. No se notaba porque cualquier clic congelaba el
+       refresco 6 s — la pausa tapaba el fallo. Al quitarla, marcabas dos pedidos, se
+       desmarcaban solos y no habia forma de borrar nada. */
+    await pag.click('#btnBack');
+    await pag.waitForSelector('#ordersList tr[data-id]', { timeout: 20000 });
+    await esperar(600);
+    await pag.$$eval('#ordersList .row-cb', cbs => { cbs.slice(0, 2).forEach(cb => { cb.checked = true; cb.dispatchEvent(new Event('change', { bubbles: true })); }); });
+    const marcadosAntes = await pag.$eval('#selDelCount', e => e.textContent.trim()).catch(() => '0');
+    await esperar(8000);   // mas de dos vueltas del reloj
+    const marcadosDespues = await pag.$eval('#selDelCount', e => e.textContent.trim()).catch(() => '0');
+    const barra = await pag.$eval('#selBar', e => !e.hidden).catch(() => false);
+    comprobar(marcadosAntes === '2' && marcadosDespues === '2' && barra,
+      'H · lo que marcas para borrar sigue marcado tras 8 s',
+      marcadosAntes + ' → ' + marcadosDespues + (barra ? ' · barra visible' : ' · BARRA OCULTA'));
+    await pag.click('#selClear').catch(() => {});
+
     /* ---- G · el filtro de metodo de pago encuentra los pedidos ------------------
        El desplegable ofrecia stripe / transferencia / manual: ninguno coincidia con lo
        que se guarda de verdad (card, klarna, scalapay, bank), y Klarna, Scalapay y
        Tarjeta ni estaban. Se comprueba pulsando cada opcion y contando filas contra lo
        que dice la API: un filtro que no encuentra nada es peor que no tenerlo. */
-    await pag.click('#btnBack');
-    await pag.waitForSelector('#appView:not([hidden])', { timeout: 20000 });
+    // (ya estamos en la lista: el bloque H volvio desde el detalle)
     const porMetodo = {};
     for (const o of (await api('admin_orders_list&limit=300')).orders || []) {
       const k = String(o.payment_method || '');

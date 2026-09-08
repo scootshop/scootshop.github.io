@@ -2353,10 +2353,20 @@
   }
 
   /* ---- RENDER ORDERS ---- */
-  function renderOrdersList(){
+  let firmaLista = '';
+  function renderOrdersList(forzar){
     updateStatusFilterCounts();
     const tbody = $('ordersList');
     const filtered = applyOrderFilters(orders);
+    /* Misma regla que el detalle: si lo que hay que dibujar es identico a lo que ya
+       esta, NO se toca el DOM. Reconstruir la tabla tira las casillas marcadas, cierra
+       el menu de tres puntos abierto y pierde la seleccion de texto. Con esto, estar
+       mirando la lista sin novedades no repinta ni una vez. */
+    try {
+      const firma = JSON.stringify([filtered, currentPage, sortBy, sortDir]);
+      if(!forzar && firma === firmaLista && tbody.children.length){ return; }
+      firmaLista = firma;
+    } catch(_) { firmaLista = ''; }
     totalOrders = filtered.length;
     totalPages = Math.max(1, Math.ceil(totalOrders / CLIENT_PAGE_SIZE));
     if(currentPage > totalPages) currentPage = totalPages;
@@ -2447,7 +2457,8 @@
       e.stopPropagation();
       kebabCopy(btn, btn.getAttribute('data-copy-val'));
     }));
-    tbody.querySelectorAll('.row-cb').forEach(cb=>cb.addEventListener('change',updateSelectionBar));
+    tbody.querySelectorAll('.row-cb').forEach(cb=>cb.addEventListener('change',()=>marcarPedido(cb.value, cb.checked)));
+    sincronizarSeleccionDOM();
     if(totalPages>1){
       $('pagination').hidden = false;
       $('pgInfo').textContent = 'P\u00E1gina '+currentPage+' de '+totalPages;
@@ -2580,10 +2591,32 @@
   $('pgNext').onclick = ()=>{ if(currentPage<totalPages){ currentPage++; renderOrdersList(); } };
 
   /* ---- SELECTION ---- */
-  function getSelectedIds(){ return [...document.querySelectorAll('.row-cb:checked')].map(cb=>cb.value); }
+  /* La seleccion vivia SOLO en el DOM (.row-cb:checked) y el repintado reconstruye la
+     tabla entera, asi que cada repintado la borraba. Antes no se notaba porque cualquier
+     clic congelaba el refresco 6 s: la pausa estaba tapando esto. Al quitarla, marcabas
+     pedidos y a los 3 s se te desmarcaban solos — "no me deja eliminar pedidos".
+     Ahora manda este conjunto y el DOM lo refleja. */
+  let seleccionPedidos = new Set();
+  function getSelectedIds(){ return [...seleccionPedidos]; }
+  function sincronizarSeleccionDOM(){
+    document.querySelectorAll('.row-cb').forEach(cb=>{ cb.checked = seleccionPedidos.has(cb.value); });
+    const todas = [...document.querySelectorAll('.row-cb')];
+    const sa = $('selectAll');
+    if(sa) sa.checked = todas.length > 0 && todas.every(cb=>cb.checked);
+  }
+  function marcarPedido(id, on){
+    if(on) seleccionPedidos.add(id); else seleccionPedidos.delete(id);
+    updateSelectionBar();
+  }
   function updateSelectionBar(){ const ids=getSelectedIds(); $('selBar').hidden=ids.length===0; $('selCount').textContent=ids.length; const sd=$('selDelCount'); if(sd) sd.textContent=ids.length; }
-  $('selectAll').addEventListener('change',()=>{ const c=$('selectAll').checked; document.querySelectorAll('.row-cb').forEach(cb=>cb.checked=c); updateSelectionBar(); });
-  $('selClear').onclick = ()=>{ $('selectAll').checked=false; document.querySelectorAll('.row-cb').forEach(cb=>cb.checked=false); updateSelectionBar(); };
+  $('selectAll').addEventListener('change',()=>{
+    const c=$('selectAll').checked;
+    // "Todos" es todos LOS QUE SE VEN, no los 200 cargados: marcar a ciegas lo que el
+    // filtro esconde seria una forma estupenda de borrar lo que no tocaba.
+    document.querySelectorAll('.row-cb').forEach(cb=>{ cb.checked=c; if(c) seleccionPedidos.add(cb.value); else seleccionPedidos.delete(cb.value); });
+    updateSelectionBar();
+  });
+  $('selClear').onclick = ()=>{ seleccionPedidos.clear(); sincronizarSeleccionDOM(); updateSelectionBar(); };
   $('selDelete').onclick = async ()=>{
     const ids = getSelectedIds();
     if(!ids.length) return;
@@ -2591,7 +2624,7 @@
     if(!ok) return;
     $('selDelete').disabled=true; $('selDelLabel').textContent='Eliminando';
     let deleted=0;
-    for(const id of ids){ const res=await apiPost('admin_order_delete',{id}); if(res&&res.ok) deleted++; }
+    for(const id of ids){ const res=await apiPost('admin_order_delete',{id}); if(res&&res.ok){ deleted++; seleccionPedidos.delete(id); } }
     $('selDelete').disabled=false; $('selDelLabel').textContent='Eliminar pedidos marcados';
     $('selBar').hidden=true;
     $('ordersMsg').innerHTML = '<div class="msg '+(deleted===ids.length?'msg--ok':'msg--warn')+'">'+(deleted===ids.length?'✅ ':'⚠ ')+deleted+' de '+ids.length+' pedidos eliminados.</div>';
