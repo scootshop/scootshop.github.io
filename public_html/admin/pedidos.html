@@ -28,7 +28,8 @@
     [hidden]{display:none!important}
 
     /* HEADER */
-    .adm-hdr{position:sticky;top:0;z-index:100;background:var(--navy);padding:0 20px;height:56px;display:flex;align-items:center;gap:14px;box-shadow:0 1px 0 rgba(255,255,255,.08)}
+    :root{--adm-hdr-h:56px}
+    .adm-hdr{position:sticky;top:0;z-index:100;background:var(--navy);padding:0 20px;height:var(--adm-hdr-h);display:flex;align-items:center;gap:14px;box-shadow:0 1px 0 rgba(255,255,255,.08)}
     .hdr-brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:.93rem;color:#fff;text-decoration:none;letter-spacing:-.01em}
     .hdr-logo{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#6366f1);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
     .hdr-mid{flex:1}
@@ -117,7 +118,11 @@
     .tb-btn:hover{border-color:var(--navy);color:var(--navy);background:var(--bg)}
 
     /* REFRESH BAR */
-    .refresh-bar{display:flex;align-items:center;gap:8px;padding:7px 12px;background:#fff;border:1px solid var(--line);border-radius:var(--r);font-size:.74rem;font-weight:600;color:var(--muted);margin-bottom:12px}
+    /* Anclada JUSTO debajo de la cabecera (que es sticky y mide --adm-hdr-h): los
+       mandos de refresco no sirven de nada si hay que subir 20 filas para llegar a
+       ellos. z-index por debajo de la cabecera (100) y por encima de la tabla. El
+       fondo es opaco a proposito: las filas pasan por debajo. */
+    .refresh-bar{position:sticky;top:var(--adm-hdr-h);z-index:90;display:flex;align-items:center;gap:8px;padding:7px 12px;background:#fff;border:1px solid var(--line);border-radius:var(--r);font-size:.74rem;font-weight:600;color:var(--muted);margin-bottom:12px;box-shadow:0 4px 12px -6px rgba(15,23,42,.28)}
     .refresh-bar--paused{background:#fffbeb;border-color:#fde68a;color:#92400e}
     .refresh-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
     .refresh-pause-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:999px;background:#fef3c7;color:#92400e;border:1px solid #fcd34d;font-size:.67rem;font-weight:800;letter-spacing:.02em;white-space:nowrap}
@@ -614,7 +619,8 @@
       .p-img{width:34px;height:34px}
       .nav-tab{font-size:.77rem;padding:8px 10px}
       .form-grid{grid-template-columns:1fr}
-      .adm-hdr{padding:0 14px;height:50px}
+      :root{--adm-hdr-h:50px}
+      .adm-hdr{padding:0 14px}
       .hdr-bust span{display:none}
       .sf{padding:10px 14px}
       .sf-step{min-width:46px}
@@ -623,7 +629,12 @@
       .modal-box--create{width:min(98%,760px);max-height:calc(100dvh - 28px);overflow:auto;-webkit-overflow-scrolling:touch;padding:16px}
       .modal-ov--scroll{padding:8px 4px}
       .refresh-bar{flex-wrap:wrap;gap:6px;padding:8px 10px}
-      .refresh-actions{margin-left:0;width:100%;justify-content:flex-start;padding-top:2px}
+      /* Sin envolver, los mandos se salian por la derecha y "Pausar" y la hora
+         quedaban fuera de la pantalla. */
+      .refresh-actions{margin-left:0;width:100%;justify-content:flex-start;padding-top:2px;flex-wrap:wrap;gap:6px 8px}
+      .refresh-cfg{font-size:.68rem}
+      .refresh-cfg select{max-width:86px}
+      .refresh-btn{padding:5px 9px}
       .refresh-time{font-size:.69rem}
       .cust-kpis{grid-template-columns:1fr 1fr}
       .cust-order-grid{grid-template-columns:1fr 1fr}
@@ -685,6 +696,38 @@
   </header>
 
   <div class="adm-body">
+    <!-- Los mandos del refresco van AQUI, lo primero bajo la cabecera y pegados a ella:
+         abajo, tras el cuadro de mandos, quedaban a 1192 px y no se veian al cargar. -->
+    <div class="refresh-bar">
+      <span class="refresh-dot" id="refreshDot" style="animation:pulse 2s infinite"></span>
+      <span id="refreshLabel">Auto-refresh: ON</span>
+      <span class="refresh-pause-pill" id="refreshPausePill" hidden></span>
+      <div class="refresh-actions">
+        <button class="refresh-btn" id="btnRefreshNow" title="Traer los datos ahora mismo">&#x1F504; Refrescar</button>
+        <label class="refresh-cfg" title="Cada cuanto se refresca solo">
+          cada
+          <select id="refreshEvery">
+            <option value="3">3 s</option>
+            <option value="10">10 s</option>
+            <option value="30">30 s</option>
+            <option value="60">1 min</option>
+            <option value="0">nunca (manual)</option>
+          </select>
+        </label>
+        <label class="refresh-cfg" title="Al tocar la pantalla, esperar antes de refrescar (para que no se te mueva nada mientras trabajas)">
+          pausa al usar
+          <select id="refreshPauseSecs">
+            <option value="0">sin pausa</option>
+            <option value="6">6 s</option>
+            <option value="15">15 s</option>
+            <option value="30">30 s</option>
+            <option value="60">1 min</option>
+          </select>
+        </label>
+        <button class="refresh-toggle" id="toggleRefresh">Pausar</button>
+        <span class="refresh-time" id="lastRefresh"></span>
+      </div>
+    </div>
     <div id="cacheOut" style="margin-bottom:10px" hidden></div>
     <div id="dashStats" class="kpi-sections" hidden></div>
     <div id="dashExtra" class="dash-grid" hidden></div>
@@ -698,36 +741,6 @@
 
     <!-- PANEL PEDIDOS -->
     <div id="panelOrders">
-      <div class="refresh-bar">
-        <span class="refresh-dot" id="refreshDot" style="animation:pulse 2s infinite"></span>
-        <span id="refreshLabel">Auto-refresh: ON</span>
-        <span class="refresh-pause-pill" id="refreshPausePill" hidden></span>
-        <div class="refresh-actions">
-          <button class="refresh-btn" id="btnRefreshNow" title="Traer los datos ahora mismo">&#x1F504; Refrescar</button>
-          <label class="refresh-cfg" title="Cada cuanto se refresca solo">
-            cada
-            <select id="refreshEvery">
-              <option value="3">3 s</option>
-              <option value="10">10 s</option>
-              <option value="30">30 s</option>
-              <option value="60">1 min</option>
-              <option value="0">nunca (manual)</option>
-            </select>
-          </label>
-          <label class="refresh-cfg" title="Al tocar la pantalla, esperar antes de refrescar (para que no se te mueva nada mientras trabajas)">
-            pausa al usar
-            <select id="refreshPauseSecs">
-              <option value="0">sin pausa</option>
-              <option value="6">6 s</option>
-              <option value="15">15 s</option>
-              <option value="30">30 s</option>
-              <option value="60">1 min</option>
-            </select>
-          </label>
-          <button class="refresh-toggle" id="toggleRefresh">Pausar</button>
-          <span class="refresh-time" id="lastRefresh"></span>
-        </div>
-      </div>
 
       <div class="toolbar">
         <div class="tb-search">
