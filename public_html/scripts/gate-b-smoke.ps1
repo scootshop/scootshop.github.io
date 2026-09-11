@@ -29,6 +29,10 @@
 #                                  IGNORA cart_items, asi que no representa lo que
 #                                  se cobra por un carrito: quien tarifa de verdad
 #                                  es resolve_order_pricing().
+#        `bank`                    ya no es un metodo de pago valido. Los de hoy son
+#                                  card, klarna, scalapay, paypal, bizum y transfer
+#                                  (BACKEND_PAYMENT_FEES). El original mandaba 'bank'
+#                                  y el backend contesta invalid_payment_method.
 #      Lo que no se puede probar se marca OMITIDA, con el motivo. No se sustituye
 #      por una comprobacion inventada que quede bonita en el listado.
 #
@@ -154,32 +158,42 @@ Write-Host ''
 # ── B1 · TARIFA ────────────────────────────────────────────────────────────────
 Write-Host 'B1 · tarifa'
 $b1 = Pedir 'order_pricing_preview' @{
-  sku = $prod.sku; currency = 'EUR'; payment_method = 'bank'; discount_code = '';
+  sku = $prod.sku; currency = 'EUR'; payment_method = 'transfer'; discount_code = '';
   frontend_base_amount = $prod.precio; shipping_amount = '0.00'; cart_items = @()
 }
 if ($b1.Code -eq 503) {
   Omitir 'tarifa (precio, precio inventado y comision)' 'order_pricing_preview responde 503 feature_disabled: DISCOUNTS_ENABLED=false'
+} elseif ($b1.Code -ge 400) {
+  # La peticion ni se acepto: eso es entorno o contrato, no una tarifa mal calculada.
+  # Darlo por FALLO de precio seria gritar donde no hay nada roto.
+  Omitir 'tarifa (precio, precio inventado y comision)' ('la peticion no se acepto: ' + [string]$b1.Data.error + ' / ' + [string]$b1.Data.detail)
 } else {
-  $total1 = if ($b1.Data) { [double]([string]$b1.Data.total_amount).Replace(',', '.') } else { -1 }
+  $total1 = if ($b1.Data) { [double]([string]$b1.Data.breakdown.total_amount).Replace(',', '.') } else { -1 }
   Comprobar 'precio sin descuento = el del catalogo' `
     ($b1.Code -eq 200 -and [math]::Abs($total1 - [double]$prod.precio) -lt 0.01) `
     ('catalogo=' + $prod.precio + ' backend=' + $total1)
 
   # El backend MANDA sobre el navegador: si el cliente dice que vale 1 EUR, se ignora.
   $b1b = Pedir 'order_pricing_preview' @{
-    sku = $prod.sku; currency = 'EUR'; payment_method = 'bank'; discount_code = '';
+    sku = $prod.sku; currency = 'EUR'; payment_method = 'transfer'; discount_code = '';
     frontend_base_amount = '1.00'; shipping_amount = '0.00'; cart_items = @()
   }
-  $total1b = if ($b1b.Data) { [double]([string]$b1b.Data.total_amount).Replace(',', '.') } else { -1 }
-  Comprobar 'un precio inventado por el navegador NO se acepta' `
-    ($b1b.Code -eq 200 -and [math]::Abs($total1b - [double]$prod.precio) -lt 0.01) `
-    ('el navegador dijo 1.00, el backend tarifa ' + $total1b)
+  $total1b = if ($b1b.Data) { [double]([string]$b1b.Data.breakdown.total_amount).Replace(',', '.') } else { -1 }
+  # EL INVARIANTE ES QUE EL BACKEND NO HAGA CASO AL NAVEGADOR, o sea que las dos
+  # respuestas sean IGUALES ENTRE SI. Compararla contra el precio del catalogo
+  # mezclaba dos cosas y daba un fallo falso cuando lo que falla es otra: el
+  # backend ignoro el 1.00 correctamente, solo que tarifa un precio distinto del
+  # que ve el cliente, y eso ya lo dice la comprobacion de arriba.
+  Comprobar 'un precio inventado por el navegador NO cambia la tarifa' `
+    ($b1b.Code -eq 200 -and [math]::Abs($total1b - $total1) -lt 0.01) `
+    ('con 554.99 tarifa ' + $total1 + ', con 1.00 tarifa ' + $total1b)
 
+  # OJO: el desglose va en .breakdown, no en la raiz de la respuesta.
   $b1c = Pedir 'order_pricing_preview' @{
     sku = $prod.sku; currency = 'EUR'; payment_method = 'card'; discount_code = '';
     frontend_base_amount = $prod.precio; shipping_amount = '0.00'; cart_items = @()
   }
-  $fee = if ($b1c.Data) { [double]([string]$b1c.Data.payment_fee_amount).Replace(',', '.') } else { -1 }
+  $fee = if ($b1c.Data) { [double]([string]$b1c.Data.breakdown.payment_fee_amount).Replace(',', '.') } else { -1 }
   Comprobar 'la comision de pasarela se calcula y viaja en el desglose' `
     ($b1c.Code -eq 200 -and $fee -ge 0) ('fee=' + $fee)
 }
