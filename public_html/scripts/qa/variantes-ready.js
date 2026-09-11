@@ -41,4 +41,7 @@ const RUTAS = ['/', '/cuenta', '/checkout/?cart=1', '/pago', '/patinetes/series-
   }
   console.log(fallos ? '\n✘ READY_KO' : '\n✔ READY_OK');
   await br.close();
+  // Mismo caso que variantes-chips.js: imprimia READY_KO y se caia por el final del
+  // IIFE, o sea salia con 0, y el orquestador lo contaba como aprobado.
+  process.exit(fallos ? 1 : 0);
 })().catch(e => { console.error('FALLO:', e.message); process.exit(1); });

@@ -67,4 +67,9 @@ async function correr(nombre, retrasar) {
     if (!ok) { fallos++; console.log('✘ ' + k + ' → ' + JSON.stringify(chips)); }
   }
   console.log(fallos || !igual ? '\n✘ CHIPS_KO' : '\n✔ CHIPS_OK — 4 vistas correctas con y sin retraso');
+  /* SALIR CON 1 AL FALLAR. Esto imprimia CHIPS_KO y se caia por el final del IIFE, o
+     sea salia con 0 — y variantes.ps1 solo mira el codigo de salida, asi que lo
+     contaba como aprobado y el resumen decia «11 pasan, 0 fallan» con un KO impreso
+     justo encima. Es el mismo fallo que se arreglo en _playwright.js, en otro sitio. */
+  process.exit(fallos || !igual ? 1 : 0);
 })().catch(e => { console.error('FALLO:', e.message); process.exit(1); });
