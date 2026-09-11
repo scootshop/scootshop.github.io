@@ -17,7 +17,10 @@
 
    Se comprueba contra el DOM ya pintado, que es donde se ve la verdad: da igual por qué
    ruta se decida, lo que no puede pasar es que el botón sea el equivocado. */
-const { chromium, devices } = require('C:/Users/User/AppData/Roaming/npm/node_modules/playwright');
+/* Playwright sale del helper comun. Aqui estaba la ruta absoluta de UNA maquina:
+ * fuera de ese ordenador la suite reventaba con un error de require, que se lee
+ * como FALLO cuando en realidad es una OMISION. Ver scripts/qa/_playwright.js. */
+const { chromium, devices } = require('./_playwright').exigirPlaywright('COMPAT_OK');
 
 const BASE = process.argv[2] || 'https://scootshop.co';
 

@@ -17,10 +17,12 @@
 //
 // Este script solo hace falta si cambia el logotipo, y necesita los PNG/WEBP de
 // partida en img/logo/.
-const { exigirPlaywright } = require('C:/Users/User/Documents/GitHub/scootshop.github.io - copia/public_html/scripts/qa/_playwright.js');
+// Ruta RELATIVA: la absoluta ataba este script a una carpeta concreta de un disco.
+const { exigirPlaywright } = require('./qa/_playwright');
 const pw = exigirPlaywright('VECTORIZA');
 const fs = require('fs');
-const RAIZ = 'C:/Users/User/Documents/GitHub/scootshop.github.io - copia/public_html/';
+// La raiz del sitio se deduce de donde vive este fichero (scripts/ cuelga de ella).
+const RAIZ = require('path').resolve(__dirname, '..') + '/';
 const TOL1 = Number(process.argv[2] || 2.2);   // elegido midiendo: ver la nota de arriba
 const ANG  = Number(process.argv[3] || 172);
 const TOL2 = Number(process.argv[4] || 0.6);

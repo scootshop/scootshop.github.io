@@ -21,7 +21,10 @@
    secuencia de `pointermove` que escucha el carrusel, así que el deslizamiento
    parece no funcionar aunque en un móvil real funcione. En móvil hay que mandar
    eventos táctiles desde dentro de la página. */
-const { chromium } = require('C:/Users/User/AppData/Roaming/npm/node_modules/playwright');
+/* Playwright sale del helper comun. Aqui estaba la ruta absoluta de UNA maquina:
+ * fuera de ese ordenador la suite reventaba con un error de require, que se lee
+ * como FALLO cuando en realidad es una OMISION. Ver scripts/qa/_playwright.js. */
+const { chromium } = require('./_playwright').exigirPlaywright('PORTADA_CLICK_OK');
 
 const base = (process.argv[2] || 'https://scootshop.co').replace(/\/$/, '');
 let fallos = 0;

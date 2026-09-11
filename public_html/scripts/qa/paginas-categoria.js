@@ -16,7 +16,10 @@
    porque las píldoras solo llevaban el scroll de una a otra. Si alguien vuelve a
    dejar que una página de categoría pinte las demás, salta la comprobación de
    «una sola sección» y la de altura. */
-const { chromium } = require('C:/Users/User/AppData/Roaming/npm/node_modules/playwright');
+/* Playwright sale del helper comun. Aqui estaba la ruta absoluta de UNA maquina:
+ * fuera de ese ordenador la suite reventaba con un error de require, que se lee
+ * como FALLO cuando en realidad es una OMISION. Ver scripts/qa/_playwright.js. */
+const { chromium } = require('./_playwright').exigirPlaywright('CATPAG_OK');
 
 const BASE = process.argv[2] || 'https://scootshop.co';
 

@@ -9,7 +9,11 @@
 #   powershell -ExecutionPolicy Bypass -File scripts/qa/variantes.ps1
 #   powershell -ExecutionPolicy Bypass -File scripts/qa/variantes.ps1 -BaseUrl https://scootshop.co
 #
-# Marcador final: VARIANTES_OK / VARIANTES_KO.
+# Marcador final, y son TRES:
+#   VARIANTES_OK        todas se ejecutaron y pasaron        (salida 0)
+#   VARIANTES_KO        alguna se ejecuto y fallo            (salida 1)
+#   VARIANTES_PARCIAL   alguna NO se pudo ejecutar           (salida 2)
+# Una omitida no es un aprobado: dice que esa parte no se ha comprobado.
 param(
   [string]$BaseUrl = 'http://127.0.0.1:8000'
 )
@@ -33,18 +37,38 @@ $comprobaciones = @(
   @{ nombre = 'readiness';           script = "$qa\variantes-ready.js";                 args = @($BaseUrl) }
 )
 
-$fallos = @()
+# TRES RESULTADOS, NO DOS. Una suite que no se puede ejecutar —porque falta
+# Playwright o el entorno— sale con 2 y NO cuenta como que paso. Antes salia con 0
+# y esto imprimia VARIANTES_OK habiendose saltado ocho de las once comprobaciones:
+# un guardian que miente es peor que no tenerlo. Ver scripts/qa/_playwright.js.
+#
+#   0  paso        1  fallo        2  omitida (no se pudo ejecutar)
+$fallos   = @()
+$omitidas = @()
+$pasadas  = @()
 foreach ($c in $comprobaciones) {
   Write-Host ''
   Write-Host ('== ' + $c.nombre + ' ==')
   & node $c.script @($c.args)
-  if ($LASTEXITCODE -ne 0) { $fallos += $c.nombre }
+  if     ($LASTEXITCODE -eq 0) { $pasadas  += $c.nombre }
+  elseif ($LASTEXITCODE -eq 2) { $omitidas += $c.nombre }
+  else                         { $fallos   += $c.nombre }
 }
 
 Write-Host ''
+Write-Host ('resumen: ' + $pasadas.Count + ' pasan, ' + $fallos.Count + ' fallan, ' + $omitidas.Count + ' omitidas (de ' + $comprobaciones.Count + ')')
+
+# Un fallo manda sobre una omision: si algo se ha roto, eso es lo que hay que ver.
 if ($fallos.Count -gt 0) {
   Write-Host ('VARIANTES_KO  fallan: ' + ($fallos -join ', '))
+  if ($omitidas.Count -gt 0) { Write-Host ('  ademas OMITIDAS: ' + ($omitidas -join ', ')) }
   exit 1
 }
-Write-Host 'VARIANTES_OK'
+if ($omitidas.Count -gt 0) {
+  Write-Host ('VARIANTES_PARCIAL  ' + $omitidas.Count + ' omitidas: ' + ($omitidas -join ', '))
+  Write-Host '  NO se ha comprobado el sistema entero. Instala lo que falte y vuelve a correrlo:'
+  Write-Host '    npm install  &&  npx playwright install chromium'
+  exit 2
+}
+Write-Host ('VARIANTES_OK  ' + $pasadas.Count + ' comprobaciones, todas ejecutadas')
 exit 0

@@ -47,7 +47,8 @@
 const fs = require('fs');
 const http = require('http');
 const path = require('path');
-const { chromium } = require('C:/Users/User/AppData/Roaming/npm/node_modules/playwright');
+// Playwright desde el helper comun, no desde la ruta de UNA maquina.
+const { chromium } = require('./qa/_playwright').exigirPlaywright('HOME_CATALOG_OK');
 
 const RAIZ = path.resolve(__dirname, '..');
 const INDEX = path.join(RAIZ, 'index.html');

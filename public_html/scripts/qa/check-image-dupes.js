@@ -40,25 +40,13 @@ const RUTAS = [
 
 const ES_IMAGEN = /\.(webp|png|jpe?g|gif|avif|svg|ico)(\?|$)/i;
 
-function cargarPlaywright() {
-  const intentos = [
-    'playwright',
-    'C:/Users/User/AppData/Roaming/npm/node_modules/playwright',
-  ];
-  for (const via of intentos) {
-    try { return require(via); } catch (_) { /* siguiente */ }
-  }
-  return null;
-}
+/* De donde sale Playwright: del helper comun, no de una copia. Esta tenia la ruta
+ * absoluta de UNA maquina y salia con 0 al no encontrarlo, o sea daba por buena la
+ * comprobacion sin haberla hecho. Ver scripts/qa/_playwright.js. */
+const { exigirPlaywright } = require('./_playwright');
 
 (async () => {
-  const pw = cargarPlaywright();
-  if (!pw) {
-    console.log('Playwright no esta instalado: no se puede comprobar el trafico.');
-    console.log('  npm i -g playwright && npx playwright install chromium');
-    console.log('IMG_DUPES_OK (omitido)');
-    process.exit(0);
-  }
+  const pw = exigirPlaywright('IMG_DUPES_OK');
 
   const navegador = await pw.chromium.launch();
   let dupTotales = 0;

@@ -19,7 +19,10 @@
    El bfcache no se puede comprobar desde aquí: con el navegador instrumentado queda
    desactivado. Lo que sí se comprueba es el camino malo —recargar la página entera—,
    que es justo donde estaban los fallos. */
-const { chromium, devices } = require('C:/Users/User/AppData/Roaming/npm/node_modules/playwright');
+/* Playwright sale del helper comun. Aqui estaba la ruta absoluta de UNA maquina:
+ * fuera de ese ordenador la suite reventaba con un error de require, que se lee
+ * como FALLO cuando en realidad es una OMISION. Ver scripts/qa/_playwright.js. */
+const { chromium, devices } = require('./_playwright').exigirPlaywright('VOLVER_OK');
 
 const BASE = process.argv[2] || 'https://scootshop.co';
 const TOLERANCIA = 40;   // px: por debajo de esto nadie nota nada
