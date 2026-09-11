@@ -923,6 +923,29 @@ function header_get(string $name): string {
   return $_SERVER[$key] ?? '';
 }
 
+/**
+ * La guarda de administracion, en UN solo sitio.
+ *
+ * Las 32 rutas admin_* repetian estas dos lineas identicas. Las 32 la tenian —se
+ * comprobo una a una— asi que no habia ningun agujero: habia una DISCIPLINA. El
+ * problema es que la ruta 33 se escribira con prisa, y un olvido aqui no da error:
+ * publica un endpoint de administracion abierto que funciona perfectamente.
+ *
+ * Se llama desde el prelude del router, antes del switch, igual que ya se hacia con
+ * enforce_route_rate_limit(). Ese patron ya existia en este fichero; esto solo lo
+ * usa para lo que mas importa.
+ *
+ * Las 32 comprobaciones interiores SE QUEDAN de momento, como defensa redundante:
+ * son idempotentes —si la clave es buena, la segunda comprobacion tambien pasa— y
+ * quitarlas es otro cambio, de otro dia.
+ */
+function require_admin(array $CFG): void {
+  $key = header_get('x-admin-key');
+  if ($CFG['admin_key'] === '' || !hash_equals($CFG['admin_key'], $key)) {
+    json_out(['ok' => false, 'error' => 'unauthorized'], 401);
+  }
+}
+
 function versioned_local_url(string $url, string $version): string {
   $url = trim($url);
   if ($url === '') return $url;
@@ -5052,6 +5075,13 @@ function resolve_order_pricing(array $input): array {
 // ---------------- ROUTER ----------------
 $route = $_GET['route'] ?? '';
 enforce_route_rate_limit($CFG, (string)$route);
+
+/* TODA ruta admin_* pasa por aqui, la escriba quien la escriba. Convierte 32 actos
+   de disciplina en una garantia estructural: una ruta admin_* nueva queda protegida
+   aunque su autor olvide la comprobacion interior. Ver require_admin(). */
+if (strncmp((string)$route, 'admin_', 6) === 0) {
+  require_admin($CFG);
+}
 
 // Lazy DB connection — only connect when a route needs it
 $pdo = null;
