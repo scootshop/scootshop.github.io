@@ -1,0 +1,24 @@
+# Dependencias Python de las herramientas de scootshop.co.
+#
+# El SITIO no las necesita: son solo para los scripts de public_html/scripts.
+# El backend es PHP y no lleva nada de esto.
+#
+#   python -m pip install -r requirements.txt
+#
+# Se fija el minimo con el que se ha comprobado y se deja crecer dentro de la
+# misma version mayor (~=): no hay motivo para clavar la version exacta en unas
+# herramientas que se corren a mano, y clavarlas obliga a tocar este fichero cada
+# vez que se actualiza el ordenador.
+
+# Trata todas las imagenes: convert-to-webp.py, optimiza-imagenes-fijas.py,
+# completar-fotos.py, build-card-shots.py y los recortes del logotipo.
+Pillow~=12.2
+
+# Solo build-logo-pie.js y los recortes del logotipo lo usan, para despejar la
+# opacidad pixel a pixel (a*tinta + (1-a)*fondo). Sin el habria que hacerlo en
+# bucles de Python y tardaria minutos en vez de segundos.
+numpy~=2.4
+
+# Recorta las fuentes: build-icon-fonts.py deja solo los glifos que icons.css
+# declara (267 KB -> 3,5 KB) y build-web-fonts.py maneja los .woff2 propios.
+fonttools~=4.63

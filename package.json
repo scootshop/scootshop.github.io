@@ -1,0 +1,30 @@
+{
+  "name": "scootshop-tooling",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Herramientas de desarrollo de scootshop.co: generadores y suites de QA. El SITIO no tiene dependencias: es HTML/CSS/JS a mano, sin framework ni empaquetador, y esto no cambia eso. Aqui solo se declara lo que necesitan los scripts de public_html/scripts para poder correr en otra maquina.",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "playwright": "1.60.0"
+  },
+  "scripts": {
+    "qa:variantes": "powershell -ExecutionPolicy Bypass -File public_html/scripts/qa/variantes.ps1",
+    "qa:catalogo": "node public_html/scripts/qa/catalogo.js",
+    "qa:api-sql": "node public_html/scripts/qa/api-sql.js",
+    "qa:rutas-img": "node public_html/scripts/qa/rutas-img.js",
+    "qa:fotos-mini": "node public_html/scripts/qa/fotos-mini.js",
+    "qa:logo-piezas": "node public_html/scripts/qa/logo-piezas.js",
+    "qa:img-dupes": "node public_html/scripts/qa/check-image-dupes.js",
+    "qa:volver-atras": "node public_html/scripts/qa/volver-atras.js",
+    "qa:compat-variantes": "node public_html/scripts/qa/compat-variantes.js",
+    "qa:paginas-categoria": "node public_html/scripts/qa/paginas-categoria.js",
+    "qa:portada-click": "node public_html/scripts/qa/portada-click.js",
+    "check:atributos": "node public_html/scripts/build-attributes-index.js --check",
+    "check:filtros": "node public_html/scripts/build-filtros.js --check",
+    "check:logo-pie": "node public_html/scripts/build-logo-pie.js --check",
+    "check:mail-track": "node public_html/scripts/build-mail-track-icons.js --check"
+  }
+}

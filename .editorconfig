@@ -1,0 +1,54 @@
+# .editorconfig — scootshop.co
+#
+# POR QUE EXISTE: habia tres ficheros con el texto corrompido (UTF-8 leido como
+# Latin-1 en algun guardado): js/global-assets.js, js/index-head.js y la ficha
+# accesorios/potencia-lunje/index.html, esta ultima dentro de un alt=, que es lo
+# que lee un lector de pantalla y lo que indexa Google. En un proyecto escrito
+# entero en español, con acentos y eñes en cada linea de copy, eso vuelve.
+#
+# ESTE FICHERO NO REFORMATEA NADA. Solo fija la codificacion y la sangria que el
+# proyecto YA usa, medida sobre el codigo real:
+#   CSS, JS, PHP, HTML .. 2 espacios
+#   Python .............. 4 espacios
+#
+# Lo que NO se activa, y a proposito:
+#
+#   trim_trailing_whitespace  27 de 400 ficheros revisados tienen espacios al
+#                             final de alguna linea (admin/pedidos.html 29,
+#                             api/index.php 18, js/pago.js 6...). Con esto en
+#                             true, cambiar UNA linea de api/index.php dejaria
+#                             ademas 18 cambios de espacios en el diff y haria
+#                             ilegible la revision.
+#
+#   insert_final_newline      css/index.css y js/asset-sync.js no acaban en
+#                             salto de linea. Mismo motivo.
+#
+#   end_of_line               git ya lo resuelve: core.autocrlf=true guarda LF y
+#                             saca CRLF en Windows. Declararlo aqui haria que el
+#                             editor reescribiera ficheros enteros sin que git
+#                             llegue a ver un cambio, que es ruido puro.
+#
+# Los tres se pueden encender el dia que se limpien esos ficheros, y entonces
+# seran gratis. Hoy no lo son.
+
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 2
+
+[*.py]
+indent_size = 4
+
+[*.{ps1,psm1}]
+indent_size = 2
+
+[Makefile]
+indent_style = tab
+
+# Generados: no se editan a mano, asi que no se les impone nada.
+[{data/attributes-index.json,data/product-overrides.js,data/product-overrides.json,asset-version.json,cache-bust.json,sitemap.xml}]
+charset = unset
+indent_style = unset
+indent_size = unset
