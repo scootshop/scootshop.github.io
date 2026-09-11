@@ -99,11 +99,6 @@
 }
 .field.field--error input::placeholder,
 .field.field--error textarea::placeholder { color: #e28a8a; opacity: 1; }
-.field.field--valid input,
-.field.field--valid select {
-  border-bottom-color: #16a34a;
-  border-bottom-width: 2.5px;
-}
 
 /* Aviso de geolocalización del CP */
 .geo-disclaimer {
@@ -120,16 +115,6 @@
 
 /* Email con check de validez */
 .field--email-wrap { position: relative; }
-.field--email-wrap .email-check {
-  position: absolute;
-  right: 12px; top: 50%;
-  transform: translateY(-50%);
-  color: #22c55e;
-  opacity: 0;
-  transition: opacity .2s ease;
-  pointer-events: none;
-}
-.field--email-wrap.is-valid .email-check { opacity: 1; }
 
 /* Prefijo + número de teléfono */
 .phone-group {

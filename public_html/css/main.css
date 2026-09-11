@@ -1927,16 +1927,6 @@ button{ font-family:inherit; }
   color:var(--muted);
   margin-top:0;
 }
-.order-summary__info-title,
-.order-summary__box-title{
-  display:block;
-  margin:0 0 8px;
-  font-size:.68rem;
-  font-weight:800;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  color:#687385;
-}
 .order-summary__info-line{
   display:flex;
   align-items:center;
