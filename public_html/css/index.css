@@ -1,22 +1,19 @@
-/* index.css - estilos especificos de index.html
- *
- * REGLA DE REPARTO (importante): aqui SOLO va el decorado propio del home —hero,
- * series-hero, nav de categorias, catalogo—. Todo lo que forme parte de la TARJETA
- * de producto va en main.css, porque la misma tarjeta se reutiliza en "Tambien te
- * puede interesar" de las fichas (la monta product-enhancements.js con
- * SCOOTSHOP_HOME_CARD_API) y las fichas NO cargan este fichero.
- * Ya paso una vez: la paleta de color (.card-colors/.color-pop) vivia aqui y en las
- * fichas la burbuja se creaba sin estilos, asi que el boton ANADIR parecia muerto.
- * Las reglas de tarjeta afinadas para el home se escriben en main.css con el prefijo
- * [data-home-catalog-root], que es el atributo que llevan tanto la parrilla del home
- * como la seccion de relacionados.
- */
 
-/* Accesibilidad */
-.skip-link{
-  position:absolute; left:-999px; top:auto;
-  width:1px; height:1px; overflow:hidden;
-}
+/* EL FONDO DE LA MITAD BAJA DE LA PORTADA
+
+   De «Categorías» hasta el pie va todo del mismo color, y el color es este.
+   Antes era a rayas: las dos zonas de parrilla dejaban ver el gris del body
+   (#f3f4f6) y las de texto iban en blanco, así que la página cambiaba de
+   suelo cinco veces de aquí abajo. Lo que separa una sección de otra es la
+   raya (.home-sep), no un cambio de tinta.
+
+   La única excepción es la oferta de la semana, que sigue siendo la banda
+   oscura: ahí el contraste ES el diseño.
+
+   El color es `--suelo`, declarado en css/main.css: el MISMO del body, de la
+   barra de las categorías y de /cuenta. Un solo gris en todo el sitio, y en una
+   hoja que cargan todas las páginas —las fichas no cargan esta. */
+
 .skip-link:focus{
   left:12px; top:12px; width:auto; height:auto;
   padding:10px 12px;
@@ -27,116 +24,196 @@
   box-shadow:0 16px 40px rgba(0,0,0,.12);
 }
 
-/* ====== Pagos ====== */
-.payments{ padding: 28px 0 0; }
-.site-footer{
-  padding: 28px 0 22px;
-  color: rgba(17,24,39,.66);
-  border-top: 1px solid rgba(0,0,0,.04);
-  margin-top: 18px;
+/* ====== EL PIE ======
+   Blanco, como el resto de la mitad baja. Antes era gris palido sobre el gris
+   del body —no cerraba nada, se disolvia— y estuvo un rato en negro; el negro
+   cerraba, pero abria un bloque oscuro justo despues de la hoja blanca del
+   legal y partia en dos lo que es una sola lectura. Blanco, la hoja llega
+   entera hasta el final.
+
+   `.payments` NO lleva `.container`: el fondo va de canto a canto y quien mete
+   el contenido en la caja de 1296px es el `.container` de dentro.
+
+   Este bloque lo copian /patinetes, /accesorios y /repuestos con
+   scripts/build-categorias.py. */
+.payments{
+  background: var(--suelo);
+  color: rgba(17,24,39,.62);
+  margin-top: 0;
+  padding: 0;
 }
+
+/* En las paginas de categoria lo de arriba es la parrilla sobre el gris del
+   body, no una seccion blanca: ahi el hueco si tiene que ponerlo el pie. */
+[data-pagina="categoria"] .payments{ margin-top: clamp(48px, 5vw, 88px); }
+
+/* SIN raya de costura. Habia un `border-top` para separar el pie del legal
+   cuando los dos eran blancos; con toda la mitad baja del mismo color, esa raya
+   era la unica de la pagina que no separaba dos cosas distintas — el pie ya se
+   distingue por su propio aire y por la letra pequeña. */
+.site-footer{
+  padding: clamp(40px, 4vw, 60px) 0 26px;
+  border-top: 0;
+  margin-top: 0;
+  color: inherit;
+}
+
+/* La marca ocupa columna y media: es una firma, no una lista, y con el mismo
+   ancho que las otras tres el claim salia en cinco renglones. */
 .footer-grid{
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px 18px;
+  grid-template-columns: 1.5fr repeat(3, 1fr);
+  gap: 34px 30px;
   text-align: left;
-  margin-bottom: 20px;
+  margin-bottom: 34px;
 }
+
 .footer-col{
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  min-width: 0;
 }
+
+/* Aqui vivia `.footer-logo`, la marca en negro recortada del original. El pie
+   ya no la lleva: con la cabecera fija enseñando el logotipo todo el rato,
+   repetirlo abajo no añadia nada. El fichero (img/logo/marca-pie.webp) y su
+   generador (scripts/build-logo-pie.js) se quedan: son 18 KB y volver a
+   ponerlo es una linea. */
+
+.footer-claim{
+  margin: 0;
+  font-size: .88rem;
+  line-height: 1.6;
+  font-weight: 500;
+  color: rgba(17,24,39,.55);
+  max-width: 34ch;
+}
+
 .footer-heading{
-  margin: 0 0 4px;
+  margin: 0 0 6px;
   font-size: .7rem;
-  font-weight: 900;
-  letter-spacing: .1em;
+  font-weight: 800;
+  letter-spacing: .16em;
   text-transform: uppercase;
   color: rgba(17,24,39,.42);
 }
+
 .footer-col a,
 .footer-col span{
-  font-size: .88rem;
-  font-weight: 700;
+  font-size: .9rem;
+  font-weight: 600;
   line-height: 1.5;
 }
+
 .site-footer a{
-  color: inherit;
+  color: #111315;
   text-decoration: none;
   border-bottom: 1px solid transparent;
-  transition: color .14s, border-color .14s;
+  transition: border-color .14s ease;
 }
-.site-footer a:hover{
-  border-bottom-color: rgba(225,6,0,.35);
-  color:#0b0c0f;
-}
+
+.site-footer a:hover{ border-bottom-color: rgba(17,24,39,.35); }
+
+.footer-col > span{ color: rgba(17,24,39,.55); }
+
 .footer-socials{
   display: flex;
-  gap: 14px;
-  font-size: 1.2rem;
+  gap: 10px;
+  margin-top: 12px;
 }
+
+/* Circulos con filo, como los botones de cuenta y carrito de la cabecera, y con
+   el mismo hover: el lavado del 4 % que usa todo boton de contorno del sitio. */
 .footer-socials a{
-  border-bottom: none !important;
-  opacity: .6;
-  transition: opacity .14s, transform .12s;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(17,24,39,.14);
+  border-radius: 999px;
+  font-size: 1rem;
+  color: #111315;
+  border-bottom: 1px solid rgba(17,24,39,.14) !important;
+  transition: background-color .14s ease, border-color .14s ease;
 }
+
 .footer-socials a:hover{
-  opacity: 1;
-  transform: translateY(-1px);
+  background: rgba(15,23,42,.04);
+  border-color: rgba(17,24,39,.28) !important;
 }
+
 .footer-bottom{
-  text-align: center;
-  padding-top: 16px;
-  border-top: 1px solid rgba(0,0,0,.04);
+  text-align: left;
+  padding-top: 22px;
+  border-top: 1px solid rgba(17,24,39,.08);
   font-size: .82rem;
-  color: rgba(17,24,39,.48);
+  color: rgba(17,24,39,.42);
 }
-@media (max-width: 640px){
+
+@media (max-width: 900px){
   .footer-grid{
     grid-template-columns: repeat(2, 1fr);
-    gap: 20px 16px;
-  }}
+    gap: 28px 20px;
+  }
+  .footer-col--marca{ grid-column: 1 / -1; }
+}
+
+@media (max-width: 560px){
+  .footer-grid{ grid-template-columns: 1fr; gap: 26px; }
+  .footer-bottom{ text-align: center; }
+}
 
 .deferred-section{
   content-visibility:auto;
   contain-intrinsic-size: 1px 720px;
 }
 
-/* ===== HERO BANNER ===== */
-.hero-banner{
-  padding: 16px 0 4px;
-  background: #ffffff;
+/* =============================================
+   HERO — las portadas de /img, sin nada encima
+   Son creatividades CERRADAS (logo, titular, lema y specs ya rotulados), así que
+   el hero es la imagen y punto: cualquier texto HTML aquí diría lo mismo dos veces.
+   La altura la da el CSS, no el JS: el viewport lleva data-auto-height="off" y
+   así el hueco está reservado desde el primer pintado (CLS 0). En móvil es el
+   4:5 del arte; en escritorio, una banda del 43 % del ancho por la que desfila
+   ese mismo arte vertical.
+   ============================================= */
+/* A sangre y pegado al header: sin padding, sin contenedor y sin radio —una
+   imagen a sangre con esquinas redondeadas se lee como una tarjeta, no como una
+   portada. El ancho es 100% del <section>, NO 100vw: con la barra de scroll
+   presente, 100vw es más ancho que el documento y aparece arrastre lateral. */
+.hero-v2{
+  padding: 0;
+  background: #fff;
 }
 
 .hero-carousel{
   position: relative;
-  border-radius: 20px;
-  border: 1px solid rgba(17,24,39,.06);
+  width: 100%;
   background: #fff;
-  overflow: hidden;
 }
 
+/* ESCRITORIO — cartelera con asomo: manda la ALTURA de la banda (43 % del ancho,
+   la misma proporción que tenía la franja 2,33:1) y el cartel 4:5 sale de ella.
+   Es altura fija, no aspect-ratio del arte, porque el hueco tiene que estar
+   reservado desde el primer pintado igual que antes: CLS 0. */
 .hero-viewport{
   position: relative;
   width: 100%;
-  aspect-ratio: 24 / 5;
-  /* initHeroCarousel fija la altura con Math.max(130, ancho*ratio). En pantallas
-     estrechas el aspect-ratio da < 130px, así que sin este min-height el hero crecía
-     hasta 130px DESPUÉS de restaurar el scroll, y el scroll anchoring desplazaba la
-     posición (deriva acumulativa al entrar/salir de una ficha). Igualar el reservado
-     al clamp del JS elimina ese salto de maquetación. */
-  min-height: 130px;
+  --banda: clamp(420px, 43vw, 700px);
+  height: var(--banda);
+  overflow: hidden;
   touch-action: pan-y pinch-zoom;
   overscroll-behavior-x: contain;
-  transition: height .4s ease;
 }
 
+/* El raíl se coloca en PÍXELES (lo centra el JS midiendo offsetLeft), no en
+   porcentajes: con el asomo la diapositiva ya no mide el ancho del viewport. */
 .hero-track{
   display: flex;
   width: 100%;
   height: 100%;
-  transform: translateX(0%);
+  transform: translateX(0);
   transition: transform .62s cubic-bezier(.22, 1, .36, 1);
 }
 
@@ -149,66 +226,25 @@
 }
 
 .hero-slide img{
+  display: block;
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  display: block;
+  object-fit: cover;
   background: #fff;
 }
 
-.hero-nav{
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 44px;
-  height: 44px;
-  border-radius: 999px;
-  border: 1px solid rgba(15,23,42,.18);
-  background: rgba(255, 255, 255, 0.505);
-  color: #000000;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 2;
-  box-shadow: 0 8px 22px rgba(15,23,42,.14);
-  transition: background .2s ease, color .2s ease, transform .2s ease, box-shadow .2s ease;
-}
-
-.hero-nav:hover{
-  background: #ffffff;
-  color: #07090c;
-  box-shadow: 0 12px 28px rgba(15,23,42,.22);
-}
-
-.hero-nav:active{
-  transform: translateY(-50%) scale(.97);
-}
-
-.hero-nav-glyph{
-  display: block;
-  font-size: 1.9rem;
-  line-height: 1;
-  font-weight: 800;
-  transform: translateY(-2px);
-}
-
-.hero-nav--prev{ left: 14px; }
-.hero-nav--next{ right: 14px; }
-
+/* Puntos: alineados con el contenido de la página, no con el borde de la pantalla,
+   para que no queden colgando en el vacío de un monitor ancho. */
 .hero-dots{
   position: absolute;
   left: 50%;
-  bottom: 12px;
+  bottom: 14px;
   transform: translateX(-50%);
-  display: inline-flex;
+  width: min(1296px, 94vw);
+  display: flex;
+  justify-content: flex-start;
   align-items: center;
   gap: 8px;
-  padding: 6px 11px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.132);
-  border: 0px solid rgba(15,23,42,.12);
-  box-shadow: 0 6px 18px rgba(15,23,42,.12);
   z-index: 2;
 }
 
@@ -228,94 +264,3903 @@
   background: #0b0c0f;
 }
 
-@media (max-width: 640px){
-  .hero-carousel{ border-radius: 16px; }
-  .hero-nav{
-    display: none;
-  }
-  .hero-nav-glyph{ font-size: 1.7rem; }
-  .hero-nav--prev{ left: 10px; }
-  .hero-nav--next{ right: 10px; }
-  .hero-dots{ bottom: 10px; }}
-
-/* ===== HOME CATEGORY NAV ===== */
-/* =============================================
-   HOME CATEGORY NAV
-   ============================================= */
-.home-category-strip{
-  padding: 10px 0 8px;
+/* MÓVIL: la portada ocupa el ancho entero, sin asomo. Es el mismo arte 4:5
+   (1122x1402) que en escritorio: en un 390 px son 488 px de alto, se ve el
+   producto entero y se ve que la página continúa. */
+@media (max-width: 760px){
+  .hero-viewport{ height: auto; aspect-ratio: 4 / 5; }
+  .hero-flecha{ display: none; }
 }
-.home-category-shell{
+
+/* ESCRITORIO — la cartelera. El cartel mide lo que le deja la banda (4:5 sobre
+   la altura) y las portadas vecinas asoman por los dos lados: eso es lo que
+   cuenta que hay más portadas, mucho mejor que los puntos.
+   El raíl es CONTINUO — initHeroCarousel clona dos portadas a cada lado — así
+   que la primera ya arranca con vecinas y nunca queda un hueco blanco. */
+@media (min-width: 760.02px){
+  /* El sangrado deja la PRIMERA portada ya centrada en el pintado estático, antes
+     de que el JS añada los clones y tome el mando. Sin él, la portada aparecería
+     pegada a la izquierda y se vería deslizarse al centro en cada carga.
+     El 50 % es del viewport (su bloque contenedor), no de la pista. */
+  .hero-track{
+    width: max-content;
+    padding-inline-start: calc(50% - (var(--banda) * .8) / 2 - 8px);
+  }
+
+  .hero-slide{
+    flex: 0 0 auto;
+    width: auto;
+    height: 100%;
+    aspect-ratio: 4 / 5;
+    margin-inline: 8px;
+    opacity: .82;
+    transition: opacity .45s ease;
+  }
+
+  .hero-slide.is-active{ opacity: 1; }
+
+  .hero-flecha{
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .94);
+    color: #0b0c0f;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(11, 12, 15, .16);
+    transition: background .18s ease, box-shadow .18s ease;
+  }
+
+  .hero-flecha:hover{ background: #fff; box-shadow: 0 6px 20px rgba(11, 12, 15, .22); }
+  .hero-flecha--prev{ left: 16px; }
+  .hero-flecha--next{ right: 16px; }
+
+  /* Centrados bajo el cartel activo, no colgando del borde del contenedor. */
+  .hero-dots{
+    width: auto;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 640px){
+  .hero-dots{ bottom: 12px; gap: 6px; }
+}
+
+/* =============================================
+   CABECERAS DE SECCIÓN de la portada
+   Mismo tono que .section-header h2 (Jakarta 800), que es la dirección
+   vigente de la home; Russo One queda para el titular del hero.
+   ============================================= */
+.cat-showcase-head{
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.home-featured .cat-showcase-head{ margin-bottom: 10px; }
+
+.cat-showcase-head h2{
+  margin: 0;
+  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
+  font-weight: 800;
+  font-size: clamp(1.35rem, 1.1rem + .9vw, 1.85rem);
+  letter-spacing: -.015em;
+  line-height: 1.2;
+  text-transform: none;
+  color: #0b0c0f;
+}
+
+.cat-showcase-head h2::after,
+.cat-showcase-head h2::before{ display: none !important; }
+
+/* LA MISMA LETRA QUE «SIN INTERMEDIARIOS»: el trazo dibujado y la inclinacion de
+   7 grados. Lo que cambia respecto al rail del dosier es el CUERPO —estos son
+   rotulos de seccion y aquel es el titular de un bloque—, asi que se toman las
+   dos cosas que hacen la voz y no el tamaño.
+
+   Va aqui y NO en la lista `:is()` de main.css, que es donde el sitio declara
+   este tratamiento: esa lista incluye `#legal h2`, y `:is()` toma la
+   especificidad de su argumento MAS ESPECIFICO, asi que el grupo entero pesa como
+   un id (1,0,1) y le ganaba a `.cat-showcase-head h2` (0,1,1) — el peso 800 se
+   quedaba en el 400 que declara la lista. Los rotulos del dosier se libran porque
+   su regla lleva `!important`. Aqui se toman solo las dos propiedades y no hay
+   pelea que perder.
+
+   La oferta de la semana comparte la clase `.cat-showcase-head` y se queda FUERA
+   a proposito: justo debajo lleva su propio titular inclinado (`.combo-titulo`,
+   Russo One con desgaste) y dos rotulos torcidos seguidos se estorban. */
+.cat-showcase .cat-showcase-head h2,
+.escaparate .cat-showcase-head h2{
+  /* El MISMO cuerpo que el titular del dosier, copiado tal cual de
+     `.legal-dossier-aside h2, .dosier-rail h2`. Si se toca alli, se toca aqui. */
+  font-size: clamp(1.8rem, 1.4rem + 1.4vw, 2.4rem);
+  line-height: 1.05;
+  letter-spacing: -.02em;
+  /* .02em y no el .04 de la lista de main.css: aquel esta calibrado para Russo
+     One, que tiene una sola cara y necesita que se le DIBUJE la negrita. Estos
+     rotulos ya van en Jakarta 800, asi que el trazo solo tiene que rematar el
+     perfil — con .04 engordaban y perdian el dibujo de la letra. */
+  -webkit-text-stroke: .02em currentColor;
+  transform: skewX(-7deg);
+  transform-origin: left bottom;
+}
+
+/* ORDEN DE PINTADO de las secciones blancas de la portada.
+   Cada una lleva `background:#fff` porque el body es gris, y una sección opaca
+   pinta ENCIMA de lo que desborda de la anterior: la sombra de las tarjetas baja
+   ~52 px por debajo de su caja y la siguiente sección se la comía, dejando un
+   corte recto justo en la costura. Con el z-index en orden descendente, cada
+   sección pinta sobre la que va después y la sombra se ve entera.
+   No se arregla con padding: eso cambiaría el ritmo vertical para tapar un
+   problema de orden de pintado. */
+.hero-v2,
+.bienve,
+.cat-showcase,
+.escaparate,
+.home-featured,
+.hero-v2{ z-index: 6; }
+/* La bienvenida proyecta una sombra larga (la del mockup): tiene que pintar por
+   encima de las categorias o el filo se corta en la costura. */
+.bienve{ z-index: 5; }
+.cat-showcase{ z-index: 4; }
+/* El escaparate entra AQUI, entre las categorias y la oferta, y por eso hubo que
+   correr un peldaño toda la escalera: el orden es el del documento y no admite
+   huecos a medias. */
+.escaparate{ z-index: 3; }
+.home-featured{ z-index: 2; }
+/* =============================================
+   BIENVENIDA / CUENTA — la invitación a registrarse, debajo de la portada
+
+   Fondo BLANCO, como «Escoge una categoría». Liso: ni degradados, ni
+   resplandores, ni tramas. Sobre blanco la tarjeta del pedido no puede apoyarse
+   en el contraste del lienzo, así que lo que la define es el FILO de 1 px más su
+   sombra — la misma regla que ya sigue la tarjeta de categoría, escrita en su
+   bloque.
+
+   UNA SOLA COLUMNA, y no es capricho: el dibujo lleva notas con línea a los dos
+   lados, y en dos columnas no hay margen donde ponerlas. El texto va arriba con
+   su ancho de lectura y el dibujo debajo, centrado, con ~260 px libres a cada
+   lado para las notas.
+   ============================================= */
+.bienve{
+  padding: clamp(118px, 11.6vw, 200px) 0 clamp(58px, 5.2vw, 90px);
+  background: #fff;
+}
+
+/* ---- Texto ---- */
+/* 1296, que es TODO el hueco util del contenedor (1340 menos sus 22+22 de
+   relleno). Y hace falta entero: a 82 px, «Bienvenido a SCOOT SHOP» con su margen
+   pide 1288 px de una linea —medido sumando texto + marca + margen, porque el
+   ancho de la caja miente: el contenedor la recorta—. Quedan 8 px de aire, asi que
+   subir el logotipo o separarlo mas parte el titular en dos lineas; el techo
+   medido del margen es 0,36em. En pantallas mas estrechas se parte igual, y ahi
+   esta bien: «SCOOT SHOP» entero en su renglon. */
+.bienve-texto{
+  max-width: 1296px;
+  margin: 0 0 clamp(22px, 2.2vw, 32px);
+}
+
+
+.bienve-head{ margin: 0 0 20px; }
+
+/* El titular sube 22 px y NADA MAS se mueve: lo que sube por arriba se devuelve
+   por abajo (12 + 22 = 34), asi que el subtitulo, las ventajas y el boton se
+   quedan exactamente donde estaban. Cambiar el relleno de la seccion habria subido
+   el bloque entero. */
+.bienve-texto h2{
+  margin: -22px 0 34px;
+  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
+  font-weight: 800;
+  font-size: clamp(2.15rem, 1.5rem + 4.6vw, 5.1rem);
+  letter-spacing: -.025em;
+  line-height: 1.1;
+  color: #0b0c0f;
+}
+
+/* El nombre de la marca no se escribe: se PONE. Son las dos piezas del logotipo
+   (`img/logo/*.svg`), TRAZADAS —no son un mapa de bits—, asi que se ven nitidas a
+   cualquier tamaño y en cualquier pantalla. Salieron de seguir el contorno real
+   del logotipo, no de acertar que tipografia es; el generador y las dos pruebas
+   que lo comprueban (geometria contra el original y comparacion visual ampliada)
+   estan descritos en la memoria del proyecto.
+   Los trazados vienen recortados al dibujo para que el CSS pueda colocarlos por la
+   altura de sus LETRAS sin adivinar cuanto margen traian dentro.
+   Las dos piezas no son iguales y por eso no valen las mismas medidas: en SCOOT
+   el dibujo son solo letras (760x133), mientras que SHOP (650x191) lleva la barra
+   roja debajo, asi que 59 de sus 191 px estan POR DEBAJO de la linea base. Darles
+   la misma altura de imagen dejaria SHOP un 31% mas pequeño.
+   De ahi las dos fracciones, MEDIDAS sobre el recorte y escritas sin redondear
+   (redondeadas a 1,4545 el apoyo se iba 1 px): la imagen de SHOP mide
+   191/132 = 1,4470 veces la altura de sus letras, y sobresale 59/132 = 0,4470 de
+   esa altura por debajo. Con `vertical-align: baseline` una imagen apoya su borde
+   inferior en la linea base; el margen negativo baja a SHOP justo esa barra, de
+   modo que lo que queda apoyado son sus LETRAS, alineadas con las de SCOOT y con
+   el texto.
+   Si algun dia se cambian las piezas, hay que volver a medir esas dos fracciones
+   sobre el recorte, que es de donde salen. */
+
+/* El margen izquierdo separa la marca de «Bienvenido a»: el espacio suelto del
+   HTML se queda corto cuando el logotipo es tan grande, y las dos cosas se leian
+   pegadas. */
+.bienve-marca-nom{ white-space: nowrap; margin-left: .32em; }
+
+.bienve-marca{
+  --marca-h: .86em;           /* alto de las LETRAS, no de la imagen */
+  position: relative;
+  display: inline-block;
+  vertical-align: baseline;
+}
+
+/* La medida la lleva la imagen y el <span> se ajusta a ella: asi el destello,
+   que es un pseudo-elemento del <span>, cae exactamente sobre el dibujo. */
+.bienve-marca img{
+  display: block;
+  width: auto;
+}
+
+.bienve-marca--scoot img{ height: var(--marca-h); }
+
+.bienve-marca--shop img{ height: calc(var(--marca-h) * 191 / 132); }
+
+.bienve-marca--shop{
+  margin-bottom: calc(var(--marca-h) * -59 / 132);
+  margin-left: .04em;
+}
+
+/* La marca se descubre CON EL SCROLL, no de una vez al asomar: el JS mide donde
+   esta y escribe el avance en unas variables, y aqui solo se consume. Por eso va
+   y VIENE — subes la pagina y la marca se vuelve a tapar—, que con una animacion
+   de las de disparar y olvidar no se puede hacer.
+   Dos reglas del sitio, heredadas del reveal de las tarjetas: el estado lo
+   enciende el JS con «marca-scroll», nunca el CSS a secas, para que sin JS la
+   marca se vea entera; y quien pide menos movimiento no lo tiene.
+   Los valores por defecto de las variables son 1 (=puesta del todo): si el JS
+   llegara tarde o fallara, lo que se ve es la marca, no un hueco. */
+/* «Bienvenido a» sube un poco y se funde, con su propio avance (--t1), que va por
+   delante del de la marca. `inline-block` no es decoracion: un elemento en linea
+   no admite `transform`, y sin el desplazamiento esto es un fundido a secas.
+   El valor por defecto de la variable es 1 (=puesto del todo), asi que sin JS o
+   con el movimiento reducido se ve el titular entero. */
+[data-bienve-titulo].marca-scroll .bienve-hola{
+  display: inline-block;
+  opacity: clamp(0, calc(var(--t1, 1) * 2.2), 1);
+  transform: translateY(calc(16px * (1 - var(--t1, 1))));
+}
+
+[data-bienve-titulo].marca-scroll .bienve-marca--scoot{
+  --pp: var(--m1, 1);
+  --pd: var(--d1, 1);
+  --po: var(--o1, 0);
+}
+
+[data-bienve-titulo].marca-scroll .bienve-marca--shop{
+  --pp: var(--m2, 1);
+  --pd: var(--d2, 1);
+  --po: var(--o2, 0);
+}
+
+/* La marca entra COMO EL TEXTO: subiendo y fundiendose, con el mismo recorrido y
+   la misma distancia. Antes se descubria con un corte diagonal (clip-path) que era
+   otra animacion distinta pegada al lado de la del texto, y el titular parecia dos
+   cosas en vez de una. Lo que la marca tiene de mas es el brillo, que va aparte.
+   El escalonado lo dan las variables: primero el texto (--t1), luego SCOOT (--m1) y
+   por ultimo SHOP (--m2). */
+[data-bienve-titulo].marca-scroll .bienve-marca{
+  opacity: clamp(0, calc(var(--pp) * 2.2), 1);
+  transform: translateY(calc(16px * (1 - var(--pp))));
+}
+
+/* EL DESTELLO. Una banda de luz que cruza las letras en el ultimo tramo del
+   recorrido. Va recortada con la forma del propio logotipo (`mask-image` con el
+   mismo SVG), asi que solo brilla la tinta: sin eso seria un rectangulo de
+   degradado sobre el fondo blanco. Se declara dentro de @supports porque un
+   navegador sin mascaras ensenaria justo ese rectangulo.
+   No necesita opacidad propia: el degradado ya es transparente por los lados, asi
+   que entra y sale solo con moverlo. */
+@supports ((-webkit-mask-image: url("/img/logo/scoot-foto.webp")) or (mask-image: url("/img/logo/scoot-foto.webp"))){
+  [data-bienve-titulo].marca-scroll .bienve-marca::after{
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    /* Nace apagado y solo lo enciende el JS mientras la banda cruza. Encendido de
+       serie, el primer fotograma —antes de que cargue la mascara— enseñaba el
+       degradado como un rectangulo blanco: ese era el parpadeo. */
+    opacity: var(--po, 0);
+    background: linear-gradient(100deg,
+      rgba(255,255,255,0) 42%,
+      rgba(255,255,255,.92) 50%,
+      rgba(255,255,255,0) 58%);
+    background-size: 260% 100%;
+    background-repeat: no-repeat;
+    background-position: calc(-80% + 260% * var(--pd)) 0;
+    -webkit-mask-image: var(--marca-svg);
+    mask-image: var(--marca-svg);
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+  }
+
+  .bienve-marca--scoot{ --marca-svg: url("/img/logo/scoot-foto.webp"); }
+  .bienve-marca--shop{ --marca-svg: url("/img/logo/shop-foto.webp"); }
+}
+
+/* El hueco lo pone .bienve-head, NO este parrafo. Con el margen aqui, el margen
+   inferior del ultimo hijo se colapsa FUERA de la caja... salvo cuando la caja
+   lleva un suelo de altura (el que pone auth-ui.js al iniciar sesion), y
+   entonces se queda dentro: la seccion encogia 22 px justo por eso. */
+.bienve-sub{
+  margin: 0;
+  max-width: 52ch;
+  font-size: clamp(1.06rem, 1rem + .35vw, 1.24rem);
+  font-weight: 500;
+  line-height: 1.6;
+  color: rgba(17,24,39,.62);
+}
+
+/* En fila, no apiladas: son tres etiquetas, no tres párrafos. */
+.bienve-ventajas{
+  list-style: none;
+  margin: 0 0 24px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 26px;
+}
+
+.bienve-ventajas li{
+  position: relative;
+  padding-left: 26px;
+  font-size: clamp(1rem, .95rem + .3vw, 1.14rem);
+  font-weight: 600;
+  color: #24272b;
+}
+
+/* El tick, dibujado con dos bordes: un check de verdad y ni un byte de imagen. */
+.bienve-ventajas li::before{
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: .42em;
+  width: 11px;
+  height: 6.5px;
+  border-left: 2px solid var(--primary, #d11c1c);
+  border-bottom: 2px solid var(--primary, #d11c1c);
+  transform: rotate(-45deg);
+}
+
+/* ---- Llamada a la acción ---- */
+.bienve-cta{
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.bienve-btn{
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 22px 9px 9px;
+  border-radius: 999px;
+  background: var(--primary, #d11c1c);
+  color: #fff;
+  text-decoration: none;
+  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
+  font-size: clamp(1rem, .96rem + .25vw, 1.12rem);
+  font-weight: 800;
+  letter-spacing: -.01em;
+  transition: background .16s ease, transform .16s ease;
+}
+
+.bienve-btn:hover{
+  background: #bd1919;
+  transform: translateY(-1px);
+}
+
+.bienve-btn:active{ transform: translateY(0); }
+
+.bienve-btn:focus-visible{
+  outline: 3px solid rgba(209,28,28,.35);
+  outline-offset: 2px;
+}
+
+/* La personita es el MISMO trazo que el icono de cuenta de la cabecera: quien
+   pulsa aquí y quien pulsa arriba van al mismo sitio, y el dibujo lo dice. */
+.bienve-btn-ico{
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.18);
+  display: grid;
+  place-items: center;
+}
+
+.bienve-btn-ico svg{ width: 20px; height: 20px; display: block; }
+
+.bienve-gracias{
+  margin: 0;
+  font-size: clamp(.9rem, .87rem + .16vw, 1rem);
+  font-weight: 600;
+  color: rgba(17,24,39,.5);
+}
+
+/* ---- El dibujo: lo que se ve al abrir un pedido ---- */
+.bienve-demo{ position: relative; }
+
+/* El ancho de la tarjeta manda; lo que sobra a los lados es el sitio de las
+   notas. El relleno de arriba es para la nota del número de pedido. */
+.bienve-lienzo{
+  position: relative;
+  max-width: 660px;
+  margin: 0 auto;
+  padding-top: 52px;
+}
+
+.bienve-pedido{
+  position: relative;
+  border-radius: 22px;
+  border: 1px solid rgba(17,19,21,.07);
+  background: #fff;
+  color: #0f172a;
+  box-shadow: 0 1px 3px rgba(15,23,42,.05), 0 12px 34px rgba(15,23,42,.07);
+}
+
+/* La franja del color del estado, arriba: es lo primero que se ve al abrir un
+   pedido de verdad. Lleva su propio radio en vez de recortarse con
+   `overflow:hidden`, porque las notas tienen que poder salirse de la tarjeta. */
+.bienve-pedido::before{
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 5px;
+  border-radius: 22px 22px 0 0;
+  background: var(--bienve-acc, #2563eb);
+}
+
+.bienve-pedido-cuerpo{ padding: 26px 28px 22px; }
+
+.bienve-pedido-eyebrow{
+  position: relative;
+  margin: 0;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.bienve-pedido-eyebrow b{
+  color: #0f172a;
+  font-variant-numeric: tabular-nums;
+}
+
+/* El nombre del estado, en grande y SIEMPRE en negro: el color lo lleva el
+   icono, no la palabra. Es la regla de /pedido y del panel. */
+.bienve-pedido-estado{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0 20px;
+  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
+  font-size: 1.9rem;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  line-height: 1.1;
+  color: #0f172a;
+}
+
+.bienve-pedido-estado-ico{
+  display: grid;
+  place-items: center;
+  color: var(--bienve-acc, #2563eb);
+}
+
+.bienve-pedido-estado-ico svg{ width: 1.05em; height: 1.05em; display: block; }
+
+.bienve-track{
+  --bienve-acc: #2563eb;
+  --bienve-hito: 38px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.bienve-hito{
+  flex: 0 0 auto;
+  width: var(--bienve-hito);
+  height: var(--bienve-hito);
+  border-radius: 999px;
+  background: #fff;
+  color: #64748b;
+  border: 1px solid #ecebeb;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 2px 6px rgba(229,229,229,.3);
+}
+
+.bienve-hito svg{ width: 58%; height: 58%; display: block; }
+
+.bienve-hito.is-done{
+  color: var(--bienve-acc, #2563eb);
+  border: 2px solid var(--bienve-acc, #2563eb);
+}
+
+.bienve-seg{
+  flex: 1 1 0;
+  min-width: 0;
+  height: 12px;
+  border-radius: 999px;
+  background: #e7ebf0;
+}
+
+.bienve-seg.is-on{ background: var(--bienve-acc, #2563eb); }
+
+/* Ancla de las dos notas del pie: la del seguimiento y la de la actualizacion.
+   NO pueden colgar del chip —es un inline-flex y la nota lo estiraba 277 px, con
+   scroll horizontal en movil— ni del span de "Actualizado", por lo mismo. */
+.bienve-pedido-pie{
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid #eef0f3;
+}
+
+.bienve-pedido-chip{
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 14px;
+  border-radius: 11px;
+  color: var(--bienve-acc, #2563eb);
+  background: #eef3fd;
+}
+
+.bienve-pedido-chip svg{ width: 17px; height: 17px; flex: 0 0 auto; }
+
+.bienve-pedido-chip-txt{
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.bienve-pedido-chip-txt small{
+  font-size: .64rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.bienve-pedido-num{
+  font-weight: 800;
+  font-size: .92rem;
+  color: var(--bienve-acc, #2563eb);
+  font-variant-numeric: tabular-nums;
+}
+
+.bienve-pedido-upd{
+  margin-left: auto;
+  font-size: .82rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.bienve-pedido-upd b{
+  color: #334155;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Los productos ----
+   Aquí NO se copia nada: `.order-summary__product` y compañía son las clases de
+   /pedido y /checkout, y viven en main.css, que la portada ya carga. Lo único
+   propio son los tres retoques que /pedido le hace a su lista. */
+.bienve-productos{
+  position: relative;
+  margin-top: 14px;
+}
+
+.bienve-productos .order-summary__product-list{
+  display: grid;
+  gap: 12px;
+}
+
+.bienve-productos .order-summary__product{
+  cursor: default;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.92) inset,
+    0 12px 28px rgba(15,23,42,.06),
+    0 4px 12px rgba(15,23,42,.03);
+}
+
+.bienve-productos .order-summary__product-title{ flex: 1 1 100%; }
+
+.bienve-productos .order-summary__product-side{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: 8px;
+  align-self: start;
+}
+
+/* ---- Las notas con línea (compartidas) ----
+   Las usan los dos dibujos explicativos del sitio: el del pedido y el de las
+   tarjetas del home. Por eso NO se llaman `.bienve-*`: nacieron ahí, pero el
+   mecanismo no es de nadie.
+   Cada nota vive DENTRO del elemento que señala, así que apunta a su sitio
+   aunque el bloque cambie de alto o de ancho. La línea y el punto son
+   pseudo-elementos: ni una imagen, ni un SVG. */
+.dib-nota{
+  position: absolute;
+  z-index: 2;
+  width: 196px;
+  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
+  font-size: .78rem;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -.005em;
+  text-transform: none;
+  color: rgba(17,24,39,.5);
+}
+
+/* Punto rojo en el extremo que toca la pieza, línea gris hasta el texto. */
+.dib-nota::before,
+.dib-nota::after{
+  content: "";
+  position: absolute;
+  background: rgba(17,24,39,.2);
+}
+
+.dib-nota::before{
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--primary, #d11c1c);
+}
+
+/* Nota de arriba: sube desde el número de pedido. */
+.dib-nota--num{
+  left: 0;
+  bottom: calc(100% + 34px);
+}
+
+.dib-nota--num::after{
+  left: 9px;
+  top: calc(100% + 6px);
+  width: 1px;
+  height: 22px;
+}
+
+.dib-nota--num::before{
+  left: 7px;
+  top: calc(100% + 28px);
+}
+
+/* Notas de la izquierda: el texto alineado a la derecha, pegado a su línea. */
+.dib-nota--envio,
+.dib-nota--seg{
+  right: calc(100% + 76px);
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: right;
+}
+
+.dib-nota--envio::after,
+.dib-nota--seg::after{
+  left: calc(100% + 10px);
+  top: 50%;
+  width: 56px;
+  height: 1px;
+}
+
+.dib-nota--envio::before,
+.dib-nota--seg::before{
+  left: calc(100% + 66px);
+  top: 50%;
+  margin-top: -2px;
+}
+
+/* Notas de la derecha. */
+.dib-nota--upd,
+.dib-nota--prod{
+  left: calc(100% + 76px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.dib-nota--upd::after,
+.dib-nota--prod::after{
+  right: calc(100% + 10px);
+  top: 50%;
+  width: 56px;
+  height: 1px;
+}
+
+.dib-nota--upd::before,
+.dib-nota--prod::before{
+  right: calc(100% + 66px);
+  top: 50%;
+  margin-top: -2px;
+}
+
+.bienve-arte-nota{
+  max-width: 660px;
+  margin: 14px auto 0;
+  font-size: .67rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: rgba(17,24,39,.32);
+}
+
+/* Menos sitio a los lados: notas más estrechas y líneas más cortas. */
+@media (max-width: 1240px){
+  .dib-nota{ width: 150px; font-size: .73rem; }
+  .dib-nota--envio,
+  .dib-nota--seg{ right: calc(100% + 52px); }
+  .dib-nota--envio::after,
+  .dib-nota--seg::after{ width: 32px; }
+  .dib-nota--envio::before,
+  .dib-nota--seg::before{ left: calc(100% + 42px); }
+  .dib-nota--upd,
+  .dib-nota--prod{ left: calc(100% + 52px); }
+  .dib-nota--upd::after,
+  .dib-nota--prod::after{ width: 32px; }
+  .dib-nota--upd::before,
+  .dib-nota--prod::before{ right: calc(100% + 42px); }
+}
+
+/* Sin márgenes donde poner notas: bajan al flujo como una lista, con su punto
+   rojo por viñeta. La información no se pierde; lo que se va es la línea, que
+   sin sitio al lado no apunta a nada. */
+@media (max-width: 1060px){
+  .bienve-lienzo{ padding-top: 0; }
+
+  /* RELATIVE, no static: el punto rojo es un pseudo-elemento absoluto y con la
+     nota sin posicionar se anclaba al bloque de arriba (la barra, el pie), asi
+     que aparecia suelto sobre un hito o sobre el chip.
+     Y con relative vuelven a contar left/right/top de cada modificador — que
+     desplazaban la nota 322 px fuera de la pantalla—, de ahi el `inset: auto` y
+     de ahi que haya que nombrarlos uno a uno: ganan por especificidad. */
+  .dib-nota,
+  .dib-nota--num,
+  .dib-nota--envio,
+  .dib-nota--seg,
+  .dib-nota--upd,
+  .dib-nota--prod{
+    position: relative;
+    inset: auto;
+    display: block;
+    width: auto;
+    transform: none;
+    text-align: left;
+    margin: 8px 0 0;
+    padding-left: 16px;
+    font-size: .76rem;
+  }
+
+  .dib-nota::after{ display: none; }
+
+  /* Hay que apagar el desplazamiento de CADA modificador, no solo el de la clase
+     base: `.dib-nota--envio::before` gana por especificidad y se quedaba con
+     su `left: calc(100% + 42px)`, que con la nota ya en el flujo sacaba el punto
+     fuera de la pantalla (medido: 754 px de documento en una ventana de 390). */
+  .dib-nota::before,
+  .dib-nota--num::before,
+  .dib-nota--envio::before,
+  .dib-nota--seg::before,
+  .dib-nota--upd::before,
+  .dib-nota--prod::before{
+    left: 2px;
+    right: auto;
+    top: .5em;
+    margin-top: 0;
+  }
+
+  /* En el flujo, cada nota se lee debajo de su bloque; dentro de una fila flex
+     (el pie, la barra) hay que sacarla a línea propia. */
+  .bienve-track,
+  .bienve-pedido-pie{ flex-wrap: wrap; }
+
+  .dib-nota--envio,
+  .dib-nota--seg,
+  .dib-nota--upd{ flex: 1 0 100%; }
+
+  .dib-nota--seg,
+  .dib-nota--upd{ margin-top: 6px; }
+}
+
+/* Las mismas medidas reducidas que usa /pedido en móvil. */
+/* En un movil estrecho la marca va en una sola linea por obligacion (no se
+   parte: es el nombre) y a 320 px no cabia: 335 px de documento en 320 de
+   ventana. Se le baja la altura de letra, que es lo unico que la encoge sin
+   tocar el titulo. */
+@media (max-width: 380px){
+  .bienve-marca{ --marca-h: .72em; }
+}
+
+/* La marca va con `nowrap` —el nombre no se parte— asi que en una pantalla
+   estrecha o cabe o desborda. Medido a 390 px: con .86em pedia 415 px de
+   documento en una ventana de 390. Estos dos escalones la dejan entrar con
+   holgura sin tocar el tamaño en escritorio, que es donde luce. */
+@media (max-width: 620px){
+  .bienve-marca{ --marca-h: .74em; }
+  .bienve-marca-nom{ margin-left: .1em; }
+}
+
+@media (max-width: 400px){
+  .bienve-marca{ --marca-h: .68em; }
+}
+
+@media (max-width: 560px){
+  .bienve{ padding: 34px 0 34px; }
+  .bienve-btn{
+    width: 100%;
+    justify-content: center;
+    padding: 9px 16px 9px 9px;
+    font-size: .92rem;
+  }
+  .bienve-btn-txt{ white-space: nowrap; }
+  .bienve-cta{ gap: 12px; }
+  .bienve-gracias{ width: 100%; text-align: center; }
+  .bienve-ventajas{ gap: 9px 18px; }
+  .bienve-pedido-cuerpo{ padding: 22px 18px 18px; }
+  .bienve-pedido-estado{ font-size: 1.55rem; }
+  .bienve-track{ --bienve-hito: 32px; gap: 6px; }
+  .bienve-seg{ height: 10px; }
+  .bienve-pedido-upd{ margin-left: 0; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .bienve-btn{ transition: none; }
+  .bienve-btn:hover{ transform: none; }
+  [data-bienve-titulo].marca-scroll .bienve-marca,
+  [data-bienve-titulo].marca-scroll .bienve-hola{
+    opacity: 1;
+    transform: none;
+  }
+  [data-bienve-titulo].marca-scroll .bienve-marca::after{ display: none; }
+}
+
+/* =============================================
+   FUNCIONAMIENTO — tres tarjetones que explican como funciona la web
+
+   Tarjeton alto, con una MAQUETA arriba y una franja blanca abajo (icono +
+   titulo), que es el formato de la referencia. Lo que NO se copia de ella es el
+   fondo oscuro: la portada ya tiene un bloque negro —la oferta de la semana— y
+   es el unico a proposito; con dos, ninguno destaca. Asi que la seccion vive
+   sobre el gris del sitio y los tarjetones son la parte oscura.
+   ============================================= */
+/* BLANCO, como «Los mas vendidos» y las categorias. De aqui hasta el pie iban
+   sobre el gris del body y el gris no separaba nada: solo apagaba la mitad de
+   abajo de la pagina. Lo que separa un bloque del siguiente es la raya
+   (.home-sep), que es lo que ya hace arriba. */
+.funciona{
+  padding: clamp(52px, 5vw, 84px) 0 clamp(44px, 4.4vw, 72px);
+  background: var(--suelo);
+}
+
+/* La cabecera propia de esta seccion (.funciona-head/-eyebrow/-sub) ya no
+   existe: el rotulo, el titular y la entradilla los pone el rail del dosier, que
+   es el mismo de «Somos SCOOT SHOP» y el de «Informacion legal». */
+
+/* Tres, y solo tres. `minmax(0,1fr)` y no `1fr` a secas: sin el minimo en 0, una
+   maqueta ancha estira su columna y las tres dejan de medir igual. */
+.funciona-parrilla{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(14px, 1.4vw, 22px);
+}
+
+.funciona-card{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border: 0;
+  border-radius: 20px;
+  background: #2b2b2b;
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  color: #fff;
+  /* El mismo gris casi negro de las placas de marca, y por lo mismo: sobre el
+     lienzo claro se define solo, sin necesidad de sombra que lo ensucie. */
+  box-shadow: none;
+  transition: transform .2s cubic-bezier(.4,0,.2,1), box-shadow .2s ease;
+}
+
+.funciona-card:hover{
+  transform: translateY(-3px);
+  box-shadow: 0 16px 34px rgba(15,23,42,.13);
+}
+
+.funciona-card:active{ transform: translateY(-1px); }
+
+.funciona-card:focus-visible{
+  outline: 3px solid rgba(209,28,28,.45);
+  outline-offset: 3px;
+}
+
+/* La maqueta. Proporcion alta, como en la referencia: es lo que hace que el
+   tarjeton se lea como una tarjeta y no como una franja. */
+.funciona-arte{
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 2.9;
+  overflow: hidden;
+  background: radial-gradient(120% 100% at 50% 0%, #3a3a3a 0%, #262626 70%);
+}
+
+/* La franja blanca de abajo: icono, titulo y un signo de mas. */
+.funciona-pie{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #fff;
+  color: #0b0c0f;
+}
+
+.funciona-pie-ico{
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  background: rgba(209,28,28,.08);
+  color: var(--primary, #d11c1c);
+}
+
+.funciona-pie-ico svg{ width: 20px; height: 20px; display: block; }
+
+.funciona-pie-txt{
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.funciona-pie-tit{
+  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
+  font-weight: 800;
+  font-size: .98rem;
+  letter-spacing: -.01em;
+  line-height: 1.25;
+}
+
+.funciona-pie-sub{
+  font-size: .78rem;
+  font-weight: 600;
+  color: rgba(17,24,39,.5);
+  line-height: 1.3;
+}
+
+/* El signo, dibujado con dos barras: gira 45 grados al abrirse y se lee como una
+   equis sin cambiar de elemento ni de icono. */
+.funciona-pie-mas{
+  position: relative;
+  flex: none;
+  margin-left: auto;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: rgba(17,19,21,.06);
+  transition: transform .22s cubic-bezier(.4,0,.2,1), background-color .22s ease;
+}
+
+.funciona-pie-mas::before,
+.funciona-pie-mas::after{
+  content: "";
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 11px;
+  height: 1.8px;
+  border-radius: 2px;
+  background: #0b0c0f;
+  transform: translate(-50%, -50%);
+}
+
+.funciona-pie-mas::after{ transform: translate(-50%, -50%) rotate(90deg); }
+
+.funciona-card[aria-expanded="true"] .funciona-pie-mas{
+  transform: rotate(45deg);
+  background: rgba(209,28,28,.12);
+}
+
+.funciona-card[aria-expanded="true"]{
+  box-shadow: 0 16px 34px rgba(15,23,42,.13);
+}
+
+/* ---- Las maquetas ---- */
+.fx-mini{
+  position: absolute;
+  display: block;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 88%;
+}
+
+/* 1) Un pedido */
+.fx-mini--pedido{
+  border-radius: 12px;
+  background: #fff;
+  color: #0f172a;
+  padding: 0 0 12px;
+  overflow: hidden;
+}
+
+.fx-mini-franja{ display: block; height: 4px; background: #2563eb; }
+.fx-mini-rot{
+  display: block;
+  margin: 11px 12px 0;
+  font-size: .52rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  color: #64748b;
+}
+.fx-mini-estado{
+  display: block;
+  margin: 2px 12px 9px;
+  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
+  font-size: 1.02rem;
+  font-weight: 800;
+  letter-spacing: -.02em;
+}
+.fx-mini-track{
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin: 0 12px 9px;
+}
+.fx-mini-hito{
+  flex: none;
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
+  border: 1.4px solid #e2e6ec;
+}
+.fx-mini-hito.is-on{ border-color: #2563eb; }
+.fx-mini-seg{ flex: 1 1 0; height: 4px; border-radius: 999px; background: #e7ebf0; }
+.fx-mini-seg.is-on{ background: #2563eb; }
+.fx-mini-chip{
+  display: block;
+  margin: 0 12px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: #eef3fd;
+  color: #2563eb;
+  font-size: .56rem;
+  font-weight: 800;
+  letter-spacing: .02em;
+}
+
+/* 2) Una tarjeta de producto */
+.fx-mini--card{
+  border-radius: 12px;
+  background: #fff;
+  color: #0f172a;
+  padding: 10px 11px 11px;
+  text-align: center;
+}
+.fx-mini-foto{
+  display: block;
+  height: 82px;
+  margin-bottom: 8px;
+}
+.fx-mini-foto img{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   display: block;
 }
-.home-category-nav{
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-  width: 100%;
-  background: rgba(241,243,247,.9);
-  border: 1px solid rgba(17,24,39,.06);
-  border-radius: 14px;
-  padding: 5px;
+.fx-mini-nom{
+  display: block;
+  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
+  font-size: .6rem;
+  font-weight: 800;
+  letter-spacing: .01em;
+}
+.fx-mini-precio{
+  display: block;
+  margin-top: 2px;
+  font-size: .72rem;
+  font-weight: 900;
+}
+.fx-mini-colores{
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin: 7px 0 8px;
+}
+.fx-mini-colores i{
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--c);
+  box-shadow: inset 0 0 0 1px rgba(17,19,21,.12);
+}
+.fx-mini-btn{
+  display: block;
+  padding: 6px 8px;
+  border-radius: 999px;
+  background: var(--primary, #d11c1c);
+  color: #fff;
+  font-size: .56rem;
+  font-weight: 800;
+  letter-spacing: .01em;
 }
 
+/* 3) El filtro y la parrilla */
+.fx-mini--web{ width: 86%; }
+.fx-mini-pills{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 9px;
+}
+.fx-mini-pills i{
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.1);
+  color: rgba(255,255,255,.72);
+  font-size: .52rem;
+  font-weight: 800;
+  font-style: normal;
+  letter-spacing: .02em;
+}
+.fx-mini-pills i.is-on{ background: #fff; color: #0b0c0f; }
+.fx-mini-rejilla{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+/* Cada hueco lleva su linea de titulo y su linea de precio: sin ellas la
+   maqueta parecia una parrilla vacia —que es justo lo contrario de lo que
+   ilustra—. */
+.fx-mini-rejilla b{
+  position: relative;
+  display: block;
+  height: 42px;
+  border-radius: 6px;
+  background: rgba(255,255,255,.12);
+  overflow: hidden;
+}
+.fx-mini-rejilla b::before,
+.fx-mini-rejilla b::after{
+  content: "";
+  position: absolute;
+  left: 6px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255,255,255,.3);
+}
+.fx-mini-rejilla b::before{ bottom: 13px; width: 62%; }
+.fx-mini-rejilla b::after{ bottom: 6px; width: 34%; background: rgba(255,255,255,.5); }
+.fx-mini-rejilla b:nth-child(-n+3){ background: rgba(255,255,255,.2); }
+
+/* ---- Los dos ejemplos de tarjeta, anotados ----
+   La tarjeta y el cuadro de opciones son maquetas: el cuadro de verdad va
+   `position:fixed` y no se puede meter dentro de un panel. Los CONTROLES, en
+   cambio, son los de siempre (`.variant-option--swatch/--pill`, de main.css), asi
+   que el circulo agotado se dibuja aqui con la misma regla que en la portada — si
+   algun dia cambia alli, cambia aqui. */
+.fxt-casos{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(28px, 3vw, 48px);
+  margin-top: clamp(22px, 2.4vw, 36px);
+}
+
+.fxt-caso-rot{
+  margin: 0 0 18px;
+  text-align: center;
+  font-size: .82rem;
+  font-weight: 600;
+  color: rgba(17,24,39,.5);
+}
+
+.fxt-caso-rot b{
+  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
+  font-weight: 800;
+  color: #0b0c0f;
+}
+
+/* El ancho de la tarjeta manda; lo que sobra a los lados es el sitio de las
+   notas, igual que en el dibujo del pedido. */
+.fxt-lienzo{
+  position: relative;
+  width: 236px;
+  margin: 0 auto;
+}
+
+.fxt-card{
+  position: relative;
+  border-radius: 18px;
+  border: 1px solid rgba(17,19,21,.07);
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(15,23,42,.05), 0 12px 30px rgba(15,23,42,.06);
+  padding: 14px 14px 16px;
+  text-align: center;
+}
+
+.fxt-dgt{
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 3;
+}
+
+.fxt-dgt .dgt-tag{
+  display: block;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: rgba(17,19,21,.06);
+}
+
+.fxt-dgt .dgt-tag-logo{
+  display: block;
+  width: 38px;
+  height: auto;
+}
+
+.fxt-foto{
+  display: block;
+  height: 132px;
+  margin-bottom: 10px;
+}
+
+.fxt-foto img{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.fxt-nom{
+  position: relative;
+  margin: 0 0 6px;
+  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
+  font-size: .84rem;
+  font-weight: 800;
+  line-height: 1.3;
+  color: #0b0c0f;
+}
+
+.fxt-precio{
+  position: relative;
+  margin: 0 0 12px;
+  font-size: 1rem;
+  font-weight: 900;
+  color: #0b0c0f;
+}
+
+.fxt-precio s{
+  margin-left: 5px;
+  font-size: .82rem;
+  font-weight: 700;
+  color: rgba(17,24,39,.42);
+}
+
+.fxt-btn{
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(17,19,21,.14);
+  background: #fff;
+  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
+  font-size: .74rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: #0b0c0f;
+}
+
+.fxt-btn i{ font-style: normal; }
+
+/* El cuadro de opciones. Mismas medidas que el de verdad: radio 18, filo de
+   1 px al 10 %, relleno 13/14/12 y la punta apuntando a la tarjeta. */
+.fxt-pop{
+  position: relative;
+  margin-top: 12px;
+  padding: 13px 14px 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(17,24,39,.10);
+  background: #fff;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.92) inset,
+    0 18px 40px rgba(15,23,42,.14),
+    0 6px 16px rgba(15,23,42,.06);
+  display: grid;
+  gap: 11px;
+}
+
+/* La punta, girada 45 grados y con solo dos de sus lados pintados: asi el filo
+   del cuadro se prolonga por ella y no se ve una costura. */
+.fxt-pop::before{
+  content: "";
+  position: absolute;
+  left: 26px;
+  top: -6px;
+  width: 11px;
+  height: 11px;
+  background: #fff;
+  border-left: 1px solid rgba(17,24,39,.10);
+  border-top: 1px solid rgba(17,24,39,.10);
+  transform: rotate(45deg);
+}
+
+.fxt-pop-fila{ position: relative; }
+
+.fxt-pop-rot{
+  display: block;
+  margin-bottom: 8px;
+  font-size: .62rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(17,24,39,.45);
+}
+
+/* Los circulos, a su tamaño de burbuja: se cambia la FICHA del token en este
+   contexto, que es lo que hace el cuadro de verdad. */
+.fxt-pop-grid{
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  --variant-size: 34px;
+}
+
+/* Envoltorio para colgar una nota de UN circulo concreto: el circulo lleva
+   `overflow:hidden` —es lo que recorta la diagonal del agotado a su forma— y una
+   nota dentro de el no se ve. */
+.fxt-sw{
+  position: relative;
+  display: inline-flex;
+}
+
+.fxt-pop-guia{
+  position: relative;
+  margin: 0;
+  text-align: center;
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: rgba(17,24,39,.38);
+}
+
+/* Las notas de este dibujo: mismas medidas de linea que las del pedido, pero mas
+   estrechas — hay dos ejemplos uno al lado del otro y el sitio es la mitad. */
+.fxt-casos .dib-nota{ width: 150px; font-size: .73rem; }
+
+.dib-nota--dgt{
+  left: calc(100% + 34px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.dib-nota--precio,
+.dib-nota--libres,
+.dib-nota--swatch{
+  left: calc(100% + 34px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.dib-nota--btn,
+.dib-nota--guia,
+.dib-nota--pill,
+.dib-nota--dos,
+.dib-nota--sindgt{
+  right: calc(100% + 34px);
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: right;
+}
+
+/* La linea y el punto, en el lado que toca. */
+.dib-nota--dgt::after,
+.dib-nota--precio::after,
+.dib-nota--libres::after,
+.dib-nota--swatch::after{
+  right: calc(100% + 10px);
+  top: 50%;
+  width: 14px;
+  height: 1px;
+}
+
+.dib-nota--dgt::before,
+.dib-nota--precio::before,
+.dib-nota--libres::before,
+.dib-nota--swatch::before{
+  right: calc(100% + 24px);
+  top: 50%;
+  margin-top: -2px;
+}
+
+.dib-nota--btn::after,
+.dib-nota--guia::after,
+.dib-nota--pill::after,
+.dib-nota--dos::after,
+.dib-nota--sindgt::after{
+  left: calc(100% + 10px);
+  top: 50%;
+  width: 14px;
+  height: 1px;
+}
+
+.dib-nota--btn::before,
+.dib-nota--guia::before,
+.dib-nota--pill::before,
+.dib-nota--dos::before,
+.dib-nota--sindgt::before{
+  left: calc(100% + 24px);
+  top: 50%;
+  margin-top: -2px;
+}
+
+/* Un solo ejemplo por fila: con dos, cada uno se queda sin margen para sus notas
+   mucho antes de llegar al movil. El corte va en 1240 y no en 1180 porque a 1181
+   —medido— dos notas ya se pisaban: el ultimo tramo en dos columnas no daba de si. */
+@media (max-width: 1240px){
+  .fxt-casos{ grid-template-columns: 1fr; gap: 34px; }
+  .fxt-casos .dib-nota{ width: 190px; font-size: .78rem; }
+}
+
+/* Sin margenes a los lados: las notas bajan al flujo, como en el otro dibujo. */
+@media (max-width: 820px){
+  .fxt-lienzo{ width: 100%; max-width: 300px; }
+
+  .fxt-casos .dib-nota,
+  .fxt-casos .dib-nota--dgt,
+  .fxt-casos .dib-nota--precio,
+  .fxt-casos .dib-nota--libres,
+  .fxt-casos .dib-nota--swatch,
+  .fxt-casos .dib-nota--btn,
+    .fxt-casos .dib-nota--guia,
+  .fxt-casos .dib-nota--pill,
+  .fxt-casos .dib-nota--dos,
+  .fxt-casos .dib-nota--sindgt{
+    position: relative;
+    inset: auto;
+    display: block;
+    width: auto;
+    transform: none;
+    text-align: left;
+    margin: 8px 0 0;
+    padding-left: 16px;
+    font-size: .76rem;
+  }
+
+  .fxt-casos .dib-nota::after{ display: none; }
+
+  .fxt-casos .dib-nota::before,
+  .fxt-casos .dib-nota--dgt::before,
+  .fxt-casos .dib-nota--precio::before,
+  .fxt-casos .dib-nota--libres::before,
+  .fxt-casos .dib-nota--swatch::before,
+  .fxt-casos .dib-nota--btn::before,
+    .fxt-casos .dib-nota--guia::before,
+  .fxt-casos .dib-nota--pill::before,
+  .fxt-casos .dib-nota--dos::before,
+  .fxt-casos .dib-nota--sindgt::before{
+    left: 2px;
+    right: auto;
+    top: .5em;
+    margin-top: 0;
+  }
+
+  /* En el flujo, una nota dentro de una fila de controles necesita linea propia. */
+  .fxt-pop-grid{ flex-wrap: wrap; }
+  .fxt-casos .dib-nota--pill,
+  .fxt-casos .dib-nota--swatch,
+  .fxt-casos .dib-nota--libres{ flex: 1 0 100%; }
+
+  /* El sello y el nombre llevan la suya dentro de un absoluto o de un parrafo
+     centrado: en el flujo se leen mejor alineadas a la izquierda del bloque. */
+  .fxt-dgt{ position: static; display: block; margin-bottom: 8px; }
+  .fxt-dgt .dgt-tag{ display: inline-block; }
+}
+
+/* ---- El recuadro que se abre ----
+   Se usa el elemento «dialog» nativo con showModal(), no un div flotante: viene
+   con el foco atrapado dentro, el cierre con Escape, el fondo inerte y su propia
+   capa por encima de todo. Nada de eso hay que escribirlo.
+   El ancho es generoso (1240) porque dentro va el dibujo del pedido con sus notas
+   a los lados, y con menos sitio se le caen al flujo. */
+/* El dialogo ocupa TODA la pantalla y no se ve: lo que se ve es la caja, centrada
+   dentro. Asi el «fuera» es un clic de verdad dentro del dialogo y se puede saber
+   por coordenadas. Con el dialogo del tamaño de la caja, el golpe en el fondo no
+   llegaba nunca —medido: no cerraba—, porque el area de alrededor la pinta el
+   ::backdrop, que no es un elemento al que se pueda apuntar. */
+.fx-modal{
+  width: 100vw;
+  max-width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink, #111315);
+  overflow: hidden;
+}
+
+/* `display` solo cuando esta abierto: declararlo suelto le quitaria al navegador
+   el `display:none` con el que oculta un dialogo cerrado. */
+.fx-modal[open]{
+  display: grid;
+  place-items: center;
+}
+
+/* Sin desenfoque, por lo mismo que el de los filtros: el velo oscuro ya separa, y
+   desenfocar la pagina entera cuesta la mitad de los fotogramas. */
+.fx-modal::backdrop{
+  background: rgba(11,12,15,.58);
+}
+
+/* La caja lleva el desplazamiento, no el propio dialogo: asi la barra de arriba
+   se queda quieta y el contenido corre por debajo. */
+.fx-modal-caja{
+  display: flex;
+  flex-direction: column;
+  width: min(1240px, calc(100vw - 32px));
+  max-height: min(92vh, 1000px);
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(15,23,42,.24), 0 4px 14px rgba(15,23,42,.08);
+  overflow: hidden;
+}
+
+.fx-modal-barra{
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 15px 16px 14px 22px;
+  border-bottom: 1px solid rgba(17,19,21,.08);
+  background: rgba(255,255,255,.96);
+}
+
+.fx-modal-rot{
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  min-width: 0;
+}
+
+.fx-modal-rot b{
+  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
+  font-size: 1.02rem;
+  font-weight: 800;
+  letter-spacing: -.01em;
+  color: #0b0c0f;
+}
+
+.fx-modal-rot span{
+  font-size: .8rem;
+  font-weight: 600;
+  color: rgba(17,24,39,.5);
+}
+
+.fx-modal-x{
+  flex: none;
+  margin-left: auto;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(17,19,21,.06);
+  color: #0b0c0f;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background-color .16s ease;
+}
+
+.fx-modal-x svg{ width: 18px; height: 18px; display: block; }
+
+.fx-modal-x:hover{ background: rgba(17,19,21,.11); }
+
+.fx-modal-x:focus-visible{
+  outline: 3px solid rgba(209,28,28,.4);
+  outline-offset: 2px;
+}
+
+.fx-modal-cuerpo{
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: clamp(22px, 2.4vw, 34px) clamp(16px, 2.2vw, 34px) clamp(26px, 2.6vw, 40px);
+}
+
+/* AQUI NO VA un `overflow:hidden` sobre <html> para congelar el fondo. Se probo y
+   el navegador, al esconder la barra de desplazamiento con la pagina ya bajada,
+   la manda al principio: medido, se abria el recuadro desde el pie de la portada
+   y al cerrarlo aparecias arriba del todo —justo lo que `scroll-memoria` existe
+   para evitar—. No hace falta: un dialogo modal ya deja el fondo inerte al raton
+   y al teclado, y el `overscroll-behavior: contain` del cuerpo impide que la
+   rueda se contagie a la pagina de debajo. */
+
+@media (max-width: 720px){
+  .fx-modal-caja{
+    width: 100vw;
+    max-width: 100vw;
+    max-height: 100dvh;
+    height: 100dvh;
+    border-radius: 0;
+  }
+  .fx-modal-barra{ padding: 13px 12px 12px 16px; }
+  .fx-modal-cuerpo{ padding: 18px 14px 28px; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .fx-modal-x{ transition: none; }
+}
+
+.funciona-panel-txt{
+  max-width: 62ch;
+  margin: 0 auto clamp(18px, 2vw, 30px);
+  text-align: center;
+}
+
+.funciona-panel-txt h3{
+  margin: 0 0 8px;
+  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
+  font-weight: 800;
+  font-size: clamp(1.12rem, 1rem + .5vw, 1.4rem);
+  letter-spacing: -.015em;
+  color: #0b0c0f;
+}
+
+.funciona-panel-txt p{
+  margin: 0;
+  font-size: .96rem;
+  font-weight: 500;
+  line-height: 1.6;
+  color: rgba(17,24,39,.62);
+}
+
+/* Los pasos de los paneles 2 y 3. */
+.funciona-pasos{
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(14px, 1.6vw, 24px);
+}
+
+.funciona-pasos li{
+  display: flex;
+  gap: 12px;
+  padding: 16px 16px 18px;
+  border: 1px solid rgba(17,24,39,.08);
+  border-radius: 16px;
+  background: #fff;
+}
+
+.funciona-paso-n{
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: rgba(209,28,28,.08);
+  color: var(--primary, #d11c1c);
+  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
+  font-size: .82rem;
+  font-weight: 900;
+}
+
+.funciona-pasos b{
+  display: block;
+  margin-bottom: 4px;
+  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
+  font-size: .95rem;
+  font-weight: 800;
+  letter-spacing: -.005em;
+  color: #0b0c0f;
+}
+
+.funciona-pasos p{
+  margin: 0;
+  font-size: .88rem;
+  font-weight: 500;
+  line-height: 1.55;
+  color: rgba(17,24,39,.6);
+}
+
+/* Dentro del panel, el dibujo del pedido ya no necesita su propio aire arriba:
+   lo pone el panel. */
+.fx-modal .bienve-demo{ margin-top: 4px; }
+
+@media (max-width: 900px){
+  .funciona-parrilla{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* El tercero pasa a ancho completo y baja de alto: apilarlo entero dejaria un
+     hueco muy largo antes del panel. */
+  .funciona-card:last-child{ grid-column: 1 / -1; }
+  .funciona-card:last-child .funciona-arte{ aspect-ratio: 16 / 6; }
+  .funciona-pasos{ grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px){
+  .funciona{ padding: 36px 0 30px; }
+  .funciona-parrilla{ grid-template-columns: 1fr; gap: 12px; }
+  .funciona-card .funciona-arte{ aspect-ratio: 16 / 7; }
+  .funciona-card:last-child .funciona-arte{ aspect-ratio: 16 / 7; }
+  .fx-mini{ width: 76%; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .funciona-card,
+  .funciona-pie-mas{ transition: none; }
+  .funciona-card:hover{ transform: none; }
+}
+
+/* =============================================
+   FILTROS DEL CATALOGO
+   Un solo boton en la barra, y todo lo que se puede afinar dentro de un recuadro.
+   Las tarjetas que no encajan se OCULTAN (.filtro-fuera): no se repinta la
+   parrilla, que tiraria las <img> y las volveria a pedir.
+   ============================================= */
+.filtros-btn{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  padding: 9px 16px;
+  border: 1px solid rgba(17,24,39,.14);
+  border-radius: 999px;
+  background: #fff;
+  color: #0b0c0f;
+  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
+  font-size: .84rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: border-color .16s ease, background .16s ease;
+}
+
+.filtros-btn svg{ width: 16px; height: 16px; }
+
+.filtros-btn:hover{ border-color: rgba(17,24,39,.3); background: #fafafa; }
+
+.filtros-btn:focus-visible{ outline: 3px solid rgba(209,28,28,.35); outline-offset: 2px; }
+
+/* Con filtros puestos el boton se marca, y el numero dice cuantos: sin eso, el
+   visitante que se deja uno puesto no entiende por que faltan modelos. */
+.filtros-btn.tiene-filtros{
+  border-color: var(--primary, #d11c1c);
+  color: var(--primary, #d11c1c);
+}
+
+/* El `hidden` del HTML lo pisa cualquier `display` con mas peso: sin esta linea
+   el contador se enseña con un 0 aunque no haya ningun filtro puesto. */
+.filtros-btn-n[hidden]{ display: none !important; }
+
+.filtros-btn-n{
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--primary, #d11c1c);
+  color: #fff;
+  font-size: .72rem;
+  font-weight: 900;
+}
+
+/* ---- El recuadro ---- */
+.filtros{
+  /* El centrado NO se hereda: el <dialog> se centra con el `margin:auto` que le
+     pone el navegador, y el reset del sitio lo pisa con margin 0. Sin esto sale
+     pegado a la esquina de arriba a la izquierda. */
+  margin: auto;
+  width: min(560px, calc(100vw - 32px));
+  /* EL PIE SE SALIA DE LA PANTALLA. Medido a 1440x700: el <form> de dentro medía
+     868 px dentro de un dialogo de 700, y como el dialogo lleva `overflow:hidden`
+     el boton «Ver N patinetes» quedaba recortado —68 px fuera a 700 de alto, 268
+     a 600—. El cuerpo NO scrolleaba: crecia.
+
+     La causa es que `.filtros-caja` intentaba heredar el `max-height` con
+     `inherit`, y eso no ata a un hijo cuyo contenido es mas alto. Lo que ata es
+     que el DIALOGO sea la columna flexible y el cuerpo pueda encogerse
+     (`min-height:0`, sin el cual un elemento flex nunca baja del alto de su
+     contenido — es el fallo clasico de esta maqueta).
+
+     `dvh` y no `vh`: en el movil `vh` cuenta con la barra del navegador retraida,
+     asi que reserva de menos justo cuando la barra esta desplegada. La linea de
+     `vh` se queda debajo como respaldo para quien no entienda `dvh`. */
+  max-height: min(86vh, 760px);
+  max-height: min(86dvh, 760px);
+  padding: 0;
+  border: 0;
+  background: #fff;
+  color: var(--ink, #111315);
+  box-shadow: 0 30px 80px rgba(15,23,42,.28);
+  overflow: hidden;
+
+  /* HOJA, no ventana: pegada al borde de abajo y redondeada solo por arriba. Un
+     <dialog> con showModal() se centra solo; `top:auto` + `margin-bottom:0` es lo
+     que lo baja. */
+  top: auto;
+  bottom: 0;
+  margin-bottom: 0;
+  border-radius: 22px 22px 0 0;
+
+  /* Entra deslizando. El estado de partida lo pone el JS con `.esta-entrando` y lo
+     quita al fotograma siguiente; sin eso el navegador pinta la hoja ya puesta y
+     no hay nada que animar. La misma clase sirve para la salida. */
+  transform: translateY(var(--hoja-y, 0px));
+  transition: transform .34s cubic-bezier(.22,.72,.26,1);
+  touch-action: none;
+}
+
+/* `[open]` y NO `.filtros` a secas: el navegador esconde un <dialog> cerrado con
+   `display:none`, y declarar `display:flex` sin condicion lo dejaria SIEMPRE
+   visible, panel de filtros incluido, en todas las paginas. */
+.filtros[open]{
+  display: flex;
+  flex-direction: column;
+}
+
+.filtros.esta-entrando,
+.filtros.esta-saliendo{
+  --hoja-y: 100%;
+}
+
+/* Mientras se arrastra manda el dedo, no la transicion: si no, la hoja va por
+   detras del gesto y se siente pegajosa. */
+.filtros.se-arrastra{
+  transition: none;
+}
+
+/* El asa. Es la señal de que la hoja se coge; y la barra entera es zona de
+   arrastre, que es lo que se espera de una de estas. */
+.filtros-asa{
+  width: 42px;
+  height: 4px;
+  margin: 9px auto 0;
+  border-radius: 999px;
+  background: rgba(17,24,39,.16);
+  flex: none;
+}
+
+/* `user-select:none` por lo mismo: sin el, el raton empieza a seleccionar el titulo
+   y el navegador convierte el gesto en un arrastre de texto. */
+.filtros-barra{
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.filtros.se-arrastra .filtros-barra{ cursor: grabbing; }
+
+/* Lo de dentro sí se desplaza con el dedo; y `contain` evita que al llegar al
+   tope el gesto siga y arrastre la portada de debajo. */
+.filtros-cuerpo{
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .filtros{ transition: none; }
+}
+
+/* EN ESCRITORIO, un cajon por la derecha — el mismo gesto que el carrito, con sus
+   mismas medidas (460 px de ancho, alto completo) y su misma curva de entrada. La
+   hoja de abajo es un patron de movil: en una pantalla ancha deja dos tercios de
+   pagina muertos y obliga a mirar al suelo.
+   El arrastre se apaga aqui: con raton no se arrastran cajones, y el asa sobra. */
+@media (min-width: 760px){
+  .filtros{
+    /* `fixed` y no lo que trae de serie un dialogo: colocado como absoluto, el
+       borde derecho se cuenta contra el bloque inicial, que INCLUYE la barra de
+       scroll, y el cajon se quedaba a 15 px del canto. */
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: auto;
+    left: auto;
+    margin: 0 0 0 auto;
+    width: min(460px, 100vw);
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    border-radius: 0;
+    border-left: 1px solid rgba(15,23,42,.1);
+    box-shadow: -18px 0 40px rgba(15,23,42,.12);
+    transform: translateX(var(--cajon-x, 0));
+    transition: transform .28s cubic-bezier(.32,.72,0,1);
+  }
+
+  .filtros.esta-entrando,
+  .filtros.esta-saliendo{
+    --cajon-x: 102%;
+    --hoja-y: 0px;
+  }
+
+  .filtros-asa{ display: none; }
+  .filtros-barra{ cursor: default; }
+}
+
+/* SIN desenfoque. Un `backdrop-filter` obliga a rehacer el borroso de TODO lo que
+   hay detras en cada fotograma, y detras hay 82 tarjetas con sus fotos: medido al
+   arrastrar la hoja, 28,6 fps con el y 61,2 sin el —el peor salto pasaba de 17 a
+   50 ms—. Por dos pixeles de borroso que casi no se ven. El velo oscuro solo ya
+   separa la hoja de la pagina. */
+.filtros::backdrop{
+  background: rgba(12,14,18,.55);
+  transition: opacity .34s ease;
+}
+
+.filtros.esta-entrando::backdrop,
+.filtros.esta-saliendo::backdrop{ opacity: 0; }
+
+.filtros-caja{
+  display: flex;
+  flex-direction: column;
+  /* `max-height:inherit` no ataba nada: hereda el valor, no el limite. Como
+     hijo flexible del dialogo, lo que la ata es no poder crecer mas que el. */
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.filtros-barra{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 20px 14px;
+  position: relative;
+}
+
+/* MISMOS NUMEROS que la cabecera del carrito (.ss-cart-head en main.css): son
+   los dos cajones del sitio y tienen que presentarse igual. Lo que cambia es lo
+   que dicen —el carrito, cuantas cosas llevas; los filtros, sobre que estas
+   filtrando—, no como lo dicen. */
+.filtros-rot{ margin: 0; display: grid; gap: 3px; }
+
+.filtros-rot b{
+  font-family: var(--sport, 'Russo One', sans-serif);
+  /* EN LINEA no admite `transform`: sin esto la inclinacion del bloque de
+     rotulos de main.css no se aplicaria. */
+  display: inline-block;
+  font-size: 1.12rem;
+  font-weight: 400;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  color: #111315;
+}
+
+/* Debajo, sobre QUE se esta filtrando: la marca elegida si la hay y, si no, la
+   categoria. Lo escribe el JS en cada apertura y en cada cambio de marca. */
+.filtros-rot span{
+  font-size: .92em;
+  font-weight: 700;
+  color: #475569;
+}
+
+/* El mismo circulo que .ss-cart-close, que a su vez es el de los botones del
+   header: 44 px, blanco, con filo y hover gris suave. Era de 38 px con relleno
+   gris y sin filo. */
+.filtros-x{
+  flex: none;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line, rgba(15,23,42,.12));
+  border-radius: 999px;
+  background: #fff;
+  color: #0f172a;
+  cursor: pointer;
+  transition: background .16s ease;
+}
+
+/* Mismo cuerpo que .ss-cart-close i y .mm-close: 16 px. */
+.filtros-x i{ font-size: 16px; line-height: 1; }
+.filtros-x:hover{ background: rgba(15,23,42,.04); }
+
+.filtros-cuerpo{
+  /* `min-height:0` es lo que le permite ENCOGERSE y, por tanto, scrollear.
+     Sin el, un elemento flex nunca baja del alto de su contenido. */
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 6px 20px 8px;
+  display: grid;
+  gap: 4px;
+}
+
+.filtros-grupo{
+  border: 0;
+  margin: 0;
+  padding: 18px 0;
+  position: relative;
+}
+
+/* Cada grupo lleva SU raya arriba, no abajo: asi el ultimo no necesita excepcion
+   y el primero —que va pegado a la barra, que ya trae la suya— la quita sin
+   dejar dos juntas.
+   Va de FONDO y no de pseudo-elemento: en un <fieldset> el <legend> sale del
+   flujo y un `::before` con `top:0` acaba debajo del titulo. */
+.filtros-grupo:first-of-type{ padding-top: 4px; }
+
+.filtros-grupo legend{
+  padding: 0;
+  margin-bottom: 10px;
+  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
+  font-size: .92rem;
+  font-weight: 800;
+}
+
+/* El eco del deslizador: donde se ha dejado, en su unidad. */
+.filtros-grupo legend i{
+  font-style: normal;
+  font-weight: 600;
+  font-size: .82rem;
+  color: rgba(17,24,39,.5);
+  margin-left: 8px;
+}
+
+.filtros-ops{ display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* El radio de verdad sigue ahi (se navega con el teclado y se lee con lector);
+   lo que se ve es la pildora. */
+.filtros-op input{ position: absolute; opacity: 0; pointer-events: none; }
+
+/* El recuento dentro de la pildora: en monoespaciada y mas tenue, como el de las
+   pildoras de categoria. Es un dato de apoyo, no parte del nombre. */
+.filtros-op i{
+  font-style: normal;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .76rem;
+  font-weight: 600;
+  opacity: .55;
+  margin-left: 5px;
+}
+
+.filtros-op span{
+  display: inline-block;
+  padding: 9px 14px;
+  border: 1px solid rgba(17,24,39,.14);
+  border-radius: 999px;
+  font-size: .84rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color .16s ease, background .16s ease, color .16s ease;
+}
+
+.filtros-op:hover span{ border-color: rgba(17,24,39,.3); }
+
+/* Lo elegido se marca con un MARCO, no con un relleno: sobre un panel blanco la
+   pildora rellena pesaba mas que el propio filtro. El padding baja 1 px por lado
+   para compensar el borde de 2, o la pildora daria un salto al elegirla. */
+.filtros-op input:checked + span{
+  background: #fff;
+  border: 2px solid #111315;
+  color: #111315;
+  padding: 8px 13px;
+}
+
+.filtros-op input:focus-visible + span{ outline: 3px solid rgba(209,28,28,.35); outline-offset: 2px; }
+
+.filtros-rango{ display: flex; gap: 12px; flex-wrap: wrap; }
+
+.filtros-rango label{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: .84rem;
+  font-weight: 700;
+  color: rgba(17,24,39,.62);
+}
+
+.filtros-rango input{
+  width: 110px;
+  padding: 9px 12px;
+  border: 1px solid rgba(17,24,39,.16);
+  border-radius: 12px;
+  font: inherit;
+  font-weight: 700;
+  color: #0b0c0f;
+}
+
+.filtros-rango input:focus-visible{ outline: 3px solid rgba(209,28,28,.3); outline-offset: 1px; border-color: transparent; }
+
+.filtros-grupo input[type="range"]{
+  width: 100%;
+  accent-color: #111315;
+  cursor: pointer;
+}
+
+.filtros-topes{
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: .74rem;
+  font-weight: 700;
+  color: rgba(17,24,39,.42);
+}
+
+.filtros-pie{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  /* No se encoge nunca: es la salida del panel. Y respeta la franja del
+     sistema (la barra de gestos del movil), que es lo que tapaba el boton. */
+  flex: 0 0 auto;
+  padding: 14px 20px calc(18px + env(safe-area-inset-bottom, 0px));
+  position: relative;
+  background: #fff;
+}
+
+.filtros-limpiar{
+  border: 0;
+  background: none;
+  padding: 8px 4px;
+  font: inherit;
+  font-size: .84rem;
+  font-weight: 700;
+  color: rgba(17,24,39,.55);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.filtros-limpiar:hover{ color: var(--primary, #d11c1c); }
+
+.filtros-ver{
+  margin-left: auto;
+  padding: 12px 22px;
+  border: 0;
+  border-radius: 999px;
+  background: #111315;
+  color: #fff;
+  font: inherit;
+  font-size: .86rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background .16s ease;
+}
+
+.filtros-ver:hover{ background: #2b2f36; }
+.filtros-ver:focus-visible{ outline: 3px solid rgba(209,28,28,.35); outline-offset: 2px; }
+
+/* ---- Lo que el filtro esconde ----
+   `display:none` y no `visibility`: tiene que dejar de ocupar sitio. Las <img> que
+   ya se bajaron siguen en el DOM, asi que volver a enseñarlas no cuesta una
+   peticion — que es justo el motivo de ocultar en vez de repintar. */
+.card.filtro-fuera{ display: none !important; }
+.filtro-vacio{ display: none !important; }
+
+.filtros-vacio{
+  margin: 28px auto;
+  max-width: 42ch;
+  text-align: center;
+  font-size: .95rem;
+  font-weight: 600;
+  color: rgba(17,24,39,.55);
+}
+
+@media (max-width: 560px){
+  .filtros{
+    width: 100vw;
+    max-width: 100vw;
+    max-height: 92vh;
+    border-radius: 20px 20px 0 0;
+    margin: auto auto 0;
+  }
+  .filtros-cuerpo{ padding: 4px 16px 6px; }
+  .filtros-barra{ padding: 16px 16px 12px; }
+  .filtros-pie{ padding: 12px 16px 16px; }
+  /* SOLO EL ICONO. A 360 px la palabra no cabe al lado de tres pildoras, y el
+     boton acababa empujando la fila. El <span> se va, no se encoge: media palabra
+     recortada se lee peor que ninguna. El aria-label del boton sigue diciendo
+     «Abrir filtros» para quien no ve el icono. */
+  .filtros-btn{
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 999px;
+  }
+  .filtros-btn-txt{ display: none; }
+
+  /* El carril de pildoras se DESVANECE antes del boton. Sin esto la ultima
+     pildora pasaba por detras del circulo y se leia media palabra cortada, que
+     parece un fallo de pintado. Es el mismo recurso que el riel de marcas. */
+  .home-catalog-barra > .home-category-nav{
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 26px), transparent 100%);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 26px), transparent 100%);
+    padding-right: 6px;
+  }
+  .filtros-btn svg{ width: 18px; height: 18px; }
+  /* Con filtros puestos, el numero se pone encima del icono: al lado no cabe. */
+  .filtros-btn-n{
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    min-width: 18px;
+    height: 18px;
+    font-size: .66rem;
+    border: 2px solid #fff;
+  }
+  .filtros-btn{ position: relative; }
+  .filtros-rango input{ width: 96px; }
+}
+
+/* =============================================
+   CATEGORÍAS — 4 tarjetas con foto real, todas del mismo tamaño.
+   ============================================= */
+/* AIRE: la sección iba con 56/44 y quedaba pinzada entre la portada a sangre y el
+   bloque negro de la oferta. Con 96/88 respira y se lee como una parada propia.
+   El padding de abajo NO es decorativo: sin él la sección acaba exactamente en
+   el borde de las tarjetas y el bloque negro que viene después arranca pegado a
+   ellas, comiéndose su esquina y su sombra.
+
+   FONDO BLANCO por decisión del usuario. Sobre blanco la tarjeta no se puede
+   apoyar en el contraste del lienzo, así que lo que la define es el FILO de 1 px
+   —por eso es algo más marcado que si hubiera fondo gris— más una sombra corta.
+   Lo que NO se puede hacer nunca es teñir la caja de la foto para dar contraste:
+   las fotos del catálogo son recortes SOBRE BLANCO (comprobado, ninguna lleva
+   alfa) y dibujarían su propio rectángulo alrededor del producto. */
+/* SEPARADOR. Una raya de un pixel PLANA, con el ANCHO DEL CONTENIDO: alinea con
+   el titular y con las tarjetas en vez de cortar la pagina de lado a lado.
+
+   Se desvanecia por los extremos y ya no: con el degradado los dos cabos salian
+   mas claros que el centro, asi que la raya no acababa donde acaba la tarjeta de
+   al lado —acababa antes, en un punto que se movia con el ancho de pantalla— y el
+   canto de la parrilla se leia desalineado. Plana empieza y acaba exactamente
+   donde empieza y acaba el contenido.
+   Ojo: el riel de marcas de las paginas de categoria conserva su degradado
+   (`[data-pagina="categoria"] .home-marcas > .container::before`); son dos rayas
+   distintas en dos paginas distintas. El `calc(100% - 44px)` es el relleno del contenedor
+   (22 + 22), asi que respeta el margen en cualquier ancho de pantalla.
+
+   El fondo blanco NO es decoracion: el separador tiene alto propio y, sin el,
+   por sus lados asomaba el gris del body entre dos secciones que son blancas
+   —medido: rgb(243,244,246)— y parecia una raya cruzando la pagina entera. */
+/* El fondo era blanco para que por los lados de la raya no asomara el gris del
+   body. Ahora toda la zona es del mismo color, así que el fondo es ese mismo:
+   con el blanco de antes, la raya salía sobre una franja más clara. */
+.home-sep{
+  background: var(--suelo);
+  display: flex;
+  justify-content: center;
+}
+
+.home-sep::after{
+  content: "";
+  width: calc(100% - 44px);
+  max-width: 1296px;
+  height: 1px;
+  background: rgba(17,24,39,.13);
+}
+
+/* SIN FONDO, como el escaparate: el gris del body. Las dos secciones son la misma
+   cosa —lo que se vende— y tenerlas en suelos distintos las partia en dos. La
+   frontera de arriba, contra la bienvenida, la marca el propio cambio de color. */
+.cat-showcase{
+  padding: 96px 0 88px;
+  background: var(--suelo);
+}
+
+/* =============================================
+   ESCAPARATE — «Los mas vendidos», ocho tarjetas
+
+   Es el resto de lo que era «Todo el catalogo»: la portada pintaba las 82
+   tarjetas de las tres categorias y ahora enseña una muestra y abre la puerta.
+   Comparte cabecera con las categorias (.cat-showcase-head) a proposito: son dos
+   bloques hermanos y leerse igual es lo que los hace hermanos.
+   ============================================= */
+/* SIN FONDO: aqui se ve el gris del body, igual que la parrilla de /patinetes.
+   La regla del sitio es «gris donde hay parrilla, blanco donde hay texto», y
+   estas ocho son EXACTAMENTE las mismas tarjetas que alli — misma clase, misma
+   sombra, mismas fotos.
+
+   Y el gris no es decoracion: la tarjeta es blanca, lleva `border: 0` y su unico
+   contorno es una sombra al 7 %; las fotos de producto son recortes sobre blanco
+   y ninguna trae transparencia. Sobre blanco son tres blancos apilados y la
+   tarjeta deja de ser un objeto. */
+.escaparate{
+  padding: clamp(56px, 5vw, 88px) 0 88px;
+  background: var(--suelo);
+}
+
+/* Aqui habia una raya entre las categorias y el escaparate. Ya no hace falta:
+   arriba es blanco y aqui empieza el gris, y un cambio de suelo separa mas que
+   cualquier filo de 1 px. Dos separadores en la misma costura son uno de mas. */
+
+/* La cabecera es solo texto: aqui no hay segundo elemento a la derecha, asi que
+   `align-items` y `flex-wrap` —que estaban por el enlace «Ver todos»— sobran.
+   La salida a /patinetes esta abajo, en `.escaparate-cta`, a un dedo de la
+   ultima tarjeta. */
+.escaparate .cat-showcase-head{
+  margin-bottom: 28px;
+}
+
+.escaparate-pie{
+  margin: 32px 0 0;
+  display: flex;
+  justify-content: center;
+}
+
+/* El boton de salida. Contorno y no relleno: el rojo de esta web esta reservado
+   para «comprar» y para la oferta, y este enlace no vende nada — lleva a mirar.
+   El mismo trato que los botones secundarios de la ficha. */
+.escaparate-cta{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0 30px;
+  border: 2px solid #111315;
+  border-radius: 999px;
+  background: #fff;
+  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
+  font-weight: 800;
+  font-size: 1rem;
+  letter-spacing: -.01em;
+  color: #111315;
+  text-decoration: none;
+  transition: background-color .16s ease;
+}
+
+/* El hover NO invierte. Rellenarlo de negro entero era la unica mancha solida de
+   ese tono en toda la home, y este sitio no usa negros plenos como fondo: la
+   convencion de un boton de contorno sobre blanco es el gris al 4 %, y ya la
+   siguen los botones de cuenta y carrito de la cabecera, la hamburguesa y el
+   aspa del cajon. El texto y el borde se quedan donde estaban — lo que se ve en
+   reposo no cambia al pasar por encima, solo se apoya. */
+.escaparate-cta:hover{
+  background: rgba(15,23,42,.04);
+}
+
+@media (max-width: 560px){
+  .escaparate{ padding: 44px 0 56px; }
+  .escaparate-pie{ margin-top: 26px; }
+  .escaparate-cta{ width: 100%; }
+}
+
+.cat-showcase .cat-showcase-head{
+  align-items: flex-end;
+  margin-bottom: 28px;
+}
+
+.cat-showcase-sub{
+  margin: 7px 0 0;
+  font-size: .95rem;
+  line-height: 1.4;
+  color: rgba(17,24,39,.55);
+}
+
+/* SIN número fijo de columnas: caben las que quepan. No es un capricho de
+   maquetación — el catálogo ya declara «Repuestos» y «Patines eléctricos», y con
+   un `repeat(2, …)` la quinta categoría se quedaba sola ocupando media fila.
+   Con `auto-fit`: 4 categorías → 4 en fila, 5 → 5, 6 → se parte cuando ya no
+   cabe. Añadir una categoría no obliga a volver aquí. */
+.cat-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+}
+
+/* SIN BORDE y con un HALO, no con una sombra proyectada: desplazamiento 0 en las
+   dos direcciones, así que rodea la tarjeta por igual en los cuatro lados.
+   El color es negro puro a muy baja opacidad —sobre blanco da gris neutro—; el
+   rgba(15,23,42) que había antes es azul pizarra y teñía el halo. */
+.cat-card{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #fff;
+  text-decoration: none;
+  box-shadow: 0 0 14px rgba(0,0,0,.07);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+@media (hover: hover){
+  .cat-card:hover{
+    transform: translateY(-4px);
+    box-shadow: 0 0 24px rgba(0,0,0,.11);
+  }
+}
+
+/* Blanco OBLIGATORIO: la foto trae su propio fondo blanco, así que cualquier tinte
+   aquí se vería como un rectángulo alrededor del producto. El aire se da con
+   padding, que sí es invisible. */
+.cat-card-photo{
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  padding: 14px 16px 6px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.cat-card-photo img{
+  display: block;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+}
+
+/* El pie de la tarjeta es una rejilla de dos columnas: a la izquierda el nombre y
+   el recuento, a la derecha una pastilla con la flecha que dice que esto se pulsa.
+   La línea de arriba separa la zona de foto de la de texto — con las dos en blanco,
+   sin ella el pie flotaba. */
+/* ---- Tarjeta de categoria CON FOTO DE AMBIENTE ----
+   La foto ocupa la tarjeta entera y el rotulo se lee encima. El velo gris no es
+   estetica: sobre una foto de noche, con luces y reflejos, el texto blanco se
+   pierde en las zonas claras. Va de menos a mas hacia abajo, que es donde esta el
+   texto. */
+/* Altura PROPIA. La foto va en absoluto y por tanto no empuja: sin esto la tarjeta
+   se quedaba con la altura del texto —medido: 72 px en movil— y la foto de ambiente
+   no se veia. En escritorio la rejilla ya la iguala con sus hermanas, asi que el
+   suelo solo hace falta donde va sola. */
+/* 360 en escritorio: es la altura que tenian cuando la foto de producto las
+   estiraba. Ahora las tres van con foto de ambiente —que va en absoluto y no
+   empuja—, asi que si no se dice, la tarjeta se queda en la altura del texto. */
+.cat-card--foto{ min-height: 360px; }
+
+@media (max-width: 900px){
+  .cat-card--foto{ min-height: 200px; }
+}
+
+.cat-card--foto .cat-card-photo{
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  background: #14161a;
+}
+
+.cat-card--foto .cat-card-photo img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cat-card--foto .cat-card-photo::after{
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+    rgba(20,22,26,.42) 0%,
+    rgba(20,22,26,.52) 45%,
+    rgba(16,18,21,.80) 100%);
+}
+
+/* El pie va ENCIMA de la foto: sin fondo propio, sin la raya de separacion y con
+   la tinta invertida. */
+.cat-card--foto .cat-card-body{
+  position: relative;
+  z-index: 1;
+  border-top: 0;
+  padding: 16px 18px 18px;
+}
+
+.cat-card--foto .cat-card-name{
+  color: #fff;
+  text-shadow: 0 1px 12px rgba(0,0,0,.45);
+}
+
+.cat-card--foto .cat-card-count{
+  color: rgba(255,255,255,.78);
+  text-shadow: 0 1px 10px rgba(0,0,0,.45);
+}
+
+/* La pastilla de la flecha, clara sobre la foto. */
+.cat-card--foto .cat-card-body::after{
+  background-color: rgba(255,255,255,.92);
+}
+
+.cat-card-body{
+  margin-top: auto;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 2px;
+  padding: 13px 16px 15px;
+  border-top: 1px solid rgba(15,23,42,.06);
+}
+
+.cat-card-name,
+.cat-card-count{ grid-column: 1; }
+
+/* Flecha: dos imágenes de fondo en vez de una máscara, porque así el color cambia
+   en el hover sin depender de mask-image (y de sus prefijos en Safari). */
+.cat-card-body::after{
+  content: '';
+  grid-column: 2;
+  grid-row: 1 / 3;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: rgba(17,24,39,.05) url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230b0c0f' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12h13M12 5l7 7-7 7'/></svg>") center / 14px 14px no-repeat;
+  transition: background-color .2s ease, transform .2s ease;
+}
+
+@media (hover: hover){
+  .cat-card:hover .cat-card-body::after{
+    background: var(--primary, #d11c1c) url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12h13M12 5l7 7-7 7'/></svg>") center / 14px 14px no-repeat;
+    transform: translateX(2px);
+  }
+}
+
+.cat-card-name{
+  font-family: var(--sport, 'Russo One', sans-serif);
+  /* TRAZO FINO, solo aqui. El bloque de rotulos de main.css dibuja el grosor con
+     `-webkit-text-stroke:.04em` porque Russo One tiene una sola cara y la negrita se
+     la inventaria el sistema. Ese calibrado es para titulares grandes; sobre estas
+     tres tarjetas —texto blanco sobre una foto oscura— engordaba las letras. Va
+     Lleva `!important` y NO es pereza: esa lista de main.css es un `:is(...)` que
+     incluye `#home-featured-title`, y un `:is()` toma la especificidad de su
+     argumento MAS FUERTE. O sea que todo el bloque pesa como un ID y ninguna clase
+     lo gana, este donde este en el orden de hojas. Es el mismo caso que ya estaba
+     resuelto asi en `.legal-dossier-aside h2` mas abajo. */
+  -webkit-text-stroke: .01em currentColor !important;
+  font-size: 1.02rem;
+  line-height: 1.15;
+  letter-spacing: .01em;
+  text-transform: uppercase;
+  color: #0b0c0f;
+}
+
+.cat-card-count{
+  font-size: .8rem;
+  font-weight: 600;
+  color: rgba(17,24,39,.5);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Todas miden igual en todos los tamaños: en móvil, a ancho completo.
+   La foto va en 4/3 —y no en cuadrado— para que la tarjeta no crezca a lo alto
+   cuando en la fila caben pocas. Como la imagen se pinta en `contain`, la altura
+   de esa caja es también el tamaño al que se ve el vehículo. */
+@media (min-width: 900.02px){
+  .cat-card-photo img{ aspect-ratio: 4 / 3; }
+  .cat-card-body{ padding: 2px 18px 14px; }
+  /* El rotulo manda en la tarjeta: es lo unico que se lee sobre la foto. */
+  .cat-card-name{ font-size: 1.32rem; letter-spacing: .01em; }
+  .cat-card-count{ font-size: .86rem; }
+}
+
+@media (max-width: 640px){
+  /* Menos aire que en escritorio, pero el mismo respiro relativo: la sección
+     seguía pegada al bloque negro. */
+  .cat-showcase{ padding: 56px 0 52px; }
+
+  /* En una columna, el subtítulo partía en dos líneas y chocaba con el enlace.
+     Aquí el encabezado se apila. */
+  .cat-showcase .cat-showcase-head{
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .cat-showcase-sub{ font-size: .88rem; }
+
+  /* DOS columnas, no una. Con cinco categorías apiladas a ancho completo la
+     sección medía 1654 px: cinco pancartas casi iguales que hay que recorrer
+     para elegir. En dos columnas se ven de un vistazo. */
+  .cat-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .cat-card-photo{ padding: 10px 12px 2px; }
+  .cat-card-photo img{ aspect-ratio: 4 / 3; }
+
+  /* LA GRANDE ES LA PRIMERA — patinetes, que es casi la mitad del catálogo. La
+     fila entera para ella y el resto en dos columnas.
+     La segunda regla cierra la rejilla sea cual sea el número de categorías: con
+     la primera ocupando su fila, las que quedan son N-1; si esa cuenta es impar
+     (o sea, N par), la última también se pone a lo ancho y no queda ningún hueco.
+     Hoy N=5 → grande + 4 en dos filas; con 6 → grande + 4 + una ancha. */
+  /* Las tres, del MISMO tamaño: una sola columna y la misma altura. Antes la
+     primera iba a lo ancho y las otras dos a medias, asi que ninguna se parecia a
+     las demas. La altura la fija .cat-card, no el contenido, porque en las de foto
+     la imagen va en absoluto y no empuja. */
+  .cat-card{ grid-column: 1 / -1; height: 200px; min-height: 0; }
+  /* Altura FIJA, no minima: en las tarjetas que aun llevan foto de producto esa
+     foto tiene tamaño propio y empujaba la caja —medido: 308 px frente a los 200
+     de las de ambiente—. Con el alto fijo, la foto se contiene dentro. */
+  .cat-card .cat-card-photo{ min-height: 0; overflow: hidden; }
+  .cat-card .cat-card-photo img{
+    aspect-ratio: auto;
+    max-height: 100%;
+    width: auto;
+    object-fit: contain;
+  }
+  /* Las de ambiente mandan sobre lo anterior: su foto llena la tarjeta. */
+  .cat-card--foto .cat-card-photo img{ width: 100%; height: 100%; max-height: none; object-fit: cover; }
+
+  .cat-card-body{ padding: 10px 13px 12px; column-gap: 8px; }
+  .cat-card-name{ font-size: 1.14rem; letter-spacing: .01em; }
+  .cat-card-count{ font-size: .8rem; }
+  .cat-card-body::after{ width: 28px; height: 28px; background-size: 12px 12px; }
+}
+
+/* =============================================
+   OFERTA DE LA SEMANA — el bloque negro de la portada
+   A sangre: el fondo lo pinta el <section>, que ya es de ancho completo; el
+   contenido sigue dentro de .container.
+   Desde el 29 ago 2026 ya no es la única sección oscura: la bienvenida de debajo
+   de la portada también lo es. Por eso NO comparten tratamiento — esta es negro
+   plano (#1c1c1c) con grafiti, y aquella un grafito azulado con resplandor rojo
+   y malla de puntos. Una tercera en el mismo tono y no destacaría ninguna.
+   ============================================= */
+.home-featured{
+  padding: 38px 0 34px;
+  background: #1c1c1c;
+  color: #fff;
+  /* Recorta el grafiti a la caja del bloque. */
+  overflow: hidden;
+}
+
+.home-featured[hidden]{ display: none; }
+
+/* El encabezado, sobre oscuro */
+/* La familia y el cuerpo van AQUI; el peso, el trazo, las versalitas y la
+   inclinacion los pone la lista de rotulos de main.css — asi lo dice ella
+   misma: «si se añade un rotulo con var(--sport), va en esta lista».
+
+   Mas pequeño que el rotulo de las secciones blancas (1,85rem) a proposito:
+   aqui no es EL titulo, es la etiqueta de encima. El titulo es el de debajo,
+   el que lleva el desgaste. */
+.home-featured .cat-showcase-head h2{
+  color: #fff;
+  font-family: var(--sport, 'Russo One', sans-serif);
+  font-size: clamp(1.05rem, .9rem + .5vw, 1.35rem);
+  letter-spacing: .03em;
+}
+
+/* Tarjetas del pack, más bajas que las del catálogo: la foto pasa de cuadrada a
+   4/3. Aquí la tarjeta no tiene que vender el producto —lo vende el pack—, así
+   que gana la compacidad. Solo dentro de esta sección. */
+/* Repite el selector de main.css con `.home-featured` delante a propósito: la
+   regla de allí ([data-home-catalog-root] .card:not(.order-summary) .card-media)
+   pesa 0,4,0 y una versión corta aquí perdía por especificidad. */
+.home-featured [data-home-catalog-root] .card:not(.order-summary) .card-media{
+  aspect-ratio: 4 / 3;
+}
+
+/* La sección es oscura pero la tarjeta sigue siendo BLANCA: sin devolverle el
+   color de tinta, el título y el chip heredan el blanco de la sección y
+   desaparecen sobre su propio fondo. Pasó: se veían la foto y el precio, y el
+   nombre del producto no estaba. */
+/* TARJETAS DEL PACK: gris oscuro con letras blancas y precio rojo, no las
+   blancas del catálogo. Es lo que hace que se lean como una oferta y no como
+   cuatro productos más.
+   La FOTO sigue sobre claro a propósito: los productos son recortes sobre
+   blanco y sobre gris oscuro se verían como un rectángulo blanco pegado. Se le
+   da forma de baldosa dentro de la tarjeta y el contraste juega a favor. */
+.home-featured [data-home-catalog-root] .card:not(.order-summary){
+  background: #7878780a;
+  box-shadow:
+    0 14px 30px rgba(0,0,0,.34),
+    0 4px 12px rgba(0,0,0,.22);
+}
+
+/* Sin margen: la foto ocupa todo el ancho arriba y el radio de la propia
+   tarjeta le recorta las esquinas. Con `margin` sobre un elemento que ya es
+   width:100% no se encoge — se desplaza, y dejaba una franja oscura a la
+   izquierda y arriba mientras se salía por la derecha. */
+.home-featured [data-home-catalog-root] .card:not(.order-summary) .card-media{
+  margin: 0;
+  border-radius: 0;
+}
+
+.home-featured [data-home-catalog-root] .card:not(.order-summary) .chip-name{
+  color: #fff;
+}
+
+/* EL PRECIO DE CADA ARTICULO, EN AMARILLO.
+
+   Estaba en blanco al 46 % —el gris de un dato secundario— y es justo lo
+   contrario: es la razon de ser de la placa. Que la bolsa ponga GRATIS y el
+   manillar 32,99 es lo que hay que ver desde lejos.
+
+   Amarillo y no el rojo de la marca por dos motivos: el rojo ya lo lleva el
+   precio total de abajo y competirian, y el fondo de esta placa es casi negro
+   con grafiti ROJO detras — un rojo sobre otro rojo se apaga. El amarillo
+   (#ffd21e, elegido a mano) es ademas el color de los propios productos del
+   pack: el patinete, los cubre cables y el manillar dorado. */
+.home-featured [data-home-catalog-root] .card:not(.order-summary) .price-now{
+  color: #ffd21e;
+}
+
+.home-featured [data-home-catalog-root] .card:not(.order-summary) .price-was{
+  color: rgba(255,255,255,.4);
+}
+
+/* El hover del catálogo aclara la tarjeta a casi blanco: sobre la oscura sería
+   un fogonazo. Aquí solo levanta y aprieta la sombra. */
+@media (hover: hover){
+  /* El hover baja con el fondo. Estaba en `3d` (24 %) cuando el reposo era `29`
+     (16 %): metia medio tono. Con el reposo en `0a` (4 %) ese mismo valor seria
+     un salto de seis veces, asi que se guarda la proporcion. */
+  .home-featured [data-home-catalog-root] .card:not(.order-summary):hover{
+    background: #78787814;
+    box-shadow:
+      0 20px 40px rgba(0,0,0,.42),
+      0 6px 16px rgba(0,0,0,.26);
+  }
+}
+
+/* PLACA NEGRA a sangre detrás de los cuatro productos. Sin ella las tarjetas
+   quedan sueltas encima del grafiti; con ella se leen como colocadas DENTRO de
+   la oferta.
+   Va de borde a borde saliéndose del .container con márgenes negativos, y
+   recupera la alineación con un padding calculado: así la PLACA ocupa todo el
+   ancho pero las tarjetas siguen a plomo con el resto de la página.
+   `50vw` es más ancho que el documento cuando hay barra de scroll; no provoca
+   arrastre porque .home-featured recorta con overflow:hidden. */
+/* UNA SOLA FILA, SIEMPRE, y se desliza. Era una parrilla de cuatro columnas y
+   con el quinto articulo del pack partia en dos filas: un pack leido en dos
+   renglones no se ve como un conjunto, se ve como dos ofertas.
+   En flex la fila no envuelve nunca —da igual que el pack pase a seis— y el
+   corte del ultimo articulo es la señal de que hay mas a la derecha. */
+.home-featured-rail{
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  gap: 1.875%;
+  /* El margen saca la placa hasta el borde de la pantalla y el relleno devuelve
+     el contenido a su sitio. Son la MISMA cantidad con el signo cambiado, así
+     que se cancelan exactas a cualquier ancho: las tarjetas quedan siempre a
+     plomo con el título. (Con un `max()` y un valor fijo se descuadraban 7 px,
+     porque `50vw` cuenta la barra de scroll y el fijo no.) */
+  margin-inline: calc(50% - 50vw);
+  padding-inline: calc(50vw - 50%);
+  padding-block: 22px;
+  border-radius: 0;
+  background: #0a0a0a30;
+  /* `overscroll-behavior-inline` corta el encadenado: al llegar al final del
+     carril, seguir arrastrando ya no navega hacia atras en el movil. */
+  overscroll-behavior-inline: contain;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    inset 0 -1px 0 rgba(255,255,255,.03);
+}
+
+.home-featured-rail::-webkit-scrollbar{ display: none; }
+
+/* «x3» sobre la foto: cuantas unidades entran de ese articulo. Va en la caja de
+   la foto —que es `position:relative` para la chapa DGT— y en la esquina
+   contraria a esa chapa, que es la unica que ya vive ahi. */
+/* «Gratis» ocupa el sitio del precio, asi que hereda de `.price-now` toda la
+   tipografia y solo cambia el color: VERDE, el mismo de /checkout y /pago. Un
+   regalo no es un precio barato, es otra cosa, y el cliente lo va a ver en las
+   tres pantallas seguidas.
+
+   El selector repite el de la regla del precio amarillo entero: aquel tiene cinco
+   clases y con `.home-featured .price-now.pack-gratis` (tres) el verde perdia el
+   pulso — de hecho llevaba perdiendolo desde antes, cuando el precio era blanco
+   al 46 %, y GRATIS salia gris sin que nadie se diera cuenta. */
+.home-featured [data-home-catalog-root] .card:not(.order-summary) .price-now.pack-gratis{
+  color: #6ee7a8;
+  /* «Gratis», no «GRATIS». La misma palabra que el cajon, /checkout y /pago. */
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.pack-unidades{
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 26px;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: #0b0c0f;
+  color: #fff;
+  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
+  font-size: .82rem;
+  font-weight: 800;
+  letter-spacing: .01em;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+/* LA FOTO DEL PACK ES CUADRADA, no 4:3 como en el resto del catalogo.
+
+   Ahi estaba lo de «se ven muy anchos»: con la caja de la foto a 1,33 la tarjeta
+   salia a 246x289 —relacion 0,85— y leia como un rectangulo tumbado por mucho que
+   se estrechara. En cuadrado la misma tarjeta pasa a ~207x311, relacion 0,67, que
+   es una pieza claramente vertical. Va acotado a `.home-featured` porque el 4:3 es
+   el encuadre con el que estan hechas las fotos del catalogo y de los relacionados;
+   aqui el producto se ve igual, solo cambia el aire de la caja. */
+.home-featured [data-home-catalog-root] .card .card-media{
+  /* `!important` y no me consta por que hace falta: el selector tiene cuatro
+     clases contra la sola de `.card-media` en main.css, va en la hoja que se carga
+     despues, y aun asi pierde. Comprobado en el navegador contra produccion: la
+     regla esta parseada en el CSSOM y el elemento la CASA (`matches` true), pero
+     inyectar ese mismo selector al final del documento tampoco gana; solo gana con
+     `!important`. No hay `@layer`, ni hojas adoptadas, ni estilo en linea, ni un
+     solo `aspect-ratio ... !important` en ninguna hoja servida. Queda anotado como
+     lo que es —un cabo suelto— en vez de inventar una explicacion. */
+  aspect-ratio: 1 / 1 !important;
+}
+
+/* El ANCHO de cada articulo. No es `1fr`: en una fila que se desliza, lo que
+   dice cuantos se ven es el ancho de la pieza, y el sobrante asomando por la
+   derecha es lo que cuenta que hay mas. Con cuatro justos no se veria que el
+   carril corre.
+
+   18,5 %. Estas cifras solo mandan en ESCRITORIO: por debajo de 1000 px las pisa el
+   bloque de mas abajo (31 %) y por debajo de 760 el suyo (58 %). El HUECO se calcula
+   a partir del ancho y en porcentaje —no en pixeles— porque los cinco articulos
+   tienen que seguir llenando el carril de punta a punta:
+   5x18,5 + 4x1,875 = 100. Con el hueco fijo en 14 px, estrechar la tarjeta dejaba
+   200 px de placa vacia a la derecha, que se lee como que falta algo y no como que
+   hay mas. Si cambia el ancho o el numero de articulos, hay que rehacer esta cuenta:
+   hueco = (100 - n x ancho) / (n - 1). */
+.home-featured-rail > *{
+  flex: 0 0 18.5%;
+  min-width: 0;
+}
+
+@media (max-width: 1000px){
+  .home-featured-rail > *{ flex: 0 0 31%; }
+}
+
+@media (max-width: 760px){
+  /* En móvil la placa va a sangre: el carril ya se salía a los bordes y una
+     caja redondeada ahí cortaría el desplazamiento. */
+  .home-featured-rail{
+    gap: 12px;
+    margin-inline: calc(50% - 50vw);
+    padding: 16px calc(50vw - 50%);
+    border-radius: 0;
+  }
+  /* Sin scroll-snap: resuelve sus porcentajes contra el scrollport y no contra
+     el contenedor, así que peleaba con el relleno de la placa a sangre y dejaba
+     la primera tarjeta desalineada del título. Con cuatro productos el ajuste
+     no aportaba nada. */
+  .home-featured-rail > *{
+    flex: 0 0 58%;
+    display: block !important;
+  }}
+
+/* =============================================
+   PACK DE LA SEMANA
+   El único bloque oscuro de la portada, y por eso funciona: si hubiera dos,
+   ninguno destacaría. Gris oscuro + rojo de marca, sin degradados de relleno.
+   La agresividad la ponen las diagonales y la tipografía, no más color.
+   ============================================= */
+.oferta-flag{
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  font-size: .84rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--primary, #d11c1c);
+}
+
+.oferta-flag[hidden]{ display: none; }
+
+.oferta-flag-reloj{
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 11px 5px 9px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.16);
+  color: #fff;
+  transition: background-color .25s ease, border-color .25s ease, color .25s ease;
+}
+
+/* La cifra lleva el `min-width` y no la pastilla: con el ancho minimo en la caja
+   de fuera, el icono se lo comia y el numero bailaba al pasar de «1d 00:00:00» a
+   «23:59:59». `tabular-nums` para que no baile tampoco al cambiar cada segundo. */
+.oferta-flag-cifra{
+  min-width: 10ch;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .06em;
+  text-align: center;
+}
+
+.oferta-flag-icono{
+  flex: none;
+  width: 15px;
+  height: 15px;
+  display: block;
+}
+
+/* ULTIMO DIA. Menos de 24 h y la pastilla se pone roja: es el unico momento en
+   que la cuenta atras deja de ser un dato y pasa a ser un motivo para comprar hoy.
+
+   Rojo CLARO (#ff6b6b) y no el `--primary` de la marca: el fondo de esta placa es
+   casi negro y el rojo de marca sobre el se apaga — ahi ya se decidio lo mismo con
+   el precio amarillo de las tarjetas. El fondo va tintado al 18 %, lo justo para
+   que la pastilla se lea como una alarma sin gritar mas que el precio. */
+.oferta-flag-reloj.es-ultimo-dia{
+  background: rgba(209,28,28,.18);
+  border-color: rgba(255,107,107,.55);
+  color: #ff6b6b;
+}
+
+/* GRAFITI de fondo: dos piezas propias, una pegada a cada borde del bloque.
+   Van en un pseudo-elemento y no en el `background` de la sección porque así se
+   les puede bajar la opacidad sin tocar el color de fondo ni el contenido.
+   Se cargan como decoración: si no llegan, la sección se ve igual de bien. */
+.home-featured::after{
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    url("/img/deco/grafiti-izquierda.webp"),
+    url("/img/deco/grafiti-derecha.webp");
+  background-position: left center, right center;
+  background-repeat: no-repeat, no-repeat;
+  background-size: auto 100%, auto 100%;
+  opacity: .17;
+  pointer-events: none;
+}
+
+.home-featured > .container{
+  position: relative;
+  z-index: 1;
+}
+
+.combo-titulo{
+  margin: 0 0 16px;
+  font-family: var(--sport, 'Russo One', sans-serif);
+  font-weight: 400;
+  font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.4rem);
+  line-height: 1.05;
+  letter-spacing: .01em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+/* Cierre: cifras a la izquierda, casilla a la derecha. */
+
+.combo-cierre{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 26px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255,255,255,.12);
+}
+
+.combo-cifras{ min-width: 0; }
+
+.combo-precios{
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 0;
+}
+
+.combo-antes{
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: rgba(255,255,255,.42);
+  font-variant-numeric: tabular-nums;
+}
+
+.combo-antes[hidden]{ display: none; }
+
+.combo-ahora{
+  font-family: var(--sport, 'Russo One', sans-serif);
+  font-size: clamp(1.9rem, 1.4rem + 1.8vw, 2.8rem);
+  line-height: 1;
+  color: var(--primary, #d11c1c);
+  font-variant-numeric: tabular-nums;
+}
+
+.combo-ahorro{
+  margin: 6px 0 0;
+  font-size: .84rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.combo-ahorro[hidden]{ display: none; }
+
+.combo-accion{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+/* EL BOTON DEL PACK. Antes era una casilla —cuadro, palomita y todo— porque
+   marcarla metia el pack y desmarcarla lo retiraba. Ahora mete el pack y se va a
+   /checkout, asi que el mando tiene que PARECER lo que hace: un boton con su
+   flecha, no algo que se marca. La forma (pastilla blanca sobre la banda oscura)
+   se conserva entera; lo unico que cambia es el interior.
+
+   `border:0` y `font:inherit` porque ahora es un <button> de verdad y el
+   navegador le pone su propio filo y su propia letra. */
+.combo-quiero{
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 26px;
+  border: 0;
+  border-radius: 12px;
+  background: #fff;
+  color: #0b0c0f;
+  font: inherit;
+  cursor: pointer;
+  user-select: none;
+  transition: transform .12s ease, box-shadow .16s ease;
+}
+
+.combo-quiero:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(0,0,0,.28);
+}
+
+.combo-quiero:focus-visible{
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+/* La flecha va en un circulo rojo: es la unica pieza de color del mando y dice
+   hacia donde lleva. Se adelanta 2 px al pasar por encima —el mismo gesto que el
+   boton de la tarjeta—, no se agranda. */
+.combo-quiero-flecha{
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--primary, #d11c1c);
+  color: #fff;
+  transition: transform .16s ease;
+}
+
+.combo-quiero-flecha svg{
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.combo-quiero:hover .combo-quiero-flecha{
+  transform: translateX(2px);
+}
+.combo-quiero-txt{
+  font-family: var(--sport, 'Russo One', sans-serif);
+  font-size: 1.15rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.combo-estado{
+  margin: 0;
+  min-height: 1.2em;
+  font-size: .78rem;
+  font-weight: 600;
+  color: rgba(255,255,255,.6);
+  text-align: right;
+}
+
+/* =============================================
+   DESGASTE — textura horneada, no filtro en vivo
+   Antes el ruido lo generaba un `feTurbulence` dentro de un SVG en data-URI
+   usado como máscara. Se veía en Chrome y en el WebKit de escritorio, pero NO
+   en el Safari del móvil: Safari no ejecuta filtros SVG dentro de una máscara,
+   así que ignoraba el filtro y pintaba la letra limpia. Sin desgaste.
+   Ahora la textura viene ya calculada en /img/deco/desgaste-v2.webp (13 KB): no hay
+   filtro que ejecutar y funciona igual en todos los motores.
+   La generó scripts/build-desgaste.py con ruido en el dominio de la frecuencia,
+   que sale PERIÓDICO por construcción y por eso repite sin costura.
+   La imagen es blanca con el dibujo en el canal ALFA, así que sirve tanto de
+   máscara de alfa como de luminancia — no depende de `mask-mode`.
+   ============================================= */
+@supports ((-webkit-mask-image: url("/img/deco/desgaste-v2.webp")) or (mask-image: url("/img/deco/desgaste-v2.webp"))){
+  @media not all and (prefers-contrast: more){
+    .combo-titulo,
+    .combo-ahora{
+      -webkit-mask-image: url("/img/deco/desgaste-v2.webp");
+      mask-image: url("/img/deco/desgaste-v2.webp");
+      -webkit-mask-repeat: repeat;
+      mask-repeat: repeat;
+    }
+
+    /* La escala de la textura es lo que decide el TAMAÑO del mordisco. Cuanto
+       más pequeña, más veces cruza el ruido por una misma letra. En móvil se
+       aprieta más: si no, la línea entera cae dentro de una franja lisa de la
+       textura y no se desgasta nada. */
+    .combo-titulo{
+      -webkit-mask-size: 210px 105px;
+      mask-size: 210px 105px;
+    }
+
+    /* El precio es mayor: la misma textura, un punto más grande, para que el
+       mordisco se lea del mismo tamaño en los dos. */
+    .combo-ahora{
+      display: inline-block;
+      -webkit-mask-size: 260px 130px;
+      mask-size: 260px 130px;
+    }
+  }
+}
+
+@media (max-width: 760px){
+  .combo-titulo{
+    -webkit-mask-size: 130px 65px;
+    mask-size: 130px 65px;
+  }
+  .combo-ahora{
+    -webkit-mask-size: 165px 82px;
+    mask-size: 165px 82px;
+  }
+
+  .home-featured{ padding: 30px 0 28px; }
+  .home-featured::after{ opacity: .12; background-size: auto 78%, auto 78%; }
+  .combo-cierre{
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  .combo-accion{ align-items: stretch; }
+  .combo-quiero{ justify-content: center; }
+  .combo-estado{ text-align: center; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .combo-quiero, .combo-quiero-flecha{ transition: none; }
+}
+
+/* =============================================
+   ¿CUÁL ES PARA TI? — sustituye al raíl de series.
+   Se pregunta por lo que el cliente sabe responder.
+   ============================================= */
+/* El relleno inferior va AQUÍ, no como margen en .home-catalog-zone: el body es
+   gris (#f3f4f6) y un margen no pinta fondo, así que separar con margen dejaba
+   una banda gris a todo lo ancho entre esta sección y el catálogo. */
+/* 54 arriba y 30 abajo, no 56 y 56: los atajos y el catálogo se leen SEGUIDOS
+   —elige por uso, o baja y míralo todo— y con 56 abajo más los 18 del titular
+   quedaban 74 px de nada que los partía en dos islas. */
+/* El titular de los atajos es SECUNDARIO. Antes medía lo mismo que «Todo el
+   catálogo» (29,6 px los dos) y nada decía cuál manda: uno es una ayuda de
+   cuatro botones y el otro encabeza el catálogo entero. */
+/* Rejilla, no flex: «etiqueta … cifra» en la primera línea, con las dos
+   alineadas por su BASE, y la pista debajo cruzando las dos columnas. Con flex
+   y `space-between` la cifra se centraba respecto al bloque de dos líneas y
+   acababa a 180 px de la etiqueta a la que pertenece. */
+/* Todo lo que cuenta cosas en esta zona habla el mismo idioma: monoespaciada
+   con cifras tabulares. Antes había TRES tratamientos para el mismo dato —esta
+   en 800 proporcional, la de las píldoras de categoría en monoespaciada 500 y
+   el total del titular en 600 proporcional— y ninguno remitía a los otros.
+   Los colores no cambian: solo la familia, el cuerpo y el peso. */
+@media (max-width: 900px){
+}
+
+@media (max-width: 640px){
+}
+
+/* =============================================
+   CABECERA DEL CATÁLOGO — barra de categorías
+   -----------------------------------------------
+   La pestaña con subrayado rojo era la ÚNICA forma huérfana de la portada: el
+   resto del sitio está hecho de píldoras de 999 px (INICIO, Cuenta, ELEGIR
+   OPCIÓN, LO QUIERO) y de tarjetas de 18 px con la sombra de tres capas. Ahora
+   esto es una píldora, y lo elegido se marca con tinta maciza — el mismo negro
+   de «FINALIZAR COMPRA».
+
+   El rojo sale de la navegación a propósito: en esta web ya significa oferta y
+   comprar, y gastarlo en un subrayado lo devalúa.
+
+   La barra comparte fondo y filo con #siteHeader (rgba(255,255,255,.92) + blur
+   y rgba(0,0,0,.05)) para que las dos pegajosas se lean como una sola pieza.
+   Alto 60 + 89 del header = 149 px, contra los 184 de antes.
+   ============================================= */
+/* =============================================
+   CABECERA DE UNA PAGINA DE CATEGORIA (/patinetes, /accesorios, /repuestos)
+
+   La portada no podia dar esto: llevaba las cinco categorias en el mismo
+   documento, asi que su titular tenia que hablar de todas y su <title> se
+   quedaba con una sola —«Patinetes electricos»— compitiendo consigo misma.
+   Aqui la pagina ES la categoria: titular propio, entradilla y miga de pan.
+
+   Sin foto ni color de fondo a proposito. Debajo viene una parrilla de
+   tarjetas con sus fotos y el trabajo de esta zona es dejarlas entrar, no
+   disputarles la mirada.
+   ============================================= */
+/* Solo el sitio y el fondo: como se lee la miga esta en main.css, junto a la de
+   la ficha, porque son la misma pieza. */
+/* Nada propio: la miga entera esta en main.css, junto a la de la ficha, porque
+   son la misma pieza. El `padding: 18px 0 0` que habia aqui era su hueco superior
+   y ahora sale de alli, con el mismo numero para las dos. */
+
+.cat-cabecera{
+  /* Sin fondo propio: toda la cabecera de categoria va sobre el gris de la
+     pagina (#f3f4f6, el del body). Estuvo en blanco y partia la pagina en dos.
+     Casi sin aire abajo: lo que viene despues es el riel de marcas y el titular
+     tiene que leerse con el. Y CERO arriba, que el hueco con la miga lo pone ella
+     con su margen inferior —los mismos 10 px que en la ficha—. */
+  padding: 0 0 4px;
+}
+
+.cat-cabecera-tit{
+  margin: 0;
+  /* Russo One: la letra de los titulares del sitio. Ya viaja en todas las
+     paginas (`fonts/russo-one-latin.woff2`), asi que esto no añade descarga. */
+  font-family: 'Russo One', var(--ui, 'Plus Jakarta Sans', sans-serif);
+  /* El grosor se DIBUJA, no se pide: ver la regla del titular en main.css. */
+  font-weight: 400;
+  -webkit-text-stroke: .04em currentColor;
+  text-transform: uppercase;
+  /* La medida comun de los titulares de pagina (main.css). Estaba en 3,4rem, que
+     al lado del titulo de una ficha —34 px— parecian dos sitios distintos. */
+  font-size: var(--titular);
+  letter-spacing: -.01em;
+  line-height: 1.04;
+  color: #0b0c0f;
+}
+
+/* La inclinacion, la misma que la del titular de la ficha: es UN solo titular en
+   todo el sitio. Va en el <span> y con `skewX` —no con `font-style:italic`, que
+   Russo One no tiene cursiva y cada navegador se la inventaria distinta—.
+   `inline-block` para que el skew tenga caja propia; sobre el <h1> arrastraria su
+   margen y su ancho de bloque. */
+.cat-cabecera-tit > span{
+  display: inline-block;
+  transform: skewX(-7deg);
+  transform-origin: left bottom;
+  padding-right: .12em;
+}
+
+/* Aqui el riel va pegado al titular: el aire que necesita en la portada —donde
+   separa una categoria de la anterior— aqui solo los desune. */
+[data-pagina="categoria"] .home-marcas{
+  padding-top: 4px;
+}
+
+/* La barra es PEGAJOSA: cuando se despega tiene que tapar lo que pasa por
+   debajo, asi que su fondo es opaco. Y es el gris de la pagina, no blanco: en
+   reposo no se distingue del resto y solo aparece al desplazarse.
+   `.97` no vale aqui —dejaba ver las tarjetas pasando por detras.
+   Esto solo se ve en /repuestos, la unica sin riel: en las demas el boton se muda
+   a la linea de marca y la barra se esconde. */
+[data-pagina="categoria"] .home-catalog-head{
+  background: var(--suelo);
+  border-bottom: 1px solid rgba(15,23,42,.08);
+}
+
+/* Sin el rotulo, en la barra solo queda el boton de filtros: a la derecha, que es
+   donde estaba. Sin esto el flex lo manda al principio. */
+[data-pagina="categoria"] .home-catalog-barra{
+  justify-content: flex-end;
+}
+
+/* Nace oculta: en una pagina de categoria el boton se muda a la linea de marca y
+   esta barra sobra. Se enseña con `hace-falta` cuando NO hay donde mudarlo —una
+   categoria de una sola marca, sin riel, como /repuestos—.
+   El orden importa: escondiendola con JS *despues* de pintar, el ancla de la URL
+   llegaba a calcularse con los 61 px de la barra todavia contados. */
+[data-pagina="categoria"] .home-catalog-head{ display: none; }
+[data-pagina="categoria"] .home-catalog-head.hace-falta{ display: block; }
+
+/* La caja que ACOGE al boton de filtros —la descripcion de la marca o el rotulo
+   del primer tramo, segun lo elegido— se convierte en una fila: texto a la
+   izquierda, boton a la derecha. La clase la pone el JS al mudarlo. */
+[data-pagina="categoria"] .lleva-filtros{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+@media (min-width: 900px){
+  [data-pagina="categoria"] .lleva-filtros > .filtros-btn{
+    gap: 10px;
+    padding: 13px 24px;
+    font-size: .98rem;
+    /* La altura del contador (.filtros-btn-n mide 20 px): asi el boton mide igual
+       lleve numero o no, y el bloque no se mueve al filtrar. */
+    line-height: 20px;
+    border-color: rgba(17,24,39,.18);
+  }
+
+  [data-pagina="categoria"] .lleva-filtros > .filtros-btn svg{
+    width: 19px;
+    height: 19px;
+  }
+}
+
+/* Y centrado vertical: el texto y el boton no miden lo mismo —dos lineas de
+   texto contra 42 px de boton— y con `flex-start` el que quedaba corto se pegaba
+   arriba. */
+[data-pagina="categoria"] .lleva-filtros{
+  align-items: center;
+}
+
+/* Caso «una marca elegida»: el segmento ES el borde de arriba de esta caja. */
+[data-pagina="categoria"] .home-marcas.tiene-desc > .container{
+  padding-top: 19px;
+  padding-bottom: 18px;   /* + 1 px de la raya = 19 */
+}
+
+/* Caso «Todos»: la caja es el rotulo del primer tramo. */
+[data-pagina="categoria"] .series-rotulo.lleva-filtros{
+  margin-top: -4px;       /* 22 de la seccion + 1 del contenedor - 4 = 19 */
+  padding-bottom: 18px;   /* + 1 px de la raya = 19 */
+}
+
+/* El texto se queda el ancho que sobre; el boton no se encoge nunca. */
+[data-pagina="categoria"] .lleva-filtros > .home-marcas-desc,
+[data-pagina="categoria"] .lleva-filtros > .series-rotulo-txt{ flex: 1 1 auto; }
+[data-pagina="categoria"] .lleva-filtros > .filtros-btn{ flex: none; }
+
+/* Con «Todos» puesto no hay descripcion y el boton se ha ido al rotulo del primer
+   tramo: esta caja se queda sin contenido y no debe ocupar sitio. Conserva 1 px
+   para sostener la raya de cierre del riel. */
+[data-pagina="categoria"] .home-marcas:not(.tiene-desc) > .container{
+  padding-top: 0;
+  padding-bottom: 0;
+  min-height: 1px;
+}
+
+/* La raya que cierra el riel: un SEGMENTO que se desvanece por los extremos, el
+   mismo dibujo que el separador de la portada (.home-sep). Va en un pseudo y no
+   en `border-top` porque un borde no admite degradado.
+   Se sale del relleno lateral del contenedor a proposito: la raya mide lo que
+   mide la caja, no lo que mide el texto. */
+[data-pagina="categoria"] .home-marcas > .container{
+  position: relative;
+}
+
+[data-pagina="categoria"] .home-marcas > .container::before{
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    rgba(17,24,39,0) 0%,
+    rgba(17,24,39,.13) 12%,
+    rgba(17,24,39,.13) 88%,
+    rgba(17,24,39,0) 100%);
+}
+
+/* En la barra pegajosa, donde la portada lleva las pildoras. Comparte metrica
+   con ellas (misma altura de linea) para que la barra mida igual en las dos. */
+.catalogo-quien{
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0;
+  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
+  font-weight: 700;
+  font-size: .96rem;
+  letter-spacing: -.01em;
+  color: #0b0c0f;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 640px){
+  /* Mismo criterio que en escritorio: casi sin aire abajo, que el titular y las
+     marcas se lean juntos. (Aqui habia tambien una medida para .cat-cabecera-txt,
+     la entradilla, que desde que se mudo al cierre de la pagina no existia.) */
+  .cat-cabecera{ padding: 0 0 4px; }
+}
+
+.home-catalog-zone{
+  position: relative;
+}
+
+.home-catalog-head{
+  position: sticky;
+  top: calc(var(--header-h, 88px) - 1px);
+  z-index: 30;
+  /* Opaca al 97% y SIN desenfoque. Esta barra va pegada arriba mientras se recorre
+     todo el catalogo, asi que su `backdrop-filter: blur(10px)` obligaba a rehacer
+     el borroso de lo que pasa por detras en cada fotograma — y detras pasan 82
+     tarjetas con sus fotos. Subiendo la opacidad de .92 a .97 se consigue lo mismo
+     por nada: comparadas las dos versiones pixel a pixel con la barra sobre las
+     tarjetas, la diferencia maxima baja de 48 a 18 sobre 765, que no se ve. */
+  background: rgba(255,255,255,.97);
+  border-bottom: 1px solid rgba(0,0,0,.05);
+}
+
+/* Aqui vivia el titular del catalogo (.home-catalog-intro, -titulo, -title). Se
+   lo llevo el dia que cada categoria tuvo su pagina: alli el titular es el <h1>
+   de la pagina (.cat-cabecera-tit) y en la portada ya no hay parrilla que
+   titular. Ningun HTML del sitio los usa. */
+
+/* El recuento es la pieza más barata que más informa, y el patrón ya era tuyo
+   («5 MODELOS» en la ficha de serie, «24 modelos» en la tarjeta de categoría). */
+.home-catalog-total{
+  flex: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--muted, #676b73);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.home-catalog-barra{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+}
+
+/* El carril de pildoras se queda con el sitio que sobra y el boton no se encoge:
+   sin esto, al deslizar las pildoras el boton se comprimia hasta desaparecer. */
+.home-catalog-barra > .home-category-nav{ flex: 1 1 auto; min-width: 0; }
+.home-catalog-barra > .filtros-btn{ flex: 0 0 auto; margin-left: 0; }
+
+.home-category-nav{
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.home-category-nav::-webkit-scrollbar{ display: none; }
+
 .home-category-chip{
-  appearance: none;
+  position: relative;
+  flex: none;
+  border: 0;
+  background: none;
+  border-radius: 999px;
+  /* ALTURA ENTERA, y no la que salga del contenido. Con 33,156 px —lo que medía
+     antes— el borde de 2 px se reparte distinto arriba que abajo en cuanto la
+     pantalla no va a densidad 1: medido con el escalado de Windows al 125%, el de
+     arriba salia un 8% mas grueso que el de abajo, y al 150% un 9%. Con un numero
+     entero los dos caen igual.
+     El relleno pasa a ser solo horizontal: con `box-sizing: border-box` la altura
+     ya la fija `height`, y dejarlo vertical solo empujaria el texto. */
+  height: 36px;
+  padding: 0 16px;
+  font-family: inherit;
+  font-size: .92rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #111315;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  transition: background-color .16s ease, color .16s ease;
+}
+
+/* Al pasar por encima, solo el fondo y MUY tenue: 4,5% de negro, que sobre blanco
+   es un gris de apenas un tono. La letra ya es negra y no tiene a donde ir. */
+.home-category-chip:hover{
+  background: rgba(17,24,39,.045);
+}
+
+/* La elegida cambia SOLO el borde: ni fondo negro, ni texto blanco, ni mas peso.
+   El relleno baja 2 px por lado para compensar el borde, o la pildora daria un
+   salto al elegirla y movería a las de al lado. */
+/* El borde no cambia la altura (border-box) ni el ancho: el relleno baja 2 px por
+   lado para compensarlo, asi que la pildora no da un salto al elegirla. */
+.home-category-chip.is-active{
+  border: 2px solid #111315;
+  padding: 0 14px;
+}
+
+@media (max-width: 640px){
+  .home-catalog-barra{ min-height: 54px; gap: 8px; }
+  .home-category-chip{ font-size: .86rem; height: 34px; padding: 0 13px; }
+  .home-category-chip.is-active{ padding: 0 11px; }
+  /* Que se VEA que hay más: hoy «Repuestos» se corta en seco y nada lo indica. */
+  .home-category-nav{
+    -webkit-mask-image: linear-gradient(90deg, #000 84%, transparent);
+    mask-image: linear-gradient(90deg, #000 84%, transparent);
+  }
+  .home-category-nav.esta-al-final{
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
+/* =============================================
+   RIEL DE MARCAS
+   -----------------------------------------------
+   Va DENTRO de cada sección de categoría, no en la barra pegajosa: así siempre
+   corresponde a lo que hay debajo y el cromo fijo no crece. Cada tarjeta usa el
+   radio, el fondo y la sombra de la tarjeta de producto, y lleva una regla de
+   3 px con el acento de la serie, que ya vive en SERIES_VISUALS (js/index.js).
+   ============================================= */
+/* Anclaje de serie: sin caja, sin alto. Solo existe para que `/#ecoxtrem` desde
+   el menú PRODUCTOS caiga en su sitio y no en el tope de la home. El margen es
+   el que reservaba la ficha que había aquí. */
+.serie-ancla{
+  display: block;
+  height: 0;
+  scroll-margin-top: calc(var(--header-h, 88px) + 96px);
+}
+
+/* En una página de categoría NO hay barra pegajosa bajo la cabecera —el botón de
+   filtros se mudó a la línea de marca—, así que los 96 px de ahí arriba son aire.
+   El navegador respeta `scroll-margin-top` al pie de la letra: con ellos puestos
+   el rótulo caía 95 px por debajo de su sitio, y no era el JS quien fallaba. */
+[data-pagina="categoria"] .serie-ancla{
+  scroll-margin-top: calc(var(--header-h, 72px) + 8px);
+}
+
+.home-marcas{
+  padding: 24px 0 0;
+}
+
+/* LÍNEA QUE CIERRA EL BLOQUE DE MARCAS.
+   Va DEBAJO de la descripción, no encima: ese texto es de la marca que acabas de
+   elegir —es la respuesta al clic— y por eso pertenece a este lado de la línea.
+   Puesta encima, leería como un titular de la parrilla, que no lo es.
+
+   Y solo existe CUANDO HAY DESCRIPCIÓN. Antes se pintaba siempre, así que con
+   «Todos» —que es el estado de partida— el párrafo quedaba oculto pero su caja
+   conservaba relleno y borde: una raya suelta sobre 18 px de aire, a un palmo de
+   la del rótulo de serie que viene detrás. Dos rayas juntas sin nada en medio.
+   La clase la pone el JS en el mismo sitio donde decide si hay texto. */
+.home-marcas > .container{
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.home-marcas.tiene-desc > .container{
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(17,24,39,.10);
+}
+
+/* La descripcion arranca a la MISMA altura que arrancaria el rotulo de serie si no
+   la hubiera: 22 px bajo el riel, que es el relleno con el que empieza la primera
+   seccion de la parrilla. Antes iba pegada al riel (1 px) mientras el rotulo
+   respiraba 22, y por eso el bloque parecia saltar al cambiar de marca a «Todos».
+   Se arregla dando aire a la descripcion, no quitandoselo a la parrilla: quitarlo
+   subia tambien las tarjetas. */
+.home-marcas.tiene-desc > .container{
+  padding-top: 22px;
+}
+
+/* La descripcion de la marca elegida. MISMOS numeros que `.series-rotulo-txt`, que
+   es el rotulo que ocupa este mismo sitio cuando esta puesto «Todos»: son el mismo
+   tipo de texto y tienen que verse igual, se llegue por donde se llegue.
+   (Estas reglas se perdieron al reescribir el bloque de la linea de cierre y el
+   texto salio un turno sin estilo — 16 px y en negro en vez de 15 y gris.) */
+.home-marcas-desc{
+  margin: 0;
+  font-size: .94rem;
+  line-height: 1.55;
+  color: var(--muted, #676b73);
+  max-width: 68ch;
+}
+
+.home-marcas-desc b{
+  color: #0b0c0f;
+  font-weight: 800;
+}
+
+.home-marcas-desc[hidden]{ display: none; }
+
+.home-marcas-riel{
+  display: flex;
+  /* Pegadas, no sueltas: en la referencia las placas casi se tocan y eso es lo
+     que las hace leerse como una tira. Empezó en 10 px —cinco tarjetas
+     sueltas—, pasó por 8 y está en 4: el aire justo para que se distingan sin
+     dejar de ser una tira. */
+  gap: 4px;
+  overflow-x: auto;
+  /* Aire arriba y abajo para que la sombra de las placas quepa DENTRO del riel.
+     `mask-image` recorta lo que pinta el elemento contra su propia caja, así
+     que con 2 px de margen la sombra salía cortada en recto y dejaba un lavado
+     gris con bordes sobre la banda: eso era la suciedad, no la sombra. */
+  padding: 10px 2px 16px;
+  /* Sin barra: la señal de que hay más la da el desvanecido, no un raíl gris. */
+  scrollbar-width: none;
+  /* A SANGRE: el relleno lateral replica el del contenedor —`clamp(16px,3vw,22px)`
+     más lo que sobra a los lados de sus 1340 px máximos— para que la primera
+     placa quede alineada con el titular aunque el riel llegue a los dos bordes.
+     Se calcula con `%` y no con `vw` a propósito: `vw` incluye el ancho de la
+     barra de scroll y provoca desborde horizontal. */
+  padding-inline: max(clamp(16px, 3vw, 22px), calc((100% - 1340px) / 2 + clamp(16px, 3vw, 22px)));
+
+  /* Desvanecido a LOS DOS LADOS. El de la derecha decía «hay más»; a la
+     izquierda no había nada y la placa se partía en seco contra el filo.
+     Las dos paradas van en variables REGISTRADAS (@property, arriba) porque
+     `mask-image` no interpola entre un degradado y `none`: lo que se anima es
+     la LONGITUD de cada difuminado, que baja a 0 cuando por ese lado ya no
+     queda nada. En píxeles y no en porcentaje: con 12 % la mancha medía ~160 px
+     en escritorio y ~47 en móvil, el mismo gesto con dos intensidades. */
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 var(--riel-desvan-izq, 0px), #000 calc(100% - var(--riel-desvan, 56px)), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 var(--riel-desvan-izq, 0px), #000 calc(100% - var(--riel-desvan, 56px)), transparent 100%);
+  transition: --riel-desvan .24s cubic-bezier(.4, 0, .2, 1), --riel-desvan-izq .24s cubic-bezier(.4, 0, .2, 1);
+
+  /* IMÁN: cada placa se engancha al filo del contenido. Sin esto el arrastre
+     libre dejaba placas a medias en cualquier posición y el conjunto se movía
+     como un bloque suelto. `scroll-padding-inline` iguala al relleno para que
+     la placa enganchada caiga donde empieza el texto de la página, no en el
+     borde crudo. */
+  --riel-desvan-izq: 56px;
+
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: max(clamp(16px, 3vw, 22px), calc((100% - 1340px) / 2 + clamp(16px, 3vw, 22px)));
+}
+
+.home-marca{ scroll-snap-align: start; }
+
+.home-marcas-riel::-webkit-scrollbar{ display: none; }
+
+/* Al llegar al final no se desvanece nada: dejar la última placa a medio
+   difuminar cuando ya no hay más parece un fallo de pintado. */
+.home-marcas-riel.esta-al-final{
+  --riel-desvan: 0px;
+}
+
+.home-marcas-riel.esta-al-inicio{
+  --riel-desvan-izq: 0px;
+}
+
+/* PLACA de marca: el logo es el protagonista y va centrado y grande, como en la
+   referencia. Antes era una tarjeta con el logo pequeño arriba a la izquierda y
+   metadatos debajo — que es otra cosa. */
+.home-marca{
+  flex: none;
+  width: 288px;
+  padding: 0;
+  border: 0;
+  /* 3 px: la placa de marca no sigue el radio de 18 de la tarjeta de producto
+     a propósito. Es cromo de navegación, y la esquina casi recta la separa de
+     lo que se compra. Pasó por 6 y por 3 hasta quedarse en 4: se nota que hay
+     radio y aun así la placa lee como una chapa, no como una tarjeta. */
+  border-radius: 4px;
+  /* Gris neutro (R=G=B). El anterior, #1b1f26, tenía la componente azul 11
+     puntos por encima de la roja y sobre la banda clara se leía frío. El
+     primer neutro, #1f1f1f, quedaba casi negro; #2b2b2b es gris oscuro sin llegar a negro
+     y sigue dando 12,6:1 de contraste con el texto blanco. */
+  background: #2b2b2b;
+  /* Sin sombra en reposo. Una placa casi negra sobre la banda gris se define
+     sola por contraste; la sombra solo añadía un halo sucio. */
+  box-shadow: none;
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  font-family: inherit;
+  /* Una sola curva y una sola duración para TODO lo que cambia al elegir: el
+     fondo, la sombra, el logo, el texto y la regla de color. Si cada pieza
+     lleva su tiempo, la inversión se ve por partes y parece un fallo.
+     .22s es el punto donde se percibe el cambio sin que estorbe al segundo
+     clic; las píldoras de arriba van a .16 porque solo mueven color. */
+  --marca-curva: cubic-bezier(.4, 0, .2, 1);
+  --marca-tiempo: .22s;
+  /* Ya no se anima `transform`: ninguna placa cambia de tamaño ni se eleva. */
+  transition:
+    box-shadow var(--marca-tiempo) var(--marca-curva),
+    background-color var(--marca-tiempo) var(--marca-curva);
+}
+
+/* Al pasar por encima solo aclara. Antes subía 2 px y encendía una sombra
+   azulada, y ese halo era justo lo que ensuciaba la banda. */
+.home-marca:hover{
+  background: #3a3a3a;
+}
+
+/* La activa ya está invertida: al pasar por encima no vuelve a oscurecerse. */
+.home-marca.esta-activa:hover{
+  background: #ffffffad;
+}
+
+/* Al pulsar solo aclara un punto más. El `scale(.985)` de antes encogía la
+   placa, y como la elegida ya parecía más pequeña, sumaba a la sensación. */
+.home-marca:active{
+  background: #454545;
+  transition-duration: .08s;
+}
+
+/* El foco por defecto del sitio es oscuro y sobre la placa oscura no se ve. */
+.home-marca:focus-visible{
+  outline: 2px solid #fff;
+  outline-offset: -4px;
+}
+
+/* Lo elegido INVIERTE la placa: fondo blanco y tinta negra. Es la marca de
+   estado más fuerte que hay —no compite con nada— y de paso la placa activa
+   pasa a hablar el idioma de la tarjeta de producto: blanca y con la sombra de
+   tres capas, como si se adelantara un plano.
+   El logo tiene que invertirse CON ella: en blanco sobre blanco desaparecería. */
+/* La placa blanca sí necesita que alguien le dibuje el borde contra la banda
+   gris, pero con un FILO de 1 px, no con la sombra de tres capas de la tarjeta
+   de producto: esa está pensada para flotar sobre blanco y sobre gris se lee
+   como un borrón. */
+/* El borde va con `inset box-shadow`, no con `border`: una sombra interior no
+   ocupa caja, así que la placa elegida mide EXACTAMENTE lo mismo que las demás.
+   Con `border` habría que compensar el ancho y cualquier despiste la encoge.
+   Antes el filo era de 1 px al 10 % de opacidad: sobre la banda gris clara casi
+   no se veía, la placa blanca se fundía con el fondo y por eso parecía
+   encogerse al elegirla. */
+/* SOLO INVIERTE. Ni filo ni equis: sobre la banda gris, una placa blanca entre
+   placas negras ya se distingue sola, y el filo de 2 px lo unico que hacia era
+   dibujarle un marco alrededor.
+   Y la equis se puede quitar porque el gesto de soltar YA existe: pulsar la marca
+   elegida la quita (lo hace el manejador desde siempre, con
+   `marcaActiva === destino ? '' : destino`). */
+.home-marca.esta-activa{
+  background: #ffffffad;
+}
+
+.home-marca.esta-activa .home-marca-nom{ color: #0b0c0f; }
+
+.home-marca.esta-activa .home-marca-logo{ filter: brightness(0); }
+
+/* El recuento en tinta plena: era la única pieza de la placa elegida que
+   seguía en gris claro, justo en la placa que más se mira. */
+.home-marca.esta-activa .home-marca-kpi{ color: #2b2b2b; font-weight: 700; }
+
+/* El foco es blanco para la placa oscura; sobre la clara no se vería. */
+.home-marca.esta-activa:focus-visible{
+  outline-color: #0b0c0f;
+}
+
+.home-marca-int{
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  padding: 9px 6px;
-  background: transparent;
-  border: 0;
-  border-radius: 10px;
-  color: rgba(17,24,39,.55);
-  font-size: .72rem;
-  font-weight: 700;
-  letter-spacing: .01em;
-  line-height: 1;
-  cursor: pointer;
-  touch-action: manipulation;
-  transition: color .15s ease, background .15s ease, box-shadow .15s ease;
-  white-space: nowrap;
+  gap: 14px;
+  height: 208px;
+  padding: 28px 20px 30px;
 }
 
-.home-category-chip i{
-  font-size: 1.05rem;
-  display: block;
-}
-
-.home-category-chip span{
-  display: block;
-}
-
-.chip-count{ display: none; }
-
-.home-category-chip:hover{
-  color: #0b0c0f;
-  background: rgba(255,255,255,.6);
-}
-
-.home-category-chip.is-active{
-  background: #0b0c0f;
+.home-marca-nom{
+  font-family: var(--sport, 'Russo One', sans-serif);
+  font-size: 1.5rem;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  line-height: 1.1;
+  text-align: center;
   color: #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  transition: color var(--marca-tiempo) var(--marca-curva);
+  /* Mismo alto que el logo (46 px) para que el recuento caiga a la MISMA altura
+     en las placas con nombre y en las que llevan imagen. Sin esto, «24 modelos»
+     y «5 modelos» quedaban a distinta altura en la misma fila. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 54px;
 }
-.home-category-chip.is-active i{ opacity: 1; }
 
-@media (min-width: 641px){
-  .home-category-nav{ padding: 4px; gap: 4px; }
-  .home-category-chip{ padding: 5px 6px; gap: 3px; }
-  .home-category-chip i{ font-size: .85rem; }
-  .home-category-chip span{ font-size: .62rem; }}
+.home-marca-logo{
+  display: block;
+  /* El logotipo llena el ancho útil de la placa (248 px de contenido menos un
+     respiro de 4 px por lado). Antes topaba en 226 y KuKirin y ROVORON —los dos
+     wordmarks más alargados— se quedaban ahí, sin llegar al borde. Con el tope
+     en 240 los cuatro llegan al mismo ancho, que es lo que hace que la fila se
+     lea pareja; la ALTURA (76) solo manda en los logotipos más cuadrados, como
+     el de DUALTRON, y por eso no se deforma ninguno: object-fit lo impide. */
+  height: 76px;
+  width: auto;
+  max-width: 240px;
+  object-fit: contain;
+  /* Silueta blanca: iguala logos de marcas con paletas muy distintas. */
+  filter: brightness(0) invert(1);
+  transition: filter var(--marca-tiempo) var(--marca-curva);
+}
+
+.home-marca-kpi{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .76rem;
+  font-weight: 500;
+  /* Sin tracking extra: la monoespaciada ya viene ancha y sumarle espacio la
+     hacía parecer una consola en vez de un dato. */
+  letter-spacing: 0;
+  color: rgba(255,255,255,.55);
+  transition: color var(--marca-tiempo) var(--marca-curva);
+}
+
+/* «Todos» hereda la regla de arriba: Russo One en mayúsculas y con tracking
+   positivo, igual que el resto de la placa. Antes esta regla la sacaba a Plus
+   Jakarta 800 en caja baja y con tracking NEGATIVO, y desentonaba: las demás
+   placas llevan un logotipo geométrico y esta palabra hablaba otro idioma. */
+
+/* Lo que el filtro esconde. `display:none` y no `visibility`: tiene que dejar
+   de ocupar sitio, y las <img> que ya se bajaron siguen en el DOM, así que
+   volver a enseñarlas no cuesta una petición. */
+.series.esta-oculta,
+[data-series-products].esta-oculta{
+  display: none !important;
+}
+
+/* Quien pide menos movimiento se queda con el cambio de color, que es la
+   información, y sin el desplazamiento, que es el adorno. */
+@media (prefers-reduced-motion: reduce){
+  .home-marca,
+  .home-marca-nom,
+  .home-marca-logo,
+  .home-marca-kpi{
+    transition-duration: .01ms !important;
+  }
+  .home-marcas-riel{ transition: none; }
+}
 
 @media (max-width: 640px){
-  .home-category-chip{
-    padding: 8px 4px;
-    font-size: .65rem;
-  }
-  .home-category-chip i{ font-size: .95rem; }}
+  .home-marcas{ padding: 18px 0 0; }
+  .home-marcas.tiene-desc > .container{ padding-bottom: 14px; }
+  .home-marcas-desc{ font-size: .88rem; }
+  /* Solo el bloque: tocar `padding` entero aquí pisaría el relleno lateral
+     que alinea la primera placa con el contenedor. */
+  .home-marcas-riel{ gap: 3px; --riel-desvan: 40px; --riel-desvan-izq: 40px; padding-block: 8px 14px; }
+  /* Placas mas pequeñas: en una pantalla estrecha, 216x160 se comian media
+     pantalla para enseñar dos marcas y media. Con 164 de ancho entran cuatro
+     enteras y la tira se lee como una tira; el alto se queda en 136, que le deja
+     aire al logotipo sin volver a comerse la pantalla. Todo baja en la misma proporcion —el logotipo, el
+     rotulo y el recuento— para que la placa no cambie de caracter. */
+  .home-marca{ width: 164px; border-radius: 4px; }
+  .home-marca-int{ height: 136px; padding: 18px 12px 19px; gap: 10px; }
+  /* Un punto mas que antes (.96): el nombre de la marca es lo que se lee de la
+     placa y a ese cuerpo quedaba pequeño al lado del logotipo. */
+  .home-marca-nom{ font-size: 1.08rem; min-height: 32px; }
+  /* Misma idea en móvil: la placa tiene 140 px de contenido. */
+  .home-marca-logo{ height: 42px; max-width: 136px; }
+  .home-marca-kpi{ font-size: .64rem; }
+}
+
+/* La nav de categorías vivía AQUÍ, bajo el hero, con aspecto de pestañas.
+   Ahora es el filtro de la parrilla y su único bloque está más arriba, junto a
+   .home-catalog-head.
+   Aquí había un `.chip-count{ display:none }` de cuando el recuento no se
+   enseñaba: sobrevivía al rediseño y ganaba por orden, así que el número se
+   escribía en el DOM y no se veía. */
 
 .catalog-empty-state{
   margin-top:12px;
@@ -345,48 +4190,15 @@
   SERIES HUB - Premium category & series UI
   ============================================= */
 
-/* Sticky category strip — sits just below fixed header (safe-area incluida para iPhone con muesca/Dynamic Island) */
-.home-category-strip{
-  position: sticky;
-  top: calc(var(--header-h, 88px) + var(--sat, 0px));
-  z-index: 40;
-  padding: 0;
-  background: rgba(255,255,255,.98);
-  backdrop-filter: saturate(180%) blur(12px);
-  -webkit-backdrop-filter: saturate(180%) blur(12px);
-}
-.home-category-shell{ display: block; }
-/* Series rail */
-/* ============================================================
-   Home Series Rail — minimal tab nav, type-only
-   ============================================================ */
-.home-series-rail-strip{
-  position: sticky;
-  top: calc(var(--rail-sticky-top, 132px) - 8px);
-  z-index: 39;
-  padding: 0;
-  overflow: visible;
-  background: rgba(255,255,255,.98);
-  border-bottom: 1px solid rgba(17,24,39,.04);
-  box-shadow: none;
-  backdrop-filter: saturate(180%) blur(12px);
-  -webkit-backdrop-filter: saturate(180%) blur(12px);
-}
-/* Capa que desaparece hacia ABAJO, sobre las cards */
-.home-series-rail-strip::after{
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 100%;
-  height: 28px;
-  pointer-events: none;
-  z-index: 1;
-  background: linear-gradient(to bottom, rgba(255,255,255,.96) 0%, rgba(255,255,255,.72) 36%, rgba(255,255,255,.32) 68%, rgba(255,255,255,0) 100%);
-}
-.home-series-rail-strip[hidden]{ display: none; }
+/* El raíl de series y la tira sticky de categorías se han eliminado de la portada:
+   las series viven en el menú PRODUCTOS y en /patinetes, y el filtro de categoría
+   está pegado a la parrilla (.home-catalog-head). */
 
-[data-home-catalog-root]{
+/* El hueco reservado es SOLO de la parrilla del catálogo. `data-home-catalog-root`
+   es el contrato de ESTILO de la tarjeta y lo llevan también los destacados y los
+   resultados por intención, que no deben reservar 780 px de alto. Por eso va
+   anclado al #comprar. */
+#comprar[data-home-catalog-root]{
   display:block;
   min-height:clamp(780px, 105vh, 1320px);
 }
@@ -395,400 +4207,109 @@
   min-height:0;
 }
 
-.home-series-rail-strip > .container{
-  position: relative;
+/* SALTARSE lo que no se ve. La portada mide 21 000 px y cuelga de ella 82 tarjetas
+   con sus fotos; en un movil, mantener todo eso maquetado y pintado es lo que hace
+   que el scroll se sienta pesado. Con esto el navegador se ahorra el trabajo de las
+   que estan fuera de pantalla.
+   El tamaño declarado NO es decorativo: es la altura real medida de una tarjeta en
+   cada tramo (244 px en movil, 419 en tableta, 450 en escritorio). Si no cuadra, la
+   pagina cambia de alto y la barra de scroll pega tirones — con un valor a ojo de
+   430 px, la portada pasaba de 21 546 a 27 472 px.
+   El `auto` de delante hace que, una vez pintada, recuerde su tamaño de verdad. */
+.series-products .card{
+  content-visibility: auto;
+  contain-intrinsic-size: auto 250px;
 }
 
-.home-series-rail-head{ display: none; }
-
-.home-series-rail{
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 10px 0;
-  margin: 0;
-  border-bottom: none;
+@media (min-width: 700px){
+  .series-products .card{ contain-intrinsic-size: auto 420px; }
 }
 
-.hsr-tile{
-  position: relative;
-  display: inline-flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 2px;
-  padding: 16px 10px;
-  margin: 0;
-  width: fit-content;
-  min-width: 0;
-  background: #ffffff00;
-  border-left: 3px solid var(--series-accent, rgba(17,24,39,.12));
-  border-radius: 11px;
-  text-decoration: none;
-  color: rgba(17,24,39,.68);
-  box-shadow: 0 1px 3px rgba(17, 24, 39, 0);
-  transition: all .2s ease;
-}
-.hsr-tile::before{ display: none; }
-.hsr-tile::after{ display: none; }
-.hsr-tile:hover{
-  color: #0b0c0f;
-  box-shadow: 0 2px 8px rgba(17,24,39,.11);
-  border-left-color: var(--series-accent, rgba(17,24,39,.2));
-  background: rgba(17,24,39,.02);
-}
-.hsr-tile.is-active{
-  color: #fff;
-  background: var(--series-accent, var(--primary, #d11c1c));
-  border-left-color: transparent;
-  border-radius: 11px 3px 3px 11px;
-  box-shadow: 0 3px 12px rgba(0,0,0,.15);
-}
-
-.hsr-tile-label{
-  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: .004em;
-  text-transform: none;
-  white-space: nowrap;
-  line-height: 1.1;
-  /* Red de seguridad: si una etiqueta no cupiese ni ocupando la fila entera,
-     se recorta con puntos suspensivos en vez de desbordar la ficha. */
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.hsr-tile-count{
-  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
-  font-size: .66rem;
-  font-weight: 600;
-  letter-spacing: .01em;
-  color: rgba(17,24,39,.45);
-  white-space: nowrap;
-  line-height: 1;
-  flex-shrink: 0;
-  text-transform: uppercase;
-}
-.hsr-tile-count::before{ display: none; }
-.hsr-tile.is-active .hsr-tile-count{
-  color: rgba(255,255,255,.85);
-}
-.hsr-tile-count--muted{
-  color: rgba(17,24,39,.35);
-  font-style: italic;
-}
-
-/* Series section header — flat editorial style, integrated with product grid */
-.series.series-hero{
-  padding: 26px 0 0;
-  margin-bottom: -2px;
-  text-align: left;
-  scroll-margin-top: calc(var(--rail-sticky-top, 132px) + 68px);
-  background: transparent;
-}
-.series.series-hero .series-hero-card{
-  position: relative;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: end;
-  gap: 20px 24px;
-  padding: 6px 0 18px 18px;
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-  border-bottom: 1px solid rgba(17,24,39,.08);
-}
-.series.series-hero .series-hero-card::before{
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 4px;
-  bottom: 18px;
-  width: 3px;
-  border-radius: 2px;
-  background: var(--series-accent, var(--primary, #d11c1c));
-}
-.series-hero-content{
-  min-width: 0;
-}
-.series-hero-eyebrow{
-  display: inline-block;
-  font-size: .68rem;
-  font-weight: 800;
-  letter-spacing: .22em;
-  text-transform: uppercase;
-  color: var(--series-accent, rgba(17,24,39,.55));
-  margin-bottom: 6px;
-}
-.series-hero-logo{
-  display: block;
-  height: auto;
-  margin: 0 0 4px;
-}
-.series.series-hero .series-hero-title{
-  font-family: 'Russo One', sans-serif;
-  font-size: clamp(22px, 2.2vw, 28px);
-  letter-spacing: .04em;
-  text-transform: uppercase;
-  color: #0b0c0f;
-  margin: 0 0 6px;
-}
-.series.series-hero .series-hero-title::after{ display: none; }
-.series-hero-desc{
-  margin: 0;
-  color: rgba(17,24,39,.62);
-  font-size: .92rem;
-  line-height: 1.55;
-  max-width: 68ch;
-}
-.series-hero-meta{
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-  padding-bottom: 2px;
-}
-.series-hero-kpi{
-  display: inline-flex;
-  align-items: baseline;
-  gap: 6px;
-  padding: 0;
-  background: transparent;
-  border: 0;
-  font-size: .72rem;
-  font-weight: 700;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: rgba(17,24,39,.5);
-}
-.series-hero-kpi strong{
-  font-family: 'Russo One', sans-serif;
-  font-size: 1.05rem;
-  letter-spacing: .03em;
-  color: var(--series-accent, #0b0c0f);
+@media (min-width: 1100px){
+  .series-products .card{ contain-intrinsic-size: auto 450px; }
 }
 
 .series-products{
   padding-top: 22px;
 }
 
-/* Mobile tweaks */
-@media (max-width: 760px){
-  .home-category-shell{
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-  .home-category-nav{
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-  .home-series-rail{
-    flex-wrap: nowrap;
-    align-items: flex-start;
-    overflow-x: auto;
-    scrollbar-width: none;
-    margin: 0;
-    padding: 10px max(8px, env(safe-area-inset-left, 0px)) 10px max(12px, env(safe-area-inset-right, 0px));
-    scroll-padding-left: max(8px, env(safe-area-inset-left, 0px));
-    scroll-padding-right: max(12px, env(safe-area-inset-right, 0px));
-    -webkit-mask-image: none;
-    mask-image: none;
-    gap: 5px;
-  }
-  .home-series-rail::-webkit-scrollbar{ display: none; }
-  .home-series-rail-strip > .container{
-    position: relative;
-    /* full-bleed sin desbordar: la section ya es 100% del viewport.
-       calc(100%+12px)/-8px sobresalía 4px a la derecha y crecía el ICB,
-       arrastrando al header fijo y provocando arrastre lateral. */
-    width: 100%;
-    margin-left: 0;
-    padding-left: 8px;
-    padding-right: 4px;
-    -webkit-mask-image: none;
-    mask-image: none;
-  }
-  .home-series-rail-strip > .container::before,
-  .home-series-rail-strip > .container::after{
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 32px;
-    pointer-events: none;
-    z-index: 8;
-  }
-  .home-series-rail-strip > .container::before{
-    left: 0;
-    background: linear-gradient(to right, rgba(245,246,248,.98) 0%, rgba(245,246,248,.82) 34%, rgba(245,246,248,0) 100%);
-  }
-  .home-series-rail-strip > .container::after{
-    right: 0;
-    background: linear-gradient(to left, rgba(245,246,248,.98) 0%, rgba(245,246,248,.82) 34%, rgba(245,246,248,0) 100%);
-  }
-  .hsr-tile{
-    flex: 0 0 auto;
-    padding: 16px 8px;
-    width: fit-content;
-    min-width: 0;
-  }
-  .hsr-tile:not(.is-active){
-    border-radius: 11px 0 0 11px;
-  }
-  .hsr-tile-label{ font-size: .88rem; }
-  .hsr-tile-count{ font-size: .58rem; }
-  .series.series-hero{
-    padding: 18px 0 0;
-  }
-  .series-hero .series-hero-card{
-    grid-template-columns: 1fr;
-    padding: 4px 0 14px 14px;
-    gap: 10px;
-    border-radius: 0;
-  }
-  .series.series-hero .series-hero-card::before{
-    top: 2px;
-    bottom: 14px;
-  }
-  .series-hero-meta{ justify-content: flex-start; padding-bottom: 0; }
+/* SEPARADOR ENTRE MARCAS DENTRO DE LA PARRILLA.
+   La parrilla ya venía agrupada —hay una <section class="series-products"> por
+   serie, es decir una por marca— pero el corte no se veía: las 64 tarjetas se
+   leían como una lista larga y el nombre de la marca solo estaba en el logotipo
+   de cada tarjeta.
+
+   Es LA MISMA PIEZA que cierra el bloque de marcas del riel, copiada entera:
+   «**KuKirin.** Rendimiento sólido…» y la raya debajo. Mismo tamaño (.94rem),
+   mismo gris, mismo negro para el nombre, misma medida de lectura y la misma
+   línea de 1px al 10 %. Si se cambia una, hay que cambiar la otra: son la misma
+   cosa dicha en dos sitios.
+
+   La raya va en el <div> —que ocupa todo el ancho del `.container`— y el
+   `max-width` en el <p> de dentro. Juntos en el mismo elemento, la línea se
+   quedaría del ancho del texto. */
+.series-rotulo{
+  margin: 0 0 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(17,24,39,.10);
 }
 
-@media (min-width: 641px) and (max-width: 760px){
-  .home-series-rail .hsr-tile{
-    flex: 0 1 auto;
-    width: auto;
-    min-width: clamp(120px, 18vw, 132px);
-    max-width: 100%;
-    padding: 14px 12px 14px 8px;
-  }
-  .home-series-rail .hsr-tile-label{ font-size: .9rem; }
-  .home-series-rail .hsr-tile-count{ font-size: .6rem; }}
-
-@media (min-width: 761px){
-  .home-series-rail{
-    flex-wrap: wrap;
-  }
-
-  /* La ficha se ACOPLA al texto: 148px es el suelo (mantiene el ritmo de la fila
-     con etiquetas cortas), no un ancho fijo. Con width/max-width clavados a
-     148px y .hsr-tile-label en nowrap, una etiqueta larga se salía de la ficha
-     y pisaba a la siguiente. */
-  .home-series-rail .hsr-tile{
-    flex: 0 1 auto;
-    width: auto;
-    min-width: 148px;
-    max-width: 100%;
-    box-sizing: border-box;
-    justify-content: center;
-    padding-right: 14px;
-    border-radius: 11px 0 0 11px;
-  }
-
-  .home-series-rail .hsr-tile.is-active{
-    border-radius: 11px 3px 3px 11px;
-  }}
-
-@media (max-width: 640px){
-  .home-category-strip{
-    padding: 8px 0 6px;
-  }
-  .home-category-nav{
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    padding: 2px;
-    gap: 2px;
-  }
-  .home-category-chip{
-    min-height: 44px;
-    padding: 5px 0;
-    font-size: clamp(.46rem, 1.55vw, .52rem);
-    font-weight: 700;
-    flex-direction: column;
-    gap: 1px;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-  }
-  .home-category-chip span{
-    display: block;
-    width: auto;
-    max-width: 100%;
-    margin: 0 auto;
-    line-height: 1;
-    letter-spacing: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: clip;
-    text-align: center;
-  }
-  .home-category-chip i{ font-size: .72rem; }
-  .home-category-chip .chip-count{ display: none; }
-  .home-category-chip[data-home-category="accessories"]{ grid-column: auto; }
-  .hsr-tile{ min-width: 100px; max-width: none; }}
-
-
-/* ---- Sticky filter strip: tighter, more editorial ---- */
-.home-category-strip{
-  padding: 10px 0 6px;
-  background: rgba(255, 255, 255, 0.918);
-  border-bottom: 0px solid rgba(255, 255, 255, 0);
+.series-rotulo-txt{
+  margin: 0;
+  font-size: .94rem;
+  line-height: 1.55;
+  color: var(--muted, #676b73);
+  max-width: 68ch;
 }
-.home-category-shell{ gap: 16px; }
-.home-category-nav{
-  background: rgba(241,243,247,.7);
-  border: 1px solid rgba(17,24,39,.05);
-  border-radius: 12px;
-  padding: 3px;
-  gap: 2px;
-}
-.home-category-chip{
-  min-height: 38px;
-  padding: 6px 12px;
-  font-size: .86rem;
-  font-weight: 700;
-  border-radius: 9px;
-  letter-spacing: .005em;
-  color: rgba(17,24,39,.62);
-  transition: background .14s ease, color .14s ease, transform .12s ease;
-}
-.home-category-chip i{ font-size: .9rem; }
-.home-category-chip .chip-count{
-  font-size: .76rem;
-  font-weight: 700;
-  opacity: .7;
-}
-.home-category-chip.is-active{
-  background: #0b0c0f;
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(15,23,42,.16), inset 0 1px 0 rgba(255,255,255,.06);
-  border-color: #0b0c0f;
-}
-.home-category-chip:not(.is-active):hover{
-  background: rgba(255,255,255,.85);
+
+.series-rotulo-txt b{
   color: #0b0c0f;
-}
-@media (max-width: 760px){  .home-category-shell{ grid-template-columns: 1fr; }}
-
-
-/* ---- Series section header: ensure left alignment overrides legacy center ---- */
-.series.series-hero .series-hero-content{
-  justify-self: stretch;
-  text-align: left;
-  width: 100%;
-}
-/* Override .series p { margin:0 auto } and .series { text-align:center } from main.css */
-.series.series-hero p,
-.series.series-hero .series-hero-eyebrow,
-.series.series-hero .series-hero-title,
-.series.series-hero .series-hero-desc{
-  text-align: left;
-  margin-left: 0;
-  margin-right: 0;
+  font-weight: 800;
 }
 
-/* ---- Series rail strip: more breathing room ---- */
-.home-series-rail-strip{ padding: 1px 0 0px; }
+/* El mismo achique que la línea del riel en pantalla estrecha. Va AQUÍ y no en el
+   bloque de 640px de más arriba porque ese bloque está ANTES en el archivo: a
+   igual especificidad ganaba `.series-rotulo-txt{font-size:.94rem}` por ser
+   posterior, y el rótulo se quedaba grande solo en móvil. */
+@media (max-width: 640px){
+  .series-rotulo-txt{ font-size: .88rem; }
+  /* Y el mismo hueco bajo el texto que `.home-marcas > .container` en móvil: 14px,
+     no 18. Es la misma pieza, y una diferencia de 4px se nota cuando las dos
+     aparecen a dos dedos una de otra en el primer tramo. */
+  .series-rotulo{ padding-bottom: 14px; }
+}
 
-/* =============================================================
+/* Aire entre las tarjetas del tramo anterior y el rótulo del siguiente. Los 22px
+   de `.series-products` bastaban cuando no había nada entre medias; ahora
+   arriba hay texto y necesita respirar por los dos lados. */
+.series-products ~ .serie-ancla + .series-products{
+  padding-top: 34px;
+}
+
+/* Con una marca elegida el rótulo sobra: la línea del riel, justo encima, dice
+   ese mismo nombre y ese mismo texto, y su raya ya cierra el bloque. Hace falta
+   decirlo explícitamente porque el filtro esconde con `display:none`, que quita
+   el sitio pero NO saca el elemento del árbol. */
+.home-category-section[data-marca-activa]:not([data-marca-activa=""]) .series-rotulo{
+  display: none;
+}
+
+/* Y como el rótulo se esconde, la raya que queda encima de las tarjetas pasa a ser
+   la de la descripción, que ya trae sus 18 px de relleno. Sumarle aquí otros 22
+   dejaba la primera tarjeta al doble de distancia que con «Todos» —medido: 36 px
+   contra 18—, y ese salto es el que se veía al cambiar de marca.
+   La separación ENTRE tramos no se pierde: la pone la regla de arriba
+   (`.series-products ~ .serie-ancla + .series-products`), que solo mira a los que
+   van detrás de otro. */
+.home-category-section[data-marca-activa]:not([data-marca-activa=""]) .series-products{
+  /* 4 y no 0: el relleno de arriba es lo unico que separa la raya de la primera
+     tarjeta, porque el del contenedor queda DENTRO de el —mueve la raya, no aleja
+     la tarjeta—. Con 0 quedaban 14 px y con «Todos» hay 18; estos 4 igualan. */
+  padding-top: 4px;
+}
+
+/* Mobile tweaks */
+/* ==============================================================
    UNIFIED EDITORIAL POLISH (May 2026)
    Re-skin Features / Sobre nosotros / FAQ / Ubicación / Legal
    to one consistent flat editorial language.
@@ -797,104 +4318,16 @@
 /* --- Shared section heading: eyebrow + flat title + accent rule --- */
 
 /* Section wrapper rhythm */
-.features{ padding: 40px 0 24px; }
 #faq.deferred-section{ padding-top: 36px; padding-bottom: 12px; }
-.legal{ padding: 44px 0 32px; }
+/* `.legal` se declaraba DOS veces: aqui el relleno y mas abajo otro con
+   `!important` que lo pisaba entero. Se queda solo el de abajo. */
 
-/* --- 1) Section header (Por qué SCOOT SHOP) --- */
-.features .section-header{
-  text-align: left;
-  max-width: none;
-  margin: 0 0 22px;
-  padding: 0 0 16px 18px;
-  position: relative;
-  border-bottom: 1px solid rgba(17,24,39,.08);
-}
-.features .section-header::before{
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 4px;
-  bottom: 18px;
-  width: 3px;
-  border-radius: 2px;
-  background: var(--primary, #d11c1c);
-}
-.features .section-header .section-eyebrow{
-  display: inline-block;
-  font-size: .68rem;
-  font-weight: 800;
-  letter-spacing: .22em;
-  text-transform: uppercase;
-  color: var(--primary, #d11c1c);
-  margin: 0 0 6px;
-}
-.features .section-header h2{
-  text-align: left;
-  margin: 0 0 6px;
-  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
-  font-weight: 800;
-  text-transform: none;
-  font-size: clamp(1.35rem, 1.05rem + 1vw, 1.7rem);
-  letter-spacing: -.015em;
-  line-height: 1.22;
-  color: #0b0c0f;
-}
-.features .section-header h2::after{ display: none; }
-.features .section-header .section-subtitle{
-  text-align: left;
-  margin: 0;
-  max-width: 64ch;
-  color: rgba(17,24,39,.62);
-  font-weight: 500;
-  font-size: .95rem;
-  line-height: 1.6;
-}
-
-/* --- 2) Feature cards: flat, minimal, uniform --- */
-.feature-grid{
-  gap: 14px;
-}
-.feature-card{
-  background: #fff;
-  border: 1px solid rgba(17,24,39,.08);
-  border-radius: 16px;
-  padding: 18px 18px 16px;
-  box-shadow: none;
-  transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease;
-}
-.feature-card:hover{
-  transform: translateY(-2px);
-  border-color: rgba(17,24,39,.16);
-  box-shadow: 0 10px 24px rgba(15,23,42,.05);
-}
-.feature-card .f-icon{
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  border: 0;
-  background: rgba(209,28,28,.08);
-  box-shadow: none;
-}
-.feature-card .f-icon i{
-  color: var(--primary, #d11c1c);
-  font-size: 17px;
-}
-.feature-card h3{
-  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
-  font-weight: 800;
-  font-size: 1rem;
-  letter-spacing: -.005em;
-  color: #0b0c0f;
-  margin: 0;
-}
-.feature-card p{
-  margin: 0;
-  color: rgba(17,24,39,.6);
-  font-size: .9rem;
-  font-weight: 500;
-  line-height: 1.5;
-}
+/* Aqui vivian «Por que SCOOT SHOP» (.section-header, .section-eyebrow,
+   .section-subtitle) y sus cuatro tarjetas (.feature-grid, .feature-card,
+   .f-icon). La seccion se fusiono con «Como funciona la web» en un solo dosier y
+   las cuatro razones pasaron a ser la lista de hechos del rail: no eran tarjetas,
+   eran condiciones de venta, y una condicion no necesita ni caja, ni sombra, ni
+   icono de color. Ninguna pagina las usa ya. */
 
 /* --- 4) Section titles unified: FAQ / Legal --- */
 #faq h2,
@@ -926,9 +4359,18 @@
 .legal h2::after{ display: none !important; }
 
 /* --- Información legal — DOSIER editorial layout (full redesign) --- */
+/* BLANCA, como «Los mas vendidos». Tenia un degradado de transparente a
+   rgba(17,24,39,.018) —una sombra de menos del 2 %— que sobre el gris del body
+   no se veia y sobre blanco tampoco: no hacia nada mas que impedir que la
+   seccion tuviera un fondo de verdad.
+
+   Y el relleno de abajo lo pone ESTA seccion, no el margen de `.payments`: el
+   pie es una banda oscura a sangre y un margen suyo dejaba ver el gris del body
+   entre el blanco del legal y el negro del pie, una raya gris justo en la
+   costura. Asi el blanco llega hasta el filo. */
 .legal{
-  padding: 64px 0 56px !important;
-  background: linear-gradient(180deg, transparent 0%, rgba(17,24,39,.018) 100%);
+  padding: 64px 0 clamp(56px, 5vw, 88px) !important;
+  background: var(--suelo);
 }
 .legal .container{ max-width: 1200px; }
 
@@ -936,6 +4378,206 @@
 .legal > .container > h2{ display: none; }
 
 #legal .container{ max-width: 1300px; }
+
+/* =====================================================
+   EL DOSIER — el reparto de «Informacion legal», ahora compartido
+
+   Un rail a la izquierda que dice de que va el bloque y con que autoridad, y un
+   cuerpo a la derecha con el contenido. Lo que separa una cosa de otra es el
+   aire y una raya de 1 px: ni cajas, ni sombras, ni iconos de color.
+
+   Nacio en «Informacion legal» y era la UNICA seccion de la portada que se leia
+   asi —por eso destacaba tanto entre las demas—. Ahora lo hablan tambien «Como
+   compras aqui» y «Somos SCOOT SHOP», y el legal deja de ser una isla para ser
+   el final de una secuencia.
+
+   `.legal-dossier` conserva su nombre y sus medidas propias (columna fija de
+   340px y rail pegajoso) porque su columna derecha es una lista de enlaces
+   larga; este es el mismo reparto en su version corriente.
+   ===================================================== */
+.dosier{
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 2.1fr);
+  gap: 0;
+  align-items: start;
+}
+
+.dosier-rail{ padding: 0 44px 0 0; }
+
+/* El filo es del CUERPO y no un `::before` colocado a mano como en el legal: ahi
+   la columna mide 340px fijos y se podia calcular la posicion; aqui las dos son
+   fraccionarias y cualquier numero escrito seria mentira en el siguiente ancho. */
+.dosier-cuerpo{
+  padding: 0 0 0 44px;
+  border-left: 1px solid rgba(17,24,39,.10);
+  min-width: 0;
+}
+
+@media (max-width: 900px){
+  .dosier{ grid-template-columns: 1fr; }
+  .dosier-rail{ padding: 0 0 30px; }
+  .dosier-cuerpo{
+    padding: 30px 0 0;
+    border-left: 0;
+    border-top: 1px solid rgba(17,24,39,.10);
+  }
+}
+
+/* EL ROTULO DE SECCION, uno solo para las tres.
+
+   Estaba escrito TRES veces igual —.dosier-eyebrow, .legal-dossier-eyebrow y
+   .faq-eyebrow— con los mismos numeros; tres copias de una cosa acaban siempre
+   en tres cosas distintas.
+
+   Y va en gris, no en rojo. Llevaba letra roja MAS un filo rojo de 2px encima, y
+   repetido en cada seccion la portada acababa con cuatro reclamos del mismo tono
+   compitiendo entre ellos y con lo unico que de verdad tiene que gritar. En esta
+   web el rojo es de «comprar» y de la oferta de la semana: gastarlo en rotular
+   un titular es quitarselo a los botones. Un rotulo orienta, no llama.
+
+   Fuera tambien los dos filos: sin el rojo, la pestaña no dibujaba nada — solo
+   metia dos rayas mas en una pagina que ya se ordena con rayas. */
+.dosier-eyebrow,
+.legal-dossier-eyebrow,
+.faq-eyebrow{
+  display: inline-block;
+  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  color: rgba(17,24,39,.42);
+  margin: 0 0 16px;
+  padding: 0;
+  border: 0;
+}
+
+.dosier-lead{
+  margin: 0;
+  font-size: .96rem;
+  line-height: 1.62;
+  color: rgba(17,24,39,.6);
+  font-weight: 500;
+  max-width: 38ch;
+}
+
+/* Los HECHOS: las cuatro condiciones de venta. Filas con raya, no tarjetas — lo
+   que las separa es lo mismo que separa los documentos del legal.
+   En la columna ancha van de dos en dos: a todo lo ancho, cuatro renglones de
+   una linea con 700 px de blanco a la derecha no eran una lista, eran cuatro
+   frases sueltas. */
+.dosier-hechos{
+  list-style: none;
+  margin: 30px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 36px;
+  row-gap: 0;
+}
+
+.dosier-hechos li{
+  display: grid;
+  gap: 2px;
+  padding: 11px 0;
+  border-top: 1px solid rgba(17,24,39,.08);
+}
+
+/* La raya de arriba la llevan TODOS menos los dos de la primera fila: en una
+   parrilla de dos columnas «el primero» son dos, no uno. */
+.dosier-hechos li:nth-child(-n+2){ border-top: 0; padding-top: 0; }
+
+.dosier-hechos strong{
+  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
+  font-weight: 800;
+  font-size: .95rem;
+  letter-spacing: -.01em;
+  color: #0b0c0f;
+}
+
+.dosier-hechos span{
+  font-size: .84rem;
+  line-height: 1.45;
+  color: rgba(17,24,39,.55);
+}
+
+/* En una columna, de una en una. Esta regla tiene que ir DESPUES de la parrilla
+   de dos: las dos valen lo mismo de especificidad, asi que manda la ultima —
+   puesta arriba junto al resto del media query del dosier, perdia y en el movil
+   seguian saliendo dos columnas de 150 px con los titulos partidos en tres. */
+@media (max-width: 640px){
+  .dosier-hechos{ grid-template-columns: 1fr; column-gap: 0; }
+  .dosier-hechos li:nth-child(-n+2){ border-top: 1px solid rgba(17,24,39,.08); padding-top: 11px; }
+  .dosier-hechos li:first-child{ border-top: 0; padding-top: 0; }
+}
+
+/* Los DATOS: pares de dato y valor. Mismo dibujo que `.legal-dossier-meta`, pero
+   aqui son el contenido de la seccion y no una nota al pie del rail, asi que
+   ocupan la columna ancha y crecen de tamaño. */
+.dosier-datos{
+  margin: 0;
+  display: grid;
+  gap: 0;
+}
+
+.dosier-datos > div{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 16px;
+  padding: 16px 0;
+  border-top: 1px solid rgba(17,24,39,.08);
+}
+
+.dosier-datos > div:first-child{ border-top: 0; padding-top: 0; }
+.dosier-datos > div[hidden]{ display: none; }
+
+.dosier-datos dt{
+  margin: 0;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(17,24,39,.42);
+}
+
+.dosier-datos dd{
+  margin: 0;
+  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
+  font-size: 1.02rem;
+  font-weight: 800;
+  letter-spacing: -.01em;
+  color: #0b0c0f;
+  text-align: right;
+}
+
+/* La linea que presenta lo que viene en el cuerpo. */
+.dosier-tag{
+  margin: 0 0 18px;
+  font-size: .86rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: rgba(17,24,39,.5);
+}
+
+/* Las tres maquetas dentro del dosier. Su `aspect-ratio` de 4/2.9 estaba
+   calibrado para tres columnas a TODO el ancho del contenedor; aqui viven en la
+   columna ancha del dosier, que es mas estrecha, y con la misma proporcion
+   quedaban 90 px mas bajas que el rail — dejando un hueco blanco a la derecha
+   que se leia como un error de maquetacion. Se les da alto, que es justo lo que
+   les sobraba: la maqueta se ve mejor cuanto menos apretada esta. */
+.dosier .funciona-arte{ aspect-ratio: 4 / 3.5; }
+
+/* Con la columna mas estrecha el rotulo de cada tarjeta parte en dos lineas.
+   Cabe, pero apretado: se le quita una pizca de cuerpo y se le da interlineado. */
+.dosier .funciona-pie{ padding: 13px 14px; }
+.dosier .funciona-pie-tit{ font-size: .94rem; line-height: 1.25; }
+
+/* Ritmo de las dos secciones que lo estrenan. */
+.about.deferred-section{
+  padding: clamp(44px, 4.2vw, 70px) 0 clamp(44px, 4.2vw, 70px);
+  background: var(--suelo);
+}
 
 .legal-dossier{
   display: grid;
@@ -960,20 +4602,13 @@
   top: calc(var(--header-h, 72px) + 24px);
   padding-right: 8px;
 }
-.legal-dossier-eyebrow{
-  display: inline-block;
-  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
-  font-size: .68rem;
-  font-weight: 800;
-  letter-spacing: .28em;
-  text-transform: uppercase;
-  color: var(--primary, #d11c1c);
-  margin-bottom: 14px;
-  padding: 6px 0;
-  border-top: 2px solid var(--primary, #d11c1c);
-  border-bottom: 1px solid rgba(17,24,39,.08);
-}
-.legal-dossier-aside h2{
+.legal-dossier-aside h2,
+.dosier-rail h2{
+  /* Mismo motivo que en los rotulos de seccion de arriba: el .04em de la lista
+     de main.css es el trazo con el que se dibuja la negrita de Russo One, y
+     estos ya son Jakarta 800. Lleva `!important` porque esa lista pesa como un
+     id —incluye `#legal h2`— y sin el gana ella. */
+  -webkit-text-stroke: .02em currentColor !important;
   display: block !important;
   font-family: var(--ui, 'Plus Jakarta Sans', sans-serif) !important;
   font-weight: 800 !important;
@@ -987,7 +4622,9 @@
   text-transform: none !important;
 }
 .legal-dossier-aside h2::before,
-.legal-dossier-aside h2::after{ display: none !important; }
+.legal-dossier-aside h2::after,
+.dosier-rail h2::before,
+.dosier-rail h2::after{ display: none !important; }
 .legal-dossier-lead{
   margin: 0 0 28px;
   font-size: .96rem;
@@ -1141,8 +4778,7 @@
     grid-template-columns: 1fr;
     gap: 4px;
   }
-  .legal-dossier-meta dd{ font-size: 1rem; }
-}
+  .legal-dossier-meta dd{ font-size: 1rem; }}
 @media (max-width: 600px){
   .legal-dossier-meta{ grid-template-columns: 1fr 1fr; }
   .legal-dossier-item > a{
@@ -1166,57 +4802,9 @@
 
 /* --- Mobile --- */
 @media (max-width: 760px){
-  #faq.deferred-section{ padding-top: 32px; }
-}
+  #faq.deferred-section{ padding-top: 32px; }}
 
 
-/* ---- Section header: refined editorial style ---- */
-.section-header{ margin-bottom: 26px; }
-.section-eyebrow{
-  display: inline-block;
-  font-size: .66rem;
-  font-weight: 900;
-  letter-spacing: .22em;
-  text-transform: uppercase;
-  color: rgba(17,24,39,.42);
-  margin-bottom: 10px;
-}
-.section-header h2{
-  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
-  font-weight: 800;
-  text-transform: none;
-  font-size: clamp(1.35rem, 1.1rem + .9vw, 1.85rem);
-  letter-spacing: -.015em;
-  line-height: 1.2;
-}
-.section-header .section-subtitle{
-  font-weight: 500;
-  color: rgba(17,24,39,.6);
-  font-size: clamp(.95rem, .9rem + .2vw, 1.04rem);
-}
-
-/* ---- Features cards: lighter, more elegant ---- */
-.features{ padding: 32px 0 14px; }
-.feature-card{
-  background: #fff;
-  border-radius: 18px;
-  padding: 20px;
-  box-shadow: 0 8px 22px rgba(15,23,42,.04);
-}
-.feature-card h3{
-  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
-  font-weight: 800;
-  font-size: 1rem;
-  letter-spacing: -.005em;
-}
-.f-icon{
-  width: 42px;
-  height: 42px;
-  background: linear-gradient(180deg, #fff, #f6f7fa);
-  box-shadow: 0 4px 10px rgba(15,23,42,.04), inset 0 0 0 1px rgba(17,24,39,.05);
-  border: 0;
-}
-.f-icon i{ font-size: 18px; }
 
 /* ---- FAQ intro spacing ---- */
 #faq h2{
@@ -1226,8 +4814,9 @@
   letter-spacing: -.015em;
 }
 
-/* ---- Footer brand line ---- */
-.payments{ padding: 32px 0 0; }
+/* Aqui habia un `.payments{ padding: 32px 0 0 }` que pisaba al de arriba. Con el
+   pie oscuro el relleno lo pone `.site-footer` por dentro: si lo pusiera la
+   seccion, el fondo negro empezaria 32px antes que su contenido. */
 /* ---- Catalog category headers (when shown) ---- */
 .catalog-category{ padding-top: 14px; }
 .catalog-category h2{
@@ -1249,33 +4838,24 @@
 /* ---- Skip link / accessibility (kept) ---- */
 
 /* =====================================================
-   ABOUT (Sobre nosotros) + FAQ — minimalist editorial
-   Same visual language as the rest of the page.
+   PREGUNTAS FRECUENTES — editorial minimalista
+
+   Este bloque ya NO se pinta en la portada: vive en /preguntas. La hoja se queda
+   aqui porque esa pagina carga css/index.css igual que las de categoria, y
+   partirla en una hoja nueva seria una peticion mas para las mismas reglas.
+   Lo que se ha ido son las de «Sobre nosotros», que ahora es un dosier.
    ===================================================== */
 
-#about.deferred-section,
-#faq.deferred-section{
-  padding-top: 56px;
-  padding-bottom: 24px;
+/* Ya no lleva `.deferred-section`: en la portada era una seccion mas y podia
+   aplazar su pintado, pero en /preguntas ES la pagina. */
+#faq{
+  padding-top: 40px;
+  padding-bottom: clamp(56px, 6vw, 96px);
+  background: #fff;
 }
 
-/* --- Shared eyebrow / title --- */
-.about-eyebrow,
-.faq-eyebrow{
-  display: inline-block;
-  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
-  font-size: .68rem;
-  font-weight: 800;
-  letter-spacing: .28em;
-  text-transform: uppercase;
-  color: var(--primary, #d11c1c);
-  margin: 0 0 14px;
-  padding: 6px 0;
-  border-top: 2px solid var(--primary, #d11c1c);
-  border-bottom: 1px solid rgba(17,24,39,.1);
-}
 
-.about-block > h2,
+.faq-block > h1,
 .faq-block > h2{
   display: block !important;
   font-family: var(--ui, 'Plus Jakarta Sans', sans-serif) !important;
@@ -1289,62 +4869,22 @@
   text-align: left !important;
   text-transform: none !important;
 }
-.about-block > h2::before,
-.about-block > h2::after,
+.faq-block > h1::before,
+.faq-block > h1::after,
 .faq-block > h2::before,
 .faq-block > h2::after{ display: none !important; }
 
-/* --- ABOUT block --- */
-.about-block{
-  display: grid;
-  gap: 18px;
-  padding-bottom: 40px;
-  border-bottom: 1px solid rgba(17,24,39,.06);
-}
-.about-lead{
-  margin: 0;
-  max-width: 72ch;
-  font-size: 1rem;
-  line-height: 1.7;
-  color: rgba(17,24,39,.66);
-  font-weight: 500;
-}
-.about-lead strong{ color: #0b0c0f; font-weight: 700; }
-.about-stats{
-  list-style: none;
-  margin: 18px 0 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  border-top: 1px solid rgba(17,24,39,.06);
-}
-.about-stats li{
-  padding: 22px 20px 22px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  border-right: 1px solid rgba(17,24,39,.06);
-}
-.about-stats li:last-child{ border-right: 0; padding-right: 0; }
-.about-stats li + li{ padding-left: 24px; }
-.about-stat-num{
-  font-family: var(--ui, 'Plus Jakarta Sans', sans-serif);
-  font-weight: 800;
-  font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.2rem);
-  letter-spacing: -.025em;
-  line-height: 1;
-  color: #0b0c0f;
-}
-.about-stat-label{
-  font-size: .72rem;
-  font-weight: 800;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  color: rgba(17,24,39,.5);
-}
-
 /* --- FAQ block --- */
 .faq-block{ display: block; }
+.faq-lead a{
+  color: var(--primary, #d11c1c);
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(209,28,28,.35);
+}
+
+.faq-lead a:hover{ border-bottom-color: var(--primary, #d11c1c); }
+
 .faq-lead{
   margin: 0 0 28px;
   max-width: 64ch;
@@ -1453,244 +4993,11 @@
 
 /* --- Mobile --- */
 @media (max-width: 760px){
-  #about.deferred-section,
-  #faq.deferred-section{ padding-top: 36px; }
-
-  .about-block{ padding-bottom: 28px; }
-  .about-stats{ grid-template-columns: repeat(2, 1fr); }
-  .about-stats li{
-    padding: 18px 16px 18px 0 !important;
-  }
-  .about-stats li:nth-child(2n){ border-right: 0; padding-right: 0; }
-  .about-stats li:nth-child(n+3){ border-top: 1px solid rgba(17,24,39,.08); }
-  .about-stats li + li{ padding-left: 0; }
-  .about-stats li:nth-child(2n+1){ padding-right: 16px; }
-  .about-stats li:nth-child(2n){ padding-left: 16px; }
+  #faq{ padding-top: 28px; }
 
   .faq-list-clean summary{
     padding: 18px 44px 18px 44px !important;
     font-size: .96rem;
   }
   .faq-list-clean details::before{ left: 0; top: 22px; font-size: .72rem; }
-  .faq-list-clean details p{ padding: 0 16px 18px 44px !important; font-size: .92rem !important; }
-}
-
-/* FINAL OVERRIDE — Category strip clean minimal */
-.home-category-strip--revamp{
-  padding: 5px 0 3px !important;
-  background: #fff !important;
-  border-bottom: 1px solid rgba(17, 24, 39, 0) !important;
-}
-
-.home-category-strip--revamp .home-category-shell{
-  display: block !important;
-  position: relative;
-}
-
-.home-category-strip--revamp .home-category-head,
-.home-category-strip--revamp .home-category-chip-meta{
-  display: none !important;
-}
-
-.home-category-strip--revamp .home-category-nav{
-  display: grid !important;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  gap: 0 !important;
-  width: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-.home-category-strip--revamp .home-category-chip{
-  position: relative;
-  min-height: 50px !important;
-  padding: 5px 4px 7px !important;
-  overflow: visible !important;
-  box-sizing: border-box !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  border-bottom: 0 !important;
-  background: transparent !important;
-  color: rgba(17,24,39,.62) !important;
-  font-size: .86rem !important;
-  font-weight: 650 !important;
-  line-height: 1 !important;
-  letter-spacing: 0 !important;
-  display: inline-flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 3px !important;
-  box-shadow: none !important;
-  transform: none !important;
-}
-
-.home-category-strip--revamp .home-category-chip + .home-category-chip::before{
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 50%;
-  width: 1px;
-  height: 12px;
-  transform: translateY(-50%);
-  background: rgba(17,24,39,.08);
-}
-
-.home-category-strip--revamp .home-category-chip::after{
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: 1px;
-  width: 0;
-  height: 3px;
-  border-radius: 999px;
-  background: #0b0c0fbb;
-  transform: translateX(-50%);
-  opacity: 0;
-  transition: width .18s ease, opacity .18s ease;
-}
-
-.home-category-strip--revamp .home-category-chip-icon{
-  display: inline-flex !important;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  max-width: none !important;
-  overflow: visible !important;
-  white-space: normal !important;
-  line-height: 1 !important;
-  color: rgba(17,24,39,.62) !important;
-  opacity: .82;
-}
-
-.home-category-strip--revamp .home-category-chip-icon i{
-  display: inline-block !important;
-  width: auto !important;
-  height: auto !important;
-  background: transparent !important;
-  border-radius: 0 !important;
-  font-size: .88rem;
-  line-height: 1 !important;
-  color: rgba(17,24,39,.62) !important;
-}
-
-.home-category-strip--revamp .home-category-chip-copy{
-  display: block;
-  min-width: 0;
-  text-align: center;
-}
-
-.home-category-strip--revamp .home-category-chip-label{
-  display: block;
-  white-space: nowrap;
-  font-size: .8rem;
-  line-height: 1;
-  color: currentColor;
-}
-
-.home-category-strip--revamp .home-category-chip:hover{
-  color: rgba(11,12,15,.9) !important;
-}
-
-.home-category-strip--revamp .home-category-chip.is-active{
-  color: #0b0c0f !important;
-}
-
-.home-category-strip--revamp .home-category-chip.is-active .home-category-chip-icon,
-.home-category-strip--revamp .home-category-chip.is-active .home-category-chip-icon i{
-  color: #0b0c0f !important;
-  opacity: 1;
-}
-
-.home-category-strip--revamp .home-category-chip.is-active::after{
-  width: 56%;
-  opacity: 1;
-}
-
-@media (max-width: 900px){
-  .home-category-strip--revamp .home-category-chip{
-    font-size: .78rem !important;
-    gap: 2px !important;
-    min-height: 46px !important;
-  }
-
-  .home-category-strip--revamp .home-category-chip-icon i{
-    font-size: .82rem;
-  }}
-
-@media (max-width: 640px){
-  .home-category-strip--revamp{
-    padding: 3px 0 2px !important;
-  }
-
-  .home-category-strip--revamp .home-category-nav{
-    display: grid !important;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-    overflow: visible !important;
-    width: calc(100% + 10px) !important;
-    margin-left: -7px !important;
-    padding-left: 7px !important;
-    padding-right: 3px !important;
-  }
-
-  .home-category-strip--revamp .home-category-nav::-webkit-scrollbar{
-    display: none !important;
-  }
-
-  .home-category-strip--revamp .home-category-chip{
-    min-width: 0 !important;
-    min-height: 44px !important;
-    padding: 7px 2px 7px !important;
-    gap: 3px !important;
-    font-size: clamp(.68rem, 1.9vw, .74rem) !important;
-  }
-
-  .home-category-strip--revamp .home-category-chip-icon{
-    width: 20px;
-    height: 20px;
-  }
-
-  .home-category-strip--revamp .home-category-chip + .home-category-chip::before{
-    height: 10px;
-  }
-
-  .home-category-strip--revamp .home-category-chip-icon i{
-    font-size: .84rem;
-  }
-
-  .home-category-strip--revamp .home-category-chip-label{
-    font-size: clamp(.72rem, 2.2vw, .8rem);
-  }}
-
-@media (max-width: 760px){
-  .home-category-strip--revamp .home-category-nav{
-    width: calc(100% + 12px) !important;
-    margin: 0 0 0 -8px !important;
-    padding: 0 4px 0 8px !important;
-  }
-
-  .home-category-strip--revamp .home-category-shell::before,
-  .home-category-strip--revamp .home-category-shell::after{
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 12px;
-    pointer-events: none;
-    z-index: 3;
-  }
-
-  .home-category-strip--revamp .home-category-shell::before{
-    left: 0;
-    background: linear-gradient(to right, rgba(255,255,255,.96) 0%, rgba(255,255,255,0) 100%);
-  }
-
-  .home-category-strip--revamp .home-category-shell::after{
-    right: 0;
-    background: linear-gradient(to left, rgba(255,255,255,.96) 0%, rgba(255,255,255,0) 100%);
-  }}
+  .faq-list-clean details p{ padding: 0 16px 18px 44px !important; font-size: .92rem !important; }}

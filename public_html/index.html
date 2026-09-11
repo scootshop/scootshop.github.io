@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
-  <title>Patinetes eléctricos | SCOOT SHOP</title>
-  <meta name="description" content="Patinetes eléctricos fiables y potentes. Envío 6–8 días, pago seguro y condiciones claras de entrega, devolución y garantía en SCOOT SHOP." />
+  <title>SCOOT SHOP | Tienda de patinetes eléctricos, accesorios y repuestos</title>
+  <meta name="description" content="Tienda de patinetes eléctricos, accesorios y repuestos. Envío 6–8 días, pago seguro y condiciones claras de entrega, devolución y garantía." />
   <meta name="robots" content="index,follow,max-image-preview:large" />
   <meta name="format-detection" content="telephone=no" />
   <meta name="theme-color" content="#ffffff" />
@@ -13,7 +13,7 @@
 
   <link rel="canonical" href="https://scootshop.co/" />
 
-  <meta name="asset-version" content="20260814-4" />
+  <meta name="asset-version" content="20260911-4" />
 
   <!-- Memoria de scroll. Aquí SOLO va lo que hay que decidir antes del primer
        pintado; guardar, restaurar y re-anclar viven en js/scroll-memoria.js, que
@@ -26,7 +26,7 @@
        las tarjetas se enseñan sin transición. Va aquí y no en main.css porque este HTML
        se sirve sin caché: cambiarlo no obliga a subir la versión global. -->
   <style>html.ss-volviendo body{visibility:hidden}html.ss-sin-entrada .card.reveal-ready{opacity:1;transform:none;transition:none}</style>
-  <script>(function(){try{if('scrollRestoration' in history)history.scrollRestoration='manual';var s=history.state,v=!!(s&&s.ss&&(s.ss.id||s.ss.y>0));window.SS_SCROLL={volviendo:v};var d=document.documentElement;if(v){d.classList.add('ss-volviendo');d.classList.add('ss-sin-entrada');setTimeout(function(){d.classList.remove('ss-volviendo');},1800);return;}if(location.hash)return;var t=function(){try{window.scrollTo(0,0);}catch(e){}};t();document.addEventListener('DOMContentLoaded',function(){t();requestAnimationFrame(function(){t();requestAnimationFrame(t);});},{once:true});}catch(e){}})();</script>
+  <script>(function(){try{if('scrollRestoration' in history)history.scrollRestoration='manual';var s=history.state,nv=(performance.getEntriesByType&&performance.getEntriesByType('navigation')[0])||null,rc=nv?nv.type==='reload':(performance.navigation&&performance.navigation.type===1),v=!rc&&!!(s&&s.ss&&(s.ss.id||s.ss.y>0));window.SS_SCROLL={volviendo:v};var d=document.documentElement;if(v){d.classList.add('ss-volviendo');d.classList.add('ss-sin-entrada');setTimeout(function(){d.classList.remove('ss-volviendo');},1800);return;}if(location.hash)return;var t=function(){try{window.scrollTo(0,0);}catch(e){}};t();document.addEventListener('DOMContentLoaded',function(){t();requestAnimationFrame(function(){t();requestAnimationFrame(t);});},{once:true});}catch(e){}})();</script>
 
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -35,19 +35,21 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-  <link rel="manifest" href="/site.webmanifest?v=20260814-4" />
+  <link rel="manifest" href="/site.webmanifest?v=20260911-4" />
   <link rel="alternate" href="https://scootshop.co/" hreflang="es" />
   <meta name="apple-mobile-web-app-title" content="SCOOT SHOP" />
   <meta name="application-name" content="SCOOT SHOP" />
 
   <!-- La precarga DEBE declarar el mismo srcset/sizes que el <img> del hero: si
        solo se precargara el original, el navegador se traería esa foto y además
-       la variante que elija el srcset (descarga doble del LCP en móvil). -->
-  <link rel="preload" as="image" href="/img/portada_4.webp" imagesrcset="/img/portada_4-480.webp 480w, /img/portada_4-800.webp 800w, /img/portada_4-1200.webp 1200w, /img/portada_4.webp 1400w" imagesizes="(max-width:1380px) 94vw, 1296px" fetchpriority="high" />
+       la variante que elija el srcset (descarga doble del LCP en móvil).
+       Desde la cartelera con asomo hay UNA sola pieza por portada (el arte
+       vertical 4:5) en los dos tamaños, así que basta una precarga sin media. -->
+  <link rel="preload" as="image" href="/img/portada/portada_s7-v2-movil-4x5-480.webp" imagesrcset="/img/portada/portada_s7-v2-movil-4x5-480.webp 480w, /img/portada/portada_s7-v2-movil-4x5-720.webp 720w, /img/portada/portada_s7-v2-movil-4x5-940.webp 940w, /img/portada/portada_s7-v2-movil-4x5-1122.webp 1122w" imagesizes="(max-width:760px) 100vw, 35vw" fetchpriority="high" />
 
   <meta property="og:url" content="https://scootshop.co/" />
-  <meta property="og:title" content="Patinetes eléctricos | SCOOT SHOP" />
-  <meta property="og:description" content="Patinetes eléctricos fiables y potentes. Envío 6–8 días, pago seguro y condiciones claras de entrega, devolución y garantía en SCOOT SHOP." />
+  <meta property="og:title" content="SCOOT SHOP | Tienda de patinetes eléctricos, accesorios y repuestos" />
+  <meta property="og:description" content="Tienda de patinetes eléctricos, accesorios y repuestos. Envío 6–8 días, pago seguro y condiciones claras de entrega, devolución y garantía." />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="SCOOT SHOP" />
   <meta property="og:locale" content="es_ES" />
@@ -57,26 +59,28 @@
   <meta property="og:image:type" content="image/webp" />
 
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Patinetes eléctricos | SCOOT SHOP" />
-  <meta name="twitter:description" content="Patinetes eléctricos fiables y potentes. Envío 6–8 días, pago seguro y condiciones claras de entrega, devolución y garantía en SCOOT SHOP." />
+  <meta name="twitter:title" content="SCOOT SHOP | Tienda de patinetes eléctricos, accesorios y repuestos" />
+  <meta name="twitter:description" content="Tienda de patinetes eléctricos, accesorios y repuestos. Envío 6–8 días, pago seguro y condiciones claras de entrega, devolución y garantía." />
   <meta name="twitter:image" content="https://scootshop.co/img/0-removebg-preview.webp" />
 
   <link rel="preload" as="font" type="font/woff2" href="/fonts/plus-jakarta-sans-latin.woff2" crossorigin />
   <link rel="preload" as="font" type="font/woff2" href="/fonts/russo-one-latin.woff2" crossorigin />
-  <link rel="stylesheet" href="/css/fuentes.css?v=20260814-4" />
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/tangerine-versatil.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/fa-brands-400.woff2" crossorigin />
+  <link rel="stylesheet" href="/css/fuentes.css?v=20260911-4" />
 
   <!-- Google Fonts principales -->
 
   <!-- Font Awesome: subset local (solo iconos usados) -->
-  <link rel="stylesheet" href="/css/icons.css?v=20260814-4" />
+  <link rel="stylesheet" href="/css/icons.css?v=20260911-4" />
 
-  <link rel="stylesheet" href="/css/main.css?v=20260814-4" />
-  <link rel="stylesheet" href="/css/partials.mobile-menu.css?v=20260814-4" />
-  <link rel="stylesheet" href="/css/index.css?v=20260814-4" />
+  <link rel="stylesheet" href="/css/main.css?v=20260911-4" />
+  <link rel="stylesheet" href="/css/partials.mobile-menu.css?v=20260911-4" />
+  <link rel="stylesheet" href="/css/index.css?v=20260911-4" />
 
   <script src="/js/index-head.js?v=20260605-2" defer></script>
-  <script src="/js/cart-runtime.js?r=20260813-5&v=20260814-4" defer></script>
-  <script src="/js/scroll-memoria.js?v=20260814-4" defer></script>
+  <script src="/js/cart-runtime.js?r=20260911-1&v=20260911-4" defer></script>
+  <script src="/js/scroll-memoria.js?v=20260911-4" defer></script>
 
   <script type="application/ld+json">
   {
@@ -114,7 +118,7 @@
         "@type": "WebPage",
         "@id": "https://scootshop.co/#webpage",
         "url": "https://scootshop.co/",
-        "name": "Patinetes eléctricos | SCOOT SHOP",
+        "name": "SCOOT SHOP | Tienda de patinetes eléctricos, accesorios y repuestos",
         "isPartOf": { "@id": "https://scootshop.co/#website" },
         "about": { "@id": "https://scootshop.co/#org" },
         "primaryImageOfPage": {
@@ -122,76 +126,6 @@
           "url": "https://scootshop.co/img/0-removebg-preview.webp"
         },
         "inLanguage": "es-ES"
-      },
-      {
-        "@type": "FAQPage",
-        "@id": "https://scootshop.co/#faq",
-        "mainEntity": [
-          {
-            "@type": "Question",
-            "name": "¿Cuánto tarda el envío?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "El envío tarda 6–8 días hábiles."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "¿Cuál es la garantía?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Aplicamos la garantía legal de conformidad vigente en España para consumidores y soporte posventa por canales oficiales."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "¿Incluye accesorios?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Sí, incluye soporte móvil, candado y cargador según modelo."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "¿Dónde puedo verlo?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Puedes verlo en Silla y Catarroja (Valencia)."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "¿Qué autonomía tienen los patinetes eléctricos?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Depende del modelo, peso del conductor, terreno y modo de conducción; cada ficha técnica muestra su rango estimado."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "¿Qué métodos de pago aceptáis?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Aceptamos pagos online mediante Stripe, además de Bizum y transferencia bancaria."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "¿Me ayudáis a elegir el modelo ideal?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Sí. Te asesoramos por WhatsApp según tu presupuesto, tipo de trayecto y preferencias de autonomía o potencia."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "¿Puedo reservar un patinete antes de pagar?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Sí, puedes reservar por WhatsApp y confirmar tu pedido cuando te indiquemos disponibilidad y pasos de pago."
-            }
-          }
-        ]
       }
     ]
   }
@@ -205,18 +139,16 @@
     <div class="container nav">
       <div class="brand">
         <a href="#inicio" aria-label="Ir al inicio">
-          <img src="/img/0-removebg-preview.webp" alt="SCOOT SHOP logo" decoding="async" fetchpriority="high" width="400" height="400" />
+          <img src="/img/logo/marca-barra.webp" alt="SCOOT SHOP logo" decoding="async" fetchpriority="high" width="195" height="88" />
           <span>Versátil</span>
         </a>
       </div>
 
       <nav class="menu" aria-label="Navegación principal">
-        <a href="#inicio" aria-current="page"><i class="fa-solid fa-house nav-icon" aria-hidden="true"></i>Inicio</a>
-        <div class="menu-products-host" data-products-desktop-root>
-          <a href="#comprar"><i class="fa-solid fa-cart-shopping nav-icon" aria-hidden="true"></i>Productos</a>
-        </div>
-        <a href="#faq"><i class="fa-solid fa-circle-question nav-icon" aria-hidden="true"></i>Preguntas</a>
-        <a href="/#legal"><i class="fa-solid fa-scale-balanced nav-icon" aria-hidden="true"></i>Legal</a>
+        <a href="#inicio" aria-current="page">Inicio</a>
+        <a href="/patinetes/">Patinetes eléctricos</a>
+        <a href="/accesorios/">Accesorios</a>
+        <a href="/repuestos/">Repuestos</a>
         <a href="https://www.instagram.com/scootshopping" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
         <a href="https://www.facebook.com/61579248524907" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook" aria-hidden="true"></i></a>
         <a href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
@@ -254,11 +186,6 @@
     <nav class="mm-panel" id="mobileMenu" role="dialog" aria-modal="true" aria-label="Menú móvil">
       <div class="mm-head">
         <div class="mm-head-left">
-          <!-- Solo visible dentro de Productos (lo enseña .mm-viewport.mm-drilled).
-               Antes el único camino de vuelta era el gesto de deslizar. -->
-          <button class="mm-back" id="mmBack" aria-label="Volver al menú" type="button">
-            <i class="fa-solid fa-chevron-left"></i>
-          </button>
           <span class="mm-head-title" id="mmHeadTitle">Menú</span>
         </div>
         <button class="mm-close" id="mmClose" aria-label="Cerrar menú" type="button">
@@ -267,213 +194,797 @@
       </div>
 
       <div class="mm-viewport" id="mmViewport">
+        <!-- TRES TARJETAS, UN DESTINO CADA UNA. Antes cada fila tenia dos objetivos:
+             el nombre navegaba y una flecha abria un cajon con las marcas de esa
+             categoria. Ese segundo nivel se ha quitado entero —marcado, CSS y JS—:
+             quien abre el menu quiere ir a la categoria, y obligar a distinguir dos
+             zonas dentro de la misma fila era pedirle que aprendiera algo para nada.
+
+             `data-mm-cat` se queda porque es la clave del catalogo con la que
+             `pintarCuentas()` (js/products-menu.js) rellena el numerito. Ya no abre
+             nada: su escucha de clic se fue con el cajon. -->
         <div class="mm-view mm-view--main">
           <div class="mm-nav">
-            <a class="mm-link" href="/#inicio">
-              <span class="mm-link-content"><i class="fa-solid fa-house mm-ico" aria-hidden="true"></i>Inicio</span>
+            <a class="mm-cat" href="/patinetes/" data-mm-cat="electric-scooters">
+              <span class="mm-cat-nom">Patinetes eléctricos</span>
+              <span class="mm-cat-cuenta" data-mm-cuenta hidden></span>
             </a>
-            <button class="mm-link" id="mmProductsToggle" type="button" aria-expanded="false">
-              <span class="mm-link-content"><i class="fa-solid fa-cart-shopping mm-ico" aria-hidden="true"></i>Productos</span>
-              <i class="fa-solid fa-chevron-right mm-arrow" aria-hidden="true"></i>
-            </button>
-            <a class="mm-link" href="/#faq">
-              <span class="mm-link-content"><i class="fa-solid fa-circle-question mm-ico" aria-hidden="true"></i>Preguntas</span>
+            <a class="mm-cat" href="/accesorios/" data-mm-cat="accessories">
+              <span class="mm-cat-nom">Accesorios</span>
+              <span class="mm-cat-cuenta" data-mm-cuenta hidden></span>
             </a>
-            <a class="mm-link" href="/#legal">
-              <span class="mm-link-content"><i class="fa-solid fa-scale-balanced mm-ico" aria-hidden="true"></i>Legal</span>
+            <a class="mm-cat" href="/repuestos/" data-mm-cat="spare-parts">
+              <span class="mm-cat-nom">Repuestos</span>
+              <span class="mm-cat-cuenta" data-mm-cuenta hidden></span>
             </a>
           </div>
-        </div>
 
-        <div class="mm-view mm-view--products">
-          <div class="mm-products-scroll" id="mmProductsSub" data-products-mobile-root></div>
+          <!-- El inicio no es una categoria, asi que no compite con ellas. -->
+          <a class="mm-inicio" href="/#inicio">Volver al inicio</a>
         </div>
       </div>
 
       <div class="mm-foot">
         <div class="mm-icons">
-          <a href="https://wa.me/34666318747" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-          <a href="https://www.facebook.com/61579248524907" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
-          <a href="https://www.instagram.com/scootshopping" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="https://wa.me/34666318747" target="_blank" rel="noopener" aria-label="WhatsApp">
+            <i class="fab fa-whatsapp"></i>
+          </a>
+          <a href="https://www.facebook.com/61579248524907" target="_blank" rel="noopener" aria-label="Facebook">
+            <i class="fab fa-facebook"></i>
+          </a>
+          <a href="https://www.instagram.com/scootshopping" target="_blank" rel="noopener" aria-label="Instagram">
+            <i class="fab fa-instagram"></i>
+          </a>
         </div>
       </div>
     </nav>
   </div>
 
   <main id="main-content">
-    <h1 class="sr-only">SCOOT SHOP — Patinetes eléctricos</h1>
+    <h1 class="sr-only">SCOOT SHOP — tienda de patinetes eléctricos, accesorios y repuestos</h1>
 
-    <section class="hero-banner" id="inicio" aria-label="Banner principal">
+    <!-- HERO. Las portadas de /img/portada son creatividades CERRADAS: ya traen logo,
+         titular, lema y specs rotulados. Por eso aquí no va una sola letra de HTML
+         —ni encima ni al lado—: duplicaría el mensaje. Cada portada enlaza a la
+         ficha del modelo que anuncia.
+         A sangre: el carrusel NO va dentro de .container.
+         UNA SOLA PIEZA POR PORTADA: el recorte vertical 4:5 (-movil-*) se usa
+         en los dos tamaños. En móvil ocupa el ancho entero; en escritorio es un
+         cartel a la altura de la banda con las portadas vecinas asomando por los
+         lados (de ahí el sizes 35vw ≈ 0,8 × la altura de la banda).
+         Las creatividades anchas 2,33:1, que vivian sueltas en /img, se borraron el
+         25 de agosto de 2026 junto con la reorganizacion de la carpeta. -->
+    <section class="hero-v2" id="inicio" aria-label="Portadas destacadas">
+      <div class="hero-carousel" data-hero-carousel data-autoplay-ms="5000" tabindex="0" aria-roledescription="carousel" aria-label="Portadas destacadas">
+        <div class="hero-viewport" data-hero-viewport data-auto-height="off">
+          <div class="hero-track" data-hero-track>
+
+            <!-- LAS DE MAS ATRAS VAN DIFERIDAS. Las ocho creatividades pesaban
+                 547 KB y se bajaban TODAS al abrir la portada, para que se viera
+                 una. `loading="lazy"` no las paraba: el rail es horizontal y las
+                 ocho estan a la misma altura, asi que para el navegador entran
+                 todas en el margen de carga.
+                 De la tercera en adelante la foto va en `data-src`/`data-srcset` y
+                 la pone el carrusel cuando esa diapositiva se acerca a la vista
+                 (js/index.js, `hidratarLoVisible`). No añade un modo de fallo
+                 nuevo: sin JS el carrusel no se mueve de todas formas.
+                 Las DOS primeras conservan su `src` porque son las que se ven al
+                 abrir —en escritorio la activa va centrada y la vecina asoma—. -->
+
+            <!-- LAS DOS ROVORON VAN PRIMERAS, y en este orden a propósito: en
+                 escritorio la cartelera centra la activa y deja asomar la vecina,
+                 así que con el S7 activo y el R7 detrás se ven las dos al abrir.
+                 La PRIMERA es la del LCP: es la que precarga la cabecera, la única
+                 con loading="eager" y fetchpriority="high". Si algún día se cambia
+                 el orden hay que mover esas tres cosas Y el <link rel="preload">
+                 del <head>, o se precarga una foto que no se ve.
+                 Nombre descriptivo (portada_s7) en vez del portada_N de las
+                 anteriores: con ocho creatividades el número ya no decía nada. -->
+            <a class="hero-slide is-active" href="/patinetes/rovoron/s7/" aria-label="Ver el ROVORON S7">
+              <img src="/img/portada/portada_s7-v2-movil-4x5-480.webp" srcset="/img/portada/portada_s7-v2-movil-4x5-480.webp 480w, /img/portada/portada_s7-v2-movil-4x5-720.webp 720w, /img/portada/portada_s7-v2-movil-4x5-940.webp 940w, /img/portada/portada_s7-v2-movil-4x5-1122.webp 1122w" sizes="(max-width:760px) 100vw, 35vw" alt="ROVORON S7 — 84V 37,1Ah, 11.500 W de pico y hasta 140 km" loading="eager" fetchpriority="high" decoding="async" width="1122" height="1402" />
+            </a>
+
+            <a class="hero-slide" href="/patinetes/rovoron/r7/" aria-label="Ver el ROVORON R7">
+              <img src="/img/portada/portada_r7-movil-4x5-480.webp" srcset="/img/portada/portada_r7-movil-4x5-480.webp 480w, /img/portada/portada_r7-movil-4x5-720.webp 720w, /img/portada/portada_r7-movil-4x5-940.webp 940w, /img/portada/portada_r7-movil-4x5-1122.webp 1122w" sizes="(max-width:760px) 100vw, 35vw" alt="ROVORON R7 y R7 PRO — 60V 28,6Ah y 60V 42Ah" loading="lazy" decoding="async" width="1122" height="1402" />
+            </a>
+
+            <a class="hero-slide" href="/patinetes/ecoxtrem/m41-armored-one/" aria-label="Ver el Ecoxtrem M41 Armored One Pro">
+              <img data-src="/img/portada/portada_1-movil-4x5-v3-480.webp" data-srcset="/img/portada/portada_1-movil-4x5-v3-480.webp 480w, /img/portada/portada_1-movil-4x5-v3-720.webp 720w, /img/portada/portada_1-movil-4x5-v3-940.webp 940w, /img/portada/portada_1-movil-4x5-v3-1122.webp 1122w" sizes="(max-width:760px) 100vw, 35vw" alt="Ecoxtrem M41 Armored One Pro — 52V 20Ah, off-road ready" decoding="async" width="1122" height="1402" />
+            </a>
+
+            <a class="hero-slide" href="/patinetes/ecoxtrem/m41-armored-dual/" aria-label="Ver el Ecoxtrem M41 Armored Dual">
+              <img data-src="/img/portada/portada_4-movil-4x5-v2-480.webp" data-srcset="/img/portada/portada_4-movil-4x5-v2-480.webp 480w, /img/portada/portada_4-movil-4x5-v2-720.webp 720w, /img/portada/portada_4-movil-4x5-v2-940.webp 940w, /img/portada/portada_4-movil-4x5-v2-1122.webp 1122w" sizes="(max-width:760px) 100vw, 35vw" alt="Ecoxtrem M41 Armored Dual — +80 km/h, 60V 24Ah, +85 km de autonomía" decoding="async" width="1122" height="1402" />
+            </a>
+
+            <a class="hero-slide" href="/patinetes/series-k/g2-pro/" aria-label="Ver el KUKIRIN G2 PRO">
+              <img data-src="/img/portada/portada_3-movil-4x5-v3-480.webp" data-srcset="/img/portada/portada_3-movil-4x5-v3-480.webp 480w, /img/portada/portada_3-movil-4x5-v3-720.webp 720w, /img/portada/portada_3-movil-4x5-v3-940.webp 940w, /img/portada/portada_3-movil-4x5-v3-1122.webp 1122w" sizes="(max-width:760px) 100vw, 35vw" alt="KUKIRIN G2 PRO — 1000W, +45 km/h, doble suspensión y frenos de disco" decoding="async" width="1122" height="1402" />
+            </a>
+
+            <a class="hero-slide" href="/patinetes/ecoxtrem/bison-gt-carbon-design/" aria-label="Ver el Ecoxtrem Bison GT">
+              <img data-src="/img/portada/portada_2-movil-4x5-v2-480.webp" data-srcset="/img/portada/portada_2-movil-4x5-v2-480.webp 480w, /img/portada/portada_2-movil-4x5-v2-720.webp 720w, /img/portada/portada_2-movil-4x5-v2-940.webp 940w, /img/portada/portada_2-movil-4x5-v2-1122.webp 1122w" sizes="(max-width:760px) 100vw, 35vw" alt="Ecoxtrem Bison GT — Power. Control. Performance." decoding="async" width="1122" height="1402" />
+            </a>
+
+            <!-- PORTADA 5 — M41 Tank Dual. Solo tenía creatividad de móvil y por
+                 eso vivía oculta en escritorio; ahora que la cartelera usa el arte
+                 vertical en los dos tamaños, entra en la rotación como una más. -->
+            <a class="hero-slide" href="/patinetes/ecoxtrem/m41-tank-dual/" aria-label="Ver el Ecoxtrem M41 Tank Dual">
+              <img data-src="/img/portada/portada_5-movil-4x5-480.webp" data-srcset="/img/portada/portada_5-movil-4x5-480.webp 480w, /img/portada/portada_5-movil-4x5-720.webp 720w, /img/portada/portada_5-movil-4x5-940.webp 940w, /img/portada/portada_5-movil-4x5-1122.webp 1122w" sizes="(max-width:760px) 100vw, 35vw" alt="Ecoxtrem M41 Tank Dual — Ultimate Edition, 2000 W" decoding="async" width="1122" height="1402" />
+            </a>
+
+            <a class="hero-slide" href="/patinetes/ecoxtrem/m41-tank-ultimate-1000w/" aria-label="Ver el Ecoxtrem M41 Tank Ultimate 1000W">
+              <img data-src="/img/portada/portada_6-movil-4x5-v2-480.webp" data-srcset="/img/portada/portada_6-movil-4x5-v2-480.webp 480w, /img/portada/portada_6-movil-4x5-v2-720.webp 720w, /img/portada/portada_6-movil-4x5-v2-940.webp 940w, /img/portada/portada_6-movil-4x5-v2-1122.webp 1122w" sizes="(max-width:760px) 100vw, 35vw" alt="Ecoxtrem M41 Tank Ultimate 1000W — varios colores disponibles" decoding="async" width="1122" height="1402" />
+            </a>
+
+          </div>
+        </div>
+
+        <!-- Flechas: solo en escritorio. En móvil manda el deslizar y un botón
+             encima de la portada solo taparía arte. -->
+        <button class="hero-flecha hero-flecha--prev" type="button" data-hero-prev aria-label="Portada anterior">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M15 4 7 12l8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="hero-flecha hero-flecha--next" type="button" data-hero-next aria-label="Portada siguiente">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="m9 4 8 8-8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+
+        <div class="hero-dots" data-hero-dots role="tablist" aria-label="Seleccionar portada"></div>
+      </div>
+    </section>
+
+    <!-- BIENVENIDA / CUENTA. Debajo de la portada, porque es la primera pregunta
+         de quien llega: «¿y esto qué me da a mí?».
+         El dibujo del pedido que vivia aqui se mudo al bloque FUNCIONAMIENTO,
+         mas abajo: aqui se invita a entrar, alli se explica como funciona.
+         El botón lleva a /cuenta/ y NO carga Google aquí: el botón real de GSI
+         vive en /cuenta, y traerse el cliente de Google (~89 KB) a la portada
+         para un enlace sería pagar ese peso en la página que más mide. -->
+    <section class="bienve" id="bienvenida" aria-labelledby="bienve-title" data-bienve>
       <div class="container">
-        <div class="hero-carousel" data-hero-carousel tabindex="0" aria-roledescription="carousel" aria-label="Portadas destacadas">
-          <div class="hero-viewport" data-hero-viewport>
-            <div class="hero-track" data-hero-track>
-              <a class="hero-slide is-active" href="#comprar" aria-label="Ver catálogo de productos">
-                <img src="/img/portada_4.webp" srcset="/img/portada_4-480.webp 480w, /img/portada_4-800.webp 800w, /img/portada_4-1200.webp 1200w, /img/portada_4.webp 1400w" sizes="(max-width:1380px) 94vw, 1296px" alt="Portada Scoot Shop M41 Armored Dual" loading="eager" fetchpriority="high" decoding="async" width="2400" height="500" style="object-position:50% 50%;" />
-              </a>
-              <a class="hero-slide" href="#comprar" aria-label="Ver catálogo de productos">
-                <img src="/img/portada_2.webp" srcset="/img/portada_2-480.webp 480w, /img/portada_2-800.webp 800w, /img/portada_2-1200.webp 1200w, /img/portada_2.webp 1400w" sizes="(max-width:1380px) 94vw, 1296px" alt="Portada Scoot Shop" loading="lazy" decoding="async" width="2400" height="500" style="object-position:50% 50%;" />
-              </a>
-              <a class="hero-slide" href="#comprar" aria-label="Ver catálogo de productos">
-                <img src="/img/portada_3.webp" srcset="/img/portada_3-480.webp 480w, /img/portada_3-800.webp 800w, /img/portada_3-1200.webp 1200w, /img/portada_3.webp 1400w" sizes="(max-width:1380px) 94vw, 1296px" alt="Patinete eléctrico en tienda SCOOT SHOP" loading="lazy" fetchpriority="low" decoding="async" width="2400" height="500" style="object-position:50% 50%;" />
-              </a>
-              <a class="hero-slide" href="#comprar" aria-label="Ver catálogo de productos">
-                <img src="/img/portada.webp" srcset="/img/portada-480.webp 480w, /img/portada-800.webp 800w, /img/portada-1200.webp 1200w, /img/portada.webp 1400w" sizes="(max-width:1380px) 94vw, 1296px" alt="Portada Scoot Shop" loading="lazy" fetchpriority="low" decoding="async" width="2400" height="500" style="object-position:50% 50%;" />
-              </a>
+
+        <div class="bienve-texto">
+          <!-- El envoltorio no pinta nada: es lo que auth-ui.js mide para ponerle
+               un suelo de altura antes de cambiar el texto al iniciar sesion. -->
+          <div class="bienve-head">
+            <h2 id="bienve-title" data-bienve-titulo><span class="bienve-hola">Bienvenido a</span> <span class="bienve-marca-nom"><span class="bienve-marca bienve-marca--scoot"><img src="/img/logo/scoot-foto.webp" alt="SCOOT" width="760" height="133" decoding="async" /></span> <span class="bienve-marca bienve-marca--shop"><img src="/img/logo/shop-foto.webp" alt="SHOP" width="650" height="191" decoding="async" /></span></span></h2>
+            <p class="bienve-sub" data-bienve-sub>Para disfrutar de una mejor experiencia, regístrate con tu cuenta de Google y sigue tus pedidos de principio a fin.</p>
+          </div>
+
+          <ul class="bienve-ventajas">
+            <li>Direcciones guardadas</li>
+            <li>Seguimiento del envío</li>
+            <li>Estado y movimientos de tu pedido</li>
+          </ul>
+
+          <div class="bienve-cta">
+            <a class="bienve-btn" href="/cuenta/" data-bienve-btn>
+              <span class="bienve-btn-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M12 12C14.4853 12 16.5 9.98528 16.5 7.5C16.5 5.01472 14.4853 3 12 3C9.51472 3 7.5 5.01472 7.5 7.5C7.5 9.98528 9.51472 12 12 12Z"/><path d="M4.5 20.25C4.5 16.9363 7.18629 14.25 10.5 14.25H13.5C16.8137 14.25 19.5 16.9363 19.5 20.25"/></svg>
+              </span>
+              <span class="bienve-btn-txt" data-bienve-btn-txt>Regístrate con Google</span>
+            </a>
+            <p class="bienve-gracias" data-bienve-gracias>Gracias por elegirnos.</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Categorías: DESPUÉS del hero y con foto real. Todas miden igual y la fila se
+         llena sola (auto-fit), así que una categoría nueva entra sin tocar nada.
+         (Los mismos argumentos de confianza siguen contándose más abajo, en
+         "Por qué SCOOT SHOP", con su sección propia.) -->
+    <!-- Aqui habia una raya separando la bienvenida de lo que se vende. Ya no hace
+         falta: arriba es blanco y aqui empieza el gris de la zona de parrilla, y un
+         cambio de suelo separa mas que un filo de 1 px. Es la misma decision que en
+         la costura de abajo, contra el escaparate. -->
+
+    <section class="cat-showcase" aria-labelledby="cat-showcase-title">
+      <div class="container">
+        <div class="cat-showcase-head">
+          <div class="cat-showcase-head-text">
+            <h2 id="cat-showcase-title">Categorías</h2>
+            <p class="cat-showcase-sub">Entra directo al listado que buscas.</p>
+          </div>
+        </div>
+        <div class="cat-grid">
+          <!-- Esta tarjeta va con FOTO DE AMBIENTE a sangre en vez de una foto de
+               producto recortada: la imagen ocupa toda la tarjeta, lleva un velo
+               gris encima y el nombre se lee sobre ella. Las otras dos siguen con
+               el formato de siempre hasta que tengan su propia foto. -->
+          <a class="cat-card cat-card--foto" href="/patinetes/" data-cat-link="electric-scooters">
+            <span class="cat-card-photo">
+              <img src="/img/categorias/patinetes.webp" alt="" loading="lazy" decoding="async" width="700" height="610" />
+            </span>
+            <span class="cat-card-body">
+              <span class="cat-card-name">Patinetes eléctricos</span>
+              <span class="cat-card-count" data-cat-count="electric-scooters">24 modelos</span>
+            </span>
+          </a>
+          <!-- Motos y bicicletas estan APAGADAS en el catalogo y podarCategoriasOcultas()
+               borra estas dos tarjetas al arrancar, asi que su destino no llega a
+               usarse. El dia que se enciendan hay que darles su pagina: son dos
+               lineas en CATEGORIAS, dentro de scripts/build-categorias.py. -->
+          <a class="cat-card" href="#comprar" data-cat-link="electric-motorcycles">
+            <span class="cat-card-photo">
+              <img src="/motos/ev12m-pro/img/1-600.webp" srcset="/motos/ev12m-pro/img/1-400.webp 400w, /motos/ev12m-pro/img/1-600.webp 600w, /motos/ev12m-pro/img/1-800.webp 800w" sizes="(max-width:640px) 92vw, (max-width:900px) 46vw, 250px" alt="Motos eléctricas" loading="lazy" decoding="async" width="600" height="600" />
+            </span>
+            <span class="cat-card-body">
+              <span class="cat-card-name">Motos</span>
+              <span class="cat-card-count" data-cat-count="electric-motorcycles">3 modelos</span>
+            </span>
+          </a>
+          <a class="cat-card" href="#comprar" data-cat-link="electric-bikes">
+            <span class="cat-card-photo">
+              <img src="/bicicletas/g73/img/1-600.webp" srcset="/bicicletas/g73/img/1-400.webp 400w, /bicicletas/g73/img/1-600.webp 600w, /bicicletas/g73/img/1-800.webp 800w" sizes="(max-width:640px) 92vw, (max-width:900px) 46vw, 250px" alt="Bicicletas eléctricas" loading="lazy" decoding="async" width="600" height="600" />
+            </span>
+            <span class="cat-card-body">
+              <span class="cat-card-name">Bicicletas</span>
+              <span class="cat-card-count" data-cat-count="electric-bikes">2 modelos</span>
+            </span>
+          </a>
+          <a class="cat-card cat-card--foto" href="/accesorios/" data-cat-link="accessories">
+            <span class="cat-card-photo">
+              <img src="/img/categorias/accesorios.webp" alt="" loading="lazy" decoding="async" width="700" height="610" />
+            </span>
+            <span class="cat-card-body">
+              <span class="cat-card-name">Accesorios</span>
+              <span class="cat-card-count" data-cat-count="accessories">22 productos</span>
+            </span>
+          </a>
+          <a class="cat-card cat-card--foto" href="/repuestos/" data-cat-link="spare-parts">
+            <span class="cat-card-photo">
+              <img src="/img/categorias/repuestos.webp" alt="" loading="lazy" decoding="async" width="700" height="610" />
+            </span>
+            <span class="cat-card-body">
+              <span class="cat-card-name">Repuestos</span>
+              <span class="cat-card-count" data-cat-count="spare-parts">1 producto</span>
+            </span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- LOS MAS VENDIDOS. Ocho tarjetas donde antes habia 82.
+         La portada pintaba las tres categorias enteras —59 patinetes, 22
+         accesorios y 1 repuesto, 22 342 px de pagina— porque las pildoras solo
+         llevaban el scroll de una a otra. Eso ya vive en /patinetes, /accesorios
+         y /repuestos, cada una con su titular, su direccion y su panel de
+         filtros; aqui se queda una muestra y la puerta de entrada.
+
+         Nace `hidden` y solo se enseña si el catalogo resuelve al menos cuatro:
+         mas vale no enseñar el escaparate que enseñarlo a medias. Lo que entra se
+         declara en DESTACADOS_HOME (js/index.js); el nombre, la foto y el precio
+         salen del catalogo en tiempo real, asi que un cambio en el panel llega
+         solo. -->
+    <section class="escaparate" id="destacados" data-escaparate aria-labelledby="escaparate-title" hidden>
+      <div class="container">
+        <div class="cat-showcase-head">
+          <div class="cat-showcase-head-text">
+            <h2 id="escaparate-title">Los más vendidos</h2>
+            <p class="cat-showcase-sub">Una muestra de lo que más sale. <span data-escaparate-cuantos></span></p>
+          </div>
+        </div>
+
+        <div class="grid" data-escaparate-grid></div>
+
+        <p class="escaparate-pie">
+          <a class="escaparate-cta" href="/patinetes/" data-escaparate-cta>Ver todos los patinetes</a>
+        </p>
+      </div>
+    </section>
+
+    <!-- OFERTA DE LA SEMANA. Toda la sección es el pack: fondo oscuro a sangre,
+         y las tarjetas del pack son las MISMAS del catálogo (buildCardMarkup),
+         solo que sin el botón de añadir — al pack se entra por la casilla, no
+         producto a producto.
+         El contenido lo rellena el JS desde el catálogo (nombres, fotos y
+         precios), así que nunca puede quedarse con un precio viejo. Qué entra y
+         con qué variante se declara en PACK_SEMANA (js/index.js): un accesorio
+         con ejes NO se puede añadir sin decir cuál, o llega un pedido sin saber
+         qué enviar. Nace hidden y solo se enseña si el catálogo lo resuelve
+         entero — más vale no enseñar la oferta que enseñarla a medias. -->
+    <section class="home-featured" data-combo aria-labelledby="home-featured-title" hidden>
+      <div class="container">
+        <!-- UN solo rótulo. Antes había tres diciendo lo mismo —«Nuestra
+             selección», «Oferta de la semana» y «Pack de la semana»—; el reloj
+             se queda porque no repite el mensaje, lo completa. -->
+        <div class="cat-showcase-head">
+          <h2 id="home-featured-title">Oferta de la semana</h2>
+          <p class="oferta-flag" data-oferta-flag hidden>
+            <!-- Reloj de trazo, como el resto de iconos del sitio. Va DENTRO de la
+                 pastilla para que herede su color: cuando quedan menos de 24 h la
+                 pastilla se pone roja y la aguja se pone roja con ella. -->
+            <span class="oferta-flag-reloj" data-oferta-reloj><svg class="oferta-flag-icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></svg><span class="oferta-flag-cifra">--d --:--:--</span></span>
+          </p>
+        </div>
+
+        <h3 class="combo-titulo" data-combo-titulo>Patinete + manillar + extras</h3>
+
+        <div class="home-featured-rail" data-home-featured></div>
+
+        <div class="combo-cierre">
+          <div class="combo-cifras">
+            <p class="combo-precios">
+              <s class="combo-antes" data-combo-antes></s>
+              <span class="combo-ahora" data-combo-ahora></span>
+            </p>
+            <p class="combo-ahorro" data-combo-ahorro hidden></p>
+          </div>
+
+          <div class="combo-accion">
+            <!-- UN BOTON, NO UNA CASILLA. Era un checkbox reversible que abria el
+                 cajon del carrito; ahora mete el pack y va derecho a /checkout. Dos
+                 razones, las dos medidas: el cajon era un clic de mas hasta pagar,
+                 y sobre todo la casilla NO restauraba su estado — al volver a la
+                 portada salia desmarcada con las cinco lineas todavia dentro, y
+                 volver a marcarla SUMABA cantidades (add() hace found.qty + qty),
+                 asi que el pack se duplicaba con el -36,99 EUR aplicado una sola
+                 vez. Lo que el cajon probaba —el desglose del pack— lo ensena
+                 /checkout una pantalla mas adelante (#ckPackRow). -->
+            <button class="combo-quiero" type="button" data-combo-quiero>
+              <span class="combo-quiero-txt">Lo quiero</span>
+              <span class="combo-quiero-flecha" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h13M12.5 5.5L19 12l-6.5 6.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </button>
+            <p class="combo-estado" data-combo-estado role="status"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Aqui estaba «Todo el catalogo»: el titular, la barra pegajosa con las
+         cinco pildoras de categoria, el panel de filtros y [data-home-catalog-root]
+         con las 82 tarjetas. Se lo han llevado /patinetes, /accesorios y
+         /repuestos, que es donde el filtro tiene sentido —filtrar por potencia
+         mientras se miran accesorios no lo tenia— y donde Google puede posicionar
+         cada listado con su propio titulo.
+         La portada media 22 342 px; sin esto, 5 000. -->
+
+    <!-- COMO COMPRAS AQUI. Antes eran DOS secciones seguidas que decian lo mismo
+         con vocabularios opuestos: «Como funciona la web» —tres tarjetones
+         oscuros con maquetas dentro— y, pegada debajo, «Por que elegirnos»
+         —cuatro tarjetitas blancas con iconos rosas—. 995 px para contar una
+         sola cosa dos veces, y dos lenguajes visuales seguidos.
+         Ahora es UN dosier, el reparto que estreno «Informacion legal»: el rail
+         dice con que garantias se compra aqui y el cuerpo enseña como se usa el
+         sitio. Las cuatro razones no eran tarjetas, eran HECHOS —una lista de
+         condiciones de venta—, y por eso van al rail en una lista con rayas y no
+         en cajas con sombra.
+
+         Tres tarjetones que se abren en el sitio, sin cambiar de
+         pagina: quien esta mirando el catalogo no quiere irse a un blog.
+         La portada de cada uno NO es una foto: es una MAQUETA del propio sitio a
+         tamaño pequeño —un pedido, una tarjeta de producto, las pildoras de
+         categoria—, hecha con HTML y CSS. Una foto habria que inventarla y no
+         diria de que va el panel; la maqueta lo enseña.
+         Va aqui, entre el catalogo y «sin intermediarios», porque se lee cuando
+         ya has visto lo que se vende y te preguntas como se compra. -->
+    <section class="funciona deferred-section" id="funcionamiento" aria-labelledby="funciona-title">
+      <div class="container">
+
+        <div class="dosier">
+
+          <aside class="dosier-rail">
+            <span class="dosier-eyebrow">Cómo compras aquí</span>
+            <h2 id="funciona-title">Sin intermediarios</h2>
+            <p class="dosier-lead">
+              Vendemos, enviamos y damos soporte nosotros. Estas cuatro cosas no
+              dependen de nadie más.
+            </p>
+          </aside>
+
+          <div class="dosier-cuerpo">
+            <p class="dosier-tag">Y así funciona la web. Pulsa lo que te interese.</p>
+
+            <div class="funciona-parrilla">
+
+          <button type="button" class="funciona-card" id="fx-btn-cuenta" aria-haspopup="dialog" aria-controls="fx-cuenta" data-funciona="cuenta">
+            <span class="funciona-arte funciona-arte--pedido" aria-hidden="true">
+              <span class="fx-mini fx-mini--pedido">
+                <span class="fx-mini-franja"></span>
+                <span class="fx-mini-rot">PEDIDO · SS-2048</span>
+                <span class="fx-mini-estado">Enviado</span>
+                <span class="fx-mini-track">
+                  <i class="fx-mini-hito is-on"></i><i class="fx-mini-seg is-on"></i>
+                  <i class="fx-mini-hito is-on"></i><i class="fx-mini-seg is-on"></i>
+                  <i class="fx-mini-hito is-on"></i><i class="fx-mini-seg"></i>
+                  <i class="fx-mini-hito"></i>
+                </span>
+                <span class="fx-mini-chip">SS7729481042ES</span>
+              </span>
+            </span>
+            <span class="funciona-pie">
+              <span class="funciona-pie-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Z"/><path d="M4.5 20.25a6 6 0 0 1 6-6h3a6 6 0 0 1 6 6"/></svg>
+              </span>
+              <span class="funciona-pie-txt">
+                <span class="funciona-pie-tit">Mi cuenta y Pedidos</span>
+                <span class="funciona-pie-sub">Dónde ves tu envío</span>
+              </span>
+              <span class="funciona-pie-mas" aria-hidden="true"></span>
+            </span>
+          </button>
+
+          <button type="button" class="funciona-card" id="fx-btn-tarjetas" aria-haspopup="dialog" aria-controls="fx-tarjetas" data-funciona="tarjetas">
+            <span class="funciona-arte funciona-arte--tarjeta" aria-hidden="true">
+              <span class="fx-mini fx-mini--card">
+                <span class="fx-mini-foto"><img src="/patinetes/rovoron/r7-pro/img/1-400.webp" alt="" loading="lazy" decoding="async" width="400" height="400"></span>
+                <span class="fx-mini-nom">ROVORON R7 PRO</span>
+                <span class="fx-mini-precio">1.299,50 €</span>
+                <span class="fx-mini-colores">
+                  <i style="--c:#171717"></i><i style="--c:#c0392b"></i><i style="--c:#2563eb"></i>
+                </span>
+                <span class="fx-mini-btn">Elegir opción →</span>
+              </span>
+            </span>
+            <span class="funciona-pie">
+              <span class="funciona-pie-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" focusable="false"><rect x="3" y="3" width="7.5" height="9" rx="1.6"/><rect x="13.5" y="3" width="7.5" height="5.5" rx="1.6"/><rect x="3" y="15" width="7.5" height="6" rx="1.6"/><rect x="13.5" y="11.5" width="7.5" height="9.5" rx="1.6"/></svg>
+              </span>
+              <span class="funciona-pie-txt">
+                <span class="funciona-pie-tit">Las tarjetas de la home</span>
+                <span class="funciona-pie-sub">Color y medida sin entrar</span>
+              </span>
+              <span class="funciona-pie-mas" aria-hidden="true"></span>
+            </span>
+          </button>
+
+          <button type="button" class="funciona-card" id="fx-btn-web" aria-haspopup="dialog" aria-controls="fx-web" data-funciona="web">
+            <span class="funciona-arte funciona-arte--web" aria-hidden="true">
+              <span class="fx-mini fx-mini--web">
+                <span class="fx-mini-pills">
+                  <i class="is-on">Todo</i><i>Patinetes</i><i>Accesorios</i><i>Repuestos</i>
+                </span>
+                <span class="fx-mini-rejilla">
+                  <b></b><b></b><b></b><b></b><b></b><b></b>
+                </span>
+              </span>
+            </span>
+            <span class="funciona-pie">
+              <span class="funciona-pie-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" focusable="false"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>
+              </span>
+              <span class="funciona-pie-txt">
+                <span class="funciona-pie-tit">Encontrar tu modelo</span>
+                <span class="funciona-pie-sub">Categorías, menú y filtros</span>
+              </span>
+              <span class="funciona-pie-mas" aria-hidden="true"></span>
+            </span>
+          </button>
+
+            </div>
+
+              <!-- Las cuatro garantias van en la columna ANCHA y debajo de las
+                   maquetas, no en el rail. En el rail el bloque medida 600 px
+                   contra los 400 de las tarjetas y dejaba un hueco blanco a la
+                   derecha que se leia como un fallo de maquetacion. Aqui el
+                   reparto es el del dosier legal —rail corto de identidad,
+                   columna larga de contenido— y ademas se lee en el orden que
+                   toca: primero como funciona el sitio, despues con que se
+                   compra. -->
+              <ul class="dosier-hechos">
+                <li>
+                  <strong>Repuestos para todo lo que vendemos</strong>
+                  <span>Mantenemos stock de todos nuestros modelos para que nunca te quedes parado.</span>
+                </li>
+                <li>
+                  <strong>Garantía gestionada por nosotros</strong>
+                  <span>Cualquier incidencia la tramitamos aquí. Sin formularios y sin esperas.</span>
+                </li>
+                <li>
+                  <strong>Devolución en 14 días</strong>
+                  <span>Puedes devolver tu pedido hasta 14 días después de recibirlo, sin justificación.</span>
+                </li>
+                <li>
+                  <strong>Atención personalizada</strong>
+                  <span>Te asesoramos por WhatsApp antes, durante y después. Hablas siempre con personas.</span>
+                </li>
+              </ul>
+          </div>
+
+        </div>
+
+        <!-- Los recuadros. El elemento «dialog» nativo, que ya trae lo que hace falta
+             cero: se pinta por encima de todo (top layer), atrapa el foco dentro,
+             cierra con Escape y oscurece el fondo con ::backdrop. Cerrado de serie,
+             asi que sin JS el boton no promete nada que no pueda cumplir.
+             No se despliegan DENTRO de la portada a proposito: el panel del pedido
+             mide 900 px de alto y empujaba media pagina hacia abajo cada vez que
+             alguien lo abria. -->
+        <dialog class="fx-modal" id="fx-cuenta" aria-labelledby="fx-cuenta-tit">
+          <div class="fx-modal-caja">
+            <div class="fx-modal-barra">
+              <p class="fx-modal-rot" id="fx-cuenta-tit"><b>Mi cuenta y Pedidos</b><span>Dónde ves tu envío</span></p>
+              <button type="button" class="fx-modal-x" data-fx-cerrar aria-label="Cerrar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" focusable="false" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+              </button>
+            </div>
+            <div class="fx-modal-cuerpo">
+          <div class="funciona-panel-txt">
+            <h3>Todo tu pedido, en una pantalla</h3>
+            <p>Al comprar recibes un enlace propio. Ahí ves en qué punto va el envío, el número con el que sigues el paquete y lo que compraste — sin llamar a nadie y sin buscar el correo.</p>
+          </div>
+        <!-- Decorativo: fuera del árbol de accesibilidad y con su rótulo, porque
+                 no es el pedido de nadie. -->
+            <div class="bienve-demo" aria-hidden="true">
+              <div class="bienve-lienzo">
+
+                <div class="bienve-pedido">
+                  <div class="bienve-pedido-cuerpo">
+                    <p class="bienve-pedido-eyebrow">Pedido · <b>SS-2048</b>
+                      <span class="dib-nota dib-nota--num">Este es el número de tu pedido</span>
+                    </p>
+
+                    <div class="bienve-pedido-estado">
+                      <span class="bienve-pedido-estado-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg></span>Enviado
+                    </div>
+
+                    <div class="bienve-track">
+                      <span class="bienve-hito is-done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M20 6 9 17l-5-5"/></svg></span>
+                      <i class="bienve-seg is-on"></i>
+                      <span class="bienve-hito is-done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="m7.5 4.27 9 5.15"/></svg></span>
+                      <i class="bienve-seg is-on"></i>
+                      <span class="bienve-hito is-done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg></span>
+                      <i class="bienve-seg"></i>
+                      <span class="bienve-hito"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .71-1.53l7-6a2 2 0 0 1 2.59 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>
+                      <span class="dib-nota dib-nota--envio">En qué punto está tu envío, paso a paso</span>
+                    </div>
+
+                    <div class="bienve-pedido-pie">
+                      <span class="bienve-pedido-chip">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <span class="bienve-pedido-chip-txt"><small>Seguimiento</small><span class="bienve-pedido-num">SS7729481042ES</span></span>
+                      </span>
+                      <span class="bienve-pedido-upd">Actualizado <b>hoy, 09:41</b></span>
+                      <span class="dib-nota dib-nota--seg">El número con el que sigues el paquete</span>
+                      <span class="dib-nota dib-nota--upd">Se actualiza solo cuando el pedido avanza</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Lista de productos: las MISMAS clases que /pedido y /checkout. -->
+                <div class="bienve-productos">
+                  <div class="order-summary__product-list">
+                    <article class="order-summary__product order-summary__product--line">
+                      <div class="order-summary__product-main">
+                        <img class="order-summary__product-image" src="/patinetes/rovoron/r7-pro/img/1-400.webp" alt="" loading="lazy" decoding="async" width="400" height="400" />
+                        <div class="order-summary__product-info">
+                          <span class="order-summary__product-title">ROVORON R7 PRO</span>
+                          <span class="order-summary__product-meta order-summary__product-meta--ref">Ref: R7PRO</span>
+                          <span class="order-summary__product-meta order-summary__product-meta--color">Modelo: R7 PRO DGT</span>
+                        </div>
+                      </div>
+                      <div class="order-summary__product-side">
+                        <strong class="order-summary__product-line-total">1.299,50 €</strong>
+                        <span class="order-summary__product-meta order-summary__product-meta--qty">Cant: 1</span>
+                      </div>
+                    </article>
+
+                    <article class="order-summary__product order-summary__product--line">
+                      <div class="order-summary__product-main">
+                        <img class="order-summary__product-image" src="/accesorios/bolsa-almacenamiento/img/1-400.webp" alt="" loading="lazy" decoding="async" width="400" height="400" />
+                        <div class="order-summary__product-info">
+                          <span class="order-summary__product-title">Bolsa de almacenamiento</span>
+                          <span class="order-summary__product-meta order-summary__product-meta--ref">Ref: ACC-BAG</span>
+                          <span class="order-summary__product-meta order-summary__product-meta--color">Único</span>
+                        </div>
+                      </div>
+                      <div class="order-summary__product-side">
+                        <strong class="order-summary__product-line-total">8,00 €</strong>
+                        <span class="order-summary__product-meta order-summary__product-meta--qty">Cant: 1</span>
+                      </div>
+                    </article>
+                  </div>
+
+                  <span class="dib-nota dib-nota--prod">Estos son los productos que has comprado</span>
+                </div>
+
+              </div>
+
+              <p class="bienve-arte-nota">Vista de ejemplo</p>
+            </div>
             </div>
           </div>
+        </dialog>
 
-          <button class="hero-nav hero-nav--prev" type="button" data-hero-prev aria-label="Portada anterior">
-            <span class="hero-nav-glyph" aria-hidden="true">&#8249;</span>
-          </button>
-          <button class="hero-nav hero-nav--next" type="button" data-hero-next aria-label="Portada siguiente">
-            <span class="hero-nav-glyph" aria-hidden="true">&#8250;</span>
-          </button>
-
-          <div class="hero-dots" data-hero-dots role="tablist" aria-label="Seleccionar portada"></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="home-category-strip home-category-strip--revamp" aria-label="Explora por categoría">
-      <div class="container">
-        <div class="home-category-shell">
-          <div class="home-category-head">
-            <p class="home-category-eyebrow">Explora</p>
-            <p class="home-category-subtitle">Elige una categoría para ver modelos recomendados</p>
+        <dialog class="fx-modal" id="fx-tarjetas" aria-labelledby="fx-tarjetas-tit">
+          <div class="fx-modal-caja">
+            <div class="fx-modal-barra">
+              <p class="fx-modal-rot" id="fx-tarjetas-tit"><b>Las tarjetas de la home</b><span>Color y medida sin entrar</span></p>
+              <button type="button" class="fx-modal-x" data-fx-cerrar aria-label="Cerrar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" focusable="false" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+              </button>
+            </div>
+            <div class="fx-modal-cuerpo">
+          <div class="funciona-panel-txt">
+            <h3>El color y la medida, desde la portada</h3>
+            <p>No hace falta entrar en la ficha para elegir. Si un producto tiene opciones, la tarjeta lo dice y las enseña ahí mismo; si no las tiene, se añade de un toque.</p>
           </div>
 
-          <div class="home-category-nav" data-home-category-nav role="toolbar" aria-label="Filtrar catálogo por categoría">
-            <button class="home-category-chip is-active" type="button" data-home-category="electric-scooters" aria-pressed="true">
-              <span class="home-category-chip-icon" aria-hidden="true"><i class="fa-solid fa-bolt"></i></span>
-              <span class="home-category-chip-copy">
-                <span class="home-category-chip-label">Patinetes</span>
-                <span class="home-category-chip-meta">Urbanos y deportivos</span>
-              </span>
-            </button>
+          <!-- Dos ejemplos reales, con las MISMAS piezas que la portada:
+               `.variant-option--swatch`, `.variant-option--pill` y el sello DGT
+               salen de main.css, asi que el circulo agotado se dibuja aqui con la
+               misma regla que alli. Lo unico propio son la tarjeta y el cuadro,
+               porque el de verdad va `position:fixed` y no se puede incrustar. -->
+          <div class="fxt-casos" aria-hidden="true">
 
-            <button class="home-category-chip" type="button" data-home-category="electric-motorcycles" aria-pressed="false">
-              <span class="home-category-chip-icon" aria-hidden="true"><i class="fa-solid fa-motorcycle"></i></span>
-              <span class="home-category-chip-copy">
-                <span class="home-category-chip-label">Motos</span>
-                <span class="home-category-chip-meta">Con más autonomía</span>
-              </span>
-            </button>
+            <div class="fxt-caso">
+              <p class="fxt-caso-rot"><b>Un patinete</b> · una sola cosa que elegir</p>
+              <div class="fxt-lienzo">
+                <div class="fxt-card">
+                  <span class="fxt-dgt">
+                    <span class="dgt-tag"><img class="dgt-tag-logo" src="/img/marcas/dgt.webp" alt="" width="163" height="64" decoding="async" loading="lazy"></span>
+                    <span class="dib-nota dib-nota--dgt">Con este sello, el patinete está homologado por la DGT y puede circular por ciudad</span>
+                  </span>
+                  <span class="fxt-foto"><img src="/patinetes/ecoxtrem/m41-armored-dual/img/1-400.webp" alt="" width="400" height="400" decoding="async" loading="lazy"></span>
+                  <p class="fxt-nom">Ecoxtrem M41 Armored Dual (LR)</p>
+                  <p class="fxt-precio">829,99 € <s>889 €</s>
+                    <span class="dib-nota dib-nota--precio">El precio tachado es el de antes de la oferta</span>
+                  </p>
+                  <span class="fxt-btn">Elegir opción <i>→</i>
+                    <span class="dib-nota dib-nota--btn">«Elegir opción» avisa de que hay algo que decidir. Cuando pone «Añadir», va derecho al carrito</span>
+                  </span>
+                </div>
 
-            <button class="home-category-chip" type="button" data-home-category="electric-bikes" aria-pressed="false">
-              <span class="home-category-chip-icon" aria-hidden="true"><i class="fa-solid fa-bicycle"></i></span>
-              <span class="home-category-chip-copy">
-                <span class="home-category-chip-label">Bicicletas</span>
-                <span class="home-category-chip-meta">Comodidad diaria</span>
-              </span>
-            </button>
+                <div class="fxt-pop">
+                  <div class="fxt-pop-fila">
+                    <span class="fxt-pop-rot">Color</span>
+                    <div class="fxt-pop-grid">
+                      <span class="variant-option variant-option--swatch" style="--variant-swatch:linear-gradient(135deg, #8c9099 50%, #eab308 50%)"></span>
+                      <span class="variant-option variant-option--swatch is-disabled" style="--variant-swatch:#0a1f66"></span>
+                      <span class="variant-option variant-option--swatch" style="--variant-swatch:#7f1d1d"></span>
+                      <span class="variant-option variant-option--swatch" style="--variant-swatch:#7cb518"></span>
+                      <span class="fxt-sw"><span class="variant-option variant-option--swatch" style="--variant-swatch:#f0c000"></span>
+                        <span class="dib-nota dib-nota--libres">El apagado y con una raya está agotado. Los que se ven enteros son los que puedes pedir hoy</span></span>
+                    </div>
+                  </div>
+                  <p class="fxt-pop-guia">Elige color
+                    <span class="dib-nota dib-nota--guia">En cuanto eliges, el producto entra solo en el carrito. No hay otro botón que pulsar</span>
+                  </p>
+                </div>
+              </div>
+            </div>
 
-            <button class="home-category-chip" type="button" data-home-category="accessories" aria-pressed="false">
-              <span class="home-category-chip-icon" aria-hidden="true"><i class="fa-solid fa-bag-shopping"></i></span>
-              <span class="home-category-chip-copy">
-                <span class="home-category-chip-label">Accesorios</span>
-                <span class="home-category-chip-meta">Equipamiento y extras</span>
-              </span>
-            </button>
+            <div class="fxt-caso">
+              <p class="fxt-caso-rot"><b>Un accesorio</b> · dos cosas que elegir</p>
+              <div class="fxt-lienzo">
+                <div class="fxt-card">
+                  <span class="fxt-foto"><img src="/accesorios/manillar-wake/img/1-400.webp" alt="" width="400" height="400" decoding="async" loading="lazy"></span>
+                  <p class="fxt-nom">Manillar WAKE 720mm/780mm
+                    <span class="dib-nota dib-nota--sindgt">Sin sello DGT: es un accesorio, no un vehículo</span>
+                  </p>
+                  <p class="fxt-precio">39,99 €</p>
+                  <span class="fxt-btn">Elegir opción <i>→</i></span>
+                </div>
+
+                <div class="fxt-pop">
+                  <div class="fxt-pop-fila">
+                    <span class="fxt-pop-rot">Medida</span>
+                    <div class="fxt-pop-grid">
+                      <span class="variant-option variant-option--pill">720 mm</span>
+                      <span class="variant-option variant-option--pill is-active">780 mm</span>
+                      <span class="dib-nota dib-nota--pill">Píldora con el nombre para lo que se lee — una medida</span>
+                    </div>
+                  </div>
+                  <div class="fxt-pop-fila">
+                    <span class="fxt-pop-rot">Color</span>
+                    <div class="fxt-pop-grid">
+                      <span class="variant-option variant-option--swatch is-active" style="--variant-swatch:#111111"></span>
+                      <span class="variant-option variant-option--swatch" style="--variant-swatch:#b93f3a"></span>
+                      <span class="variant-option variant-option--swatch" style="--variant-swatch:#2f93b8"></span>
+                      <span class="variant-option variant-option--swatch" style="--variant-swatch:#6b4fa0"></span>
+                      <span class="dib-nota dib-nota--swatch">Círculo con el color para lo que se ve. Al moverlo, cambia la foto</span>
+                    </div>
+                  </div>
+                  <p class="fxt-pop-guia">Elige color
+                    <span class="dib-nota dib-nota--dos">Con dos cosas que elegir salen las dos, y hasta que no están las dos no se añade nada</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
           </div>
-        </div>
+            </div>
+          </div>
+        </dialog>
+
+        <dialog class="fx-modal" id="fx-web" aria-labelledby="fx-web-tit">
+          <div class="fx-modal-caja">
+            <div class="fx-modal-barra">
+              <p class="fx-modal-rot" id="fx-web-tit"><b>Encontrar tu modelo</b><span>Categorías, menú y filtros</span></p>
+              <button type="button" class="fx-modal-x" data-fx-cerrar aria-label="Cerrar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" focusable="false" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+              </button>
+            </div>
+            <div class="fx-modal-cuerpo">
+          <div class="funciona-panel-txt">
+            <h3>Tres caminos hasta tu modelo</h3>
+            <p>El catálogo es el mismo en todos; cambia por dónde entras.</p>
+          </div>
+          <ol class="funciona-pasos">
+            <li>
+              <span class="funciona-paso-n">1</span>
+              <div>
+                <b>Por categoría</b>
+                <p>Las pastillas de arriba del catálogo (Todo, Patinetes, Accesorios, Repuestos) filtran la parrilla al instante, sin recargar.</p>
+              </div>
+            </li>
+            <li>
+              <span class="funciona-paso-n">2</span>
+              <div>
+                <b>Por marca</b>
+                <p>El menú <b>PRODUCTOS</b> de la cabecera abre las marcas y sus modelos. Es el camino corto si ya sabes qué buscas.</p>
+              </div>
+            </li>
+            <li>
+              <span class="funciona-paso-n">3</span>
+              <div>
+                <b>Por lo que necesitas</b>
+                <p>En «¿Cuál es para ti?» respondes con lo que sí sabes —para ciudad, para monte, cuánta autonomía— y te deja los que encajan.</p>
+              </div>
+            </li>
+          </ol>
+            </div>
+          </div>
+        </dialog>
+
       </div>
     </section>
 
-    <section class="home-series-rail-strip" aria-label="Series destacadas">
+    <!-- Con las tres secciones en blanco, lo que las separa es esta raya. Va
+         ENTRE las dos y no dentro, al reves que la del escaparate: aquella tenia
+         que esconderse con una seccion que nace `hidden`, y estas dos se pintan
+         siempre. -->
+    <div class="home-sep" role="presentation"></div>
+
+    <!-- SOMOS SCOOT SHOP. El mismo dosier. Antes era un parrafo generico y cuatro
+         cifras sueltas en una fila; el parrafo decia ademas «patinetes, motos y
+         bicicletas electricas» cuando motos y bicis estan apagadas desde agosto.
+         Los datos son lo unico concreto que habia, asi que mandan: van en filas
+         de dato y valor, como el bloque de meta del dosier legal. El recuento de
+         modelos lo escribe el catalogo (data-about-modelos) y su fila nace
+         `hidden`: un numero a mano envejece el dia que se da de alta uno. -->
+    <section id="about" class="about deferred-section">
       <div class="container">
-        <div class="home-series-rail-head">
-          <span class="home-series-rail-eyebrow">Índice de series</span>
-          <span class="home-series-rail-hint" aria-hidden="true">Salta a la serie</span>
-        </div>
-        <nav class="home-series-rail" data-home-series-rail role="tablist" aria-label="Saltar a serie"></nav>
-      </div>
-    </section>
+        <div class="dosier">
 
-    <div id="comprar" data-home-catalog-root></div>
+          <aside class="dosier-rail">
+            <span class="dosier-eyebrow">Sobre nosotros</span>
+            <h2>Somos SCOOT SHOP</h2>
+            <p class="dosier-lead">
+              Una tienda valenciana especializada en patinetes eléctricos.
+              Seleccionamos cada modelo con criterio, mantenemos repuestos
+              disponibles para todo lo que vendemos y acompañamos a cada cliente
+              desde la elección hasta el posventa.
+            </p>
+          </aside>
 
-    <section class="features deferred-section" aria-label="¿Por qué elegirnos?">
-      <div class="container">
-        <div class="section-header">
-          <span class="section-eyebrow">Por qué SCOOT SHOP</span>
-          <h2>Todo lo que necesitas, sin intermediarios.</h2>
-          <p class="section-subtitle">Vehículos eléctricos con repuestos disponibles, garantía gestionada directamente y atención personalizada en cada compra.</p>
-        </div>
-        <ul class="feature-grid">
-          <li class="feature-card">
-            <div class="f-icon"><i class="fa-solid fa-bolt" aria-hidden="true"></i></div>
-            <h3>Repuestos para todo lo que vendemos</h3>
-            <p>Mantenemos stock de repuestos de todos nuestros modelos para que nunca te quedes parado.</p>
-          </li>
-          <li class="feature-card">
-            <div class="f-icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></div>
-            <h3>Garantía gestionada por nosotros</h3>
-            <p>Cualquier incidencia la tramitamos directamente nosotros. Sin formularios, sin esperas, sin runaround.</p>
-          </li>
-          <li class="feature-card">
-            <div class="f-icon"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i></div>
-            <h3>Devolución en 14 días</h3>
-            <p>Puedes devolver tu pedido hasta 14 días después de recibirlo, sin justificación ni burocracia.</p>
-          </li>
-          <li class="feature-card">
-            <div class="f-icon"><i class="fa-solid fa-comments" aria-hidden="true"></i></div>
-            <h3>Atención personalizada</h3>
-            <p>Te asesoramos por WhatsApp antes, durante y después de la compra. Hablas siempre con personas.</p>
-          </li>
-        </ul>
-      </div>
-    </section>
+          <dl class="dosier-datos">
+            <div><dt>Marcas principales</dt><dd>KuKirin · Ecoxtrem</dd></div>
+            <div data-about-fila-modelos hidden><dt>Modelos a la venta</dt><dd data-about-modelos></dd></div>
+            <div><dt>Envío a toda España</dt><dd>6–8 días</dd></div>
+            <div><dt>Plazo de devolución</dt><dd>14 días</dd></div>
+            <div><dt>Dónde estamos</dt><dd>Silla y Catarroja, Valencia</dd></div>
+          </dl>
 
-    <section id="about" class="container deferred-section">
-      <div class="about-block">
-        <span class="about-eyebrow">Sobre nosotros</span>
-        <h2>Somos SCOOT SHOP.</h2>
-        <p class="about-lead">
-          Una tienda valenciana especializada en patinetes, motos y bicicletas eléctricas.
-          Seleccionamos cada modelo con criterio, mantenemos repuestos disponibles para todo
-          lo que vendemos y acompañamos a cada cliente desde la elección hasta el posventa.
-          Porque vender sin dar soporte no es vender.
-        </p>
-        <ul class="about-stats">
-          <li>
-            <span class="about-stat-num">KuKirin</span>
-            <span class="about-stat-label">Marca principal</span>
-          </li>
-          <li>
-            <span class="about-stat-num">Ecoxtrem</span>
-            <span class="about-stat-label">Marca principal</span>
-          </li>
-          <li>
-            <span class="about-stat-num">6–8</span>
-            <span class="about-stat-label">Días de envío</span>
-          </li>
-          <li>
-            <span class="about-stat-num">14</span>
-            <span class="about-stat-label">Días de devolución</span>
-          </li>
-        </ul>
-      </div>
-    </section>
-
-    <section id="faq" class="container deferred-section">
-      <div class="faq-block">
-        <span class="faq-eyebrow">Preguntas frecuentes</span>
-        <h2>Resolvemos tus dudas.</h2>
-        <p class="faq-lead">Si no encuentras tu respuesta, te ayudamos al momento por WhatsApp.</p>
-
-        <div class="faq-list-clean">
-          <details><summary>¿Cuánto tarda el envío?</summary><p>6–8 días hábiles a toda España.</p></details>
-          <details><summary>¿Cuál es la garantía?</summary><p>Aplicamos la garantía legal de conformidad vigente en España para consumidores, además de soporte posventa por WhatsApp y email.</p></details>
-          <details><summary>¿Incluye accesorios?</summary><p>Sí, soporte móvil, candado y cargador según modelo.</p></details>
-          <details><summary>¿Dónde puedo verlo?</summary><p>En Silla y Catarroja (Valencia).</p></details>
-          <details><summary>¿Qué autonomía tienen los patinetes eléctricos?</summary><p>Depende del modelo, peso del conductor, terreno y modo de conducción; cada ficha técnica muestra su rango estimado.</p></details>
-          <details><summary>¿Qué métodos de pago aceptáis?</summary><p>Pagos online mediante Stripe, además de Bizum y transferencia bancaria.</p></details>
-          <details><summary>¿Me ayudáis a elegir el modelo ideal?</summary><p>Sí. Te asesoramos por WhatsApp según tu presupuesto, trayecto diario y potencia que necesitas.</p></details>
-          <details><summary>¿Puedo reservar un patinete antes de pagar?</summary><p>Sí, puedes reservar por WhatsApp y te guiamos paso a paso para cerrar tu compra.</p></details>
         </div>
       </div>
     </section>
 
+    <!-- Aqui estaban las PREGUNTAS FRECUENTES: ocho filas cerradas y 742 px en
+         los que no habia nada que leer hasta que alguien pulsaba. Se han ido a
+         /preguntas, que ademas es donde el schema FAQPage sirve de algo: estaba
+         declarado como `@id "scootshop.co/#faq"` —colgando de la portada— y
+         Google indexa la portada, no el ancla. Mismo argumento por el que las
+         categorias se fueron a su pagina. -->
+
+    <!-- Con las tres secciones en blanco, lo que las separa es esta raya. Va
+         ENTRE las dos y no dentro, al reves que la del escaparate: aquella tenia
+         que esconderse con una seccion que nace `hidden`, y estas dos se pintan
+         siempre. -->
+    <div class="home-sep" role="presentation"></div>
 
     <section id="legal" class="legal deferred-section">
       <div class="container">
@@ -539,23 +1050,47 @@
       </div>
     </section>
 
+    <!-- EL PIE. Blanco, como toda la mitad baja, y separado del legal por la
+         raya de su propia caja.
+         SIN logotipo: lo ensena la cabecera fija todo el rato y repetirlo aqui
+         no anadia nada. El fichero (img/logo/marca-pie.webp) y su generador se
+         quedan en el repositorio; volver a ponerlo es una linea.
+         Las redes se quedan en esta primera columna, con el claim, porque son
+         de quien firma y no una cuarta columna de enlaces.
+         Este bloque lo copian /patinetes, /accesorios y /repuestos con
+         scripts/build-categorias.py: se cambia aqui y se regeneran. -->
     <section class="payments deferred-section" aria-label="Pie de página">
       <div class="container">
 
         <footer class="site-footer">
           <div class="footer-grid">
+
+            <div class="footer-col footer-col--marca">
+              <!-- Sin logotipo: lo ensena la cabecera fija todo el rato y aqui no
+                   anadia nada. El fichero sigue en img/logo/marca-pie.webp. -->
+              <p class="footer-claim">Patinetes eléctricos, accesorios y repuestos. Seleccionados con criterio y con repuestos para todo lo que vendemos.</p>
+              <div class="footer-socials">
+                <a href="https://www.instagram.com/scootshopping" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="https://www.facebook.com/61579248524907" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                <a href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+              </div>
+            </div>
+
             <div class="footer-col">
               <p class="footer-heading">Contacto</p>
               <a href="https://wa.me/34666318747" target="_blank" rel="noopener">WhatsApp: 666 318 747</a>
               <a href="mailto:info@scootshop.co">info@scootshop.co</a>
               <span>Silla y Catarroja, Valencia</span>
             </div>
+
             <div class="footer-col">
-              <p class="footer-heading">Navegación</p>
-              <a href="/#inicio">Inicio</a>
-              <a href="/#comprar">Productos</a>
-              <a href="/#faq">Preguntas frecuentes</a>
+              <p class="footer-heading">Tienda</p>
+              <a href="/patinetes/">Patinetes eléctricos</a>
+              <a href="/accesorios/">Accesorios</a>
+              <a href="/repuestos/">Repuestos</a>
+              <a href="/preguntas/">Preguntas frecuentes</a>
             </div>
+
             <div class="footer-col">
               <p class="footer-heading">Legal</p>
               <a href="/legal/">Aviso legal</a>
@@ -563,15 +1098,9 @@
               <a href="/legal/garantia-servicio-tecnico/">Garantía y SAT</a>
               <a href="/legal/uso-responsable-seguridad/">Uso responsable</a>
             </div>
-            <div class="footer-col">
-              <p class="footer-heading">Síguenos</p>
-              <div class="footer-socials">
-                <a href="https://www.instagram.com/scootshopping" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                <a href="https://www.facebook.com/61579248524907" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
-                <a href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-              </div>
-            </div>
+
           </div>
+
           <div class="footer-bottom">
             © <span id="y">2026</span> SCOOT SHOP · Todos los derechos reservados
           </div>
@@ -581,6 +1110,311 @@
   </main>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
