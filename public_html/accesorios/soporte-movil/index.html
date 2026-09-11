@@ -9,7 +9,7 @@
   <meta name="robots" content="index,follow,max-image-preview:large" />
   <meta name="format-detection" content="telephone=no" />
   <link rel="canonical" href="https://scootshop.co/accesorios/soporte-movil/" />
-  <meta name="asset-version" content="20260814-4" />
+  <meta name="asset-version" content="20260911-4" />
   <!-- Ficha SIEMPRE arriba: reset al tope en inline + DOMContentLoaded + 2 frames (vence el carry de scroll del WebView de apps, que aparece al renderizar). Sin lock ni guard. -->
   <!-- Memoria de scroll. Aquí SOLO va lo que hay que decidir antes del primer
        pintado; guardar, restaurar y re-anclar viven en js/scroll-memoria.js, que
@@ -17,7 +17,7 @@
        visita nueva: la marca global de antes no podía, y entrar por el logo te
        dejaba a mitad del catálogo. -->
   <style>html.ss-volviendo body{visibility:hidden}</style>
-  <script>(function(){try{if('scrollRestoration' in history)history.scrollRestoration='manual';var s=history.state,v=!!(s&&s.ss&&(s.ss.id||s.ss.y>0));window.SS_SCROLL={volviendo:v};var d=document.documentElement;if(v){d.classList.add('ss-volviendo');setTimeout(function(){d.classList.remove('ss-volviendo');},1800);return;}if(location.hash)return;var t=function(){try{window.scrollTo(0,0);}catch(e){}};t();document.addEventListener('DOMContentLoaded',function(){t();requestAnimationFrame(function(){t();requestAnimationFrame(t);});},{once:true});}catch(e){}})();</script>
+  <script>(function(){try{if('scrollRestoration' in history)history.scrollRestoration='manual';var s=history.state,nv=(performance.getEntriesByType&&performance.getEntriesByType('navigation')[0])||null,rc=nv?nv.type==='reload':(performance.navigation&&performance.navigation.type===1),v=!rc&&!!(s&&s.ss&&(s.ss.id||s.ss.y>0));window.SS_SCROLL={volviendo:v};var d=document.documentElement;if(v){d.classList.add('ss-volviendo');setTimeout(function(){d.classList.remove('ss-volviendo');},1800);return;}if(location.hash)return;var t=function(){try{window.scrollTo(0,0);}catch(e){}};t();document.addEventListener('DOMContentLoaded',function(){t();requestAnimationFrame(function(){t();requestAnimationFrame(t);});},{once:true});}catch(e){}})();</script>
   <meta property="og:url" content="https://scootshop.co/accesorios/soporte-movil/" />
   <meta property="og:title" content="Soporte móvil antivibración para patinete | SCOOT SHOP" />
   <meta property="og:description" content="Soporte de móvil con anclaje firme, giro 360° y diseño antivibración para patinetes y bicicletas." />
@@ -32,19 +32,79 @@
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="preload" as="font" type="font/woff2" href="/fonts/plus-jakarta-sans-latin.woff2" crossorigin />
   <link rel="preload" as="font" type="font/woff2" href="/fonts/russo-one-latin.woff2" crossorigin />
-  <link rel="stylesheet" href="/css/fuentes.css?v=20260814-4" />
-  <link rel="stylesheet" href="/css/icons.css?v=20260814-4">
-  <link rel="stylesheet" href="/css/main.css?v=20260814-4">
-  <link rel="stylesheet" href="/css/partials.mobile-menu.css?v=20260814-4">
-  <link rel="stylesheet" href="/css/tarjetas.css?v=20260814-4">
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/tangerine-versatil.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/fa-brands-400.woff2" crossorigin />
+  <link rel="stylesheet" href="/css/fuentes.css?v=20260911-4" />
+  <link rel="stylesheet" href="/css/icons.css?v=20260911-4">
+  <link rel="stylesheet" href="/css/main.css?v=20260911-4">
+  <link rel="stylesheet" href="/css/partials.mobile-menu.css?v=20260911-4">
+  <link rel="stylesheet" href="/css/tarjetas.css?v=20260911-4">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"Soporte móvil antivibración para patinete","description":"Soporte de móvil con anclaje firme, giro 360° y diseño antivibración para patinetes y bicicletas.","brand":{"@type":"Brand","name":"MOGGAM"},"sku":"ACC-HOLDER","image":["https://scootshop.co/accesorios/soporte-movil/img/2.webp","https://scootshop.co/accesorios/soporte-movil/img/3.webp","https://scootshop.co/accesorios/soporte-movil/img/4.webp"],"url":"https://scootshop.co/accesorios/soporte-movil/","offers":{"@type":"Offer","priceCurrency":"EUR","price":"7.40","availability":"https://schema.org/InStock","url":"https://scootshop.co/accesorios/soporte-movil/"}}</script>
 </head>
 <body>
-  <div id="site-header-slot"></div>
+  <div id="site-header-slot" data-horneado="1">
+<!-- /partials/site-header.html -->
+
+<!-- Fonts and icons are loaded in the main document head to avoid duplication -->
+
+<!-- Header styles are bundled in /css/main.css -->
+
+<header id="siteHeader" aria-label="Barra superior">
+  <div class="container nav">
+    <div class="brand">
+      <a href="/#inicio" aria-label="Ir al inicio">
+        <img src="/img/logo/marca-barra.webp" alt="SCOOT SHOP logo" decoding="async" fetchpriority="high" width="195" height="88" />
+        <span>Versátil</span>
+      </a>
+    </div>
+
+    <nav class="menu" aria-label="Navegación principal">
+      <a href="/#inicio">Inicio</a>
+      <a href="/patinetes/">Patinetes eléctricos</a>
+      <a href="/accesorios/">Accesorios</a>
+      <a href="/repuestos/">Repuestos</a>
+      <a href="https://www.instagram.com/scootshopping" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+      <a href="https://www.facebook.com/61579248524907" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook" aria-hidden="true"></i></a>
+      <a href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
+    </nav>
+
+    <div class="header-actions" aria-label="Acciones rápidas">
+      <a class="header-account-btn" id="headerAccountToggle" href="/cuenta/" aria-label="Ir a área cliente" onclick="window.location.href='/cuenta/';return false;">
+        <svg class="header-account-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 12C14.4853 12 16.5 9.98528 16.5 7.5C16.5 5.01472 14.4853 3 12 3C9.51472 3 7.5 5.01472 7.5 7.5C7.5 9.98528 9.51472 12 12 12Z"></path>
+          <path d="M4.5 20.25C4.5 16.9363 7.18629 14.25 10.5 14.25H13.5C16.8137 14.25 19.5 16.9363 19.5 20.25"></path>
+        </svg>
+        <span class="header-account-label">Cuenta</span>
+        <span class="header-account-dot" id="headerAccountDot" hidden aria-hidden="true"></span>
+      </a>
+
+      <button class="header-cart-btn" data-cart-open type="button" aria-label="Abrir carrito" aria-controls="ssCartPanel" aria-expanded="false">
+        <svg class="header-cart-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M7.5 18C8.32843 18 9 18.6716 9 19.5C9 20.3284 8.32843 21 7.5 21C6.67157 21 6 20.3284 6 19.5C6 18.6716 6.67157 18 7.5 18Z"></path>
+          <path d="M16.5 18.0001C17.3284 18.0001 18 18.6716 18 19.5001C18 20.3285 17.3284 21.0001 16.5 21.0001C15.6716 21.0001 15 20.3285 15 19.5001C15 18.6716 15.6716 18.0001 16.5 18.0001Z"></path>
+          <path d="M2 3L2.26121 3.09184C3.5628 3.54945 4.2136 3.77826 4.58584 4.32298C4.95808 4.86771 4.95808 5.59126 4.95808 7.03836V9.76C4.95808 12.7016 5.02132 13.6723 5.88772 14.5862C6.75412 15.5 8.14857 15.5 10.9375 15.5H12M16.2404 15.5C17.8014 15.5 18.5819 15.5 19.1336 15.0504C19.6853 14.6008 19.8429 13.8364 20.158 12.3075L20.6578 9.88275C21.0049 8.14369 21.1784 7.27417 20.7345 6.69708C20.2906 6.12 18.7738 6.12 17.0888 6.12H11.0235M4.95808 6.12H7" stroke-linecap="round"></path>
+        </svg>
+        <span class="cart-badge" hidden>0</span>
+      </button>
+
+      <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileMenu" type="button">
+        <i class="fa-solid fa-bars" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+      </div>
+  <!-- /site-header-slot -->
   <div id="mobile-menu-slot"></div>
   <main id="main-content" class="page-wrap">
     <section class="container">
-      <nav class="breadcrumb" aria-label="Ruta"><a href="/">Inicio</a><span>/</span><a href="/#comprar">Accesorios</a><span>/</span><span>Soporte móvil</span></nav>
+      <nav class="breadcrumb" aria-label="Ruta">
+        <a href="/">Inicio</a>
+        <span class="breadcrumb-sep" aria-hidden="true">/</span>
+        <a href="/accesorios/">Accesorios</a>
+        <span class="breadcrumb-sep" aria-hidden="true">/</span>
+        <span aria-current="page">Soporte móvil</span>
+      </nav>
       <div class="page-title"><div class="title-left"><h1>Soporte móvil antivibración para patinete</h1><div class="subtitle">Giro 360° · anclaje firme · compatible con 5,4–7,2”</div></div><div class="badge-min badge-acc"><i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i> Accesorios</div></div>
       <div class="layout">
         <div class="layout-media">
@@ -69,12 +129,318 @@
     <footer>© <span id="y"></span> SCOOT SHOP · <a href="/#legal">Legal</a></footer>
   </main>
 
-  <script src="/data/products.js?v=20260814-4" defer></script>
-  <script src="/js/product-enhancements.js?v=20260814-4" defer></script>
+  <script src="/data/product-overrides.js?v=20260911-4" defer></script>
+  <script src="/data/products.js?v=20260911-4" defer></script>
+  <script src="/js/product-enhancements.js?v=20260911-4" defer></script>
   <script src="/js/global-assets.js?v=20260605-2" defer></script>
-  <script src="/js/scroll-memoria.js?v=20260814-4" defer></script>
+  <script src="/js/scroll-memoria.js?v=20260911-4" defer></script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
