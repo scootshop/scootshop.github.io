@@ -1,4 +1,4 @@
-# Bump de la versión global de assets.
+﻿# Bump de la versión global de assets.
 #
 # POR DEFECTO NO TOCA LAS IMÁGENES, y es deliberado. Las fotos se sirven
 # `immutable, max-age=1 año`, así que cambiarles el ?v= crea una URL nueva y el
@@ -250,6 +250,37 @@ $sampleHtml = Get-Content $htmlFiles[0].FullName -Raw -Encoding UTF8
 $metaMatch = [regex]::Match($sampleHtml, '<meta\s+name="asset-version"\s+content="([^"]+)"\s*/?>')
 $currentVersion = if ($metaMatch.Success) { $metaMatch.Groups[1].Value.Trim() } else { '' }
 
+# ── La version de PRODUCCION manda si va por delante ─────────────────────────────
+# Hay DOS escritores de asset-version.json: este script y `bump_asset_version()` del
+# backend, que corre en CADA cambio de precio o de stock desde el panel. Si el panel ha
+# bumpeado y aqui se parte del numero local, el bump sale HACIA ATRAS: se reutiliza una
+# version ya servida con OTRO css, y como el css es `immutable` un anyo, quien tuviera
+# esa version en cache se queda con la hoja vieja para siempre. Paso el 24-ago-2026.
+function Compare-AssetVersion {
+  param([string]$A, [string]$B)
+  $ra = [regex]::Match($A, '^(\d{8})-(\d+)$')
+  $rb = [regex]::Match($B, '^(\d{8})-(\d+)$')
+  if (-not $ra.Success) { return -1 }
+  if (-not $rb.Success) { return 1 }
+  $da = [int]$ra.Groups[1].Value; $db = [int]$rb.Groups[1].Value
+  if ($da -ne $db) { if ($da -gt $db) { return 1 } else { return -1 } }
+  $na = [int]$ra.Groups[2].Value; $nb = [int]$rb.Groups[2].Value
+  if ($na -gt $nb) { return 1 } elseif ($na -lt $nb) { return -1 } else { return 0 }
+}
+
+if (-not $Version) {
+  try {
+    $resp = Invoke-WebRequest -Uri 'https://scootshop.co/asset-version.json' -UseBasicParsing -TimeoutSec 8
+    $viva = ([regex]::Match($resp.Content, '"v"\s*:\s*"([^"]+)"')).Groups[1].Value.Trim()
+    if ($viva -and (Compare-AssetVersion -A $viva -B $currentVersion) -gt 0) {
+      Write-Output "- produccion va por delante ($viva > $currentVersion): se parte de ahi"
+      $currentVersion = $viva
+    }
+  } catch {
+    Write-Warning "No se pudo leer la version de produccion ($($_.Exception.Message)). Se parte de la local: $currentVersion"
+  }
+}
+
 $targetVersion = if ($Version) { $Version.Trim() } else { Get-NextVersion -Current $currentVersion }
 
 if ($targetVersion -notmatch '^\d{8}-\d+$') {
@@ -276,7 +307,15 @@ try {
 $assetObj.v = $targetVersion
 $assetUpdated = $assetObj | ConvertTo-Json -Depth 5
 
-Set-Content -Path $assetPath -Value $assetUpdated -Encoding UTF8
+# SIN BOM, y no es un detalle de estilo: `Set-Content -Encoding UTF8` en Windows
+# PowerShell 5.1 escribe BOM, y quien lee este fichero en el servidor es
+# `bump_asset_version()` (api/index.php) con `json_decode`, que con BOM devuelve null.
+# Entonces el patron `^(\d{8})-(\d+)$` no casa, la funcion cae en "$hoy-1" y la
+# numeracion RETROCEDE: pasó de verdad el 24-ago-2026: el sitio estaba en 20260824-3,
+# un cambio de precio desde el panel lo dejó en -1 y el siguiente en -2, reutilizando
+# una version ya servida con OTRO css. Como el css es `immutable` por un año, quien ya
+# tenia la -2 en cache se quedaba con la hoja vieja para siempre.
+[System.IO.File]::WriteAllText($assetPath, $assetUpdated + "`n", (New-Object System.Text.UTF8Encoding($false)))
 
 Write-Output "OK: asset-version actualizado a $targetVersion"
 Write-Output "- HTML actualizados: $($htmlFiles.Count)"

@@ -32,6 +32,7 @@ import json
 import os
 import re
 import sys
+import urllib.parse
 import urllib.request
 
 RAIZ = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -49,6 +50,17 @@ CONJUNTOS = {
     'fuentes-400-500-700-800': 'family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap',
     'fuentes-400-600-700-800': 'family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap',
 }
+
+# TANGERINE, RECORTADA A LA PALABRA QUE ESCRIBE
+# Esta familia pinta UNA cosa en todo el sitio: el «Versátil» que va al lado del
+# logotipo (`.brand span`, css/main.css). Su .woff2 completo pesa 24,8 KB y viaja
+# en TODAS las páginas — 24 KB por ocho letras.
+# Google sirve un recorte si se le pide con `text=`, y aquí sí se puede recortar
+# sin riesgo, al revés que con las de texto corrido: el contenido que se pinta con
+# ella no es variable, es una constante escrita en el HTML de la cabecera.
+# OJO: si algún día otra cosa se pinta en Tangerine, hay que añadir sus letras
+# aquí o saldrán en la cursiva de reserva. Por eso el guardián lo comprueba.
+TANGERINE_TEXTO = 'Versátil'
 
 BLOQUE = re.compile(r'/\*\s*([a-z0-9\-\[\]]+)\s*\*/\s*(@font-face\s*\{.*?\})', re.S)
 URL_WOFF = re.compile(r'url\((https://[^)]+\.woff2)\)')
@@ -91,11 +103,50 @@ def main():
         return 0
 
     descargados = {}
+
+    # El recorte de Tangerine se pide aparte: `text=` se aplica a TODAS las
+    # familias de la consulta, y metido en la consulta grande recortaria tambien
+    # Plus Jakarta Sans y Russo One, que si pintan texto variable.
+    recorte_tangerine = pedir(
+        'https://fonts.googleapis.com/css2?family=Tangerine:wght@700&text=%s&display=swap'
+        % urllib.parse.quote(TANGERINE_TEXTO)).decode('utf-8')
+    # El recorte NO viene de una URL acabada en .woff2: Google lo sirve desde
+    # `/l/font?kit=...`, sin extension, asi que URL_WOFF no casa con el.
+    m = re.search(r'url\((https://[^)]+)\)', recorte_tangerine)
+    if not m:
+        print('no llega el recorte de Tangerine')
+        return 1
+    datos = pedir(m.group(1))
+    io.open(os.path.join(DESTINO_FUENTES, 'tangerine-versatil.woff2'), 'wb').write(datos)
+    descargados[m.group(1)] = ('tangerine-versatil.woff2', len(datos))
+    # Sin `unicode-range`: el recorte ya solo trae esas letras.
+    # El `unicode-range` que devuelve Google se CONSERVA: dice exactamente que
+    # letras trae el recorte, asi que si algun dia se pinta en Tangerine un texto
+    # con otras, el navegador cae a la cursiva de reserva en vez de dibujar huecos.
+    bloque_tangerine = re.search(r'@font-face\s*\{.*?\}', recorte_tangerine, re.S).group(0)
+    bloque_tangerine = re.sub(r'url\(https://[^)]+\)',
+                              'url(/fonts/tangerine-versatil.woff2)', bloque_tangerine)
+    # `block` y no `swap`, SOLO para esta. `swap` pinta la palabra con la cursiva de
+    # reserva y la cambia cuando llega la buena: son dos formas distintas de la misma
+    # palabra en la cabecera, y se ve. Con `block` no se pinta hasta tenerla, y como
+    # va precargada y pesa 3,3 KB desde este mismo dominio, esa espera es de unos
+    # pocos milisegundos. Se puede hacer aqui y no en las demas porque esta fuente
+    # escribe UNA palabra: en un parrafo, `block` seria texto invisible.
+    bloque_tangerine = bloque_tangerine.replace('font-display: swap;', 'font-display: block;')
+
     for slug, consulta in CONJUNTOS.items():
         css = pedir('https://fonts.googleapis.com/css2?' + consulta).decode('utf-8')
         bloques = []
+        tangerine_puesta = False
         for subconjunto, bloque in BLOQUE.findall(css):
             familia = FAMILIA.search(bloque).group(1)
+            if familia == 'Tangerine':
+                # La completa se descarta: en su lugar va el recorte, una sola vez.
+                if not tangerine_puesta:
+                    bloques.append('/* recorte de «%s» */' % TANGERINE_TEXTO
+                                   + chr(10) + bloque_tangerine)
+                    tangerine_puesta = True
+                continue
             remoto = URL_WOFF.search(bloque).group(1)
             local = nombre_local(familia, subconjunto)
             if remoto not in descargados:

@@ -1,6 +1,6 @@
-param(
+﻿param(
   [Parameter(Mandatory = $true)]
-  [ValidateSet('k', 'n', 'gt', 'ix')]
+  [ValidateSet('k', 'n', 'gt', 'ix', 'rovoron', 'dualtron', 'ecoxtrem', 'joyor')]
   [string]$SeriesKey,
 
   [Parameter(Mandatory = $true)]
@@ -29,6 +29,12 @@ param(
   [string]$ImageExt = 'webp',
   [string]$VideoId,
   [string]$VideoTitle,
+  # Colores de la LINEA de acento del panel (izquierda,derecha). Idealmente los
+  # del PRODUCTO: el ROVORON S7 es negro con aqua y su linea es "#111315,#1FACB2".
+  # Sin esto la linea cae al rojo de --primary, que no dice nada del producto.
+  # Si el producto llega a tener ejes, cada opcion puede afinarlo con
+  # `accentColors` en data/products.js y el JS pisa este valor al elegir.
+  [string]$AccentColors,
   [string]$Description,
   [string]$Subtitle,
   [string]$PayPalId,
@@ -47,13 +53,25 @@ function Get-SeriesLabel {
     'n' { 'Serie N' }
     'gt' { 'Serie GT' }
     'ix' { 'Serie IX' }
+    'rovoron' { 'ROVORON' }
+    'dualtron' { 'DUALTRON' }
+    'joyor' { 'JOYOR' }
+    'ecoxtrem' { 'Ecoxtrem' }
     default { throw "Serie no soportada: $Key" }
   }
 }
 
 function Get-SeriesFolder {
   param([string]$Key)
-  "series-$Key"
+  # Las series de marca no llevan el prefijo "series-": su carpeta es el nombre
+  # de la marca, como ya hace Ecoxtrem (/patinetes/ecoxtrem/...).
+  switch ($Key) {
+    'rovoron' { 'rovoron' }
+    'dualtron' { 'dualtron' }
+    'joyor' { 'joyor' }
+    'ecoxtrem' { 'ecoxtrem' }
+    default { "series-$Key" }
+  }
 }
 
 function Get-AssetVersion {
@@ -192,6 +210,7 @@ function Build-ProductPage {
     [string]$AssetVersion,
     [string]$NameValue,
     [string]$SeriesLabelValue,
+    [string]$SeriesKeyValue,
     [string]$BrandValue,
     [string]$PriceTextValue,
     [string]$CompareAtTextValue,
@@ -215,6 +234,47 @@ function Build-ProductPage {
     [string]$PayPalIdValue
   )
 
+  # El "Modelo" de la ficha tecnica se componia como "<marca> <nombre> (<serie>)".
+  # En una serie de MARCA (ROVORON, Ecoxtrem) el nombre YA empieza por la marca y
+  # la etiqueta de serie ES la marca, asi que salia "ROVORON ROVORON R7 (ROVORON)"
+  # en las dos fichas ROVORON, a la vista del cliente. Se compone sin repetir.
+  # PILDORA DE MARCA. Las marcas con logotipo propio lo enseñan en su color de
+  # verdad; el resto, el nombre de la marca del PRODUCTO (nunca el de la serie:
+  # "Serie K" o "Serie N" son nombres de almacen y no le dicen nada al cliente).
+  # Se prefiere el wordmark horizontal, la misma regla que el riel de la portada.
+  $chipLogos = @{
+    'ecoxtrem' = @('/img/marcas/ecoxtrem-logo.webp', 1259, 315, 'Ecoxtrem')
+    'k'        = @('/img/marcas/kukirin-wordmark.webp', 500, 89, 'KUKIRIN')
+    'rovoron'  = @('/img/marcas/rovoron-logo.webp', 1561, 320, 'ROVORON')
+    'dualtron' = @('/img/marcas/dualtron-logo-v2.webp', 1000, 298, 'DUALTRON')
+    'joyor'    = @('/img/marcas/joyor-logo.webp', 346, 77, 'JOYOR')
+  }
+  $BrandChip = "<i class=`"fa-solid fa-bolt`" aria-hidden=`"true`"></i> $BrandValue"
+  $claveChip = if ($SeriesKeyValue) { $SeriesKeyValue.Trim().ToLowerInvariant() } else { '' }
+  if ($claveChip -and $chipLogos.ContainsKey($claveChip)) {
+    $l = $chipLogos[$claveChip]
+    $BrandChip = "<img class=`"badge-min-logo`" src=`"$($l[0])`" alt=`"$($l[3])`" width=`"$($l[1])`" height=`"$($l[2])`" decoding=`"async`">"
+  }
+
+  # De "#111315,#1FACB2" al style del panel. Una sola: las dos mitades iguales.
+  $AccentStyle = ''
+  if ($AccentColors) {
+    $partes = @($AccentColors -split '[,;|]' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+    if ($partes.Count -ge 1) {
+      $izq = $partes[0]
+      $der = if ($partes.Count -ge 2) { $partes[1] } else { $partes[0] }
+      $AccentStyle = " style=`"--series-accent-a:$izq;--series-accent-b:$der`""
+    }
+  }
+
+  $ModelValue = $NameValue
+  if ($BrandValue -and -not $NameValue.StartsWith($BrandValue, [StringComparison]::OrdinalIgnoreCase)) {
+    $ModelValue = "$BrandValue $NameValue"
+  }
+  if ($SeriesLabelValue -and $SeriesLabelValue -ne $BrandValue -and $ModelValue -notlike "*$SeriesLabelValue*") {
+    $ModelValue = "$ModelValue ($SeriesLabelValue)"
+  }
+
   $stockLabel = switch ($StockValue) {
     'out_of_stock' { 'Agotado' }
     'preorder' { 'Reserva disponible' }
@@ -227,6 +287,10 @@ function Build-ProductPage {
     default { 'https://schema.org/InStock' }
   }
 
+  # LAS FOTOS DE PRODUCTO NUNCA LLEVAN ?v=. Versionarlas las invalida en cada
+  # bump (1,1 MB de fotos por 46 KB de CSS) y provoca descarga doble cuando el
+  # HTML y el JS no coinciden en la forma de la URL: eso es el parpadeo.
+  # Lo vigilan scripts/qa/check-image-cache.ps1 y check-image-dupes.js.
   $imageMain = "$ImageBaseRel" + "1.$ImageExtValue"
   # Base sin extension, para el srcset responsive del #mainImage. Las variantes
   # -400/-600/-800/-1000 las genera scripts/build-card-shots.py; si aun no
@@ -262,7 +326,7 @@ function Build-ProductPage {
     $src = "$ImageBaseRel$i.$ImageExtValue"
     $thumbItems += @"
               <button class="$cls" data-img="$src" type="button" aria-label="Ver imagen $i">
-                <img src="$src`?v=$AssetVersion" alt="$NameValue vista $i" loading="lazy" decoding="async">
+                <img src="$src" alt="$NameValue vista $i" loading="lazy" decoding="async">
               </button>
 "@
   }
@@ -274,7 +338,6 @@ function Build-ProductPage {
     $priceExtra = @"
 
             <span class="price-was">$CompareAtTextValue</span>
-            <span class="discount-badge">-$DiscountPct%</span>
 "@
   }
 
@@ -330,17 +393,23 @@ function Build-ProductPage {
   <link rel="canonical" href="https://scootshop.co$CanonicalPath" />
 
   <meta name="asset-version" content="$AssetVersion" />
-  <!-- Ficha SIEMPRE arriba: reset al tope en inline + DOMContentLoaded + 2 frames (vence el carry de scroll del WebView de apps). -->
-  <script>(function(){try{if('scrollRestoration' in history)history.scrollRestoration='manual';var t=function(){try{window.scrollTo(0,0);}catch(e){}};t();document.addEventListener('DOMContentLoaded',function(){t();requestAnimationFrame(function(){t();requestAnimationFrame(t);});},{once:true});addEventListener('pageshow',function(e){if(e&&e.persisted)t();});}catch(e){}})();</script>
+  <!-- Ficha SIEMPRE arriba: reset al tope en inline + DOMContentLoaded + 2 frames (vence el carry de scroll del WebView de apps, que aparece al renderizar). Sin lock ni guard. -->
+  <!-- Memoria de scroll. Aquí SOLO va lo que hay que decidir antes del primer
+       pintado; guardar, restaurar y re-anclar viven en js/scroll-memoria.js, que
+       es el único que mueve el scroll. `history.state` distingue una vuelta de una
+       visita nueva: la marca global de antes no podía, y entrar por el logo te
+       dejaba a mitad del catálogo. -->
+  <style>html.ss-volviendo body{visibility:hidden}</style>
+  <script>(function(){try{if('scrollRestoration' in history)history.scrollRestoration='manual';var s=history.state,v=!!(s&&s.ss&&(s.ss.id||s.ss.y>0));window.SS_SCROLL={volviendo:v};var d=document.documentElement;if(v){d.classList.add('ss-volviendo');setTimeout(function(){d.classList.remove('ss-volviendo');},1800);return;}if(location.hash)return;var t=function(){try{window.scrollTo(0,0);}catch(e){}};t();document.addEventListener('DOMContentLoaded',function(){t();requestAnimationFrame(function(){t();requestAnimationFrame(t);});},{once:true});}catch(e){}})();</script>
 
   <!-- FAVICON -->
-  <link rel="icon" href="/favicon.ico?v=$AssetVersion" sizes="any">
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=$AssetVersion">
-  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png?v=$AssetVersion">
-  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png?v=$AssetVersion">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=$AssetVersion">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=$AssetVersion">
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=$AssetVersion">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest?v=$AssetVersion">
   <meta name="theme-color" content="#ffffff">
   <meta name="apple-mobile-web-app-title" content="SCOOT SHOP">
@@ -362,14 +431,19 @@ function Build-ProductPage {
   <meta name="twitter:image" content="https://scootshop.co$imageMain" />
 
   <!-- Performance -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="dns-prefetch" href="//www.youtube-nocookie.com" />
 
-  <!-- Fonts + Icons (non-blocking) -->
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" media="print" onload="this.media='all'" />
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Tangerine:wght@700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" /></noscript>
+  <!-- LAS FUENTES SON NUESTRAS Y VAN PRECARGADAS. Esta plantilla pedia las tres
+       familias a Google y ademas con la hoja aplazada (media="print"), asi que la
+       cabecera se pintaba con la letra de reserva hasta que respondian dos origenes
+       externos. Como cada producto nuevo nace de aqui, la web se fue llenando de
+       fichas asi: 35 de 105 paginas en septiembre de 2026. Las tres precargas son
+       las tres letras de la cabecera —texto, rotulos y la palabra «Versatil»— y sin
+       ellas el navegador no las descubre hasta despues de leer el CSS. -->
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/plus-jakarta-sans-latin.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/russo-one-latin.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/tangerine-versatil.woff2" crossorigin />
+  <link rel="stylesheet" href="/css/fuentes.css?v=$AssetVersion" />
   <link rel="stylesheet" href="/css/icons.css?v=$AssetVersion">
 
   <!-- Base CSS (fallback for menu + layout) -->
@@ -377,8 +451,6 @@ function Build-ProductPage {
   <link rel="stylesheet" href="/css/partials.mobile-menu.css?v=$AssetVersion">
   <link rel="stylesheet" href="/css/tarjetas.css?v=$AssetVersion">
 
-  <!-- Asset loader (partials, cache busting, common UI, mobile menu) -->
-  <script src="/js/global-assets.js?v=$AssetVersion" defer></script>
 </head>
 
 <body>
@@ -404,7 +476,7 @@ function Build-ProductPage {
           <div class="subtitle">$subtitle</div>
         </div>
         <div class="badge-min">
-          <i class="fa-solid fa-bolt" aria-hidden="true"></i> $BrandValue
+          $BrandChip
         </div>
       </div>
 
@@ -412,7 +484,7 @@ function Build-ProductPage {
         <div class="layout-media">
           <section class="gallery" aria-label="Imágenes $NameValue">
             <div class="gallery-main">
-              <img src="$imageMain`?v=$AssetVersion" srcset="$imageMainBase-400.webp`?v=$AssetVersion 400w, $imageMainBase-600.webp`?v=$AssetVersion 600w, $imageMainBase-800.webp`?v=$AssetVersion 800w, $imageMainBase-1000.webp`?v=$AssetVersion 1000w" sizes="(max-width:980px) 84vw, 33vw" alt="$NameValue vista principal" id="mainImage" loading="eager" fetchpriority="high" decoding="async">
+              <img src="$imageMain" srcset="$imageMainBase-400.webp 400w, $imageMainBase-600.webp 600w, $imageMainBase-800.webp 800w, $imageMainBase-1000.webp 1000w" sizes="(max-width:980px) 84vw, 33vw" alt="$NameValue vista principal" id="mainImage" loading="eager" fetchpriority="high" decoding="async">
             </div>
 
             <div class="thumbs" aria-label="Miniaturas $NameValue">
@@ -422,7 +494,7 @@ $thumbsBlock
 $videoBlock
         </div>
 
-        <aside class="panel" aria-label="Ficha técnica $NameValue">
+        <aside class="panel"$AccentStyle aria-label="Ficha técnica $NameValue">
           <div class="price-row" aria-label="Precio $NameValue">
             <span class="price-values">
               <span class="price-now">$PriceTextValue</span>$priceExtra
@@ -473,7 +545,7 @@ $videoBlock
 
               <div id="specTable" class="spec-acc-panel" hidden>
                 <div class="spec-table" aria-label="Especificaciones $NameValue">
-                  <div class="spec-row"><div class="spec-label">Modelo</div><div class="spec-value">$BrandValue $NameValue ($SeriesLabelValue)</div></div>
+                  <div class="spec-row"><div class="spec-label">Modelo</div><div class="spec-value">$ModelValue</div></div>
                   <div class="spec-row"><div class="spec-label">Velocidad max.</div><div class="spec-value">$TopSpeedValue</div></div>
                   <div class="spec-row"><div class="spec-label">Motor</div><div class="spec-value">$MotorValue</div></div>
                   <div class="spec-row"><div class="spec-label">Autonomía</div><div class="spec-value">$RangeValue</div></div>
@@ -585,8 +657,16 @@ $ldImages
   }
   </script>
 
-  <script src="/data/products.js?v=$AssetVersion"></script>
-  <script src="/js/product-enhancements.js?v=$AssetVersion"></script>
+  <!-- ORDEN Y defer: los tres primeros van en este orden y TODOS con defer.
+       Sin defer bloquean el primer pintado (medido: FCP 4832 -> 2032 ms al
+       ponerlo), y global-assets va DESPUES para que el orden de ejecucion sea
+       overrides -> catalogo -> mejoras -> loader. Lo vigila
+       scripts/qa/carga-no-bloqueante.py. -->
+  <script src="/data/product-overrides.js?v=$AssetVersion" defer></script>
+  <script src="/data/products.js?v=$AssetVersion" defer></script>
+  <script src="/js/product-enhancements.js?v=$AssetVersion" defer></script>
+  <script src="/js/global-assets.js?v=$AssetVersion" defer></script>
+  <script src="/js/scroll-memoria.js?v=$AssetVersion" defer></script>
 </body>
 </html>
 "@
@@ -645,7 +725,7 @@ if (-not $NoPlaceholderImage) {
   Copy-Item -Path $placeholderImage -Destination (Join-Path $productImageFolder '1.jpg') -Force
 }
 
-$pageHtml = Build-ProductPage -AssetVersion $assetVersion -NameValue $resolvedName -SeriesLabelValue $seriesLabel -BrandValue $resolvedBrand -PriceTextValue $priceText -CompareAtTextValue $compareText -MotorValue $MotorText.Trim() -BatteryValue $BatteryText.Trim() -RangeValue $RangeText.Trim() -TopSpeedValue $TopSpeedText.Trim() -WheelValue $WheelText.Trim() -SkuValue $resolvedSku -CanonicalPath $rootRelative -ImageBaseRel $imageBaseRel -ImageExtValue $resolvedExt -ImageCountValue $imageCountSafe -StockValue $Stock -PriceNumber $priceNumber -DiscountPct $discountPct -DescriptionValue $Description -SubtitleValue $Subtitle -VideoIdValue $VideoId -VideoTitleValue $VideoTitle -PayPalIdValue $PayPalId
+$pageHtml = Build-ProductPage -AssetVersion $assetVersion -NameValue $resolvedName -SeriesLabelValue $seriesLabel -SeriesKeyValue $SeriesKey -BrandValue $resolvedBrand -PriceTextValue $priceText -CompareAtTextValue $compareText -MotorValue $MotorText.Trim() -BatteryValue $BatteryText.Trim() -RangeValue $RangeText.Trim() -TopSpeedValue $TopSpeedText.Trim() -WheelValue $WheelText.Trim() -SkuValue $resolvedSku -CanonicalPath $rootRelative -ImageBaseRel $imageBaseRel -ImageExtValue $resolvedExt -ImageCountValue $imageCountSafe -StockValue $Stock -PriceNumber $priceNumber -DiscountPct $discountPct -DescriptionValue $Description -SubtitleValue $Subtitle -VideoIdValue $VideoId -VideoTitleValue $VideoTitle -PayPalIdValue $PayPalId
 Set-Content -Path $productIndex -Value $pageHtml -Encoding UTF8
 
 $productEntry = Build-ProductEntry -Id $productId -SkuValue $resolvedSku -NameValue $resolvedName -BrandValue $resolvedBrand -SeriesValue $SeriesKey -CategoryValue $CategoryKey -PriceTextValue $priceText -CompareAtTextValue $compareText -StockValue $Stock -HrefValue $rootRelative -ImageValue $imageRelative -AltValue ("Patinete eléctrico " + $resolvedName) -MotorValue $MotorText.Trim() -RangeValue $RangeText.Trim() -BatteryValue $BatteryText.Trim() -SeriesLabelValue $seriesLabel -ImageBaseRel $imageBaseRel -ImageExtValue $resolvedExt -ImageCountValue $imageCountSafe

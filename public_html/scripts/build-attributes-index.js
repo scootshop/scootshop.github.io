@@ -70,7 +70,24 @@ function construir() {
     throw new Error('el catalogo o el nucleo no se cargaron (productos=' + productos.length + ')');
   }
 
-  const salida = { labels: SS.ETIQUETAS || {}, products: {}, byHref: {} };
+  const salida = { labels: SS.ETIQUETAS || {}, products: {}, byHref: {}, packs: [] };
+
+  /* LOS PACKS VIAJAN AL BACKEND POR AQUI.
+     Un pack cambia el precio de lo que se cobra, asi que `api/index.php` tiene
+     que conocerlo: lo lee de este indice (`resolve_order_pricing()`). Se copia
+     tal cual lo declara el catalogo — cantidades incluidas — para que la regla
+     este escrita en un solo sitio. */
+  salida.packs = (win.SCOOTSHOP_getPacks ? win.SCOOTSHOP_getPacks() : [])
+    .map(pack => ({
+      id: String(pack.id || ''),
+      titulo: String(pack.titulo || ''),
+      articulos: (pack.articulos || []).map(a => {
+        const fila = { sku: String(a.sku || ''), cantidad: Math.max(1, parseInt(a.cantidad, 10) || 1) };
+        if (a.precioPackTotal !== undefined) fila.precioPackTotal = Number(a.precioPackTotal);
+        else if (a.precioPack !== undefined) fila.precioPack = Number(a.precioPack);
+        return fila;
+      })
+    }));
   const ordenados = productos.slice().sort((a, b) => String(a.sku || '').localeCompare(String(b.sku || '')));
 
   for (const p of ordenados) {
