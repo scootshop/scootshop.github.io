@@ -70,56 +70,9 @@
     unlockBackgroundScroll(scrollTarget);
     burger.setAttribute('aria-expanded', 'false');
 
-    // Reset drill-down
-    if (viewport) viewport.classList.remove('mm-drilled');
-    panel.classList.remove('is-drilled');
-    setHeadTitle('Menú');
 
     // Return focus to burger
     burger.focus();
-    return true;
-  }
-
-  // El título de la cabecera hace de rótulo del nivel en el que estás: "Menú"
-  // en la raíz, "Productos" dentro del drill. Va emparejado con #mmBack, que el
-  // CSS solo muestra cuando el viewport tiene .mm-drilled.
-  function setHeadTitle(text) {
-    var title = document.getElementById('mmHeadTitle');
-    if (title) title.textContent = text;
-  }
-
-  function drillToProducts() {
-    var viewport = document.getElementById('mmViewport');
-    var productsBtn = document.getElementById('mmProductsToggle');
-    var panel = document.getElementById('mobileMenu');
-    if (!viewport) return false;
-    viewport.classList.add('mm-drilled');
-    // El botón de volver está en .mm-head, hermano ANTERIOR del viewport: no hay
-    // combinador CSS que llegue ahí desde .mm-viewport.mm-drilled. Se marca
-    // también el panel para poder mostrarlo sin depender de :has().
-    if (panel) panel.classList.add('is-drilled');
-    setHeadTitle('Productos');
-    if (productsBtn) productsBtn.setAttribute('aria-expanded', 'true');
-
-    // El foco salta a la primera serie: sin esto se queda en el botón
-    // "Productos", que acaba de salir de pantalla.
-    var firstLink = viewport.querySelector('.mm-view--products .mm-link');
-    if (firstLink) firstLink.focus();
-    return true;
-  }
-
-  function drillBack() {
-    var viewport = document.getElementById('mmViewport');
-    var productsBtn = document.getElementById('mmProductsToggle');
-    var panel = document.getElementById('mobileMenu');
-    if (!viewport) return false;
-    viewport.classList.remove('mm-drilled');
-    if (panel) panel.classList.remove('is-drilled');
-    setHeadTitle('Menú');
-    if (productsBtn) {
-      productsBtn.setAttribute('aria-expanded', 'false');
-      productsBtn.focus();
-    }
     return true;
   }
 
@@ -201,22 +154,6 @@
         return;
       }
 
-      // Products drill-down
-      if (e.target.closest('#mmProductsToggle')) {
-        e.preventDefault();
-        e.stopPropagation();
-        drillToProducts();
-        return;
-      }
-
-      // Back (mismo destino que el gesto de deslizar)
-      if (e.target.closest('#mmBack')) {
-        e.preventDefault();
-        e.stopPropagation();
-        drillBack();
-        return;
-      }
-
       // Close on any navigation link click
       var link = e.target.closest('.mm-panel a[href]');
       if (link && isMenuOpen()) {
@@ -232,11 +169,7 @@
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && isMenuOpen()) {
         e.preventDefault();
-        // Escape retrocede un nivel antes de cerrar del todo, igual que el
-        // botón de volver: si estás en Productos, no pierdes el menú entero.
-        var viewport = document.getElementById('mmViewport');
-        if (viewport && viewport.classList.contains('mm-drilled')) drillBack();
-        else closeMenu();
+        closeMenu();
         return;
       }
       if (e.key === 'Tab' && isMenuOpen()) {
@@ -262,11 +195,9 @@
     document.addEventListener('touchend', function() {
       if (!isSwiping) return;
       var diff = touchCurrentX - touchStartX;
-      if (diff > 70) {
-        var viewport = document.getElementById('mmViewport');
-        if (viewport && viewport.classList.contains('mm-drilled')) drillBack();
-        else closeMenu();
-      }
+      // Deslizar a la derecha cierra. Antes retrocedia un nivel si estabas
+      // dentro del cajon de marcas; ya no hay niveles.
+      if (diff > 70) closeMenu();
       isSwiping = false;
       touchStartX = 0;
       touchCurrentX = 0;
@@ -276,9 +207,6 @@
     if (win) {
       win.MM_openMenu = openMenu;
       win.MM_closeMenu = closeMenu;
-      win.MM_toggleProducts = drillToProducts;
-      win.MM_drillToProducts = drillToProducts;
-      win.MM_drillBack = drillBack;
     }
   }
 

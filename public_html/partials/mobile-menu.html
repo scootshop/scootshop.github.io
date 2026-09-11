@@ -1,15 +1,10 @@
-﻿<!-- /partials/mobile-menu.html — Drawer + Drill-down -->
+<!-- /partials/mobile-menu.html — Drawer + Drill-down -->
 
 <div class="mm-backdrop" id="mmBackdrop"></div>
 
 <nav class="mm-panel" id="mobileMenu" role="dialog" aria-modal="true" aria-label="Menú móvil">
   <div class="mm-head">
     <div class="mm-head-left">
-      <!-- Solo visible dentro de Productos (lo enseña .mm-viewport.mm-drilled).
-           Antes el único camino de vuelta era el gesto de deslizar. -->
-      <button class="mm-back" id="mmBack" aria-label="Volver al menú" type="button">
-        <i class="fa-solid fa-chevron-left"></i>
-      </button>
       <span class="mm-head-title" id="mmHeadTitle">Menú</span>
     </div>
     <button class="mm-close" id="mmClose" aria-label="Cerrar menú" type="button">
@@ -18,29 +13,33 @@
   </div>
 
   <div class="mm-viewport" id="mmViewport">
-    <!-- View 0: Main nav -->
+    <!-- TRES TARJETAS, UN DESTINO CADA UNA. Antes cada fila tenia dos objetivos:
+         el nombre navegaba y una flecha abria un cajon con las marcas de esa
+         categoria. Ese segundo nivel se ha quitado entero —marcado, CSS y JS—:
+         quien abre el menu quiere ir a la categoria, y obligar a distinguir dos
+         zonas dentro de la misma fila era pedirle que aprendiera algo para nada.
+
+         `data-mm-cat` se queda porque es la clave del catalogo con la que
+         `pintarCuentas()` (js/products-menu.js) rellena el numerito. Ya no abre
+         nada: su escucha de clic se fue con el cajon. -->
     <div class="mm-view mm-view--main">
       <div class="mm-nav">
-        <a class="mm-link" href="/#inicio">
-          <span class="mm-link-content"><i class="fa-solid fa-house mm-ico" aria-hidden="true"></i>Inicio</span>
+        <a class="mm-cat" href="/patinetes/" data-mm-cat="electric-scooters">
+          <span class="mm-cat-nom">Patinetes eléctricos</span>
+          <span class="mm-cat-cuenta" data-mm-cuenta hidden></span>
         </a>
-        <button class="mm-link" id="mmProductsToggle" type="button" aria-expanded="false">
-          <span class="mm-link-content"><i class="fa-solid fa-cart-shopping mm-ico" aria-hidden="true"></i>Productos</span>
-          <i class="fa-solid fa-chevron-right mm-arrow" aria-hidden="true"></i>
-        </button>
-        <a class="mm-link" href="/#faq">
-          <span class="mm-link-content"><i class="fa-solid fa-circle-question mm-ico" aria-hidden="true"></i>Preguntas</span>
+        <a class="mm-cat" href="/accesorios/" data-mm-cat="accessories">
+          <span class="mm-cat-nom">Accesorios</span>
+          <span class="mm-cat-cuenta" data-mm-cuenta hidden></span>
         </a>
-        <a class="mm-link" href="/#legal">
-          <span class="mm-link-content"><i class="fa-solid fa-scale-balanced mm-ico" aria-hidden="true"></i>Legal</span>
+        <a class="mm-cat" href="/repuestos/" data-mm-cat="spare-parts">
+          <span class="mm-cat-nom">Repuestos</span>
+          <span class="mm-cat-cuenta" data-mm-cuenta hidden></span>
         </a>
       </div>
 
-    </div>
-
-    <!-- View 1: Products drill-down -->
-    <div class="mm-view mm-view--products">
-      <div class="mm-products-scroll" id="mmProductsSub" data-products-mobile-root></div>
+      <!-- El inicio no es una categoria, asi que no compite con ellas. -->
+      <a class="mm-inicio" href="/#inicio">Volver al inicio</a>
     </div>
   </div>
 

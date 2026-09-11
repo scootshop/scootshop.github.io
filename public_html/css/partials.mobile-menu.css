@@ -130,46 +130,14 @@ body.mm-lock-scroll {
   min-width: 0;
 }
 
-/* Volver: mismo botón circular del sistema que .mm-close, en espejo. Solo
-   existe dentro de Productos; la clase la pone drillToProducts() sobre el panel
-   porque .mm-head es hermano ANTERIOR del viewport y ningún combinador CSS
-   llega hasta aquí desde .mm-viewport.mm-drilled. */
-.mm-back {
-  width: 38px;
-  height: 38px;
-  border-radius: 999px;
-  border: 1px solid var(--mm-line);
-  background: #fff;
-  color: #0f172a;
-  font-size: 0.9rem;
-  cursor: pointer;
-  display: none;
-  place-items: center;
-  flex: 0 0 auto;
-  padding: 0;
-  transition: background 0.16s ease;
-}
-.mm-panel.is-drilled .mm-back {
-  display: grid;
-}
-.mm-back:active {
-  background: rgba(15, 23, 42, 0.07);
-}
-@media (hover: hover) {
-  .mm-back:hover {
-    background: rgba(15, 23, 42, 0.04);
-  }
-}
-.mm-back:focus-visible {
-  outline: 2px solid var(--mm-focus);
-  outline-offset: 2px;
-}
-
 /* Mismo tratamiento que el "TU CARRITO" del carrito. */
 .mm-head-title {
-  font-family: inherit;
-  font-weight: 800;
-  font-size: 1.05rem;
+  font-family: var(--sport, 'Russo One', sans-serif);
+  /* EN LINEA no admite `transform`: sin esto la inclinacion del bloque de
+     rotulos de main.css no se aplicaria. */
+  display: inline-block;
+  font-weight: 400;
+  font-size: 1.12rem;
   letter-spacing: 0.03em;
   text-transform: uppercase;
   color: var(--mm-text);
@@ -237,46 +205,107 @@ body.mm-lock-scroll {
   gap: 14px;
 }
 
-.mm-view--products {
-  transform: translateX(100%);
-  overflow: hidden;
-}
+/* ── LAS TRES CATEGORIAS ──
+   Una TARJETA POR CATEGORIA, no una lista de filas grises dentro de una caja.
+   Aquello no se parecia a nada del sitio: iconos de Font Awesome en gris, un
+   numerito y un chevron, que es lenguaje de app de ajustes. Aqui todo lo que se
+   presenta —producto, articulo del carrito, recuadro de variante— es una tarjeta
+   blanca con la sombra gris calida de la casa, y el titulo va en la letra de los
+   rotulos. Eso es lo que se hace ahora.
 
-/* Drill into products */
-.mm-viewport.mm-drilled .mm-view--main {
-  transform: translateX(-25%);
-  opacity: 0;
-  pointer-events: none;
-}
-.mm-viewport.mm-drilled .mm-view--products {
-  transform: translateX(0);
-}
-
-/* ── Tarjeta: PRIMITIVA ÚNICA de todo el menú ── */
-/* .mm-nav + .mm-link son la tarjeta y la fila de los DOS niveles: la nav
-   principal y los grupos de series de Productos. Antes el nivel 2 tenía su
-   propio componente (.mm-sub-category-card + .mm-sub-link) que divergía en
-   borde, radio, sombra, fondo y peso del separador, y por eso al entrar en
-   Productos parecía otra web. No vuelvas a crear una tarjeta paralela: si el
-   nivel 2 necesita algo, es que lo necesita la primitiva.
-
-   Mismo lenguaje que .ss-cart-item: radio 20, blanco sólido y UNA sombra.
-   Se retiró el `backdrop-filter: blur(10px)` que tenía: el panel que hay detrás
-   es blanco opaco, así que desenfocaba algo que no se ve, y aun así el
-   navegador lo componía en cada frame de la animación de entrada.
-   `overflow:hidden` para que el fondo de :active de la primera y la última fila
-   no se salga de las esquinas redondeadas. */
+   La pila NO lleva fondo ni sombra propios: los pone cada tarjeta. */
 .mm-nav {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 12px;
   border: 0;
-  border-radius: 20px;
-  background: #fff;
-  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
-  overflow: hidden;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
 }
 
+.mm-cat {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding: 18px 20px;
+  border-radius: 18px;
+  background: #fff;
+  text-decoration: none;
+  color: var(--mm-text);
+  /* La sombra de la casa: la misma de los recuadros de la ficha y del cajon del
+     carrito. Es lo que despega una tarjeta blanca de un panel blanco. */
+  box-shadow:
+    0 0px 5px 2px rgb(232 222 222 / 18%),
+    0 1px 0 rgba(255, 255, 255, .94) inset,
+    0 14px 30px rgba(138, 138, 138, .08);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .16s ease, box-shadow .16s ease;
+}
+
+.mm-cat:active {
+  transform: translateY(1px);
+  box-shadow:
+    0 0px 4px 1px rgb(232 222 222 / 22%),
+    0 6px 14px rgba(138, 138, 138, .10);
+}
+
+.mm-cat:focus-visible {
+  outline: 2px solid var(--mm-focus);
+  outline-offset: 2px;
+}
+
+/* El nombre habla con la voz de los rotulos: Russo One, versalitas e inclinado.
+   La familia y el cuerpo van aqui; el trazo y la inclinacion los pone el bloque
+   de rotulos de main.css, donde `.mm-cat-nom` esta en la lista. `inline-block`
+   porque un `<span>` en linea no admite `transform`. */
+.mm-cat-nom {
+  display: inline-block;
+  font-family: var(--sport, 'Russo One', sans-serif);
+  font-weight: 400;
+  font-size: clamp(.95rem, 4.1vw, 1.12rem);
+  line-height: 1.15;
+  color: var(--mm-text);
+}
+
+/* El recuento, en la pildora de la casa: la misma de `.variant-axis-value` en la
+   ficha. Sobre blanco se lee por su sombra, no por su fondo. */
+.mm-cat-cuenta {
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .82);
+  font-size: .67rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+  color: var(--mm-muted);
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, .06);
+}
+
+/* El inicio NO es una categoria: va en voz baja para no competir con las tres.
+   Mismo tratamiento que el «Vaciar» del cajon del carrito. */
+.mm-inicio {
+  align-self: center;
+  margin-top: 4px;
+  padding: 10px 6px;
+  font-size: .74rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--mm-muted);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.mm-inicio:active { text-decoration: underline; text-underline-offset: 3px; }
+@media (hover: hover) {
+  .mm-inicio:hover { text-decoration: underline; text-underline-offset: 3px; }
+}
+
+/* ── Tarjeta: PRIMITIVA del panel de marcas ──
+   `.mm-link` la sigue usando el marcado que genera `products-menu.js`. */
 .mm-link {
   appearance: none;
   width: 100%;
@@ -332,30 +361,12 @@ body.mm-lock-scroll {
   color: #9ca3af;
 }
 
-/* "Productos" es una fila más: sin fondo rojo, sin texto ni icono de acento y
-   sin peso propio. Lo único que la distingue es el chevron, que no es adorno —
-   es lo que avisa de que abre otra pantalla en vez de navegar. */
-.mm-arrow {
-  font-size: 0.68rem;
-  color: rgba(0, 0, 0, 0.25);
-  transition: transform 180ms ease;
-}
-.mm-link:hover .mm-arrow,
-.mm-link:active .mm-arrow {
-  transform: translateX(3px);
+/* La salida del cajón: la primera fila lleva a la categoría entera. */
+.mm-link--todos {
+  font-weight: 800;
 }
 
-/* ── Products scroll area ── */
-/* Mismo padding lateral y superior que .mm-view--main: los dos niveles deben
-   arrancar en la misma línea, si no la tarjeta "salta" al entrar en Productos. */
-.mm-products-scroll {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding: 16px 16px 24px;
-}
-
-/* El cajón corta en la serie: no lista modelos. Cada .mm-sub-group es una
+.mm-sub-group es una
    categoría — rótulo FUERA de la tarjeta (antes había doble encabezado: uno
    fuera y otro dentro) y una .mm-nav con sus series. */
 .mm-sub-shell {

@@ -38,20 +38,35 @@
     }
   }
 
-  /* El panel corta en la serie: NO lista modelos. Cada serie enlaza a su sección
-     de la portada (homeSectionId), donde ya hay foto, precio y stock. Así el
-     panel se queda en un número fijo de filas por muchos productos que se
-     añadan al catálogo. */
-  function buildPanel(categories) {
+  /* El panel corta en la serie: NO lista modelos. Cada serie enlaza a su tramo
+     DENTRO DE LA PAGINA DE SU CATEGORIA (`/patinetes/#series-joyor`), donde ya
+     hay foto, precio y stock. Así el panel se queda en un número fijo de filas
+     por muchos productos que se añadan al catálogo.
+
+     Antes era `/#series-joyor`, un ancla de la portada: valia mientras la portada
+     pintaba las tres categorias enteras, y dejo de llevar a ningun sitio cuando
+     cada una se mudo a su pagina. La ruta NO se deduce aqui —se le pregunta al
+     catalogo, que es donde esta escrita una sola vez. */
+  function buildPanel(categories, opciones) {
     var cats = categories || getMenuCategories();
     if (!cats.length) return '';
+    var op = opciones || {};
 
     var groups = cats.map(function (category) {
+      /* Si la categoria no tiene pagina (motos y bicicletas, apagadas), se cae a
+         la portada: mejor llevar a algo que a un ancla muerta. */
+      var base = '/';
+      try {
+        if (typeof window.SCOOTSHOP_getCategoryUrl === 'function') {
+          base = window.SCOOTSHOP_getCategoryUrl(category.key) || '/';
+        }
+      } catch (_) {}
+
       var rows = (category.series || []).map(function (series) {
         var count = (series.items || []).length;
         var sectionId = series.homeSectionId || ('series-' + series.key);
         return '' +
-          '<a class="mm-link" href="/#' + escapeHtml(sectionId) + '">' +
+          '<a class="mm-link" href="' + escapeHtml(base) + '#' + escapeHtml(sectionId) + '">' +
             '<span class="mm-link-content">' + escapeHtml(series.label) + '</span>' +
             '<span class="mm-link-aside">' +
               '<span class="mm-count">' + count + '</span>' +
@@ -60,14 +75,56 @@
           '</a>';
       }).join('');
 
+      /* En el cajon de UNA categoria el nombre no se repite —lo dice la cabecera
+         del cajon— y la primera fila es la salida a la pagina entera, que es lo
+         que la mayoria viene buscando: el cajon esta para afinar, no para tener
+         que afinar. */
+      var titulo = op.sinTitulo
+        ? ''
+        : '<div class="mm-sub-title">' + escapeHtml(category.label) + '</div>';
+
+      var todos = '';
+      if (op.conTodos && base !== '/') {
+        var total = (category.series || []).reduce(function (n, se) {
+          return n + ((se.items || []).length);
+        }, 0);
+        todos = '' +
+          '<a class="mm-link mm-link--todos" href="' + escapeHtml(base) + '">' +
+            '<span class="mm-link-content">Ver todos</span>' +
+            '<span class="mm-link-aside">' +
+              '<span class="mm-count">' + total + '</span>' +
+              '<i class="fa-solid fa-chevron-right mm-arrow" aria-hidden="true"></i>' +
+            '</span>' +
+          '</a>';
+      }
+
       return '' +
         '<section class="mm-sub-group" aria-label="' + escapeHtml(category.label) + '">' +
-          '<div class="mm-sub-title">' + escapeHtml(category.label) + '</div>' +
-          '<div class="mm-nav">' + rows + '</div>' +
+          titulo +
+          '<div class="mm-nav">' + todos + rows + '</div>' +
         '</section>';
     }).join('');
 
     return '<div class="mm-sub-shell">' + groups + '</div>';
+  }
+
+  /* El cajon de UNA categoria (movil). Devuelve '' si la categoria no existe o no
+     tiene series: quien llama decide entonces navegar en vez de abrir un cajon
+     vacio. */
+  function panelDeCategoria(clave) {
+    var cats = getMenuCategories().filter(function (c) { return c && c.key === clave; });
+    if (!cats.length) return '';
+    if (!(cats[0].series || []).length) return '';
+    return buildPanel(cats, { sinTitulo: true, conTodos: true });
+  }
+
+  /* Cuantos productos tiene una categoria, para el numerito de su fila. */
+  function cuentaDeCategoria(clave) {
+    var cats = getMenuCategories().filter(function (c) { return c && c.key === clave; });
+    if (!cats.length) return 0;
+    return (cats[0].series || []).reduce(function (n, se) {
+      return n + ((se.items || []).length);
+    }, 0);
   }
 
   function renderMobile(root, panelHtml) {
@@ -81,7 +138,7 @@
     // Enlace estático de reserva del <div data-products-desktop-root>: es a donde
     // apunta Productos si el JS no llega a montar el desplegable.
     var fallbackLink = host.querySelector('a[href]');
-    var fallbackHref = fallbackLink ? (fallbackLink.getAttribute('href') || '/#comprar') : '/#comprar';
+    var fallbackHref = fallbackLink ? (fallbackLink.getAttribute('href') || '/patinetes/') : '/patinetes/';
 
     host.innerHTML = '' +
       '<button class="pc-products-trigger" type="button" aria-expanded="false" aria-controls="pcProductsPanel">' +
@@ -103,7 +160,7 @@
     var scope = root || document;
 
     // Si el catálogo aún no está, NO se pinta: el host conserva su enlace
-    // estático a /#comprar en vez de quedarse con un desplegable vacío. Quien
+    // estático a /patinetes en vez de quedarse con un desplegable vacío. Quien
     // carga el catálogo vuelve a llamar aquí cuando termina.
     var panelHtml = buildPanel();
     if (!panelHtml) return false;
@@ -114,7 +171,23 @@
     var mobileRoots = scope.querySelectorAll('[data-products-mobile-root]');
     for (var j = 0; j < mobileRoots.length; j++) renderMobile(mobileRoots[j], panelHtml);
 
+    pintarCuentas(scope);
+
     return true;
+  }
+
+  /* El numerito de cada fila de categoria del menu movil. Sale del catalogo, asi
+     que un alta o una baja se refleja sola; nace `hidden` para no enseñar un cero
+     mientras carga. */
+  function pintarCuentas(scope) {
+    var filas = (scope || document).querySelectorAll('[data-mm-cat]');
+    for (var i = 0; i < filas.length; i++) {
+      var hueco = filas[i].querySelector('[data-mm-cuenta]');
+      if (!hueco) continue;
+      var n = cuentaDeCategoria(filas[i].getAttribute('data-mm-cat') || '');
+      if (n > 0) { hueco.textContent = String(n); hueco.hidden = false; }
+      else { hueco.hidden = true; }
+    }
   }
 
   // =========================
@@ -188,6 +261,8 @@
 
   window.SS_PRODUCT_MENUS = {
     buildPanel: buildPanel,
+    panelDeCategoria: panelDeCategoria,
+    cuentaDeCategoria: cuentaDeCategoria,
     render: render,
     initDesktop: initDesktop
   };
