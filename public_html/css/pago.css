@@ -198,7 +198,7 @@
       display:block;
       margin:0;
       font-family:var(--sport);
-      font-weight:700;
+      /* El peso lo pone la regla del titular, en main.css. */
       font-size:.95rem;
       color:var(--ink);
       text-transform:uppercase;

@@ -8,19 +8,27 @@
   <meta name="description" content="Completa tus datos de envío antes del pago seguro en SCOOT SHOP." />
   <meta name="robots" content="noindex,nofollow" />
   <meta name="theme-color" content="#ffffff" />
-  <meta name="asset-version" content="20260814-4" />
+  <meta name="asset-version" content="20260911-4" />
 
   <link rel="canonical" href="https://scootshop.co/checkout" />
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-  <link rel="manifest" href="/site.webmanifest?v=20260814-4" />
+  <link rel="manifest" href="/site.webmanifest?v=20260911-4" />
 
   <link rel="preload" as="font" type="font/woff2" href="/fonts/plus-jakarta-sans-latin.woff2" crossorigin />
   <link rel="preload" as="font" type="font/woff2" href="/fonts/russo-one-latin.woff2" crossorigin />
-  <link rel="stylesheet" href="/css/fuentes-500-700-800.css?v=20260814-4" />
-  <link rel="stylesheet" href="/css/icons.css?v=20260814-4" />
-  <link rel="stylesheet" href="/css/main.css?v=20260814-4" />
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/tangerine-versatil.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/fa-brands-400.woff2" crossorigin />
+  <link rel="stylesheet" href="/css/fuentes-500-700-800.css?v=20260911-4" />
+  <link rel="stylesheet" href="/css/icons.css?v=20260911-4" />
+  <link rel="stylesheet" href="/css/main.css?v=20260911-4" />
+  <!-- El menú móvil se PINTA desde sessionStorage antes de que el runtime
+       inyecte su hoja (ver primeCachedPartials + ensureCss en global-assets*.js).
+       Sin esta etiqueta estática, esa fracción de segundo se veía el cajón crudo
+       arriba a la izquierda. Enlazada aquí, el CSS bloquea el pintado y no hay
+       ningún frame sin estilos. -->
+  <link rel="stylesheet" href="/css/partials.mobile-menu.css?v=20260911-4">
   <script src="/js/asset-sync.js?v=20260605-2" defer></script>
   <script src="/js/global-assets.js?v=20260605-2" defer></script>
 
@@ -39,12 +47,12 @@
       min-height:100%;
       font-family:var(--ui);
       color:var(--ink);
-      background:
-        radial-gradient(circle at top left, rgba(255,255,255,.96), transparent 30%),
-        radial-gradient(circle at top right, rgba(230,236,244,.92), transparent 34%),
-        linear-gradient(180deg, #fbfcfd 0%, #f3f5f8 100%);
-      background-attachment:fixed;
-      background-color:#f3f5f8;
+      /* EL MISMO SUELO QUE EL RESTO DEL SITIO (--suelo, css/main.css). Aqui habia
+         dos resplandores y un degradado propios, con su gris (#f3f5f8): al venir
+         del carrito se notaba el salto, y era la unica pagina del sitio con fondo
+         degradado. Un checkout no necesita decoracion; necesita no distraer. */
+      background: var(--suelo);
+      background-color: var(--suelo);
     }
     a{ color:inherit; }
     a:focus-visible,
@@ -220,6 +228,11 @@
       background-position: left bottom !important;
     }
 
+    /* El boton de continuar, ya en la columna del resumen. Hereda el ancho de
+       la barra lateral y se queda pegajoso con ella. */
+    .ck-sidebar .actions{ margin-top:14px; }
+    .ck-sidebar .actions[hidden]{ display:none; }
+
     /* -- Order summary sidebar -- */
     .ck-sidebar{
       display:flex;
@@ -244,65 +257,6 @@
     }
     .ck-summary-head::-webkit-details-marker{ display:none; }
     .ck-summary-head::marker{ display:none; content:''; }
-    .ck-toggle-arrow{
-      display:none;
-      flex:0 0 auto;
-      width:20px;
-      height:20px;
-      transition:transform .2s ease;
-    }
-
-    /* Recipient / address meta */
-    .ck-meta{
-      pointer-events:none;
-      user-select:none;
-    }
-    .ck-meta-title{
-      display:block;
-      margin-bottom:8px;
-      font-size:.68rem;
-      font-weight:800;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      color:#687385;
-    }
-    .ck-meta-row{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      font-size:.8rem;
-      color:var(--muted);
-      font-weight:600;
-      line-height:1.4;
-      transition:opacity .18s ease, color .18s ease;
-    }
-    .ck-meta-row + .ck-meta-row{
-      margin-top:8px;
-      padding-top:8px;
-      border-top:1px solid rgba(17,19,21,.06);
-    }
-    .ck-meta-row.is-placeholder{
-      opacity:.72;
-    }
-    .ck-meta-row svg{
-      width:14px;
-      height:14px;
-      flex:0 0 auto;
-      opacity:.6;
-    }
-    .ck-meta-icon{
-      width:14px;
-      height:14px;
-      flex:0 0 auto;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      opacity:.7;
-      font-size:14px;
-      font-weight:900;
-      line-height:1;
-    }
-
     .legal-note{
       order:3;
       font-size:.72rem;
@@ -356,6 +310,14 @@
 
     .section-block--contact{
       background:#fff;
+    }
+    /* El rotulo de «Direccion» ya no encabeza una tarjeta: separa dos mitades
+       DENTRO de la misma, y lo hace SIN filo. Llego a llevar un `border-top` para
+       marcar la union; con el subrayado del ultimo campo de contacto justo encima
+       salian dos rayas grises casi pegadas, y eso se lee como un error, no como una
+       division. El aire de arriba es el que separa. */
+    .section-block--address > .section-heading{
+      padding-top:6px;
     }
 
     .section-heading{
@@ -462,16 +424,11 @@
       border-bottom-width:1.5px;
       border-bottom-color:rgba(17,19,21,.14);
     }
-    .field.field--valid input,
-    .field.field--valid select{
-      border-bottom-color:#16a34a;
-      border-bottom-width:2.5px;
-    }
-    .field.field--valid .phone-prefix,
-    .field.field--valid .phone-group input#phone{
-      border-bottom-color:#16a34a !important;
-      border-bottom-width:2.5px !important;
-    }
+    /* NO hay estado «correcto» pintado. Una casilla bien rellenada se queda como
+       estaba: la unica linea de color que existe es la NEGRA del foco (#424242,
+       arriba), y el rojo del error. Marcar en verde lo que simplemente esta escrito
+       llenaba el formulario de semaforos y le daba a «he escrito algo» el mismo peso
+       visual que a «esto esta mal». */
     .field textarea{
       min-height:56px;
       resize:vertical;
@@ -503,17 +460,6 @@
       line-height:1.45;
     }
     .field--email-wrap{ position:relative; }
-    .field--email-wrap .email-check{
-      position:absolute;
-      right:12px;
-      top:50%;
-      transform:translateY(-50%);
-      color:#22c55e;
-      opacity:0;
-      transition:opacity .2s ease;
-      pointer-events:none;
-    }
-    .field--email-wrap.is-valid .email-check{ opacity:1; }
 
     /* Phone prefix + number group */
     .phone-group{
@@ -604,10 +550,11 @@
     .ck-btn{
       order:1;
       appearance:none;
-      border:1px solid #6b6c6c;
+      border:0;
       border-radius:999px;
       padding:18px 24px;
-      background:linear-gradient(180deg, #373737 0%, #111111 100%);
+      /* Plano, igual que «Elegir opcion» del catalogo y que el boton del cajon. */
+      background:#252525;
       color:#fff;
       font-family:var(--ui);
       font-weight:800;
@@ -695,31 +642,34 @@
       .form-grid{
         grid-template-columns:1fr;
       }
+      /* EN MOVIL EL BOTON VUELVE AL FINAL, debajo del formulario, que es donde
+         estaba. Aqui la barra lateral lleva `order:-1` —el resumen se pone ENCIMA
+         del formulario—, asi que dejar el boton dentro de ella lo mandaba al
+         principio de la pagina, antes de haber rellenado nada.
+
+         `display:contents` disuelve la caja de la barra y asciende a sus dos hijos
+         a casillas de la rejilla, de modo que el resumen y el boton se pueden
+         ordenar por separado: resumen arriba (-1), formulario en medio (1) y boton
+         al final (2). Es la unica forma de colocarlos distinto en cada tamaño sin
+         escribir el boton dos veces en el HTML —y dos botones de envio con el mismo
+         id serian dos problemas, no uno—. En escritorio la barra recupera su caja y
+         con ella su `position:sticky`. */
       .ck-sidebar{
+        display:contents;
+      }
+      .ck-sidebar > .ck-summary{
         order:-1;
-        position:static;
-        align-self:auto;
-        width:100%;
-        max-width:none;
-        justify-self:stretch;
+      }
+      .ck-sidebar > .actions{
+        order:2;
+        margin-top:0;
       }
       .ck-summary{
         width:100%;
         max-width:none;
       }
-      /* Plegable solo aquí (≤1200px) */
-      .ck-summary-head{
-        cursor:pointer;
-      }
-      .ck-toggle-arrow{
-        display:block;
-      }
-      .ck-summary[open] .ck-toggle-arrow{
-        transform:rotate(180deg);
-      }
-      .ck-summary:not([open]) .ck-summary-head{
-        border-bottom:0;
-      }
+      /* Ya NO es plegable aqui tampoco: el resumen esta abierto en todos los anchos,
+         asi que no se enseña una flecha ni un cursor que prometan algo que no pasa. */
     }
     @media (max-width: 640px){
       .ck-wrap{ padding:18px clamp(16px,2.5vw,22px) 30px; }
@@ -878,9 +828,10 @@
     .ck-btn{
       position:relative;
       isolation:isolate;
-      background:linear-gradient(180deg, #373737 0%, #111111 100%);
+      /* Plano, igual que «Elegir opcion» del catalogo y que el boton del cajon. */
+      background:#252525;
       color:#fff;
-      border:1px solid #6b6c6c;
+      border:0;
       border-radius:999px;
       font-weight:800;
       letter-spacing:.04em;
@@ -898,7 +849,10 @@
       inset:0;
       z-index:-1;
       border-radius:inherit;
-      background:linear-gradient(180deg, #4a4a4a 0%, #171717 100%);
+      /* La capa del hover: el mismo aclarado plano del catalogo (#3a3a3a). Era
+         otro degradado, asi que al pasar el raton el boton recuperaba el relieve
+         que se acaba de quitar. */
+      background:#3a3a3a;
       opacity:0;
       pointer-events:none;
       transition:opacity .26s ease;
@@ -1068,7 +1022,59 @@
   </style>
 </head>
 <body>
-  <div id="site-header-slot"></div>
+  <div id="site-header-slot" data-horneado="1">
+<!-- /partials/site-header.html -->
+
+<!-- Fonts and icons are loaded in the main document head to avoid duplication -->
+
+<!-- Header styles are bundled in /css/main.css -->
+
+<header id="siteHeader" aria-label="Barra superior">
+  <div class="container nav">
+    <div class="brand">
+      <a href="/#inicio" aria-label="Ir al inicio">
+        <img src="/img/logo/marca-barra.webp" alt="SCOOT SHOP logo" decoding="async" fetchpriority="high" width="195" height="88" />
+        <span>Versátil</span>
+      </a>
+    </div>
+
+    <nav class="menu" aria-label="Navegación principal">
+      <a href="/#inicio">Inicio</a>
+      <a href="/patinetes/">Patinetes eléctricos</a>
+      <a href="/accesorios/">Accesorios</a>
+      <a href="/repuestos/">Repuestos</a>
+      <a href="https://www.instagram.com/scootshopping" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+      <a href="https://www.facebook.com/61579248524907" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook" aria-hidden="true"></i></a>
+      <a href="https://wa.me/34666318747" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
+    </nav>
+
+    <div class="header-actions" aria-label="Acciones rápidas">
+      <a class="header-account-btn" id="headerAccountToggle" href="/cuenta/" aria-label="Ir a área cliente" onclick="window.location.href='/cuenta/';return false;">
+        <svg class="header-account-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 12C14.4853 12 16.5 9.98528 16.5 7.5C16.5 5.01472 14.4853 3 12 3C9.51472 3 7.5 5.01472 7.5 7.5C7.5 9.98528 9.51472 12 12 12Z"></path>
+          <path d="M4.5 20.25C4.5 16.9363 7.18629 14.25 10.5 14.25H13.5C16.8137 14.25 19.5 16.9363 19.5 20.25"></path>
+        </svg>
+        <span class="header-account-label">Cuenta</span>
+        <span class="header-account-dot" id="headerAccountDot" hidden aria-hidden="true"></span>
+      </a>
+
+      <button class="header-cart-btn" data-cart-open type="button" aria-label="Abrir carrito" aria-controls="ssCartPanel" aria-expanded="false">
+        <svg class="header-cart-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M7.5 18C8.32843 18 9 18.6716 9 19.5C9 20.3284 8.32843 21 7.5 21C6.67157 21 6 20.3284 6 19.5C6 18.6716 6.67157 18 7.5 18Z"></path>
+          <path d="M16.5 18.0001C17.3284 18.0001 18 18.6716 18 19.5001C18 20.3285 17.3284 21.0001 16.5 21.0001C15.6716 21.0001 15 20.3285 15 19.5001C15 18.6716 15.6716 18.0001 16.5 18.0001Z"></path>
+          <path d="M2 3L2.26121 3.09184C3.5628 3.54945 4.2136 3.77826 4.58584 4.32298C4.95808 4.86771 4.95808 5.59126 4.95808 7.03836V9.76C4.95808 12.7016 5.02132 13.6723 5.88772 14.5862C6.75412 15.5 8.14857 15.5 10.9375 15.5H12M16.2404 15.5C17.8014 15.5 18.5819 15.5 19.1336 15.0504C19.6853 14.6008 19.8429 13.8364 20.158 12.3075L20.6578 9.88275C21.0049 8.14369 21.1784 7.27417 20.7345 6.69708C20.2906 6.12 18.7738 6.12 17.0888 6.12H11.0235M4.95808 6.12H7" stroke-linecap="round"></path>
+        </svg>
+        <span class="cart-badge" hidden>0</span>
+      </button>
+
+      <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileMenu" type="button">
+        <i class="fa-solid fa-bars" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+      </div>
+  <!-- /site-header-slot -->
   <div id="mobile-menu-slot"></div>
 
   <div class="ck-wrap">
@@ -1101,7 +1107,7 @@
                   <label for="email">Correo electrónico *</label>
                   <div class="field--email-wrap">
                     <input id="email" name="email" type="email" autocomplete="email" placeholder="tu@email.com" maxlength="190" required />
-                    <svg class="email-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    
                   </div>
                   <span class="field-error">Introduce un email válido</span>
                 </div>
@@ -1115,9 +1121,14 @@
                   <span class="field-error">Introduce un teléfono</span>
                 </div>
               </div>
-            </div>
 
-            <div class="section-block section-block--address">
+              <!-- CONTACTO Y DIRECCION SON UN SOLO CUADRO. Eran dos `.section-block`,
+                   cada uno con su sombra: ocho datos contados como dos objetos. Aqui
+                   dentro solo queda el envoltorio que la clase `--address` necesita
+                   —el observador del aviso de precision geografica lo busca por ella—
+                   y el rotulo, que pasa a ser un separador interno en vez de la
+                   cabecera de una tarjeta propia. -->
+              <div class="section-block--address">
               <div class="section-heading section-heading--action">
                 <strong>Dirección <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-left:5px"><path d="M20 9v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9"/><path d="M9 22V12h6v10"/><path d="M2 10.6L12 2l10 8.6"/></svg></strong>
                 <!-- Selector de direcciones guardadas (visible solo con 2 o más en la cuenta) -->
@@ -1130,6 +1141,11 @@
                 <span>Introduce la dirección donde quieres recibir tu pedido para continuar al pago seguro.</span>
               </div>
               <div class="form-grid">
+              <!-- EL ORDEN DE LAS CASILLAS ES EL DE LA REJILLA: dos por fila.
+                   Pais + codigo postal · provincia + ciudad · direccion + puerta.
+                   La calle va la ULTIMA a proposito: se escribe cuando ya esta
+                   dicho el sitio. No hay reglas de posicion por casilla, asi que
+                   mover una aqui la mueve en la pantalla. -->
                 <div class="field">
                   <label for="country">País *</label>
                   <select id="country" name="country" autocomplete="country-name" required>
@@ -1140,31 +1156,11 @@
                     <option value="Alemania">Alemania</option>
                   </select>
                 </div>
-
-                <div class="field field--full">
-                  <label for="addressLine1">Dirección *</label>
-                  <input id="addressLine1" name="addressLine1" type="text" autocomplete="address-line1" placeholder="Calle, número y edificio" maxlength="255" required />
-                  <span id="geoPrecisionNote" class="geo-disclaimer" hidden></span>
-                  <span class="field-error">Introduce una dirección</span>
-                </div>
-
-                <div class="field field--full">
-                  <label for="addressLine2">Piso, puerta o referencia <span class="opt">(opcional)</span></label>
-                  <input id="addressLine2" name="addressLine2" type="text" autocomplete="address-line2" placeholder="Ej: 2ºB, escalera derecha…" maxlength="255" />
-                </div>
-
                 <div class="field">
                   <label for="postalCode">Código postal *</label>
                   <input id="postalCode" name="postalCode" type="text" autocomplete="postal-code" inputmode="numeric" placeholder="28001" maxlength="16" required />
                   <span class="field-error">Introduce el código postal</span>
                 </div>
-
-                <div class="field">
-                  <label for="city">Ciudad *</label>
-                  <input id="city" name="city" type="text" autocomplete="address-level2" placeholder="Madrid" maxlength="100" required />
-                  <span class="field-error">Introduce la ciudad</span>
-                </div>
-
                 <div class="field field--province">
                   <label for="province">Provincia *</label>
                   <select id="province" name="province" autocomplete="address-level1" required>
@@ -1172,6 +1168,21 @@
                   </select>
                   <input id="provinceCustom" name="provinceCustom" type="text" autocomplete="address-level1" placeholder="Escribe tu provincia o región" maxlength="100" hidden />
                   <span class="field-error">Selecciona una provincia</span>
+                </div>
+                <div class="field">
+                  <label for="city">Ciudad *</label>
+                  <input id="city" name="city" type="text" autocomplete="address-level2" placeholder="Madrid" maxlength="100" required />
+                  <span class="field-error">Introduce la ciudad</span>
+                </div>
+                <div class="field">
+                  <label for="addressLine1">Dirección *</label>
+                  <input id="addressLine1" name="addressLine1" type="text" autocomplete="address-line1" placeholder="Calle, número y edificio" maxlength="255" required />
+                  <span id="geoPrecisionNote" class="geo-disclaimer" hidden></span>
+                  <span class="field-error">Introduce una dirección</span>
+                </div>
+                <div class="field">
+                  <label for="addressLine2">Piso, puerta o referencia <span class="opt">(opcional)</span></label>
+                  <input id="addressLine2" name="addressLine2" type="text" autocomplete="address-line2" placeholder="Ej: 2ºB, escalera derecha…" maxlength="255" />
                 </div>
 
                 <div class="field field--full" id="notesBlock" hidden>
@@ -1183,15 +1194,9 @@
                   <a href="#" id="notesToggle" style="color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:.76rem;text-transform:uppercase;letter-spacing:.08em"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Añadir nota de entrega</a>
                 </div>
               </div>
+              </div>
             </div>
 
-            <div class="actions">
-              <button class="ck-btn" type="submit" id="submitBtn">
-                Continuar a pago
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
-              </button>
-              <p class="legal-note">Al continuar aceptas nuestra <a href="/legal/" target="_blank">Política de privacidad</a>. Tus datos se usan exclusivamente para gestionar el pedido.</p>
-            </div>
           </form>
 
           <div class="empty" id="emptyState" hidden>
@@ -1205,7 +1210,6 @@
         <details class="ck-summary order-summary order-summary--checkout" id="ckSummaryDetails">
           <summary class="ck-summary-head order-summary__header order-summary__toggle">
             <h2 class="order-summary__title">Resumen del pedido</h2>
-            <svg class="ck-toggle-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </summary>
           <div class="ck-summary-body order-summary__body">
             <div class="ck-product order-summary__product" id="ckProduct">
@@ -1222,6 +1226,12 @@
                 <span class="ck-k order-summary__row-label">Subtotal</span>
                 <span class="ck-v order-summary__row-value" id="ckSubtotal">—</span>
               </div>
+              <!-- La rebaja del pack de la portada. Nace oculta: solo se enseña si
+                   el carrito trae el pack COMPLETO. -->
+              <div class="ck-sum-row order-summary__row" id="ckPackRow" hidden>
+                <span class="ck-k order-summary__row-label">Pack de la semana</span>
+                <span class="ck-v order-summary__row-value" id="ckPackValue" style="color:#1a8f4a;font-weight:800">—</span>
+              </div>
               <div class="ck-sum-row order-summary__row">
                 <span class="ck-k order-summary__row-label">Envío</span>
                 <span class="ck-v order-summary__row-value" id="ckShipping" style="color:#1a8f4a;font-weight:800">Gratis</span>
@@ -1232,28 +1242,24 @@
               </div>
             </div>
 
-            <div class="ck-meta order-summary__box order-summary__info-box order-summary__info-box--checkout" id="ckContactMeta" aria-label="Resumen de contacto">
-              <span class="ck-meta-title order-summary__box-title order-summary__info-title">Tus datos</span>
-              <div class="ck-meta-row order-summary__info-line is-placeholder" id="ckRecipientRow">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                <span class="order-summary__box-text" id="ckRecipientName">Nombre pendiente</span>
-              </div>
-              <div class="ck-meta-row order-summary__info-line is-placeholder" id="ckEmailRow">
-                <span class="ck-meta-icon" aria-hidden="true">@</span>
-                <span class="order-summary__box-text" id="ckEmailValue">Email pendiente</span>
-              </div>
-              <div class="ck-meta-row order-summary__info-line is-placeholder" id="ckPhoneRow">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.08 4.18 2 2 0 014.06 2h3a2 2 0 012 1.72c.12.9.33 1.77.63 2.61a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.47-1.18a2 2 0 012.11-.45c.84.3 1.71.51 2.61.63A2 2 0 0122 16.92z"/></svg>
-                <span class="order-summary__box-text" id="ckPhoneValue">Teléfono pendiente</span>
-              </div>
-            </div>
-
             <div class="ck-trust order-summary__muted">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
               Pago seguro · SSL
             </div>
           </div>
         </details>
+
+        <!-- EL BOTON VIVE EN LA COLUMNA DEL RESUMEN, no debajo del formulario.
+             Sale del <form> por posicion, asi que lleva `form="shippingForm"`: sin
+             ese atributo un boton de envio fuera de su formulario no envia nada y
+             el checkout se queda mudo al pulsarlo. -->
+        <div class="actions">
+          <button class="ck-btn" type="submit" id="submitBtn" form="shippingForm">
+            Continuar a pago
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+          </button>
+          <p class="legal-note">Al continuar aceptas nuestra <a href="/legal/" target="_blank">Política de privacidad</a>. Tus datos se usan exclusivamente para gestionar el pedido.</p>
+        </div>
       </aside>
 
     </div>
@@ -1263,33 +1269,24 @@
     (function(){
       'use strict';
 
-      // Summary toggle: desktop open, mobile/tablet collapsed
-      // Resumen del pedido: plegable solo hasta 1200px. En escritorio queda SIEMPRE
-      // abierto — el <details> nativo se plegaría con clic o Enter aunque la flecha
-      // esté oculta, así que se bloquea el toggle y se reabre si algo lo cierra.
+      /* EL RESUMEN VA SIEMPRE ABIERTO, en cualquier ancho. Hasta ahora era plegable
+         por debajo de 1200 px y ademas nacia CERRADO: se entraba al checkout sin ver
+         que se estaba comprando, justo donde mas falta hace comprobarlo.
+
+         El <details> se conserva por el marcado y por si algun dia vuelve a plegarse,
+         pero se le bloquea el cierre: sin este guard, un clic o un Enter sobre la
+         cabecera lo plegarian igual aunque la flecha este oculta, y quedaria un
+         resumen cerrado que nada vuelve a abrir. */
       var summaryDetails = document.getElementById('ckSummaryDetails');
       if (summaryDetails) {
-        var summaryCompactMq = window.matchMedia('(max-width: 1200px)');
+        summaryDetails.open = true;
         var summaryHead = summaryDetails.querySelector('summary');
-        var syncSummaryOpen = function(){
-          if (!summaryCompactMq.matches) summaryDetails.open = true;
-        };
-        summaryDetails.open = !summaryCompactMq.matches;
         if (summaryHead) {
-          summaryHead.addEventListener('click', function(event){
-            if (!summaryCompactMq.matches) event.preventDefault();
-          });
+          summaryHead.addEventListener('click', function(event){ event.preventDefault(); });
         }
-        summaryDetails.addEventListener('toggle', syncSummaryOpen);
-        if (summaryCompactMq.addEventListener) {
-          summaryCompactMq.addEventListener('change', function(){
-            summaryDetails.open = !summaryCompactMq.matches;
-          });
-        } else if (summaryCompactMq.addListener) {
-          summaryCompactMq.addListener(function(){
-            summaryDetails.open = !summaryCompactMq.matches;
-          });
-        }
+        summaryDetails.addEventListener('toggle', function(){
+          if (!summaryDetails.open) summaryDetails.open = true;
+        });
       }
 
       function getParam(key){
@@ -1346,7 +1343,13 @@
       function formatMoney(value){
         var num = Number(value);
         if(!Number.isFinite(num)) num = 0;
-        return num.toFixed(2) + ' €';
+        /* Coma decimal: el sitio entero escribe "8,90 €" (catálogo, fichas, /pago con
+           su fmtEur) y este resumen era el único que ponía punto. Se veía poco porque
+           solo salía en el modo carrito; al añadir la línea de envío pasa a verse en
+           cada pedido, y "2.99 €" al lado de un "8,90 €" canta.
+           Los enteros van sin decimales, igual que el catálogo: "535 €", no "535,00 €". */
+        var txt = Number.isInteger(num) ? String(num) : num.toFixed(2).replace('.', ',');
+        return txt + ' €';
       }
 
       function escapeHtml(value){
@@ -1408,8 +1411,50 @@
         }
       }
 
+      /* Lo que descuenta el pack de la portada, 0 si no hay pack. Se declara
+         fuera para que lo vea tambien el pintado del resumen. */
+      var rebajaPack = 0;
+
+      /* ── LOS PACKS ─────────────────────────────────────────────────────
+         La regla la declara el catalogo (`SCOOTSHOP_resolverPacks`) y la
+         aplica el backend al tarifar el pedido; aqui solo se pinta lo mismo.
+         `null` mientras el catalogo no ha llegado: hasta entonces cada linea
+         vale su precio de catalogo, que es lo unico verdadero que se puede
+         decir sin el. Se recalcula al cumplirse `SS_READY`.
+
+         Antes esto se leia de `ss_checkout_discount`, la llave donde la
+         portada dejaba un CODIGO DE DESCUENTO. El resumen decia entonces
+         «Pack de la semana -36,99 €» en vez de enseñar la bolsa a cero y el
+         manillar a 32,99, que es lo que el cliente vio en la oferta. */
+      var packResuelto = null;
+
+      function resolverPacksDelCarrito(items){
+        try{
+          if(typeof window.SCOOTSHOP_resolverPacks !== 'function') return null;
+          var r = window.SCOOTSHOP_resolverPacks(items || []);
+          return (r && r.packs && r.packs.length) ? r : null;
+        }catch(e){ return null; }
+      }
+
+      function importeDeLinea(i, items){
+        var lista = items || [];
+        var item = lista[i] || {};
+        var suelto = Number(((Number(item.price) || 0) * (Number(item.qty) || 1)).toFixed(2));
+        var l = packResuelto && packResuelto.lineas && packResuelto.lineas[i];
+        if(!l) return { ahora: suelto, antes: 0, enPack: false };
+        return { ahora: l.importe, antes: l.importeSuelto || 0, enPack: !!l.enPack };
+      }
+
+      function textoDeLinea(i, items){
+        var v = importeDeLinea(i, items);
+        var tachado = v.antes ? ('<s class="order-summary__product-was">' + formatMoney(v.antes) + '</s>') : '';
+        if(v.ahora <= 0) return '<span class="order-summary__product-free">Gratis</span>' + tachado;
+        return formatMoney(v.ahora) + tachado;
+      }
+
       function cartSubtotal(items){
         var list = Array.isArray(items) ? items : [];
+        if(packResuelto) return packResuelto.subtotal;
         var total = 0;
         for(var i = 0; i < list.length; i++) total += list[i].price * list[i].qty;
         return Number(total.toFixed(2));
@@ -1424,7 +1469,7 @@
       var colorLabel = safeText(getParam('colorLabel')) || '';
       var priceNum = Number(priceRaw.replace(',', '.'));
       var priceLabel = Number.isFinite(priceNum) && priceNum > 0
-        ? (Number.isInteger(priceNum) ? priceNum + ' €' : priceNum.toFixed(2) + ' €')
+        ? formatMoney(priceNum)
         : (priceRaw || '€');
       var isCartMode = getParam('cart') === '1';
       var cartItems = isCartMode ? loadCartItems() : [];
@@ -1434,14 +1479,27 @@
         var firstCartItem = cartItems[0];
         var cartUnits = 0;
         for (var c = 0; c < cartItems.length; c++) cartUnits += cartItems[c].qty;
+        packResuelto = resolverPacksDelCarrito(cartItems);
         var totalCartPrice = cartSubtotal(cartItems);
 
         name = 'Carrito SCOOT SHOP (' + cartUnits + (cartUnits === 1 ? ' artículo)' : ' artículos)');
         sku = firstCartItem.sku || 'CART';
         productUrl = firstCartItem.url || '/';
         productImage = firstCartItem.image || '';
-        priceNum = totalCartPrice;
-        priceLabel = formatMoney(totalCartPrice);
+        /* LA REBAJA DEL PACK. La portada la deja en `ss_checkout_discount` junto
+           al codigo, y el cajon del carrito ya la enseña. Aqui se resta para que
+           las tres pantallas digan lo mismo: el cliente veia 812,99 € en la
+           portada, 849,98 aqui y otra vez 812,99 al pagar, y eso parece un cebo.
+           Se aplica SOLO con las cinco lineas dentro; quitar una la deshace, que
+           es lo mismo que hara la caja (el codigo lleva minimo de pedido). Quien
+           decide de verdad sigue siendo el backend en /pago. */
+        /* Aqui se leia `ss_checkout_discount` para restar el importe del cupon.
+           Ahora el pack ya viene aplicado linea a linea en `totalCartPrice`. */
+        rebajaPack = packResuelto
+          ? Number((packResuelto.subtotalSuelto - packResuelto.subtotal).toFixed(2))
+          : 0;
+        priceNum = Number(totalCartPrice.toFixed(2));
+        priceLabel = formatMoney(priceNum);
         hasProduct = true;
 
         writeStorageValue(CHECKOUT_CART_SNAPSHOT_KEY, JSON.stringify(cartItems));
@@ -1664,6 +1722,14 @@
         ckColor.style.display = 'inline-flex';
       }
 
+      /* La miniatura del resumen se ve a 56 px: se pide la medida pequeña del
+         catalogo. OJO — solo para PINTARLA. `productImage` sigue siendo la foto
+         grande porque viaja en los parametros de la URL y en el pedido, y ahi
+         tiene que ir la buena. */
+      function fotoChica(src){
+        return window.SCOOTSHOP_miniatura ? window.SCOOTSHOP_miniatura(src) : src;
+      }
+
       function applyResolvedProductImage(nextImage){
         var normalized = safeText(nextImage);
         if (!normalized) return;
@@ -1671,7 +1737,7 @@
         productImage = normalized;
 
         if (ckThumb) {
-          ckThumb.src = normalized;
+          ckThumb.src = fotoChica(normalized);
           ckThumb.alt = name;
           ckThumb.hidden = false;
         }
@@ -2090,13 +2156,14 @@
       var ckColor = document.getElementById('ckColor');
       var ckThumb = document.getElementById('ckThumb');
       var ckSubtotal = document.getElementById('ckSubtotal');
+      var ckShipping = document.getElementById('ckShipping');
       var ckTotal = document.getElementById('ckTotal');
 
       if (ckName) ckName.textContent = name;
       if (ckSku && sku) ckSku.textContent = 'Ref: ' + sku;
       if (ckColor && colorLabel) renderColorLabel(colorLabel);
       if (ckThumb && productImage) {
-        ckThumb.src = productImage;
+        ckThumb.src = fotoChica(productImage);
         ckThumb.alt = name;
         ckThumb.hidden = false;
       }
@@ -2116,7 +2183,7 @@
           cartList.id = 'ckCartItemsList';
           cartList.className = 'order-summary__product-list';
 
-          cartList.innerHTML = cartItems.map(function(item){
+          cartList.innerHTML = cartItems.map(function(item, indiceLinea){
             var itemName = escapeHtml(item.name || 'Producto');
             var itemRef = item.sku ? ('<span class="order-summary__product-meta order-summary__product-meta--ref">Ref: ' + escapeHtml(item.sku) + '</span>') : '';
             /* Regla global: una linea sin variantes muestra "Unico" (el chip --color va
@@ -2128,10 +2195,20 @@
             var itemQty = (Number(item.qty) > 1)
               ? ('<span class="order-summary__product-meta order-summary__product-meta--qty">Cant: ' + escapeHtml(item.qty) + '</span>')
               : '';
-            var itemUnitPrice = '<span class="order-summary__product-meta order-summary__product-meta--price">Precio: ' + ((Number(item.price) || 0).toFixed(2)) + ' €</span>';
-            var lineTotal = ((Number(item.price) || 0) * (Number(item.qty) || 1)).toFixed(2) + ' €';
+            /* La chapa del pack OCUPA EL SITIO DE «Ref:»: en una linea de oferta la
+               referencia no dice nada y cuatro chapas apiladas doblan el alto de la
+               tarjeta en movil. Y sin precio unitario: «3 por 10 €» no es «a 3,33»,
+               y la bolsa de regalo no vale 8 — manda el importe de la linea.
+               Al montar casi nunca hay pack (el catalogo llega despues), asi que la
+               conversion de verdad la hace `repintarPrecios()`. */
+            var enPack = importeDeLinea(indiceLinea, cartItems).enPack;
+            if (enPack) itemRef = '<span class="order-summary__product-meta order-summary__product-meta--pack">Pack de la semana</span>';
+            var itemUnitPrice = enPack
+              ? ''
+              : '<span class="order-summary__product-meta order-summary__product-meta--price">Precio: ' + ((Number(item.price) || 0).toFixed(2)) + ' €</span>';
+            var lineTotal = textoDeLinea(indiceLinea, cartItems);
             var itemImage = item.image
-              ? ('<img class="order-summary__product-image" src="' + escapeHtml(item.image) + '" alt="' + itemName + '" loading="lazy" decoding="async" />')
+              ? ('<img class="order-summary__product-image" src="' + escapeHtml(window.SCOOTSHOP_miniatura ? window.SCOOTSHOP_miniatura(item.image) : item.image) + '" alt="' + itemName + '" loading="lazy" decoding="async" />')
               : ('<div class="order-summary__product-image" aria-hidden="true"></div>');
 
             return '' +
@@ -2184,8 +2261,98 @@
         if (!window.SS_READY && typeof Promise === 'function') {
           window.SS_READY = new Promise(function (res) { window.__ssResolverReady = res; });
         }
-        if (window.SS_READY) window.SS_READY.then(repintarVariantes);
-        else repintarVariantes();
+        /* La foto pequeña va en el MISMO enganche que los chips, y por el mismo
+           motivo: la regla la sabe el catalogo (`SCOOTSHOP_miniatura`) y esta
+           pagina se pinta antes de que llegue —medido: el resumen sale con la
+           foto grande y no la cambiaba nadie—. Al llegar, se reescribe SOLO el
+           `src` de la miniatura; `productImage`, que es la que viaja en la URL y
+           en el pedido, no se toca. */
+        var achicarThumb = function () {
+          var t = document.getElementById('ckThumb');
+          if (!t || !t.getAttribute('src')) return;
+          var chica = fotoChica(t.getAttribute('src'));
+          if (chica !== t.getAttribute('src')) t.setAttribute('src', chica);
+        };
+        /* Y los PRECIOS, por el mismo enganche y por el mismo motivo: los packs
+           los declara el catalogo y esta pagina se pinta antes de que llegue.
+           Se reescriben solo cifras y chips — nunca el HTML de la lista, que
+           volveria a pedir las fotos (los duplicados de check-image-dupes.js). */
+        var repintarPrecios = function () {
+          if (!isCartMode || !cartItems.length) return;
+          var antes = packResuelto;
+          packResuelto = resolverPacksDelCarrito(cartItems);
+          if (!packResuelto && !antes) return;
+
+          priceNum = Number(cartSubtotal(cartItems).toFixed(2));
+          priceLabel = formatMoney(priceNum);
+          rebajaPack = packResuelto
+            ? Number((packResuelto.subtotalSuelto - packResuelto.subtotal).toFixed(2))
+            : 0;
+          calcularTotales();
+
+          if (ckSubtotal) ckSubtotal.textContent = priceLabel;
+          if (ckTotal) ckTotal.textContent = totalLabel;
+          var filaPack = document.getElementById('ckPackRow');
+          var valorPack = document.getElementById('ckPackValue');
+          if (filaPack && valorPack) {
+            if (rebajaPack > 0) {
+              valorPack.textContent = 'Ahorras ' + formatMoney(rebajaPack);
+              filaPack.hidden = false;
+            } else {
+              filaPack.hidden = true;
+            }
+          }
+          if (ckShipping) {
+            if (envioPedido > 0) {
+              ckShipping.textContent = formatMoney(envioPedido);
+              ckShipping.style.color = '';
+              ckShipping.style.fontWeight = '800';
+            } else {
+              ckShipping.textContent = 'Gratis';
+              ckShipping.style.color = '#1a8f4a';
+              ckShipping.style.fontWeight = '800';
+            }
+          }
+
+          var lista = document.getElementById('ckCartItemsList');
+          if (lista) {
+            var totales = lista.querySelectorAll('.order-summary__product-line-total');
+            for (var t = 0; t < totales.length && t < cartItems.length; t++) {
+              totales[t].innerHTML = textoDeLinea(t, cartItems);
+            }
+            var infos = lista.querySelectorAll('.order-summary__product-info');
+            for (var u = 0; u < infos.length && u < cartItems.length; u++) {
+              /* La chapa de «Ref:» se convierte en la del pack, y al reves. Es la
+                 MISMA caja: cambiarle clase y texto evita rehacer el HTML de la
+                 tarjeta, que volveria a pedir la foto. */
+              var chapa = infos[u].querySelector('.order-summary__product-meta--ref, .order-summary__product-meta--pack');
+              var precio = infos[u].querySelector('.order-summary__product-meta--price');
+              var dentro = importeDeLinea(u, cartItems).enPack;
+              if (chapa) {
+                if (dentro) {
+                  chapa.className = 'order-summary__product-meta order-summary__product-meta--pack';
+                  chapa.textContent = 'Pack de la semana';
+                } else {
+                  chapa.className = 'order-summary__product-meta order-summary__product-meta--ref';
+                  chapa.textContent = 'Ref: ' + (cartItems[u].sku || '');
+                }
+              }
+              if (precio) precio.hidden = dentro;
+            }
+          }
+
+          var boton = document.getElementById('submitBtn');
+          if (boton && totalLabel && totalLabel !== '€') {
+            var txt = boton.firstChild;
+            if (txt && txt.nodeType === 3) txt.textContent = 'Continuar a pago — ' + totalLabel + ' ';
+          }
+        };
+        if (window.SS_READY) window.SS_READY.then(function () {
+          repintarVariantes();
+          achicarThumb();
+          repintarPrecios();
+        });
+        else { repintarVariantes(); achicarThumb(); repintarPrecios(); }
       } catch (_) {}
 
       if (!isCartMode) {
@@ -2210,36 +2377,105 @@
           });
       }
 
+      /* Envío por umbral: la MISMA regla que aplica el backend en
+         resolve_order_pricing() (SHIPPING_FREE_FROM / SHIPPING_FEE). Aquí se
+         calcula solo para ENSEÑARLO; quien cobra es el servidor, que lo recalcula
+         desde el catálogo. Si algún día cambian los números, se cambian en los dos
+         sitios — y el que manda es el de PHP. */
+      var ENVIO_GRATIS_DESDE = 10;
+      var ENVIO_IMPORTE = 2.99;
+      var envioPedido = 0;
+      var totalConEnvio = priceNum;
+      var totalLabel = priceLabel;
+
+      /* Las cifras del resumen, en una funcion: hay que escribirlas DOS veces.
+         La primera al cargar la pagina, con lo que se sabe; la segunda cuando
+         llega el catalogo, que es quien declara los packs — hasta entonces el
+         precio del pack no se puede resolver y las lineas valen su precio
+         suelto. Medido: el catalogo lo añade global-assets-app.js despues de
+         que corra este script. */
+      function calcularTotales(){
+        envioPedido = (Number.isFinite(priceNum) && priceNum > 0 && priceNum < ENVIO_GRATIS_DESDE)
+          ? ENVIO_IMPORTE
+          : 0;
+        totalConEnvio = (Number.isFinite(priceNum) && priceNum > 0)
+          ? Number((priceNum + envioPedido).toFixed(2))
+          : priceNum;
+        totalLabel = (Number.isFinite(totalConEnvio) && totalConEnvio > 0)
+          ? formatMoney(totalConEnvio)
+          : priceLabel;
+      }
+      calcularTotales();
+
+      /* El subtotal es la SUMA DE LAS LINEAS que se ven encima, ya con su precio
+         de pack. Antes se enseñaba sin rebajar y la rebaja iba en su fila, porque
+         venia de un cupon; con la oferta aplicada articulo a articulo, un
+         subtotal mas alto que las lineas que lo forman no cuadra. */
       if (ckSubtotal) ckSubtotal.textContent = priceLabel;
-      if (ckTotal) ckTotal.textContent = priceLabel;
+      var ckPackRow = document.getElementById('ckPackRow');
+      var ckPackValue = document.getElementById('ckPackValue');
+      if (ckPackRow && ckPackValue) {
+        if (rebajaPack > 0) {
+          /* No es un descuento, es lo que se ahorra: el precio de pack ya esta
+             en cada linea. */
+          ckPackValue.textContent = 'Ahorras ' + formatMoney(rebajaPack);
+          ckPackRow.hidden = false;
+        } else {
+          ckPackRow.hidden = true;
+        }
+      }
+      if (ckShipping) {
+        if (envioPedido > 0) {
+          ckShipping.textContent = formatMoney(envioPedido);
+          ckShipping.style.color = '';
+          ckShipping.style.fontWeight = '800';
+          ckShipping.setAttribute('title', 'Envío gratis a partir de ' + ENVIO_GRATIS_DESDE + ' €');
+        } else {
+          ckShipping.textContent = 'Gratis';
+          ckShipping.style.color = '#1a8f4a';
+          ckShipping.style.fontWeight = '800';
+          ckShipping.removeAttribute('title');
+        }
+      }
+      if (ckTotal) ckTotal.textContent = totalLabel;
 
       // Inject price into submit button
       var submitBtn = document.getElementById('submitBtn');
-      if (submitBtn && priceLabel && priceLabel !== '€') {
+      if (submitBtn && totalLabel && totalLabel !== '€') {
         var btnText = submitBtn.firstChild;
         if (btnText && btnText.nodeType === 3) {
-          btnText.textContent = 'Continuar a pago — ' + priceLabel + ' ';
+          btnText.textContent = 'Continuar a pago — ' + totalLabel + ' ';
         }
       }
 
       if (!hasProduct) {
         if (shippingForm) shippingForm.hidden = true;
         if (emptyState) emptyState.hidden = false;
+        /* El boton vive en la columna del resumen desde que se mudo, asi que
+           esconder el formulario ya NO se lo lleva por delante: sin esto, un
+           carrito vacio se quedaba con «Continuar a pago» pulsable al lado de
+           «No hay un producto seleccionado». */
+        var accionesVacio = document.querySelector('.ck-sidebar .actions');
+        if (accionesVacio) accionesVacio.hidden = true;
       }
 
       var STORAGE_KEY = 'ss_checkout_shipping';
 
-      function loadSavedShipping(){
-        try {
-          var raw = readStorageValue(STORAGE_KEY);
-          return raw ? JSON.parse(raw) : null;
-        } catch (_) {
-          return null;
-        }
+      /* La dirección NO se guarda entre visitas. Vivía también en localStorage y
+         `pago.js` solo limpiaba la copia de sessionStorage, así que la de localStorage
+         sobrevivía para siempre y volvía a rellenar el formulario días después con una
+         dirección vieja. Ahora solo se guarda en la SESIÓN, que es lo que hace falta
+         para el salto checkout → /pago y para volver atrás sin perder lo escrito: al
+         cerrar la pestaña desaparece. Rellenar la dirección solo puede hacerlo la
+         ubicación o una dirección guardada en la cuenta, que son cosas que el cliente
+         ha pedido. */
+      function purgarDireccionVieja(){
+        try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
       }
 
       function saveShipping(data){
-        writeStorageValue(STORAGE_KEY, JSON.stringify(data));
+        purgarDireccionVieja();
+        try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (_) {}
       }
 
       function buildPaymentUrl(){
@@ -2409,7 +2645,13 @@
         }
       }
 
-      prefillForm(loadSavedShipping());
+      purgarDireccionVieja();
+
+      /* El formulario arranca VACÍO. Antes se rellenaba con lo último escrito, y como
+         sessionStorage sobrevive a una recarga, la dirección volvía una y otra vez en la
+         misma pestaña. Lo que se guarda sirve SOLO para el salto a /pago, nunca para
+         pintar el formulario: rellenar la dirección solo puede hacerlo la ubicación (el
+         código postal completa ciudad y provincia) o una dirección de la cuenta. */
       syncPlaceholders();
 
       // ── Fase 2: autocompletar desde la cuenta del cliente ──
@@ -2449,11 +2691,9 @@
             // Sin predeterminada: respetar la dirección ya rellenada (no pisar).
             var keepAddress = false;
             if (!hasDefault) {
-              var existing = loadSavedShipping();
               var fnNow = document.getElementById('fullName');
               var alNow = document.getElementById('addressLine1');
-              keepAddress = !!(existing && (existing.addressLine1 || existing.fullName)) ||
-                !!((fnNow && fnNow.value.trim()) || (alNow && alNow.value.trim()));
+              keepAddress = !!((fnNow && fnNow.value.trim()) || (alNow && alNow.value.trim()));
             }
 
             // Con 2 o más direcciones guardadas, el usuario elige cuál usar.
@@ -2659,73 +2899,13 @@
           .catch(function(){ /* invitado o error: sin autocompletar */ });
       })();
 
-      // Live contact details in summary
-      function syncSummaryMeta(group, row, valueEl, prefix, value, placeholder){
-        if (!group || !row || !valueEl) return;
-        var text = safeText(value);
-        if (text) {
-          valueEl.textContent = prefix ? (prefix + text) : text;
-          row.classList.remove('is-placeholder');
-        } else {
-          valueEl.textContent = placeholder;
-          row.classList.add('is-placeholder');
-        }
-        group.hidden = false;
-      }
-
-      function bindSummaryMetaField(field, group, row, valueEl, prefix, formatter, placeholder){
-        if (!field || !group || !row || !valueEl) return;
-        function update(){
-          var value = typeof formatter === 'function' ? formatter(field.value) : field.value;
-          syncSummaryMeta(group, row, valueEl, prefix, value, placeholder);
-        }
-        field.addEventListener('input', update);
-        field.addEventListener('change', update);
-        update();
-      }
-
-      var ckContactMeta = document.getElementById('ckContactMeta');
-      var recipientRow = document.getElementById('ckRecipientRow');
-      var ckRecipientName = document.getElementById('ckRecipientName');
-      var emailRow = document.getElementById('ckEmailRow');
-      var ckEmailValue = document.getElementById('ckEmailValue');
-      var phoneRow = document.getElementById('ckPhoneRow');
-      var ckPhoneValue = document.getElementById('ckPhoneValue');
-      var fullNameField = document.getElementById('fullName');
-
-      bindSummaryMetaField(fullNameField, ckContactMeta, recipientRow, ckRecipientName, 'Para: ', null, 'Nombre pendiente');
-      bindSummaryMetaField(emailField, ckContactMeta, emailRow, ckEmailValue, '', null, 'Email pendiente');
-
-      // Phone summary: combine prefix + number
-      function updatePhoneSummary(){
-        var prefix = safeText(phonePrefixField ? phonePrefixField.value : '');
-        var number = phoneField ? formatPhoneDisplay(stripCountryFromNational(phoneField.value, prefix)) : '';
-        var full = number ? (prefix + ' ' + number).trim() : '';
-        syncSummaryMeta(ckContactMeta, phoneRow, ckPhoneValue, '', full, 'Teléfono pendiente');
-      }
-      if (phoneField) {
-        phoneField.addEventListener('input', updatePhoneSummary);
-        phoneField.addEventListener('change', updatePhoneSummary);
-      }
-      if (phonePrefixField) {
-        phonePrefixField.addEventListener('input', updatePhoneSummary);
-        phonePrefixField.addEventListener('change', updatePhoneSummary);
-      }
-      updatePhoneSummary();
-
-      // Email valid check
-      var emailWrap = emailField ? emailField.closest('.field--email-wrap') : null;
-      function updateEmailCheck(){
-        if (!emailWrap || !emailField) return;
-        var val = safeText(emailField.value);
-        var valid = val.length > 4 && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(val);
-        emailWrap.classList.toggle('is-valid', valid);
-      }
-      if (emailField) {
-        emailField.addEventListener('input', updateEmailCheck);
-        emailField.addEventListener('blur', updateEmailCheck);
-        updateEmailCheck();
-      }
+      /* Aqui vivia el cuadro «Tus datos» del resumen: nombre, correo y telefono
+         repintados en vivo mientras se escribian. Se quito porque en ESTA pantalla
+         los tres campos estan a la izquierda, visibles al mismo tiempo: el cuadro
+         no informaba de nada, repetia. En /pago si hay un cuadro parecido y ese se
+         queda, porque alli el formulario ya no esta y es el unico sitio donde se
+         puede comprobar a donde va el pedido. */
+      // El correo ya no se marca en verde al ser valido: no habia nada que decir.
 
 
 
@@ -2756,7 +2936,6 @@
           if (input.required || input.value) {
             var valid = input.checkValidity() && input.value.trim() !== '';
             field.classList.toggle('field--error', !valid && (input.required ? true : !!input.value));
-            field.classList.toggle('field--valid', valid);
           }
         });
       }
@@ -2999,6 +3178,311 @@
   </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

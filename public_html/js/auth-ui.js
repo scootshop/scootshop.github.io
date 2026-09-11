@@ -286,10 +286,101 @@
     el.textContent = stateLabel(state.uiState);
   }
 
+  // BIENVENIDA de la portada (seccion .bienve de index.html). Solo existe ahi,
+  // asi que como el resto de renderizadores de este modulo: si el elemento no
+  // esta, no hace nada.
+  //
+  // Cambia TEXTO, nunca la estructura ni el ejemplo de la derecha. La caja tiene
+  // que medir lo mismo con sesion y sin ella: este repintado llega cuando
+  // responde auth_status, con la seccion ya visible, y acortarla moveria la
+  // pagina bajo el dedo de quien esta leyendo. De ahi que el copy con sesion
+  // tenga la MISMA largura que el de invitado, titular incluido («Bienvenido de
+  // nuevo, Nombre» frente a «Bienvenido a SCOOT SHOP»): igualar el texto sale
+  // mejor que forzar alturas con CSS, que deja huecos a los anchos en los que no
+  // hacen falta. Medido a 320, 360, 390 y 1440: 0 px de salto entre los tres
+  // estados.
+  //
+  // El texto de invitado no se duplica aqui: se guarda el que trae el HTML la
+  // primera vez y se repone tal cual al volver a invitado (cerrar sesion en otra
+  // pestana vuelve a pasar por aqui). Asi el copy tiene UN solo sitio.
+  var bienveGuest = null;
+
+  function renderHomeWelcome() {
+    var box = document.querySelector('[data-bienve]');
+    if (!box) return;
+
+    var titulo = box.querySelector('[data-bienve-titulo]');
+    var sub = box.querySelector('[data-bienve-sub]');
+    var btnTxt = box.querySelector('[data-bienve-btn-txt]');
+    var btn = box.querySelector('[data-bienve-btn]');
+    if (!titulo || !sub || !btnTxt) return;
+
+    if (!bienveGuest) {
+      bienveGuest = {
+        titulo: titulo.innerHTML,
+        sub: sub.textContent,
+        btn: btnTxt.textContent,
+        aria: btn ? (btn.getAttribute('aria-label') || '') : '',
+      };
+    }
+
+    var dentro = !!(state.uiState === 'logged_in' && state.user);
+    box.setAttribute('data-bienve', dentro ? 'sesion' : 'invitado');
+
+    var cabecera = box.querySelector('.bienve-head');
+
+    if (!dentro) {
+      if (cabecera) cabecera.style.minHeight = '';
+      titulo.innerHTML = bienveGuest.titulo;
+      sub.textContent = bienveGuest.sub;
+      btnTxt.textContent = bienveGuest.btn;
+      if (btn) {
+        if (bienveGuest.aria) btn.setAttribute('aria-label', bienveGuest.aria);
+        else btn.removeAttribute('aria-label');
+      }
+      return;
+    }
+
+    // SUELO DE ALTURA. La caja no puede ENCOGER al llegar la sesion: el texto
+    // nuevo se reparte en otras lineas y a un ancho de movil eso mueve media
+    // pantalla bajo el dedo de quien esta leyendo. Igualar el copy carater a
+    // caracter no lo arregla —el corte de linea depende del ancho exacto, y
+    // medido a 320/360/390 seguian saliendo saltos de 26 a 37 px—, asi que se
+    // mide lo que HAY pintado (el estado de invitado) justo antes de
+    // sustituirlo, y se suelta cuando cambia el ANCHO, que es cuando ese numero
+    // deja de valer. Ojo: no vale escuchar resize a secas. En un movil, mover la
+    // barra de direcciones dispara un resize por el ALTO, y con un listener de un
+    // solo uso el suelo se soltaba en la misma carga: medido, seguian saliendo
+    // 37 px de salto a 360 px con el codigo ya puesto.
+    if (cabecera && !cabecera.style.minHeight) {
+      var alto = Math.round(cabecera.getBoundingClientRect().height);
+      if (alto > 0) {
+        var anchoAlFijar = window.innerWidth;
+        cabecera.style.minHeight = alto + 'px';
+        window.addEventListener('resize', function soltar() {
+          if (window.innerWidth === anchoAlFijar) return;
+          cabecera.style.minHeight = '';
+          window.removeEventListener('resize', soltar);
+        });
+      }
+    }
+
+    // Solo el nombre de pila, y solo si es corto: un nombre largo parte el
+    // titular en tres lineas.
+    var nombre = String((state.user && state.user.name) || '').trim().split(/\s+/)[0] || '';
+    if (nombre.length > 20) nombre = '';
+
+    titulo.textContent = nombre ? ('Bienvenido de nuevo, ' + nombre) : 'Bienvenido de nuevo';
+    sub.textContent = 'Ya lo tienes todo a mano: tus direcciones guardadas y el estado de cada pedido, dentro de tu cuenta.';
+    btnTxt.textContent = 'Ver mis pedidos';
+    if (btn) btn.setAttribute('aria-label', 'Ir a mi cuenta y ver mis pedidos');
+  }
+
   function renderAll() {
     renderDesktopPanel();
     renderCheckoutState();
     renderAccountPageState();
+    renderHomeWelcome();
   }
 
   function loadOrders() {
