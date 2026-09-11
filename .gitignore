@@ -52,3 +52,11 @@ public_html/img/cart-collage/
 # y algunos de esos scripts llevan credenciales a fuego (por eso salieron de aquí).
 _cleanup_quarantine/
 m41-armored-dual-img-backup/
+
+# Recibos de pedidos subidos desde el panel (route=admin_order_receipt_upload).
+# Son documentos de CLIENTES REALES: datos personales que no se versionan nunca.
+# Se conservan el .htaccess que protege la carpeta y el PDF de demostracion,
+# que si forman parte del proyecto.
+public_html/uploads/receipts/*
+!public_html/uploads/receipts/.htaccess
+!public_html/uploads/receipts/demo-recibo.pdf

@@ -61,6 +61,7 @@ node scripts/qa/fotos-por-variante.js                                           
 node scripts/qa/portada-click.js [base]                                            # la portada se pulsa y se arrastra
 node scripts/qa/paginas-categoria.js [base]                                       # cada categoria en su pagina, y solo la suya
 python scripts/build-categorias.py --check                                        # /patinetes, /accesorios y /repuestos al dia
+python scripts/build-cabecera.py --check                                          # la cabecera, horneada en las 91 paginas que la pedian aparte
 ```
 
 Deploy is FTP via `deploy.py` (also wired into VS Code tasks: "Deploy dry-run", "Deploy whitelist", "Deploy selected files"). **Deploy selectively** — `--all-changed` is intentionally gated behind `--allow-bulk`. Secrets come from `.env`/`.env.local` (`SCOOTSHOP_FTP_PASSWORD`), never the command line.
@@ -629,6 +630,72 @@ avisos y **los seis son falsos positivos ya conocidos**: `.btn-hosted-pay--*` y
 `.header-account-dot--*` se componen por concatenación, y `.menu-products-host` es el
 desplegable de escritorio que ya no se monta (2,2 KB; se deja, quitarlo es una decisión de
 producto, no de rendimiento).
+
+### La cabecera se ve desde el primer fotograma (8 Sep 2026)
+
+El menu «se distorsionaba» al cambiar de pagina. Eran **tres** fallos distintos, no
+uno, y solo se ven con la red lenta (medido a 900 kbps y 150 ms de latencia):
+
+**1. Tangerine no se precargaba.** Es la fuente que escribe el «Versatil» de la
+cabecera, y de las tres que usa el sitio era la unica sin `<link rel=preload>`: el
+navegador no la descubria hasta despues de leer el CSS. Con `font-display:swap` eso
+significa pintar la palabra con la cursiva de reserva y cambiarla despues. Medido en
+`/accesorios/`, el ancho de «Versatil» iba **49 -> 102 -> 60 px**: tres formas en dos
+segundos. Ahora va precargada en las 105 paginas y su `@font-face` es el unico con
+**`font-display: block`** — no se pinta hasta tenerla. Se puede hacer *solo* con esta
+porque escribe UNA palabra y pesa 3,2 KB desde este dominio (llega a los 781 ms con la
+red frenada); en un parrafo, `block` seria texto invisible. Lo pone
+`scripts/build-web-fonts.py`, asi que sobrevive a regenerar las hojas.
+
+**2. Treinta y cinco fichas seguian pidiendole las fuentes a Google**, y ademas con la
+hoja aplazada a proposito (`media="print" onload=...`), asi que su cabecera se pintaba
+con la letra de reserva hasta que respondian dos origenes externos con su DNS y su
+TLS. No era una chapuza suelta: **la plantilla las emitia asi**, de modo que cada
+producto nuevo nacia roto. Migradas las 35 y arreglada `new-series-product.ps1`.
+
+**3. Noventa y una paginas pintaban la cabecera con JavaScript.** Traian
+`<div id="site-header-slot"></div>` vacio y lo rellenaba `loadPartial()` tras pedir
+`/partials/site-header`. Medido en una ficha:
+
+| | la cabecera aparece |
+|---|---|
+| primera visita | **no aparece en 4,5 s** (el hueco mide 0 px) |
+| segunda visita (cache de sesion) | 946 ms |
+
+`scripts/build-cabecera.py` mete el parcial dentro del hueco. **El parcial sigue
+siendo la unica fuente**: el script copia, no escribe; cambiar la cabecera es cambiar
+`partials/site-header.html` y volver a correrlo, y `--check` falla si alguna pagina se
+quedo atras.
+
+Por que esto si compensa y **hornear la parrilla de la portada no** (ver mas arriba):
+aquella eran 84 KB y 44 subarboles disputandole el ancho de banda a la foto de
+portada, que es el LCP. Esta son 3,5 KB de marcado que ya se pedia igual —como una
+peticion aparte y mas tarde— y encima ahorra esa peticion.
+
+Dos trampas, las dos pisadas:
+
+- **`loadPartial()` habria repintado la cabecera horneada.** Su guard de «no repintes
+  si es identico» compara contra la cache de **sesion**, que en la primera visita esta
+  vacia; asi que pedia el parcial y sustituia la barra por otra igual, destruyendola y
+  recreandola — justo el parpadeo que se venia a quitar. El hueco lleva ahora
+  `data-horneado` y con esa marca no se pide nada: solo se hidrata. Sube el `&r=` de
+  `global-assets-app.js` al tocarlo.
+- **Buscar el hueco con `</div>` no vale**: la cabecera lleva cinco dentro, y una
+  expresion no-avara «cerraba» el hueco en el primero. Se cierra con una marca propia
+  (`<!-- /site-header-slot -->`).
+
+Resultado, con la red frenada: la cabecera se pinta en **2 fotogramas** (vacio -> final)
+y no vuelve a cambiar; **0 peticiones** del parcial; «Versatil» mide 60 px desde el
+principio en ficha, categoria y checkout. Comprobado ademas que el menu sigue vivo:
+cajon del carrito, chapa de 0 -> 1 y menu movil con sus tres categorias.
+
+La cabecera en linea de `index.html` y el parcial coinciden salvo en 7 lineas, y las
+7 son correctas: la portada usa anclas relativas y `aria-current="page"` porque **es**
+el inicio.
+
+**Lo que queda igual a proposito:** `mobile-menu-slot` se sigue pidiendo aparte. No se
+ve hasta que se pulsa la hamburguesa, asi que su retraso no distorsiona nada; el dia
+que se hornee, va por el mismo camino.
 
 ### `img/` — una carpeta por oficio (25 Aug 2026)
 
