@@ -13,7 +13,7 @@
     "ACC-BAG": {
       "id": "acc-storage-bag",
       "name": "Bolsa de almacenamiento",
-      "series": "acc",
+      "series": "mounts",
       "categoryKey": "accessories",
       "priceText": "8 €",
       "compareAtPriceText": "",
@@ -25,7 +25,7 @@
     "ACC-BAR-KOCEVLO": {
       "id": "acc-handlebar-kocevlo",
       "name": "Manillar KOCEVLO Carbono 680-760mm",
-      "series": "acc",
+      "series": "handlebars",
       "categoryKey": "accessories",
       "priceText": "44,99 €",
       "compareAtPriceText": "",
@@ -59,7 +59,7 @@
     "ACC-BAR-LUNJE": {
       "id": "acc-handlebar-lunje",
       "name": "Manillar LUNJE 720mm/780mm",
-      "series": "acc",
+      "series": "handlebars",
       "categoryKey": "accessories",
       "priceText": "42,99 €",
       "compareAtPriceText": "",
@@ -98,7 +98,7 @@
     "ACC-BAR-NANLIO": {
       "id": "acc-handlebar-nanlio",
       "name": "Manillar NANLIO Tornasol 780mm",
-      "series": "acc",
+      "series": "handlebars",
       "categoryKey": "accessories",
       "priceText": "44,99 €",
       "compareAtPriceText": "",
@@ -123,7 +123,7 @@
     "ACC-BAR-UNO": {
       "id": "acc-handlebar-uno",
       "name": "Manillar UNO 640-800mm",
-      "series": "acc",
+      "series": "handlebars",
       "categoryKey": "accessories",
       "priceText": "39,99 €",
       "compareAtPriceText": "",
@@ -159,7 +159,7 @@
     "ACC-BAR-WAKE": {
       "id": "acc-handlebar-wake",
       "name": "Manillar WAKE 720mm/780mm",
-      "series": "acc",
+      "series": "handlebars",
       "categoryKey": "accessories",
       "priceText": "39,99 €",
       "compareAtPriceText": "",
@@ -194,7 +194,7 @@
     "ACC-BAR-WAKE-DH": {
       "id": "acc-handlebar-wake-dh",
       "name": "Manillar WAKE Downhill 780mm",
-      "series": "acc",
+      "series": "handlebars",
       "categoryKey": "accessories",
       "priceText": "42,99 €",
       "compareAtPriceText": "",
@@ -221,7 +221,7 @@
     "ACC-BEAST": {
       "id": "acc-the-beast-stickers",
       "name": "Pegatinas THE BEAST",
-      "series": "acc",
+      "series": "stickers",
       "categoryKey": "accessories",
       "priceText": "4,50 €",
       "compareAtPriceText": "",
@@ -230,10 +230,189 @@
       "image": "/accesorios/pegatina-the-beast/img/2.webp",
       "axes": []
     },
+    "ACC-CABLE": {
+      "id": "acc-cable-wrap",
+      "name": "Cubre cables en espiral 1 m",
+      "series": "protection",
+      "categoryKey": "accessories",
+      "priceText": "5 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/accesorios/cubre-cables-espiral/",
+      "image": "/accesorios/cubre-cables-espiral/img/1.webp",
+      "axes": [
+        {
+          "key": "color",
+          "label": "Color",
+          "type": "swatch",
+          "options": {
+            "negro": "Negro",
+            "blanco": "Blanco",
+            "azul": "Azul",
+            "rojo": "Rojo",
+            "amarillo": "Amarillo"
+          }
+        }
+      ]
+    },
+    "ACC-CRASH": {
+      "id": "acc-crash-protectors",
+      "name": "Protectores anticaídas de aluminio y carbono",
+      "series": "protection",
+      "categoryKey": "accessories",
+      "priceText": "8,90 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/accesorios/protectores-anticaidas/",
+      "image": "/accesorios/protectores-anticaidas/img/1.webp",
+      "axes": [
+        {
+          "key": "color",
+          "label": "Color",
+          "type": "swatch",
+          "options": {
+            "negro": "Negro",
+            "dorado": "Dorado",
+            "azul": "Azul",
+            "rojo": "Rojo",
+            "naranja": "Naranja"
+          }
+        }
+      ]
+    },
+    "ACC-CRASH-C": {
+      "id": "acc-crash-protectors-cilindricos",
+      "name": "Protectores anticaídas cilíndricos Ø39 mm",
+      "series": "protection",
+      "categoryKey": "accessories",
+      "priceText": "10,50 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/accesorios/protectores-anticaidas-cilindricos/",
+      "image": "/accesorios/protectores-anticaidas-cilindricos/img/1.webp",
+      "axes": [
+        {
+          "key": "color",
+          "label": "Color",
+          "type": "swatch",
+          "options": {
+            "negro": "Negro",
+            "azul": "Azul",
+            "rojo": "Rojo",
+            "naranja": "Naranja",
+            "dorado": "Dorado",
+            "plata": "Plata",
+            "morado": "Morado"
+          }
+        }
+      ]
+    },
+    "ACC-CRASH-T": {
+      "id": "acc-crash-protectors-tornasol",
+      "name": "Protectores anticaídas tornasol Ø60 mm",
+      "series": "protection",
+      "categoryKey": "accessories",
+      "priceText": "13,90 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/accesorios/protectores-anticaidas-tornasol/",
+      "image": "/accesorios/protectores-anticaidas-tornasol/img/1.webp",
+      "axes": [
+        {
+          "key": "color",
+          "label": "Color",
+          "type": "swatch",
+          "options": {
+            "negro": "Negro",
+            "dorado": "Dorado",
+            "azul": "Azul",
+            "rojo": "Rojo",
+            "plata": "Plata"
+          }
+        }
+      ]
+    },
+    "ACC-GRIPS": {
+      "id": "acc-grips-npy",
+      "name": "Puños ergonómicos con cierre de aluminio",
+      "series": "handlebars",
+      "categoryKey": "accessories",
+      "priceText": "12 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/accesorios/punos-ergonomicos/",
+      "image": "/accesorios/punos-ergonomicos/img/1.webp",
+      "axes": [
+        {
+          "key": "color",
+          "label": "Color",
+          "type": "swatch",
+          "options": {
+            "negro": "Negro",
+            "azul": "Azul",
+            "rojo": "Rojo",
+            "naranja": "Naranja",
+            "turquesa": "Turquesa",
+            "morado": "Morado",
+            "marron": "Marrón"
+          }
+        }
+      ]
+    },
+    "ACC-GRIPS-D": {
+      "id": "acc-grips-deemount",
+      "name": "Puños jaspeados con cierre de aluminio",
+      "series": "handlebars",
+      "categoryKey": "accessories",
+      "priceText": "8,90 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/accesorios/punos-deemount/",
+      "image": "/accesorios/punos-deemount/img/1.webp",
+      "axes": [
+        {
+          "key": "color",
+          "label": "Color",
+          "type": "swatch",
+          "options": {
+            "negro": "Negro",
+            "negro-rojo": "Negro y rojo",
+            "negro-azul": "Negro y azul",
+            "negro-turquesa": "Negro y turquesa",
+            "negro-morado": "Negro y morado",
+            "azul": "Azul"
+          }
+        }
+      ]
+    },
+    "ACC-GRIPS-M": {
+      "id": "acc-grips-motsuv",
+      "name": "Puños ergonómicos camuflaje",
+      "series": "handlebars",
+      "categoryKey": "accessories",
+      "priceText": "13,90 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/accesorios/punos-motsuv/",
+      "image": "/accesorios/punos-motsuv/img/1.webp",
+      "axes": [
+        {
+          "key": "color",
+          "label": "Color",
+          "type": "swatch",
+          "options": {
+            "rojo": "Rojo",
+            "amarillo": "Amarillo",
+            "verde": "Verde",
+            "azul": "Azul"
+          }
+        }
+      ]
+    },
     "ACC-HOLDER": {
       "id": "acc-phone-holder",
       "name": "Soporte móvil antivibración para patinete",
-      "series": "acc",
+      "series": "mounts",
       "categoryKey": "accessories",
       "priceText": "7,40 €",
       "compareAtPriceText": "",
@@ -245,7 +424,7 @@
     "ACC-LIMIT-M41": {
       "id": "acc-speed-limiter-m41",
       "name": "Mando limitador — M41 Tank",
-      "series": "acc-limit",
+      "series": "limiters",
       "categoryKey": "accessories",
       "priceText": "58,99 €",
       "compareAtPriceText": "",
@@ -257,7 +436,7 @@
     "ACC-LIMIT-M41-AD": {
       "id": "acc-speed-limiter-m41-armored-dual",
       "name": "Mando limitador — M41 Armored Dual",
-      "series": "acc-limit",
+      "series": "limiters",
       "categoryKey": "accessories",
       "priceText": "58,99 €",
       "compareAtPriceText": "",
@@ -269,7 +448,7 @@
     "ACC-LIMIT-M41-AO": {
       "id": "acc-speed-limiter-m41-armored-one",
       "name": "Mando limitador — M41 Armored One",
-      "series": "acc-limit",
+      "series": "limiters",
       "categoryKey": "accessories",
       "priceText": "58,99 €",
       "compareAtPriceText": "",
@@ -281,7 +460,7 @@
     "ACC-LIMIT-M41-TD": {
       "id": "acc-speed-limiter-m41-tank-dual",
       "name": "Mando limitador — M41 Tank Dual",
-      "series": "acc-limit",
+      "series": "limiters",
       "categoryKey": "accessories",
       "priceText": "58,99 €",
       "compareAtPriceText": "",
@@ -293,7 +472,7 @@
     "ACC-REFLECT": {
       "id": "acc-reflective-stickers",
       "name": "Pegatinas reflectantes",
-      "series": "acc",
+      "series": "stickers",
       "categoryKey": "accessories",
       "priceText": "6,50 €",
       "compareAtPriceText": "",
@@ -305,7 +484,7 @@
     "ACC-RGB": {
       "id": "acc-rgb-lights",
       "name": "Luces estroboscópicas LED RGB para patinete y bicicleta",
-      "series": "acc",
+      "series": "lighting",
       "categoryKey": "accessories",
       "priceText": "6 €",
       "compareAtPriceText": "",
@@ -313,6 +492,39 @@
       "href": "/accesorios/luces-led-rgb/",
       "image": "/accesorios/luces-led-rgb/img/1.webp",
       "axes": []
+    },
+    "ACC-STEM-LUNJE": {
+      "id": "acc-stem-lunje",
+      "name": "Potencia/Vástago LUNJE 35 mm",
+      "series": "stems",
+      "categoryKey": "accessories",
+      "priceText": "23,99 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/accesorios/potencia-lunje/",
+      "image": "/accesorios/potencia-lunje/img/16.webp",
+      "axes": [
+        {
+          "key": "color",
+          "label": "Color",
+          "type": "swatch",
+          "options": {
+            "negro": "Negro",
+            "azul": "Azul",
+            "rojo": "Rojo",
+            "naranja": "Naranja",
+            "morado": "Morado",
+            "plata": "Plata",
+            "titanio": "Titanio",
+            "tornasol": "Tornasol",
+            "negro-turquesa": "Negro y turquesa",
+            "negro-rojo": "Negro y rojo",
+            "negro-titanio": "Negro y titanio",
+            "morado-plata": "Morado y plata",
+            "rosa-dorado": "Rosa y dorado"
+          }
+        }
+      ]
     },
     "BISONGT": {
       "id": "ecoxtrem-bison-gt-carbon-design",
@@ -373,6 +585,177 @@
       "image": "/patinetes/series-n/d6/img/1.webp",
       "axes": []
     },
+    "DTT3": {
+      "id": "thunder-3",
+      "name": "DUALTRON THUNDER 3",
+      "series": "dualtron",
+      "categoryKey": "electric-scooters",
+      "priceText": "3399 €",
+      "compareAtPriceText": "3599 €",
+      "stock": "in_stock",
+      "href": "/patinetes/dualtron/thunder-3/",
+      "image": "/patinetes/dualtron/thunder-3/img/1.webp",
+      "axes": []
+    },
+    "ECXBISON": {
+      "id": "ecoxtrem-bison",
+      "name": "Ecoxtrem Bison",
+      "series": "ecoxtrem",
+      "categoryKey": "electric-scooters",
+      "priceText": "449 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/patinetes/ecoxtrem/bison/",
+      "image": "/patinetes/ecoxtrem/bison/img/3.webp",
+      "axes": [
+        {
+          "key": "color",
+          "label": "Color",
+          "type": "swatch",
+          "options": {
+            "verde": "Verde",
+            "negro": "Negro",
+            "rojo": "Rojo",
+            "azul": "Azul",
+            "amarillo": "Amarillo",
+            "turquesa": "Turquesa",
+            "lila": "Lila",
+            "marfil": "Blanco marfil",
+            "negro-rojo": "Negro y rojo"
+          }
+        }
+      ]
+    },
+    "ECXDEID": {
+      "id": "deimos-dual",
+      "name": "Ecoxtrem Deimos Dual",
+      "series": "ecoxtrem",
+      "categoryKey": "electric-scooters",
+      "priceText": "625 €",
+      "compareAtPriceText": "649 €",
+      "stock": "in_stock",
+      "href": "/patinetes/ecoxtrem/deimos-dual/",
+      "image": "/patinetes/ecoxtrem/deimos-dual/img/1.webp",
+      "axes": [
+        {
+          "key": "color",
+          "label": "Color",
+          "type": "swatch",
+          "options": {
+            "negro-rojo": "Negro y rojo",
+            "naranja": "Naranja",
+            "amarillo": "Amarillo",
+            "gris-verde": "Gris y verde"
+          }
+        }
+      ]
+    },
+    "ECXDEIS": {
+      "id": "deimos-single",
+      "name": "Ecoxtrem Deimos Single",
+      "series": "ecoxtrem",
+      "categoryKey": "electric-scooters",
+      "priceText": "479 €",
+      "compareAtPriceText": "599 €",
+      "stock": "in_stock",
+      "href": "/patinetes/ecoxtrem/deimos-single/",
+      "image": "/patinetes/ecoxtrem/deimos-single/img/1.webp",
+      "axes": []
+    },
+    "ECXDELTA": {
+      "id": "ecoxtrem-delta",
+      "name": "Ecoxtrem Delta 4000W",
+      "series": "ecoxtrem",
+      "categoryKey": "electric-scooters",
+      "priceText": "2340 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/patinetes/ecoxtrem/delta/",
+      "image": "/patinetes/ecoxtrem/delta/img/1.webp",
+      "axes": [
+        {
+          "key": "color",
+          "label": "Color",
+          "type": "swatch",
+          "options": {
+            "naranja": "Naranja",
+            "azul": "Azul",
+            "amarillo": "Amarillo"
+          }
+        }
+      ]
+    },
+    "ECXLINEAR": {
+      "id": "ecoxtrem-linear",
+      "name": "Ecoxtrem Linear",
+      "series": "ecoxtrem",
+      "categoryKey": "electric-scooters",
+      "priceText": "265 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/patinetes/ecoxtrem/linear/",
+      "image": "/patinetes/ecoxtrem/linear/img/1.webp",
+      "axes": [
+        {
+          "key": "color",
+          "label": "Color",
+          "type": "swatch",
+          "options": {
+            "negro": "Negro",
+            "camel": "Camel",
+            "lima": "Lima"
+          }
+        }
+      ]
+    },
+    "ECXVORTEX": {
+      "id": "ecoxtrem-vortex",
+      "name": "ETRIC Vortex",
+      "series": "ecoxtrem",
+      "categoryKey": "electric-scooters",
+      "priceText": "745 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/patinetes/ecoxtrem/vortex/",
+      "image": "/patinetes/ecoxtrem/vortex/img/1.webp",
+      "axes": [
+        {
+          "key": "color",
+          "label": "Color",
+          "type": "swatch",
+          "options": {
+            "gris": "Gris",
+            "negro": "Negro",
+            "azul": "Azul",
+            "amarillo": "Amarillo",
+            "plata": "Plata",
+            "turquesa": "Turquesa",
+            "marfil": "Blanco marfil"
+          }
+        }
+      ]
+    },
+    "ECXXANZER": {
+      "id": "ecoxtrem-xanzer",
+      "name": "Ecoxtrem M41 Tank Xanzer",
+      "series": "ecoxtrem",
+      "categoryKey": "electric-scooters",
+      "priceText": "1103,08 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/patinetes/ecoxtrem/xanzer/",
+      "image": "/patinetes/ecoxtrem/xanzer/img/1.webp",
+      "axes": [
+        {
+          "key": "color",
+          "label": "Color",
+          "type": "swatch",
+          "options": {
+            "negro": "Negro"
+          }
+        }
+      ]
+    },
     "EV05M": {
       "id": "motos-ev05m",
       "name": "EVERCROSS EV05M",
@@ -422,11 +805,11 @@
       "axes": [
         {
           "key": "model",
-          "label": "Modelo",
+          "label": "Versión",
           "type": "pill",
           "options": {
-            "vmp": "G2 PRO VMP",
-            "normal": "G2 PRO Normal"
+            "vmp": "G2 PRO DGT",
+            "normal": "G2 PRO NORMAL"
           }
         }
       ]
@@ -503,6 +886,138 @@
       "image": "/patinetes/series-ix/ix8/img/1.webp",
       "axes": []
     },
+    "JC10DGT": {
+      "id": "joyor-c10-dgt",
+      "name": "JOYOR C10 DGT",
+      "series": "joyor",
+      "categoryKey": "electric-scooters",
+      "priceText": "577 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/patinetes/joyor/c10-dgt/",
+      "image": "/patinetes/joyor/c10-dgt/img/1.webp",
+      "axes": []
+    },
+    "JF5": {
+      "id": "joyor-f5",
+      "name": "JOYOR F5",
+      "series": "joyor",
+      "categoryKey": "electric-scooters",
+      "priceText": "367 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/patinetes/joyor/f5/",
+      "image": "/patinetes/joyor/f5/img/1.webp",
+      "axes": []
+    },
+    "JG5": {
+      "id": "joyor-g5",
+      "name": "JOYOR G5",
+      "series": "joyor",
+      "categoryKey": "electric-scooters",
+      "priceText": "407 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/patinetes/joyor/g5/",
+      "image": "/patinetes/joyor/g5/img/1.webp",
+      "axes": []
+    },
+    "JLITEGO": {
+      "id": "joyor-litego",
+      "name": "JOYOR LiteGo",
+      "series": "joyor",
+      "categoryKey": "electric-scooters",
+      "priceText": "427 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/patinetes/joyor/litego/",
+      "image": "/patinetes/joyor/litego/img/1.webp",
+      "axes": []
+    },
+    "JS5Z": {
+      "id": "joyor-s5-z",
+      "name": "JOYOR S5-Z",
+      "series": "joyor",
+      "categoryKey": "electric-scooters",
+      "priceText": "547 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/patinetes/joyor/s5-z/",
+      "image": "/patinetes/joyor/s5-z/img/1.webp",
+      "axes": []
+    },
+    "JT6D": {
+      "id": "joyor-t6d",
+      "name": "JOYOR T6D",
+      "series": "joyor",
+      "categoryKey": "electric-scooters",
+      "priceText": "657 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/patinetes/joyor/t6d/",
+      "image": "/patinetes/joyor/t6d/img/1.webp",
+      "axes": []
+    },
+    "JY10DGT": {
+      "id": "joyor-y10-dgt",
+      "name": "JOYOR Y10 DGT",
+      "series": "joyor",
+      "categoryKey": "electric-scooters",
+      "priceText": "627 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/patinetes/joyor/y10-dgt/",
+      "image": "/patinetes/joyor/y10-dgt/img/1.webp",
+      "axes": []
+    },
+    "JY6S": {
+      "id": "joyor-y6-s",
+      "name": "JOYOR Y6-S",
+      "series": "joyor",
+      "categoryKey": "electric-scooters",
+      "priceText": "547 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/patinetes/joyor/y6-s/",
+      "image": "/patinetes/joyor/y6-s/img/1.webp",
+      "axes": []
+    },
+    "KA1": {
+      "id": "k-a1",
+      "name": "KUKIRIN A1",
+      "series": "k",
+      "categoryKey": "electric-scooters",
+      "priceText": "427 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/patinetes/series-k/a1/",
+      "image": "/patinetes/series-k/a1/img/1.webp",
+      "axes": []
+    },
+    "KC1": {
+      "id": "k-c1",
+      "name": "KUKIRIN C1",
+      "series": "k",
+      "categoryKey": "electric-scooters",
+      "priceText": "527 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/patinetes/series-k/c1/",
+      "image": "/patinetes/series-k/c1/img/1.webp",
+      "axes": []
+    },
+    "KC1PRO": {
+      "id": "k-c1-pro",
+      "name": "KUKIRIN C1 Pro",
+      "series": "k",
+      "categoryKey": "electric-scooters",
+      "priceText": "567 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/patinetes/series-k/c1-pro/",
+      "image": "/patinetes/series-k/c1-pro/img/1.webp",
+      "axes": []
+    },
     "KG2": {
       "id": "k-g2",
       "name": "KUKIRIN G2",
@@ -513,6 +1028,76 @@
       "stock": "in_stock",
       "href": "/patinetes/series-k/g2/",
       "image": "/patinetes/series-k/g2/img/1.webp",
+      "axes": [
+        {
+          "key": "model",
+          "label": "Versión",
+          "type": "pill",
+          "options": {
+            "vmp": "G2 DGT",
+            "normal": "G2 NORMAL"
+          }
+        }
+      ]
+    },
+    "KG2MAX": {
+      "id": "k-g2-max",
+      "name": "KUKIRIN G2 Max",
+      "series": "k",
+      "categoryKey": "electric-scooters",
+      "priceText": "677 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/patinetes/series-k/g2-max/",
+      "image": "/patinetes/series-k/g2-max/img/1.webp",
+      "axes": []
+    },
+    "KG3PRO": {
+      "id": "k-g3-pro",
+      "name": "KUKIRIN G3 Pro",
+      "series": "k",
+      "categoryKey": "electric-scooters",
+      "priceText": "1197 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/patinetes/series-k/g3-pro/",
+      "image": "/patinetes/series-k/g3-pro/img/1.webp",
+      "axes": []
+    },
+    "KM4MAX": {
+      "id": "k-m4-max",
+      "name": "KUKIRIN M4 Max",
+      "series": "k",
+      "categoryKey": "electric-scooters",
+      "priceText": "427 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/patinetes/series-k/m4-max/",
+      "image": "/patinetes/series-k/m4-max/img/1.webp",
+      "axes": []
+    },
+    "KM5PRO": {
+      "id": "k-m5-pro",
+      "name": "KUKIRIN M5 Pro",
+      "series": "k",
+      "categoryKey": "electric-scooters",
+      "priceText": "827 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/patinetes/series-k/m5-pro/",
+      "image": "/patinetes/series-k/m5-pro/img/1.webp",
+      "axes": []
+    },
+    "KT3": {
+      "id": "k-t3",
+      "name": "KUKIRIN T3",
+      "series": "k",
+      "categoryKey": "electric-scooters",
+      "priceText": "516 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/patinetes/series-k/t3/",
+      "image": "/patinetes/series-k/t3/img/1.webp",
       "axes": []
     },
     "M41DUAL": {
@@ -627,6 +1212,82 @@
       "image": "/patinetes/series-n/n7/img/1.webp",
       "axes": []
     },
+    "R7": {
+      "id": "r7",
+      "name": "ROVORON R7",
+      "series": "rovoron",
+      "categoryKey": "electric-scooters",
+      "priceText": "998,50 €",
+      "compareAtPriceText": "1150 €",
+      "stock": "in_stock",
+      "href": "/patinetes/rovoron/r7/",
+      "image": "/patinetes/rovoron/r7/img/1-v2.webp",
+      "axes": [
+        {
+          "key": "model",
+          "label": "Versión",
+          "type": "pill",
+          "options": {
+            "dgt": "R7 DGT",
+            "libre": "R7 NORMAL"
+          }
+        },
+        {
+          "key": "color",
+          "label": "Color",
+          "type": "swatch",
+          "options": {
+            "negro": "Negro",
+            "rojo": "Rojo",
+            "azul": "Azul"
+          }
+        }
+      ]
+    },
+    "R7PRO": {
+      "id": "r7-pro",
+      "name": "ROVORON R7 PRO",
+      "series": "rovoron",
+      "categoryKey": "electric-scooters",
+      "priceText": "1299,50 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/patinetes/rovoron/r7-pro/",
+      "image": "/patinetes/rovoron/r7-pro/img/1.webp",
+      "axes": [
+        {
+          "key": "model",
+          "label": "Versión",
+          "type": "pill",
+          "options": {
+            "dgt": "R7 PRO DGT",
+            "libre": "R7 PRO NORMAL"
+          }
+        },
+        {
+          "key": "color",
+          "label": "Color",
+          "type": "swatch",
+          "options": {
+            "negro": "Negro",
+            "rojo": "Rojo",
+            "azul": "Azul"
+          }
+        }
+      ]
+    },
+    "REP-NEU11OFF": {
+      "id": "rep-neumatico-11-offroad",
+      "name": "Neumático 11 pulgadas off-road (par)",
+      "series": "rep",
+      "categoryKey": "spare-parts",
+      "priceText": "56,99 €",
+      "compareAtPriceText": "",
+      "stock": "in_stock",
+      "href": "/repuestos/neumatico-11-offroad/",
+      "image": "/repuestos/neumatico-11-offroad/img/1.webp",
+      "axes": []
+    },
     "S3": {
       "id": "s3",
       "name": "S3-11",
@@ -651,6 +1312,28 @@
       "image": "/patinetes/series-n/s4/img/1.webp",
       "axes": []
     },
+    "S7": {
+      "id": "s7",
+      "name": "ROVORON S7",
+      "series": "rovoron",
+      "categoryKey": "electric-scooters",
+      "priceText": "2370 €",
+      "compareAtPriceText": "2499 €",
+      "stock": "in_stock",
+      "href": "/patinetes/rovoron/s7/",
+      "image": "/patinetes/rovoron/s7/img/1.webp",
+      "axes": [
+        {
+          "key": "model",
+          "label": "Versión",
+          "type": "pill",
+          "options": {
+            "dgt": "S7 DGT",
+            "libre": "S7 NORMAL"
+          }
+        }
+      ]
+    },
     "T10": {
       "id": "t10",
       "name": "T10",
@@ -661,18 +1344,6 @@
       "stock": "in_stock",
       "href": "/patinetes/series-gt/t10/",
       "image": "/patinetes/series-gt/t10/img/1.webp",
-      "axes": []
-    },
-    "T10DUAL": {
-      "id": "t10-dual",
-      "name": "JOYOR T10 DUAL",
-      "series": "gt",
-      "categoryKey": "electric-scooters",
-      "priceText": "799 €",
-      "compareAtPriceText": "860 €",
-      "stock": "in_stock",
-      "href": "/patinetes/series-gt/t10-dual/",
-      "image": "/patinetes/series-gt/t10-dual/img/1.webp",
       "axes": []
     },
     "T30": {
@@ -745,6 +1416,13 @@
     "/accesorios/manillar-wake": "ACC-BAR-WAKE",
     "/accesorios/manillar-wake-downhill": "ACC-BAR-WAKE-DH",
     "/accesorios/pegatina-the-beast": "ACC-BEAST",
+    "/accesorios/cubre-cables-espiral": "ACC-CABLE",
+    "/accesorios/protectores-anticaidas": "ACC-CRASH",
+    "/accesorios/protectores-anticaidas-cilindricos": "ACC-CRASH-C",
+    "/accesorios/protectores-anticaidas-tornasol": "ACC-CRASH-T",
+    "/accesorios/punos-ergonomicos": "ACC-GRIPS",
+    "/accesorios/punos-deemount": "ACC-GRIPS-D",
+    "/accesorios/punos-motsuv": "ACC-GRIPS-M",
     "/accesorios/soporte-movil": "ACC-HOLDER",
     "/accesorios/mando-limitador-m41-tank": "ACC-LIMIT-M41",
     "/accesorios/mando-limitador-m41-armored-dual": "ACC-LIMIT-M41-AD",
@@ -752,10 +1430,19 @@
     "/accesorios/mando-limitador-m41-tank-dual": "ACC-LIMIT-M41-TD",
     "/accesorios/pegatinas-reflectantes": "ACC-REFLECT",
     "/accesorios/luces-led-rgb": "ACC-RGB",
+    "/accesorios/potencia-lunje": "ACC-STEM-LUNJE",
     "/patinetes/ecoxtrem/bison-gt-carbon-design": "BISONGT",
     "/motos/challenger12": "CHALLENGER12",
     "/patinetes/series-n/d20": "D20",
     "/patinetes/series-n/d6": "D6",
+    "/patinetes/dualtron/thunder-3": "DTT3",
+    "/patinetes/ecoxtrem/bison": "ECXBISON",
+    "/patinetes/ecoxtrem/deimos-dual": "ECXDEID",
+    "/patinetes/ecoxtrem/deimos-single": "ECXDEIS",
+    "/patinetes/ecoxtrem/delta": "ECXDELTA",
+    "/patinetes/ecoxtrem/linear": "ECXLINEAR",
+    "/patinetes/ecoxtrem/vortex": "ECXVORTEX",
+    "/patinetes/ecoxtrem/xanzer": "ECXXANZER",
     "/motos/ev05m": "EV05M",
     "/motos/ev12m-pro": "EV12MPRO",
     "/patinetes/series-gt/g2": "G2",
@@ -766,20 +1453,71 @@
     "/patinetes/series-n/ie-s1": "IES1",
     "/patinetes/series-ix/ix3": "IX3",
     "/patinetes/series-ix/ix8": "IX8",
+    "/patinetes/joyor/c10-dgt": "JC10DGT",
+    "/patinetes/joyor/f5": "JF5",
+    "/patinetes/joyor/g5": "JG5",
+    "/patinetes/joyor/litego": "JLITEGO",
+    "/patinetes/joyor/s5-z": "JS5Z",
+    "/patinetes/joyor/t6d": "JT6D",
+    "/patinetes/joyor/y10-dgt": "JY10DGT",
+    "/patinetes/joyor/y6-s": "JY6S",
+    "/patinetes/series-k/a1": "KA1",
+    "/patinetes/series-k/c1": "KC1",
+    "/patinetes/series-k/c1-pro": "KC1PRO",
     "/patinetes/series-k/g2": "KG2",
+    "/patinetes/series-k/g2-max": "KG2MAX",
+    "/patinetes/series-k/g3-pro": "KG3PRO",
+    "/patinetes/series-k/m4-max": "KM4MAX",
+    "/patinetes/series-k/m5-pro": "KM5PRO",
+    "/patinetes/series-k/t3": "KT3",
     "/patinetes/ecoxtrem/m41-armored-dual": "M41DUAL",
     "/patinetes/ecoxtrem/m41-armored-one": "M41ONE",
     "/patinetes/ecoxtrem/m41-tank-ultimate-1000w": "M41TANK",
     "/patinetes/ecoxtrem/m41-tank-dual": "M41TANKDUAL",
     "/patinetes/series-n/n7": "N7PRO",
+    "/patinetes/rovoron/r7": "R7",
+    "/patinetes/rovoron/r7-pro": "R7PRO",
+    "/repuestos/neumatico-11-offroad": "REP-NEU11OFF",
     "/patinetes/series-n/s3": "S3",
     "/patinetes/series-n/s4": "S4",
+    "/patinetes/rovoron/s7": "S7",
     "/patinetes/series-gt/t10": "T10",
-    "/patinetes/series-gt/t10-dual": "T10DUAL",
     "/patinetes/series-gt/t30": "T30",
     "/patinetes/series-gt/tf3": "TF3",
     "/patinetes/series-n/v70-connected": "V70",
     "/patinetes/series-n/vs6": "VS6",
     "/patinetes/series-ix/w9": "W9"
-  }
+  },
+  "packs": [
+    {
+      "id": "pack-tank-dual",
+      "titulo": "M41 Tank Dual + manillar + extras",
+      "articulos": [
+        {
+          "sku": "M41TANKDUAL",
+          "cantidad": 1
+        },
+        {
+          "sku": "ACC-BAR-WAKE-DH",
+          "cantidad": 1,
+          "precioPack": 32.99
+        },
+        {
+          "sku": "ACC-LIMIT-M41-TD",
+          "cantidad": 1,
+          "precioPack": 45
+        },
+        {
+          "sku": "ACC-CABLE",
+          "cantidad": 3,
+          "precioPackTotal": 10
+        },
+        {
+          "sku": "ACC-BAG",
+          "cantidad": 1,
+          "precioPack": 0
+        }
+      ]
+    }
+  ]
 }
