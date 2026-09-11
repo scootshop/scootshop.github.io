@@ -24,6 +24,7 @@ import sys
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MARCA = 'CATEGORIAS_OK'
 NL = chr(10)
+CRLF = chr(13) + chr(10)
 
 
 def leer(rel):
@@ -45,8 +46,16 @@ def como_el_sitio(html):
     """
     if not html.startswith('﻿'):
         html = '﻿' + html
+    # Y acaba en LINEA EN BLANCO, no solo en salto. 88 de las 97 paginas del sitio
+    # acaban asi porque es como las deja scripts/bump-assets-version.ps1 al
+    # reescribirlas. Sin esto, CADA BUMP volvia a romper `--check`: el bump añadia
+    # ese salto de mas y el generador no lo ponia. El desfase no estaba en las
+    # paginas; estaba en que dos herramientas escribian el mismo fichero de dos
+    # formas distintas.
     if not html.endswith(NL):
         html = html + NL
+    if not html.endswith(CRLF):
+        html = html + CRLF
     return html
 
 
@@ -537,7 +546,11 @@ def main():
     for cat in CATEGORIAS:
         destino = os.path.join(RAIZ, cat['carpeta'], 'index.html')
         nuevo = como_el_sitio(componer(cat, piezas, ver, rev_carrito))
-        viejo = io.open(destino, encoding='utf-8').read() if os.path.exists(destino) else None
+        # newline='' AL LEER, igual que al escribir. Sin esto Python usa saltos
+        # universales y traduce los CRLF del fichero a LF al leerlo, asi que la
+        # comparacion NUNCA cuadra aunque el fichero sea identico byte a byte.
+        # Esa era la otra mitad del CATEGORIAS_KO perpetuo.
+        viejo = io.open(destino, encoding='utf-8', newline='').read() if os.path.exists(destino) else None
         if viejo == nuevo:
             print('  = /%s/' % cat['carpeta'])
             continue
@@ -550,7 +563,7 @@ def main():
     # /preguntas: mismas piezas compartidas, sin catalogo.
     destino = os.path.join(RAIZ, 'preguntas', 'index.html')
     nuevo = como_el_sitio(componer_preguntas(piezas, ver))
-    viejo = io.open(destino, encoding='utf-8').read() if os.path.exists(destino) else None
+    viejo = io.open(destino, encoding='utf-8', newline='').read() if os.path.exists(destino) else None
     if viejo == nuevo:
         print('  = /preguntas/')
     elif comprobar:
