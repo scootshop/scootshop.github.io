@@ -63,8 +63,21 @@
      de tiempo o el inline fallara, se recalcula igual desde el historial. */
   var API = window.SS_SCROLL || (window.SS_SCROLL = {});
 
+  /* RECARGAR NO ES VOLVER ATRAS. Una recarga reutiliza la MISMA entrada del
+     historial, asi que el estado guardado sigue ahi y sin esta comprobacion el
+     sitio daba por hecho que el visitante venia de atras: recargar la portada te
+     dejaba a media pagina en vez de arriba. El tipo de navegacion lo distingue. */
+  function esRecarga() {
+    try {
+      var e = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+      if (e) return e.type === 'reload';
+      return !!(performance.navigation && performance.navigation.type === 1);
+    } catch (e) { return false; }
+  }
+
   function estadoDelHistorial() {
     try {
+      if (esRecarga()) return null;
       var s = history.state;
       if (!s || typeof s !== 'object' || !s.ss || typeof s.ss !== 'object') return null;
       var ss = s.ss;

@@ -211,7 +211,7 @@
       // (global-assets.js es no-store, asÃ­ que el nuevo sufijo llega al instante).
       // Subir esta revisiÃ³n SIEMPRE que se toque cart-runtime.js: el fichero se
       // sirve como immutable y el ?v global no basta para refrescarlo.
-      var cartRuntimeRev = '20260813-5';
+      var cartRuntimeRev = '20260911-1';
       cartScript.src = '/js/cart-runtime.js?v=' + encodeURIComponent(ver) + '&r=' + cartRuntimeRev;
       cartScript.async = false;
       cartScript.dataset.cartRuntime = 'true';
@@ -226,7 +226,7 @@
       // Mismo truco que cart-runtime.js: product-attributes.js se sirve como immutable,
       // asi que el ?v global no basta para refrescarlo. Subir SIEMPRE esta revision al
       // tocar el nucleo (global-assets.js es no-store y llega al instante).
-      var attrsRev = '20260813-1';
+      var attrsRev = '20260827-1';
       attrsScript.src = '/js/product-attributes.js?v=' + encodeURIComponent(ver) + '&r=' + attrsRev;
       attrsScript.async = false;
       attrsScript.dataset.productAttributes = 'true';
@@ -248,7 +248,7 @@
       // Mismo truco que cart-runtime.js justo arriba: global-assets-app.js se
       // sirve como immutable, asÃ­ que el ?v global no basta para refrescarlo.
       // Subir SIEMPRE esta revisiÃ³n al tocar global-assets-app.js.
-      var globalAppRev = '20260812-3';
+      var globalAppRev = '20260908-1';
       script.src = '/js/global-assets-app.js?v=' + encodeURIComponent(ver) + '&r=' + globalAppRev;
       script.async = false;
       script.dataset.globalAssetsRuntime = 'true';

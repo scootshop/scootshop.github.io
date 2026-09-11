@@ -550,6 +550,22 @@
   function loadPartial(slotId, url) {
     var slot = document.getElementById(slotId);
     if (!slot) return Promise.resolve(false);
+
+    /* EL HUECO PUEDE VENIR HORNEADO DESDE EL SERVIDOR.
+
+       `scripts/build-cabecera.py` mete la cabecera dentro del hueco en las 91
+       paginas que la pedian por separado, y le pone `data-horneado`. Cuando esta
+       esa marca, el marcado que hay en el DOM salio del MISMO despliegue que la
+       pagina: no hay nada que traer ni nada que repintar, solo hidratar.
+
+       Sin esta salida, el guard de mas abajo no bastaba: compara contra la cache
+       de SESION, que en la primera visita esta vacia, asi que se pedia el parcial
+       y se sustituia la cabecera por otra identica — destruyendo y recreando la
+       barra, que es justo el parpadeo que veniamos a quitar. */
+    if (slot.getAttribute('data-horneado') && slot.children.length) {
+      hydratePartial(slot);
+      return Promise.resolve(true);
+    }
     var ver = window.ASSET_VER || fallbackVersion();
     var verUrl = withVer(url, ver);
     var cachedHtml = readPartialCache(url, ver);
@@ -641,14 +657,32 @@
       // sueltos en una tercera línea sin icono. Esta estructura de tres <div> tiene
       // que ser la MISMA que la del HTML de las fichas: aquí se reescribe la caja
       // entera en cada carga, así que lo que se escriba aquí es lo que se ve.
+      /* La primera línea ya NO puede prometer envío gratis a secas: desde el 15 de
+         agosto de 2026 los pedidos por debajo de 10 € pagan 2,99 € (umbral en
+         api/index.php, SHIPPING_FREE_FROM / SHIPPING_FEE). Con accesorios de 5 € en
+         el catálogo, dejar el "Envío gratis" de siempre sería anunciar una cosa y
+         cobrar otra en el paso de pago. En un producto que YA supera el umbral él
+         solo se sigue diciendo gratis, que es lo cierto y lo que más vende. */
+      var precioFicha = 0;
+      try {
+        var btnPrecio = document.querySelector('[data-product-cart-btn][data-price]');
+        var txtPrecio = btnPrecio
+          ? btnPrecio.getAttribute('data-price')
+          : (document.querySelector('.price-now') || {}).textContent;
+        precioFicha = parseFloat(String(txtPrecio || '').replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
+      } catch (_) {}
+      var lineaEnvio = (precioFicha > 0 && precioFicha < 10)
+        ? '<div><strong>Envío 2,99 €</strong> · gratis desde 10 €</div>'
+        : '<div><strong>Envío gratis</strong> (Península)</div>';
+
       if (isExpressShipping) {
         shippingBox.innerHTML = '' +
-          '<div><strong>Envío gratis</strong> (Península)</div>' +
+          lineaEnvio +
           '<div>Preparación: <strong>1 día hábil</strong></div>' +
           '<div class="ship-transit">Tránsito: <span class="transit-express"><strong>2-3 días</strong><i class="icon-fire"></i></span></div>';
       } else {
         shippingBox.innerHTML = '' +
-          '<div><strong>Envío gratis</strong> (Península)</div>' +
+          lineaEnvio +
           '<div>Preparación: <strong>1 día hábil</strong></div>' +
           '<div class="ship-transit">Tránsito: <strong>5–7 días hábiles</strong></div>';
       }
@@ -1126,7 +1160,51 @@
           addToCartBtn.setAttribute('data-name', product.name || 'Producto SCOOT SHOP');
           addToCartBtn.setAttribute('data-price', product.priceText || '');
           addToCartBtn.setAttribute('data-url', product.href || pathname);
+          /* La foto del botón "Añadir" es la de la VARIANTE elegida, no la portada.
+             Al hidratar, la elegida es la de por defecto, así que se la pedimos al
+             núcleo: en un producto cuya portada es un muestrario de colores, poner
+             `product.image` metía en el carrito una foto con los cinco colores
+             debajo del rótulo "COLOR: NEGRO". Si el núcleo aún no ha llegado se
+             mantiene el comportamiento de antes y el selector lo corrige al primer
+             clic. */
           addToCartBtn.setAttribute('data-image', imageSrc || product.image || '');
+          /* …y en cuanto exista el núcleo, la de la variante. Medido: esta hidratación
+             corre antes que `SS_ATTRS` (el núcleo llega ~200 ms después), así que
+             preguntar aquí y ya está devolvía siempre vacío — el fallo que hacía que
+             el carrito enseñara la portada. Se pone lo que se sabe ahora y se corrige
+             al resolver `SS_READY`, mucho antes de que a nadie le dé tiempo a pulsar
+             "Añadir". Solo se pisa si el núcleo devuelve algo: nunca con vacío. */
+          (function fotoDeLaVarianteCuandoSePueda() {
+            function poner() {
+              try {
+                var A = window.SS_ATTRS;
+                if (!A || typeof A.fotoDe !== 'function' || typeof A.ejes !== 'function'
+                    || typeof A.porDefecto !== 'function') return;
+                /* `porDefecto` recibe UN EJE, no el producto: la selección por defecto
+                   se arma eje a eje. */
+                var seleccion = {};
+                var listaEjes = A.ejes(product) || [];
+                for (var e = 0; e < listaEjes.length; e++) {
+                  var opcion = A.porDefecto(listaEjes[e]);
+                  if (opcion) seleccion[listaEjes[e].key] = opcion;
+                }
+                var foto = A.fotoDe(product, seleccion);
+                if (!foto) return;
+                addToCartBtn.setAttribute('data-image', foto);
+                /* Y el `image=` del enlace "Comprar ahora", porque es DE AHÍ de donde
+                   cart-runtime saca la foto de la línea (readSelectedVariantImage):
+                   arreglar solo `data-image` no cambiaba nada, la pisaba después. */
+                var btnComprar = document.querySelector('.btn-main[href]');
+                if (!btnComprar) return;
+                var url = new URL(btnComprar.getAttribute('href'), window.location.origin);
+                if (!url.searchParams.get('image')) return;
+                url.searchParams.set('image', foto);
+                btnComprar.setAttribute('href', url.pathname + url.search + url.hash);
+              } catch (_) {}
+            }
+            poner();
+            if (window.SS_READY && typeof window.SS_READY.then === 'function') window.SS_READY.then(poner);
+          })();
           /* La variante elegida NO se pisa con vacío. Esta hidratación lee el eje de
              CÍRCULOS del DOM; una ficha que se elige por modelo y medida no tiene
              ninguno, así que aquí `activeColorKey` sale vacío y borraba la clave que

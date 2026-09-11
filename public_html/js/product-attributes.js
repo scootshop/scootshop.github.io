@@ -110,6 +110,11 @@
       shortLabel: texto(op.shortLabel || op.labelCorta || ''),
       swatch: texto(op.swatch || ''),
       images: imagenes,
+      /* Cuál de sus fotos REPRESENTA a la opción (carrito, checkout, burbuja). Se
+         declara cuando `images[0]` no sirve: la variante por defecto abre con la foto
+         de portada por la regla anti-FOUC, y esa suele ser un muestrario de colores.
+         Ver fotoDe(). Sin declarar, manda `images[0]` y nada cambia. */
+      photo: (op.photo === 0 || op.photo) ? op.photo : null,
       // Fotos por combinación con otro eje: { '720': 3, '780': 9 }. Es lo que permite
       // que un mismo acabado tenga foto distinta en cada medida.
       imagesBy: (op.imagesBy && typeof op.imagesBy === 'object') ? op.imagesBy : null,
@@ -121,6 +126,14 @@
       // Solo lo usan quienes lo entienden (la ficha reescribe descripción y badge).
       desc: texto(op.desc || ''),
       dgt: op.dgt,
+      /* Colores de la LÍNEA de acento del panel (mitad izquierda / mitad derecha).
+         Un eje de círculos ya aporta color por su `swatch`, pero uno de PÍLDORAS no
+         aporta ninguno y la línea caía al rojo de `--primary`, que no tiene nada que
+         ver con el producto. Se declara aquí, como `shortLabel`: es presentación
+         declarada, no una regla escondida en el CSS de una ficha. */
+      accentColors: Array.isArray(op.accentColors)
+        ? op.accentColors.map(texto).filter(Boolean)
+        : null,
       // Restringe qué opciones de OTRO eje quedan disponibles con esta elegida.
       allows: (op.allows && typeof op.allows === 'object') ? op.allows : null,
       sku: texto(op.sku || ''),
@@ -268,8 +281,29 @@
      nadie tenga que cambiar código. Sin selección resoluble, la foto del producto. */
   function fotoDe(producto, seleccion) {
     if (!producto) return '';
-    var ids = imagenesDe(producto, seleccion || {});
-    var id = ids.length ? ids[0] : '';
+    seleccion = seleccion || {};
+
+    /* `photo` es la foto que REPRESENTA a la opción: la del carrito, el checkout y la
+       burbuja. Existe porque `images[0]` no siempre vale. Cuando una opción abre con
+       la foto de portada —regla anti-FOUC: la variante por defecto DEBE arrancar con
+       la que pinta el HTML estático— esa primera foto suele ser un muestrario con
+       todos los colores, y en el carrito el cliente veía "COLOR: NEGRO" al lado de una
+       foto con cinco colores. Coger "la última" tampoco servía: el G2 PRO declara
+       `images:[1..7]` porque son TODAS las fotos de ese modelo, y ahí la buena es la
+       primera. Por eso lo dice el dato y no una heurística sobre la forma del array. */
+    var todos = ejes(producto);
+    for (var i = 0; i < todos.length; i++) {
+      var opcion = seleccion[todos[i].key];
+      if (opcion && opcion.photo !== undefined && opcion.photo !== null && opcion.photo !== '') {
+        return rutaDeFoto(producto, opcion.photo);
+      }
+    }
+
+    var ids = imagenesDe(producto, seleccion);
+    return rutaDeFoto(producto, ids.length ? ids[0] : '');
+  }
+
+  function rutaDeFoto(producto, id) {
     if (id === '' || id === null || id === undefined) return texto(producto.image);
 
     var comoTexto = texto(id);

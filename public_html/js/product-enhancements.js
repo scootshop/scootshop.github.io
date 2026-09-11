@@ -162,7 +162,13 @@
     var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
     if (conn) {
       if (conn.saveData) return;
-      if (/^(slow-)?2g$/.test(String(conn.effectiveType || ''))) return;
+      /* Tambien en 3g. Esta precarga son cuatro fotos a tamano completo
+         —medido en la ficha del M41 Armored, 326 KB— y su unico premio es que
+         pulsar una miniatura sea instantaneo. En 3g esas fotos tardan mas en
+         llegar de lo que el cliente tarda en pulsar, asi que no adelantan
+         nada: solo le gastan los datos. Quien va bien de red lo sigue
+         teniendo igual. */
+      if (/^(slow-)?2g$|^3g$/.test(String(conn.effectiveType || ''))) return;
     }
 
     sources = sources.slice(0, PRELOAD_MAX);
@@ -929,7 +935,11 @@
       }
 
       if (typeof variant.dgt === 'boolean') {
-        var badge = panel.querySelector('.price-row .dgt-badge');
+        /* El sello ya no vive en la fila del precio sino sobre la FOTO, asi que
+           se busca en el documento y no dentro del panel. Se deja el sitio viejo
+           en la lista por si alguna ficha se quedara sin migrar. */
+        var badge = document.querySelector('.gallery-main .dgt-tag') ||
+                    panel.querySelector('.price-row .dgt-tag, .price-row .dgt-badge');
         if (badge) {
           var target = (badge.closest && badge.closest('.dgt-tooltip')) || badge;
           target.style.display = variant.dgt ? '' : 'none';
@@ -998,6 +1008,22 @@
        mientras su catálogo decía "G2 PRO VMP", y por eso la clase de píldora había
        que ponerla a mano. Generalizado aquí, las 12 fichas pasan a ser consumidoras
        de golpe y sin tratamiento especial para ninguna. */
+    /* ¿Esta opción NO se puede comprar? Son dos motivos distintos y antes solo se
+       miraba el segundo:
+         1. AGOTADA. El catálogo lo dice con `available:false` (o `disabled`/`agotado`),
+            y el núcleo lo normaliza a `disabled`. Esto NO se miraba, así que el
+            repintado desde el catálogo borraba el `disabled` que el HTML estático ya
+            traía puesto: el blanco del M41 Armored Dual volvía a ser pulsable y se
+            podía pedir un color sin stock.
+         2. Sin ninguna foto que enseñar. Se mantiene: un círculo que no cambia nada
+            al pulsarlo tampoco vale.
+       Nunca al revés: tener fotos NO implica que quede stock. */
+    function noSeVende(variant, indices) {
+      if (!variant) return true;
+      if (variant.disabled === true || variant.available === false || variant.agotado === true) return true;
+      return !(indices && indices.length) && !variant.images;
+    }
+
     function aplicarDatosAlBoton(button, variant, esPildora, isDefault, isUnavailable, ejeDeLaOpcion) {
       // El respaldo del nombre es el rótulo del eje AL QUE PERTENECE la opción, no el
       // del eje principal: en una ficha de dos ejes eso anunciaba mal la medida.
@@ -1013,8 +1039,11 @@
       button.setAttribute('aria-pressed', isDefault ? 'true' : 'false');
       // El nombre SIEMPRE accesible, también en el círculo: una opción no puede
       // identificarse solo por su color.
-      button.setAttribute('aria-label', nombre);
-      button.title = nombre;
+      /* Una opción agotada tiene que DECIRLO, no solo verse apagada: el círculo no
+         lleva texto y un lector de pantalla solo anunciaría "BLANCO". El markup
+         estático ya usaba esta convención y el repintado la perdía. */
+      button.setAttribute('aria-label', isUnavailable ? (nombre + ' (agotado)') : nombre);
+      button.title = isUnavailable ? (nombre + ' — agotado') : nombre;
       /* AQUÍ NO se toca `data-color-key`, y es deliberado. Esa clave es la identidad
          de la línea en el carrito y en los pedidos YA guardados. Hoy sale de la
          etiqueta ("Negro"); el catálogo la llama "negro". Escribirla desde el dato
@@ -1050,7 +1079,7 @@
         aplicarDatosAlBoton(
           button, variant, eje.type === 'pill',
           button.classList.contains('is-active'),
-          !indexesEst.length && !variant.images
+          noSeVende(variant, indexesEst)
         );
         button.__ssOpcion = variant;
         buttons.push(button);
@@ -1071,7 +1100,7 @@
     } else if (grid) {
       variants.forEach(function (variant, index) {
         var indexes = toIndexList(variant, originalItems.length);
-        var isUnavailable = !indexes.length;
+        var isUnavailable = noSeVende(variant, indexes);
         var isDefault = variant.default === true || (variant.defaultColor === true) || (!buttons.length && !variants.some(function (item) { return item.default === true || item.defaultColor === true; }) && index === 0);
         var button = document.createElement('button');
         button.type = 'button';
@@ -1276,6 +1305,21 @@
           }
         });
 
+        /* DESCRIPCIÓN, SELLO DGT, PRECIO Y REFERENCIA DE CUALQUIER EJE.
+           Esto solo se aplicaba a la opción del eje PRINCIPAL, que es el de
+           círculos cuando existe. En un producto de dos ejes donde la
+           homologación vive en el otro —ROVORON R7: versión + color— elegir
+           «Sin homologar» no quitaba el sello ni cambiaba el texto: el dato
+           estaba declarado y nadie lo leía.
+           Se recorren los ejes en el ORDEN DEL CATÁLOGO, así que si dos
+           declararan lo mismo manda el último, que es el más específico.
+           `applyVariantContent` ya ignora las opciones que no declaran nada,
+           de modo que los productos de un solo eje se comportan igual. */
+        ejes.forEach(function (ejeX) {
+          var opX = seleccionActual[ejeX.key];
+          if (opX) applyVariantContent(opX);
+        });
+
         (soloSecundarios ? [] : buttons).forEach(function (b) {
           var esActivo = b === (opciones && opciones.boton);
           if (opciones && opciones.boton) {
@@ -1342,9 +1386,14 @@
   }
 
   /* ============================
-     1) BADGE DE DESCUENTO (%)
-     ============================ */
-  (function discountBadge() {
+     1) AGRUPADOR DEL PRECIO (.price-values)
+     ============================
+     Aqui se inyectaba ademas el BADGE ROJO de descuento (-13%). Retirado del
+     sitio entero el 27 de agosto de 2026: el precio tachado ya dice que hay
+     rebaja. Queda solo la normalizacion de la estructura, que sigue haciendo
+     falta porque no todas las fichas traen el wrapper y sin el la fila del
+     precio se descoloca. */
+  (function agruparPrecio() {
     var priceRow = panel.querySelector('.price-row');
     var priceNow = panel.querySelector('.price-now');
     var priceWas = panel.querySelector('.price-was');
@@ -1363,30 +1412,9 @@
       priceValues.appendChild(priceWas);
     }
 
-    // Idempotente: si ya hay un badge estático en el HTML, reubícalo dentro del
-    // wrapper (para igualar posición) y no añadas otro.
-    var existing = priceRow.querySelector('.discount-badge');
-    if (existing) {
-      if (existing.parentNode !== priceValues) priceValues.appendChild(existing);
-      return;
-    }
-
-    function parsePrice(el) {
-      var text = el.textContent.replace(/[^\d,.]/g, '').replace(',', '.');
-      return parseFloat(text);
-    }
-
-    var now = parsePrice(priceNow);
-    var was = parsePrice(priceWas);
-    if (!was || !now || was <= now) return;
-
-    var pct = Math.round((1 - now / was) * 100);
-    if (pct < 1) return;
-
-    var badge = document.createElement('span');
-    badge.className = 'discount-badge';
-    badge.textContent = '-' + pct + '%';
-    priceValues.appendChild(badge);
+    // Barrido: alguna ficha vieja cacheada puede traer el badge en su HTML.
+    var sobrante = priceRow.querySelector('.discount-badge');
+    if (sobrante && sobrante.parentNode) sobrante.parentNode.removeChild(sobrante);
   })();
 
 
@@ -1581,7 +1609,18 @@
          estas miniaturas se volvieran a bajar en cada bump. Y ya no hace falta
          igualar nada: global-assets-app.js dejó de reescribir el src de las imágenes,
          que era lo que partía la descarga en dos y hacía parpadear la fila. */
-      var img = (acc.gallery && acc.gallery[0] && acc.gallery[0].src) || acc.image || '';
+      /* PORTADA (`image`), no `gallery[0]`. En esta caja todavía no se ha elegido nada
+         —la fila dice "COLOR: POR ELEGIR"—, así que toca enseñar el muestrario con
+         todos los colores, que es justo lo que es la portada. `gallery[0]` es otra
+         cosa: la foto con la que ABRE la ficha, y esa es la del color por defecto. */
+      var img = acc.image || (acc.gallery && acc.gallery[0] && acc.gallery[0].src) || '';
+
+      /* La foto PEQUENA, no la grande: SCOOTSHOP_miniatura() cambia la portada
+         por su medida de 400. Aqui se ve a 56x56 y estaba bajando el original
+         —en esta caja habia 620 KB de foto para nueve cuadraditos, la mayor de
+         107 KB para 3.136 pixeles de pantalla. Si el catalogo no ha llegado
+         todavia se queda la grande: mas pesada, nunca rota. */
+      if (window.SCOOTSHOP_miniatura) img = window.SCOOTSHOP_miniatura(img);
 
       /* Accesorios CON variantes (color, medida...) NO se pueden añadir desde aquí.
          Este botón no lleva data-product-cart-btn a propósito —si no, heredaría el
@@ -1728,19 +1767,45 @@
        ahí obligaría a bumpear el asset-version global y redesplegarlas todas por
        una animación que solo se ve en cuatro páginas. */
     (function rotarFamilias() {
-      var VISIBLES = 2;
       var CADA_MS = 4500;
 
-      var pool = [];
-      var todas = bloque.querySelectorAll('.compat-row[data-rot-group]');
-      for (var i = 0; i < todas.length; i++) pool.push(todas[i]);
-      if (pool.length <= VISIBLES) return;   // con dos o menos no hay nada que rotar
+      /* UN HUECO POR FAMILIA. Cada familia se releva consigo misma: los manillares
+         entre manillares y los protectores entre protectores.
 
-      // Barajado Fisher-Yates. Solo cambia el orden en que se van mostrando; en
-      // pantalla siguen saliendo en el orden del DOM, entre el limitador y la bolsa.
-      for (var s = pool.length - 1; s > 0; s--) {
-        var r = Math.floor(Math.random() * (s + 1));
-        var tmp = pool[s]; pool[s] = pool[r]; pool[r] = tmp;
+         Antes esto era un único carrusel de dos huecos sobre TODAS las filas que
+         rotasen: `data-rot-group` se escribía en el DOM y no lo leía nadie. Con una
+         sola familia ('manillar') daba igual y por eso no se notó. Al entrar la
+         segunda (los dos protectores) el defecto se vuelve visible: los ocho
+         competían por los mismos dos huecos, así que había vueltas con dos
+         manillares y ningún protector, y vueltas con los dos protectores a la vez
+         —que es justo lo que no tiene sentido enseñar, porque son alternativas
+         entre sí—.
+
+         El número de filas en pantalla no cambia: antes eran dos huecos fijos y
+         ahora son dos familias. Si algún día se declara una tercera, la caja crece
+         una fila; ese es el momento de decidir si toca limitar cuántas familias
+         se enseñan a la vez. */
+      var porGrupo = {};
+      var orden = [];
+      var todas = bloque.querySelectorAll('.compat-row[data-rot-group]');
+      for (var i = 0; i < todas.length; i++) {
+        var g = todas[i].getAttribute('data-rot-group') || '';
+        if (!porGrupo[g]) { porGrupo[g] = []; orden.push(g); }
+        porGrupo[g].push(todas[i]);
+      }
+      if (!orden.length) return;
+
+      // Barajado Fisher-Yates DENTRO de cada familia. Solo cambia el orden en que se
+      // van mostrando; en pantalla siguen saliendo en el orden del DOM, entre el
+      // limitador y la bolsa.
+      var huecos = [];
+      for (var q = 0; q < orden.length; q++) {
+        var pool = porGrupo[orden[q]];
+        for (var s = pool.length - 1; s > 0; s--) {
+          var r = Math.floor(Math.random() * (s + 1));
+          var tmp = pool[s]; pool[s] = pool[r]; pool[r] = tmp;
+        }
+        huecos.push({ pool: pool, idx: 0, actual: null });
       }
 
       // display en el style del elemento, no el atributo [hidden]: las filas llevan
@@ -1749,15 +1814,16 @@
       function ver(fila) { fila.style.display = ''; }
 
       var suave = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-      var idx = 0;
 
       // Las filas ocultas no descargan su foto (loading="lazy" + display:none), así
       // que al aparecer saldrían un instante en blanco. Se adelanta la del turno
-      // siguiente, no las cinco: en la ficha de un patinete no toca gastar ahí.
+      // siguiente de CADA familia, no las cinco: en la ficha de un patinete no toca
+      // gastar ahí.
       function precargarSiguientes() {
-        for (var k = 0; k < VISIBLES; k++) {
-          // `idx` ya apunta a la siguiente candidata a entrar.
-          var f = pool[(idx + k) % pool.length];
+        for (var h = 0; h < huecos.length; h++) {
+          var hu = huecos[h];
+          // `idx` ya apunta a la siguiente candidata a entrar en ese hueco.
+          var f = hu.pool[hu.idx % hu.pool.length];
           var im = f && f.querySelector('img');
           if (im && im.src) { var pre = new Image(); pre.decoding = 'async'; pre.src = im.src; }
         }
@@ -1772,30 +1838,30 @@
         for (var i = 0; i < as.length; i++) as[i].cancel();
       }
 
-      /* Las filas que hay AHORA en pantalla, por hueco. Se lleva a mano en vez de
-         deducirla del display porque los relevos ya no son en bloque: puede quedarse
-         una y cambiar solo la otra, así que hace falta saber QUÉ hueco se renueva. */
-      var visibles = [];
-
-      function mostrarPareja(desde) {
-        for (var i = 0; i < pool.length; i++) ocultar(pool[i]);
-        visibles = [];
-        for (var k = 0; k < VISIBLES; k++) {
-          var fila = pool[(desde + k) % pool.length];
+      /* Cada hueco lleva a mano QUÉ fila suya está en pantalla (`actual`). Se lleva
+         así en vez de deducirlo del display porque los relevos no son en bloque:
+         puede quedarse una familia quieta y cambiar solo la otra. */
+      function mostrarPrimeras() {
+        for (var h = 0; h < huecos.length; h++) {
+          var hu = huecos[h];
+          for (var i = 0; i < hu.pool.length; i++) ocultar(hu.pool[i]);
+          var fila = hu.pool[0];
           limpiarAnimaciones(fila);
           ver(fila);
-          visibles.push(fila);
+          hu.actual = fila;
+          // El cursor queda tras la que ya está puesta. Con una sola fila en la
+          // familia se queda en ella y `relevar()` no la toca.
+          hu.idx = hu.pool.length > 1 ? 1 : 0;
         }
-        return visibles.slice();
       }
 
-      /* La siguiente del pool que no esté ya en pantalla: sin esto, al relevar un solo
-         hueco podía tocarle la fila que se está quedando y salir dos veces. */
-      function siguienteLibre() {
-        for (var intento = 0; intento < pool.length; intento++) {
-          var cand = pool[idx % pool.length];
-          idx = (idx + 1) % pool.length;
-          if (visibles.indexOf(cand) === -1) return cand;
+      /* La siguiente de SU familia que no sea la que ya está puesta: sin esto, al
+         relevar podía tocarle la misma y "cambiar" a lo mismo. */
+      function siguienteDe(hu) {
+        for (var intento = 0; intento < hu.pool.length; intento++) {
+          var cand = hu.pool[hu.idx % hu.pool.length];
+          hu.idx = (hu.idx + 1) % hu.pool.length;
+          if (cand !== hu.actual) return cand;
         }
         return null;
       }
@@ -1843,10 +1909,16 @@
       function relevar() {
         if (enRelevo) return;                 // no encadenar dos relevos a la vez
 
-        // Relevo POR FILA: salen solo las que nadie está mirando ni configurando.
+        /* Relevo POR FILA: salen solo las que nadie está mirando ni configurando, y
+           solo de las familias que tengan con qué relevarse (una familia de una sola
+           fila se queda fija, que es lo correcto: no hay alternativa que enseñar). */
+        var turnos = [];
         var salen = [];
-        for (var i = 0; i < visibles.length; i++) {
-          if (!apuntada(visibles[i])) salen.push(visibles[i]);
+        for (var i = 0; i < huecos.length; i++) {
+          var hu = huecos[i];
+          if (hu.pool.length < 2 || !hu.actual || apuntada(hu.actual)) continue;
+          turnos.push(hu);
+          salen.push(hu.actual);
         }
         if (!salen.length) return;            // las tiene todas apuntadas: quietas
 
@@ -1860,18 +1932,18 @@
              entera —y con una burbuja abierta anclada a ella, se quedaría flotando
              lejos de su botón. */
           var entran = [];
-          for (var h = 0; h < visibles.length; h++) {
-            if (salen.indexOf(visibles[h]) === -1) continue;
-            var saliente = visibles[h];
-            /* siguienteLibre() mira `visibles`, que todavía contiene a la saliente y a
-               la que se queda: así no se repite ninguna de las dos. */
-            var nueva = siguienteLibre();
+          for (var h = 0; h < turnos.length; h++) {
+            var hu = turnos[h];
+            var saliente = hu.actual;
+            /* siguienteDe() solo mira la familia del hueco, así que la entrante nunca
+               es la que se está yendo ni pisa el hueco de la otra familia. */
+            var nueva = siguienteDe(hu);
             if (!nueva) continue;
             saliente.parentNode.insertBefore(nueva, saliente);
             limpiarAnimaciones(nueva);
             ver(nueva);
             ocultar(saliente);
-            visibles[h] = nueva;
+            hu.actual = nueva;
             entran.push(nueva);
           }
           // Solo las que ENTRAN se funden: la que se queda no debe parpadear.
@@ -1895,8 +1967,7 @@
         if (document.hidden) parar(); else arrancar();
       });
 
-      mostrarPareja(0);     // primer par, sin animacion: nadie lo ha visto cambiar
-      idx = VISIBLES % pool.length;   // el cursor queda tras la pareja inicial
+      mostrarPrimeras();    // una por familia, sin animacion: nadie lo ha visto cambiar
       precargarSiguientes();
       arrancar();
     })();
@@ -2105,31 +2176,35 @@
   })();
 
   /* ============================
-     BADGE DGT AUTOMÁTICO
+     ETIQUETA DGT AUTOMÁTICA
      Regla: si el producto está certificado por la DGT en el catálogo
-     (products.js → dgtCertified:true, lo mismo que pinta el icono en la
-     home), el badge aparece también en la ficha. Fuente única = catálogo.
-     Idempotente: no duplica si el HTML ya trae el badge estático.
+     (products.js → dgtCertified:true, lo mismo que pinta la etiqueta en la
+     home), aparece también en la ficha. Fuente única = catálogo.
+     Idempotente: no duplica si el HTML ya trae la etiqueta estática.
+
+     Desde agosto de 2026 es el LOGOTIPO oficial en un WebP de 2,6 KB. El sello
+     azul de antes era un SVG trazado de 236 KB en las 12 fichas homologadas, y
+     además obligaba a un truco en tarjetas.css para que la fila del precio no
+     creciera al mostrarlo (medía 57px contra los 38 del precio, y el precio
+     "saltaba" al cambiar de DGT a NORMAL). Con texto no pasa ninguna de las dos.
      ============================ */
-  (function ensureDgtBadge() {
+  (function ensureDgtTag() {
     var product = getCurrentProduct();
     if (!product || product.dgtCertified !== true) return;
 
-    var priceRow = panel.querySelector('.price-row');
-    if (!priceRow || priceRow.querySelector('.dgt-badge')) return;
+    /* VA SOBRE LA FOTO, no en la fila del precio. Desde septiembre de 2026 el
+       sello es la misma pestaña pegada al canto que lleva la tarjeta del catalogo,
+       y su sitio es `.gallery-main`. Esto ponia una SEGUNDA copia en la fila del
+       precio en cuanto la estatica se mudo: la ficha salia con dos sellos. */
+    var galeria = document.querySelector('.gallery-main');
+    if (!galeria || galeria.querySelector('.dgt-tag')) return;
 
-    var img = document.createElement('img');
-    img.className = 'dgt-badge';
-    img.src = withVersion('/img/dgtchapa.svg');
-    img.alt = 'Logo DGT';
-    // width/height + eager: reservan el hueco por aspect-ratio y lo cargan ya,
-    // para que no crezca el price-row al llegar (antes con lazy y sin dims saltaba
-    // ~19px hacia abajo). El SVG es 1254x1254; el CSS lo escala a 57px.
-    img.setAttribute('width', '1254');
-    img.setAttribute('height', '1254');
-    img.loading = 'eager';
-    img.decoding = 'async';
-    priceRow.appendChild(img);
+    var caja = document.createElement('div');
+    caja.className = 'dgt-tooltip dgt-tooltip--tab dgt-tooltip--ficha';
+    // OJO: sin withVersion(). Es una imagen y las imagenes NUNCA llevan ?v=
+    // (provoca descarga doble y parpadeo); lo vigila check-image-cache.ps1.
+    caja.innerHTML = '<span class="dgt-tag"><img class="dgt-tag-logo" src="/img/marcas/dgt.webp" alt="DGT" width="163" height="64" decoding="async"></span>';
+    galeria.insertBefore(caja, galeria.firstChild);
   })();
 
 
@@ -2188,14 +2263,37 @@
        elegir dónde anclar la vuelta. */
     relatedEl.setAttribute('data-scroll-volatil', '');
     var relatedMounted = false;
+    var montajePedido = false;
     var loadFallbackTimer = 0;
 
+    /* SE ESPERA AL NÚCLEO, igual que la caja "Añade algo más" de más arriba y por el
+       mismo motivo, que aquí se había vuelto a pisar. `buildCardMarkup()` del home
+       pregunta `SS_ATTRS.ejes(producto)` para decidir si la tarjeta abre la burbuja o
+       añade de un clic, y medido en esta ficha la parrilla se montaba a los 3212 ms
+       mientras el núcleo llegaba a los 3220: ocho milisegundos tarde, pero suficientes
+       para que TODOS los productos salieran con cero ejes y, por tanto, con "Añadir"
+       directo. El manillar WAKE Downhill (7 colores), el cubre cables (5) y el M41
+       ARMORED ONE (5 versiones) entraban al carrito sin decir cuál.
+       Aquí ni siquiera salvaba el `variantHint`: la tarjeta del home no lo consulta como
+       hace la caja de compatibles, así que el fallo se veía en el catálogo entero.
+
+       El guardián es `montajePedido` y NO `relatedMounted`: entre pedir el montaje y
+       ejecutarlo hay una espera, y los tres disparadores de abajo (API ya presente,
+       `load` del script y el temporizador de respaldo) podían colarse todos dentro de
+       esa ventana y pintar la parrilla tres veces. */
     function mountRelated(useHomeCards) {
-      if (relatedMounted) return;
+      if (relatedMounted || montajePedido) return;
 
       var homeCardApi = window.SCOOTSHOP_HOME_CARD_API;
       var canUseHomeCards = !!(useHomeCards && homeCardApi && typeof homeCardApi.buildCardMarkup === 'function');
       if (!canUseHomeCards) return;
+
+      montajePedido = true;
+      ssListo().then(function () { montarAhora(homeCardApi); });
+    }
+
+    function montarAhora(homeCardApi) {
+      if (relatedMounted) return;
 
       var html = '<h2 class="related-title">También te puede interesar</h2>';
       html += '<div class="grid related-home-grid">';
@@ -2214,7 +2312,7 @@
         section.appendChild(relatedEl);
       }
 
-      if (canUseHomeCards && typeof homeCardApi.hydrate === 'function') {
+      if (typeof homeCardApi.hydrate === 'function') {
         homeCardApi.hydrate();
       }
 
