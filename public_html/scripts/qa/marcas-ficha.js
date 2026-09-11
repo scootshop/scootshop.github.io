@@ -116,6 +116,22 @@ for (const rel of fichas) {
     }
   }
 
+  /* EL BLOQUE TIENE QUE SER JSON VALIDO, y se comprueba ANTES que la marca.
+     Si no parsea, Google descarta el bloque ENTERO en silencio: ni marca, ni precio,
+     ni disponibilidad. Y aqui la marca se busca con una expresion regular, que
+     encuentra el valor igual en un JSON roto — o sea que sin esta comprobacion el
+     guardian daba por buena una ficha invisible para el buscador. Paso de verdad:
+     a patinetes/series-gt/gt9 le faltaba una coma antes de "offers". */
+  const bloques = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g) || [];
+  for (const b of bloques) {
+    const txt = b.replace(/<script[^>]*>/, '').replace(/<\/script>/, '');
+    try {
+      JSON.parse(txt);
+    } catch (e) {
+      fallos.push({ rel, que: 'el JSON-LD no es JSON valido: ' + String(e.message).slice(0, 70) });
+    }
+  }
+
   const mLd = html.match(/"brand"\s*:\s*\{[^}]*?"name"\s*:\s*"([^"]*)"/);
   if (mLd) {
     conJsonLd++;
