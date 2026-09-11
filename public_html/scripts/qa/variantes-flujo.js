@@ -5,7 +5,9 @@ const { chromium } = exigirPlaywright('FLUJO_OK');
 const B = process.argv[2] || 'http://127.0.0.1:8000';
 
 const CASOS = [
-  { ruta: '/patinetes/series-k/g2-pro/', nombre: 'G2 PRO (modelo)', espera: { model: 'vmp' }, texto: /^Modelo: G2 PRO/ },
+  // El eje pasó a «Versión» y la opción a «G2 PRO DGT» el 27 ago 2026. La CLAVE
+  // sigue siendo 'vmp': llega al carrito y a pedidos guardados y no se renombra.
+  { ruta: '/patinetes/series-k/g2-pro/', nombre: 'G2 PRO (versión)', espera: { model: 'vmp' }, texto: /^Versión: G2 PRO DGT/ },
   { ruta: '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/', nombre: 'M41 Tank (color)', espera: { color: 'negro' }, texto: /^Color: /},
   { ruta: '/accesorios/manillar-wake/', nombre: 'WAKE (medida+color)', espera: { size: '780', color: 'negro' }, texto: /Medida: .*·.*Color: |Color: .*·.*Medida: / },
   { ruta: '/accesorios/manillar-uno/', nombre: 'UNO (modelo+medida)', espera: { model: 'rb12', size: '720' }, texto: /Modelo: .*·.*Medida: |Medida: .*·.*Modelo: / }

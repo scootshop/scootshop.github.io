@@ -37,6 +37,18 @@ async function nueva(br) {
 
 const y = (p) => p.evaluate(() => Math.round(window.scrollY));
 
+/* Baja hasta donde HAY tarjetas, en vez de a una altura fija. Con un número a
+   pelo, cualquier cambio de altura en la parte alta de la home dejaba la primera
+   tarjeta unos píxeles por encima del borde y la prueba fallaba por no encontrar
+   dónde pulsar — no por la vuelta atrás, que es lo que se quiere medir. */
+async function irADondeHayTarjetas(p) {
+  await p.evaluate(() => {
+    const c = document.querySelector('article.card');
+    if (c) window.scrollTo(0, Math.round(c.getBoundingClientRect().top + window.scrollY - 120));
+    else window.scrollTo(0, 2600);
+  });
+}
+
 /* Pulsa desde dentro de la página, sin que nadie recoloque nada. */
 async function pulsarTarjetaVisible(p) {
   const ok = await p.evaluate(() => {
@@ -72,7 +84,7 @@ async function pulsarEnlaceVisible(p, selector) {
     try {
       await p.goto(BASE + '/', { waitUntil: 'load' });
       await p.waitForTimeout(3500);
-      await p.evaluate(() => window.scrollTo(0, 2600));
+      await irADondeHayTarjetas(p);
       await p.waitForTimeout(700);
       const salida = await y(p);
       await pulsarTarjetaVisible(p);
@@ -86,6 +98,47 @@ async function pulsarEnlaceVisible(p, selector) {
     await ctx.close();
   }
 
+  // 1 bis) EL CAMINO MAS FRECUENTE desde que cada categoria tiene su pagina:
+  //        /patinetes → ficha → atras. Aqui la parrilla es larga (59 modelos), asi
+  //        que es donde mas se nota caer en otro sitio. La portada ya solo enseña
+  //        ocho tarjetas y por si sola no probaba este caso.
+  {
+    const { ctx, p } = await nueva(br);
+    try {
+      await p.goto(BASE + '/patinetes/', { waitUntil: 'load' });
+      await p.waitForTimeout(3500);
+      await irADondeHayTarjetas(p);
+      await p.waitForTimeout(700);
+      const salida = await y(p);
+      await pulsarTarjetaVisible(p);
+      await p.waitForTimeout(2000);
+      await p.goBack({ waitUntil: 'load' });
+      await p.waitForTimeout(4000);
+      const vuelta = await y(p);
+      anotar('/patinetes → ficha → atrás', Math.abs(vuelta - salida) <= TOLERANCIA,
+        'salí en ' + salida + ', vuelvo a ' + vuelta);
+    } catch (e) { anotar('/patinetes → ficha → atrás', false, e.message.slice(0, 60)); }
+    await ctx.close();
+  }
+
+  // 1 ter) Y entrar en la categoria DE NUEVO no es volver: debe abrirse arriba.
+  {
+    const { ctx, p } = await nueva(br);
+    try {
+      await p.goto(BASE + '/patinetes/', { waitUntil: 'load' });
+      await p.waitForTimeout(3500);
+      await irADondeHayTarjetas(p);
+      await p.waitForTimeout(700);
+      await pulsarTarjetaVisible(p);
+      await p.waitForTimeout(2000);
+      await p.goto(BASE + '/patinetes/', { waitUntil: 'load' });
+      await p.waitForTimeout(4000);
+      const vuelta = await y(p);
+      anotar('entrar en /patinetes abre arriba', vuelta <= TOLERANCIA, 'y=' + vuelta);
+    } catch (e) { anotar('entrar en /patinetes abre arriba', false, e.message.slice(0, 60)); }
+    await ctx.close();
+  }
+
   // 2) Entrar por el logo NO es volver: la home debe abrirse arriba. Este era el
   //    fallo más visible del mecanismo anterior, que guardaba la posición en una
   //    marca global de la pestaña y la aplicaba viniera el cliente de donde viniera.
@@ -94,7 +147,7 @@ async function pulsarEnlaceVisible(p, selector) {
     try {
       await p.goto(BASE + '/', { waitUntil: 'load' });
       await p.waitForTimeout(3500);
-      await p.evaluate(() => window.scrollTo(0, 2600));
+      await irADondeHayTarjetas(p);
       await p.waitForTimeout(700);
       await pulsarTarjetaVisible(p);
       await p.waitForTimeout(2000);
@@ -155,7 +208,7 @@ async function pulsarEnlaceVisible(p, selector) {
     try {
       await p.goto(BASE + '/', { waitUntil: 'load' });
       await p.waitForTimeout(3500);
-      await p.evaluate(() => window.scrollTo(0, 2000));
+      await irADondeHayTarjetas(p);
       await p.waitForTimeout(600);
       const salida = await y(p);
       await pulsarTarjetaVisible(p);

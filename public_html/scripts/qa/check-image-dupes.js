@@ -30,8 +30,10 @@ const BASE = process.argv[2] || 'https://scootshop.co';
 
 const RUTAS = [
   '/',
+  '/patinetes/',                            // la parrilla entera de una categoria
+  '/accesorios/',                           // idem, con el riel de familias
   '/patinetes/ecoxtrem/m41-armored-dual/',  // muchas fotos + caja "Anade algo mas"
-  '/patinetes/series-gt/t10-dual/',         // variantes de color (galeria que se rehace)
+  '/patinetes/ecoxtrem/m41-tank-ultimate-1000w/', // variantes de color (galeria que se rehace)
   '/accesorios/manillar-lunje/',            // variantes de dos ejes
   '/patinetes/series-n/n7/',
 ];

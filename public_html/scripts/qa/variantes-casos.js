@@ -108,7 +108,9 @@ const NUEVOS = [
   });
 
   check('CASO A — solo Color', r.A.ejes.join() === 'Color/swatch' && r.A.texto === 'Color: Rojo', r.A.ejes + '  "' + r.A.texto + '"');
-  check('CASO B — solo Modelo (KUKIRIN G2 PRO)', r.B.ejes.join() === 'Modelo/pill' && r.B.texto === 'Modelo: G2 PRO VMP', r.B.ejes + '  "' + r.B.texto + '"');
+  // El eje pasó a llamarse «Versión» y sus opciones a «G2 PRO DGT / G2 PRO NORMAL»
+  // el 27 ago 2026: VMP no distingue nada (homologados o no, todos son VMP).
+  check('CASO B — solo Versión (KUKIRIN G2 PRO)', r.B.ejes.join() === 'Versión/pill' && r.B.texto === 'Versión: G2 PRO DGT', r.B.ejes + '  "' + r.B.texto + '"');
   check('CASO C — Modelo + Color', r.C.ejes.join() === 'Modelo/pill,Color/swatch' && r.C.texto === 'Modelo: Pro · Color: Verde', r.C.ejes + '  "' + r.C.texto + '"');
   check('CASO D — Modelo + Color + Medida', r.D.ejes.length === 3 && r.D.texto === 'Modelo: Pro · Color: Negro · Medida: 11"', '"' + r.D.texto + '"');
   check('CASO E — sin variantes: ni eje ni texto', r.E.ejes.length === 0 && r.E.texto === '', 'ejes=' + r.E.ejes.length + ' texto="' + r.E.texto + '"');

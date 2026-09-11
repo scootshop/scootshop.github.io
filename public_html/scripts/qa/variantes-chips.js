@@ -6,7 +6,7 @@ const B = process.argv[2] || 'http://127.0.0.1:8000';
 
 const LINEAS = [
   {key:'M41|Negro',sku:'M41TANK',name:'A legacy',price:530,url:'/patinetes/ecoxtrem/m41-tank-ultimate-1000w/',color:'Negro',colorLabel:'Negro',qty:1,stock:'in_stock'},
-  {key:'G2|vmp',sku:'G2PRO',name:'B modelo',price:515,url:'/patinetes/series-k/g2-pro/',color:'vmp',colorLabel:'G2 PRO VMP',attrs:{model:'vmp'},qty:2,stock:'in_stock'},
+  {key:'G2|vmp',sku:'G2PRO',name:'B modelo',price:515,url:'/patinetes/series-k/g2-pro/',color:'vmp',colorLabel:'G2 PRO DGT',attrs:{model:'vmp'},qty:2,stock:'in_stock'},
   {key:'W|n720',sku:'ACC-BAR-WAKE',name:'C dos ejes',price:39.99,url:'/accesorios/manillar-wake/',color:'negro-720',colorLabel:'Negro · 720 mm',attrs:{size:'720',color:'negro'},qty:1,stock:'in_stock'},
   {key:'S|',sku:'SOPMOV',name:'E sin variantes',price:12.99,url:'/accesorios/soporte-movil/',color:'',colorLabel:'',qty:1,stock:'in_stock'}
 ];
@@ -57,13 +57,13 @@ async function correr(nombre, retrasar) {
   const b = await correr('retrasado', true);
   const igual = JSON.stringify(a) === JSON.stringify(b);
   console.log('\nmismo resultado con y sin retraso: ' + (igual ? '✔' : '✘ difieren'));
-  const esperado = ['Color: Negro','Modelo: G2 PRO VMP','Medida: 720 mm · Color: Negro','Único'];
+  const esperado = ['Color: Negro','Versión: G2 PRO DGT','Medida: 720 mm · Color: Negro','Único'];
   let fallos = 0;
   for (const k of Object.keys(a)) {
     const chips = a[k].chips;
     const ok = k.indexOf('carrito') > -1
       ? JSON.stringify(chips) === JSON.stringify(esperado)
-      : JSON.stringify(chips) === JSON.stringify(['Modelo: G2 PRO VMP']);
+      : JSON.stringify(chips) === JSON.stringify(['Versión: G2 PRO DGT']);
     if (!ok) { fallos++; console.log('✘ ' + k + ' → ' + JSON.stringify(chips)); }
   }
   console.log(fallos || !igual ? '\n✘ CHIPS_KO' : '\n✔ CHIPS_OK — 4 vistas correctas con y sin retraso');
