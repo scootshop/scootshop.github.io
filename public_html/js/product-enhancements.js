@@ -2331,7 +2331,12 @@
     var indexScript = document.querySelector('script[src*="/js/index.js"]');
     if (!indexScript) {
       indexScript = document.createElement('script');
-      indexScript.src = '/js/index.js?v=' + encodeURIComponent(assetVersion());
+      /* La MISMA revisión que le pone js/index-head.js. Sin ella, un arreglo de
+         index.js llegaba a la portada al instante y a las 79 fichas —que lo cargan
+         por aquí, para la parrilla de «También te puede interesar»— no llegaba hasta
+         el siguiente bump global. Subirla en los dos sitios a la vez; lo vigila
+         scripts/qa/revisiones.js. */
+      indexScript.src = '/js/index.js?v=' + encodeURIComponent(assetVersion()) + '&r=20260909-2';
       indexScript.defer = true;
       indexScript.setAttribute('data-home-card-api-loader', 'true');
       document.head.appendChild(indexScript);

@@ -190,7 +190,11 @@
   const loadAssets = (ver) => {
     window.ASSET_VER = ver;
     updateStaticElements(ver);
-    appendDeferredScript('/js/cart-runtime.js', ver);
+    // Subir SIEMPRE esta revisión al tocar js/cart-runtime.js, y subirla TAMBIÉN en
+    // js/global-assets.js y en la etiqueta estática de index.html / las categorías:
+    // el fichero se sirve como inmutable y el ?v global no basta para refrescarlo.
+    // Lo vigila scripts/qa/revisiones.js.
+    appendDeferredScript('/js/cart-runtime.js', ver, '20260911-1');
     appendDeferredScript('/js/mobile-menu.js', ver);
     appendDeferredScript('/js/auth-ui.js', ver);
     // La capa operativa (precio/stock del panel) va SIEMPRE antes del catálogo.
@@ -199,7 +203,11 @@
     /* Núcleo de atributos. Va DESPUÉS del catálogo y ANTES de todo lo que pinta
        variantes (products-menu, index.js y, por delegación, variant-pop): es quien
        dice qué eje es cada cosa, cómo se llama y cómo se representa. */
-    appendDeferredScript('/js/product-attributes.js', ver);
+    // Aquí faltaba la revisión y era un hueco de verdad: js/global-assets.js sí se la
+    // pone, así que un arreglo del núcleo llegaba al instante a las fichas y al
+    // checkout, y a la PORTADA y las tres categorías no llegaba nunca — hasta el
+    // siguiente bump global. Subirla aquí y allí a la vez.
+    appendDeferredScript('/js/product-attributes.js', ver, '20260827-1');
     // Dueño único del panel de Productos (escritorio + móvil). Va DESPUÉS de
     // products.js (necesita el catálogo) y ANTES de index.js, que delega en él.
     // Los `defer` se ejecutan en orden de documento, así que el orden manda.
