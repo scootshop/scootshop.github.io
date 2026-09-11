@@ -146,6 +146,43 @@ RewriteRule ^patinetes/series-k/m41-armored/?$ /patinetes/ecoxtrem/m41-armored-o
 # El manillar KRSEC se sustituyo por el WAKE WKHB01 (mismo hueco de catalogo).
 RewriteRule ^accesorios/manillar-krsec/?$ /accesorios/manillar-wake/ [R=301,L]
 
+# Las paginas donde se compararon los diseños de filtros y de la placa de marca
+# elegida (31 ago 2026). Ya se
+# eligio, asi que deja de existir; sigue en el servidor porque deploy.py no borra
+# en remoto, y esta regla es lo que la retira de la web.
+RewriteRule ^pruebas-filtros(\.html)?/?$ / [R=301,L]
+RewriteRule ^pruebas-marcas(\.html)?/?$ / [R=301,L]
+RewriteRule ^pruebas-iconos(\.html)?/?$ / [R=301,L]
+
+# Baja 30 ago 2026: patinetes SIN homologar, que no se pueden vender para circular
+# en España. Los cuatro KUKIRIN son de los doce que el distribuidor no homologa y
+# ademas pasan de 50 km/h; el JOYOR C10 tiene su gemelo homologado (C10 DGT), asi
+# que ese va derecho a el. Los KUKIRIN van a su alternativa HOMOLOGADA mas cercana
+# —quien llegaba buscando un G4 encuentra un G3 Pro que si puede circular—, y no al
+# listado de la serie: /patinetes/series-k/ es una carpeta sin pagina y devuelve 403.
+RewriteRule ^patinetes/joyor/c10/?$ /patinetes/joyor/c10-dgt/ [R=301,L]
+RewriteRule ^patinetes/series-k/g2-master/?$ /patinetes/series-k/g2-max/ [R=301,L]
+RewriteRule ^patinetes/series-k/g2-ultra/?$ /patinetes/series-k/g2-max/ [R=301,L]
+RewriteRule ^patinetes/series-k/g4-max/?$ /patinetes/series-k/g3-pro/ [R=301,L]
+RewriteRule ^patinetes/series-k/g4/?$ /patinetes/series-k/g3-pro/ [R=301,L]
+
+# Baja 9 sep 2026: se recorta la gama JOYOR. Ocho SIN homologar (los ocho mas caros)
+# y uno homologado, el S-PRO, por decision comercial. Quedan ocho JOYOR: tres
+# homologados (T6D, Y10 DGT, C10 DGT) y cinco sin homologar de gama baja.
+# El T6 va derecho a su gemelo homologado, el T6D, igual que se hizo con el C10.
+# El resto va al Y10 DGT, que es el JOYOR homologado mas potente que sobrevive
+# (800 W, 100 km): quien buscaba un S8 o un E6-S encuentra algo que SI puede circular.
+# No se manda a /patinetes/joyor/ porque es una carpeta sin pagina y devuelve 403.
+RewriteRule ^patinetes/joyor/t6/?$ /patinetes/joyor/t6d/ [R=301,L]
+RewriteRule ^patinetes/joyor/s8/?$ /patinetes/joyor/y10-dgt/ [R=301,L]
+RewriteRule ^patinetes/joyor/s8e/?$ /patinetes/joyor/y10-dgt/ [R=301,L]
+RewriteRule ^patinetes/joyor/s8-s-z/?$ /patinetes/joyor/y10-dgt/ [R=301,L]
+RewriteRule ^patinetes/joyor/s10-s-z/?$ /patinetes/joyor/y10-dgt/ [R=301,L]
+RewriteRule ^patinetes/joyor/luxerider/?$ /patinetes/joyor/y10-dgt/ [R=301,L]
+RewriteRule ^patinetes/joyor/e6-s/?$ /patinetes/joyor/y10-dgt/ [R=301,L]
+RewriteRule ^patinetes/joyor/s-pro/?$ /patinetes/joyor/y10-dgt/ [R=301,L]
+RewriteRule ^patinetes/series-gt/t10-dual/?$ /patinetes/joyor/y10-dgt/ [R=301,L]
+
 # /algo.html -> /algo
 RewriteCond %{THE_REQUEST} \s/+(.+?)\.html[\s?] [NC]
 RewriteRule ^ %1 [R=301,L]

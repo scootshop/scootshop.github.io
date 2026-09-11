@@ -10,6 +10,36 @@
     <priority>1.0</priority>
   </url>
 
+  <!-- ===== Paginas de categoria =====
+       Cada categoria tiene su listado desde el 1 de septiembre de 2026. Antes
+       vivian las tres dentro de la portada y no habia nada que indexar por
+       separado: una sola URL respondia a «patinetes electricos», «accesorios» y
+       «repuestos» a la vez. -->
+  <url>
+    <loc>https://scootshop.co/patinetes/</loc>
+    <lastmod>2026-09-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/accesorios/</loc>
+    <lastmod>2026-09-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/repuestos/</loc>
+    <lastmod>2026-09-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/preguntas/</loc>
+    <lastmod>2026-09-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
   <!-- ===== Legal ===== -->
   <url>
     <loc>https://scootshop.co/legal/</loc>
@@ -52,6 +82,13 @@
     <image:image><image:loc>https://scootshop.co/accesorios/soporte-movil/img/2.webp</image:loc><image:title>Soporte móvil para patinete eléctrico</image:title></image:image>
   </url>
   <url>
+    <loc>https://scootshop.co/repuestos/neumatico-11-offroad/</loc>
+    <lastmod>2026-08-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://scootshop.co/repuestos/neumatico-11-offroad/img/1.webp</image:loc><image:title>Neumático 11 pulgadas off-road 90/65-6.5</image:title></image:image>
+  </url>
+  <url>
     <loc>https://scootshop.co/accesorios/pegatina-the-beast/</loc>
     <lastmod>2026-04-05</lastmod>
     <changefreq>weekly</changefreq>
@@ -85,6 +122,62 @@
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
     <image:image><image:loc>https://scootshop.co/accesorios/manillar-wake-downhill/img/1.webp</image:loc><image:title>Manillar WAKE Downhill 780mm para Ecoxtrem M41</image:title></image:image>
+  </url>
+  <url>
+    <loc>https://scootshop.co/accesorios/potencia-lunje/</loc>
+    <lastmod>2026-08-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://scootshop.co/accesorios/potencia-lunje/img/1.webp</image:loc><image:title>Manillar WAKE Downhill 780mm para Ecoxtrem M41</image:title></image:image>
+  </url>
+  <url>
+    <loc>https://scootshop.co/accesorios/protectores-anticaidas/</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://scootshop.co/accesorios/protectores-anticaidas/img/1.webp</image:loc><image:title>Protectores anticaídas de aluminio y carbono para patinete eléctrico</image:title></image:image>
+  </url>
+  <url>
+    <loc>https://scootshop.co/accesorios/protectores-anticaidas-tornasol/</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://scootshop.co/accesorios/protectores-anticaidas-tornasol/img/1.webp</image:loc><image:title>Protectores anticaídas tornasol de aluminio para patinete eléctrico</image:title></image:image>
+  </url>
+  <url>
+    <loc>https://scootshop.co/accesorios/protectores-anticaidas-cilindricos/</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://scootshop.co/accesorios/protectores-anticaidas-cilindricos/img/1.webp</image:loc><image:title>Protectores anticaídas cilíndricos de aluminio para patinete eléctrico</image:title></image:image>
+  </url>
+  <url>
+    <loc>https://scootshop.co/accesorios/cubre-cables-espiral/</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://scootshop.co/accesorios/cubre-cables-espiral/img/1.webp</image:loc><image:title>Cubre cables en espiral de 1 metro para patinete eléctrico</image:title></image:image>
+  </url>
+  <url>
+    <loc>https://scootshop.co/accesorios/punos-ergonomicos/</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://scootshop.co/accesorios/punos-ergonomicos/img/1.webp</image:loc><image:title>Puños ergonómicos con cierre de aluminio para patinete y bicicleta</image:title></image:image>
+  </url>
+  <url>
+    <loc>https://scootshop.co/accesorios/punos-deemount/</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://scootshop.co/accesorios/punos-deemount/img/1.webp</image:loc><image:title>Puños jaspeados con cierre de aluminio para patinete y bicicleta</image:title></image:image>
+  </url>
+  <url>
+    <loc>https://scootshop.co/accesorios/punos-motsuv/</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://scootshop.co/accesorios/punos-motsuv/img/1.webp</image:loc><image:title>Puños ergonómicos camuflaje para patinete y bicicleta</image:title></image:image>
   </url>
   <url>
     <loc>https://scootshop.co/accesorios/manillar-uno/</loc>
@@ -270,7 +363,102 @@
       <image:title>KUKIRIN G2 PRO vista 9</image:title>
     </image:image>
   </url>
-
+  <url>
+    <loc>https://scootshop.co/patinetes/series-k/m4-max/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/series-k/t3/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/series-k/a1/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/series-k/g2-max/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/series-k/c1-pro/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/series-k/g3-pro/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/series-k/c1/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/series-k/m5-pro/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/joyor/t6d/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/joyor/litego/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/joyor/y10-dgt/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/joyor/c10-dgt/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/joyor/s5-z/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/joyor/g5/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/joyor/y6-s/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/joyor/f5/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
   <url>
     <loc>https://scootshop.co/patinetes/series-k/g2/</loc>
     <lastmod>2026-04-05</lastmod>
@@ -637,40 +825,6 @@
     </image:image>
   </url>
   <url>
-    <loc>https://scootshop.co/patinetes/series-gt/t10-dual/</loc>
-    <lastmod>2026-04-05</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-    <image:image>
-      <image:loc>https://scootshop.co/patinetes/series-gt/t10-dual/img/1.webp</image:loc>
-      <image:title>JOYOR T10 DUAL — Patinete electrico doble motor 2×1000 W</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://scootshop.co/patinetes/series-gt/t10-dual/img/2.webp</image:loc>
-      <image:title>JOYOR T10 DUAL vista 2</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://scootshop.co/patinetes/series-gt/t10-dual/img/3.webp</image:loc>
-      <image:title>JOYOR T10 DUAL vista lateral</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://scootshop.co/patinetes/series-gt/t10-dual/img/4.webp</image:loc>
-      <image:title>JOYOR T10 DUAL vista trasera</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://scootshop.co/patinetes/series-gt/t10-dual/img/5.webp</image:loc>
-      <image:title>JOYOR T10 DUAL motor delantero</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://scootshop.co/patinetes/series-gt/t10-dual/img/6.webp</image:loc>
-      <image:title>JOYOR T10 DUAL motor trasero</image:title>
-    </image:image>
-    <image:image>
-      <image:loc>https://scootshop.co/patinetes/series-gt/t10-dual/img/7.webp</image:loc>
-      <image:title>JOYOR T10 DUAL en uso</image:title>
-    </image:image>
-  </url>
-  <url>
     <loc>https://scootshop.co/patinetes/series-gt/tf3/</loc>
     <lastmod>2026-04-05</lastmod>
     <changefreq>weekly</changefreq>
@@ -1023,5 +1177,76 @@
       <image:title>iScooter IX8 vista 6</image:title>
     </image:image>
   </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/ecoxtrem/bison/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/ecoxtrem/linear/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/ecoxtrem/xanzer/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/ecoxtrem/delta/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/ecoxtrem/vortex/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/rovoron/r7/</loc>
+    <lastmod>2026-08-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/rovoron/r7-pro/</loc>
+    <lastmod>2026-08-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/rovoron/s7/</loc>
+    <lastmod>2026-08-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/dualtron/thunder-3/</loc>
+    <lastmod>2026-08-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/ecoxtrem/deimos-single/</loc>
+    <lastmod>2026-08-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://scootshop.co/patinetes/ecoxtrem/deimos-dual/</loc>
+    <lastmod>2026-08-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
 </urlset>
+
+
+
+
+
 
