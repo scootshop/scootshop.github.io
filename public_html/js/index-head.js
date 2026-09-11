@@ -34,9 +34,9 @@
     return v || '1';
   };
 
-  // Auto-actualizaciÃ³n al restaurar desde bfcache: si la versiÃ³n publicada cambiÃ³
-  // respecto a la que tiene esta pÃ¡gina (congelada), recargamos para traer el cÃ³digo
-  // nuevo. Evita quedarse con JS/HTML viejo tras un despliegue al volver atrÃ¡s.
+  // Auto-actualización al restaurar desde bfcache: si la versión publicada cambió
+  // respecto a la que tiene esta página (congelada), recargamos para traer el código
+  // nuevo. Evita quedarse con JS/HTML viejo tras un despliegue al volver atrás.
   window.addEventListener('pageshow', (e) => {
     if (!e || !e.persisted) return;
     fetch('/asset-version.json?t=' + Date.now(), { cache: 'no-store' })
@@ -69,32 +69,32 @@
   };
 
   const updateStaticElements = (ver) => {
-    /* Ya no hay nada que reescribir. Estaba versionando [data-img] â€”la foto grande de
-       cada miniaturaâ€”, pero desde que el bump global no toca las imÃ¡genes sus URLs se
-       quedan congeladas en la versiÃ³n en que se subieron: ponerles la actual pedÃ­a una
+    /* Ya no hay nada que reescribir. Estaba versionando [data-img] —la foto grande de
+       cada miniatura—, pero desde que el bump global no toca las imágenes sus URLs se
+       quedan congeladas en la versión en que se subieron: ponerles la actual pedía una
        URL distinta de la cacheada, o sea rebajar la misma foto.
-       El aviso que ya habÃ­a aquÃ­ ("avoid changing already requested src/href at
-       runtime; rewriting them triggers duplicate downloads") vale tambiÃ©n para esto y
-       para el resto de imÃ¡genes; ver la misma regla en global-assets-app.js. */
+       El aviso que ya había aquí ("avoid changing already requested src/href at
+       runtime; rewriting them triggers duplicate downloads") vale también para esto y
+       para el resto de imágenes; ver la misma regla en global-assets-app.js. */
   };
 
   const appendDeferredScript = (src, ver, rev) => {
-    // Dedupe por ruta base (ignorando ?v): si la pÃ¡gina ya incluye este script
-    // de forma estÃ¡tica con otra versiÃ³n (p. ej. cart-runtime.js en el home), no
-    // lo cargamos otra vez â€” provocaba doble registro del handler de "AÃ±adir".
+    // Dedupe por ruta base (ignorando ?v): si la página ya incluye este script
+    // de forma estática con otra versión (p. ej. cart-runtime.js en el home), no
+    // lo cargamos otra vez — provocaba doble registro del handler de "Añadir".
     if (document.querySelector('script[src="' + src + '"]') ||
         document.querySelector('script[src^="' + src + '?"]')) return;
     const script = document.createElement('script');
-    // `rev` = sufijo de revisiÃ³n localizado, mismo truco que cart-runtime.js en
+    // `rev` = sufijo de revisión localizado, mismo truco que cart-runtime.js en
     // global-assets.js: el fichero se sirve como inmutable y el ?v global no basta
     // para refrescarlo, pero index-head.js es no-store y el sufijo llega al instante.
     script.src = withVer(src, ver) + (rev ? '&r=' + encodeURIComponent(rev) : '');
     /* `async = false` es OBLIGATORIO, no decorativo. Un <script> creado desde JS es
-       ASÃNCRONO por defecto y `defer` NO le devuelve el orden: solo `async=false`
+       ASÍNCRONO por defecto y `defer` NO le devuelve el orden: solo `async=false`
        garantiza que se ejecuten en el orden en que se insertan. Sin esto, medido en
-       producciÃ³n, `product-attributes.js` terminaba ANTES que `products.js` (455 ms
-       contra 463 ms) y el nÃºcleo se anunciaba listo sin catÃ¡logo que resolver: el
-       carrito escribÃ­a "Modelo: vmp" en vez de "Modelo: G2 PRO VMP". */
+       producción, `product-attributes.js` terminaba ANTES que `products.js` (455 ms
+       contra 463 ms) y el núcleo se anunciaba listo sin catálogo que resolver: el
+       carrito escribía "Modelo: vmp" en vez de "Modelo: G2 PRO VMP". */
     script.async = false;
     script.defer = true;
     document.head.appendChild(script);
@@ -174,12 +174,12 @@
   /* â”€â”€ LA PROMESA EXISTE ANTES QUE EL NUCLEO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
      `SS_READY` se cumple cuando se pueden resolver atributos contra el catalogo. Se
      publica AQUI, en el cargador, antes de pedir un solo script: asi cualquier codigo
-     â€”incluido el script inline de una ficha, que corre antes que todo lo demasâ€” puede
+     —incluido el script inline de una ficha, que corre antes que todo lo demas— puede
      escribir `window.SS_READY.then(...)` sin preguntarse si el nucleo ya existe.
 
      Antes cada consumidor resolvia eso por su cuenta: "si SS_ATTRS existe uso su
      promesa; si no, escucho el evento ss:attrs y entonces uso su promesa". Ese bloque
-     estaba copiado en cuatro sitios y el que se olvidaba â€”la fichaâ€” se quedaba sin
+     estaba copiado en cuatro sitios y el que se olvidaba —la ficha— se quedaba sin
      enterarse. Una sola puerta, disponible desde el instante cero. */
   if (!window.SS_READY) {
     window.SS_READY = (typeof Promise === 'function')
@@ -193,18 +193,18 @@
     appendDeferredScript('/js/cart-runtime.js', ver);
     appendDeferredScript('/js/mobile-menu.js', ver);
     appendDeferredScript('/js/auth-ui.js', ver);
-    // La capa operativa (precio/stock del panel) va SIEMPRE antes del catÃ¡logo.
+    // La capa operativa (precio/stock del panel) va SIEMPRE antes del catálogo.
     appendDeferredScript('/data/product-overrides.js', ver);
     appendDeferredScript('/data/products.js', ver);
-    /* NÃºcleo de atributos. Va DESPUÃ‰S del catÃ¡logo y ANTES de todo lo que pinta
-       variantes (products-menu, index.js y, por delegaciÃ³n, variant-pop): es quien
-       dice quÃ© eje es cada cosa, cÃ³mo se llama y cÃ³mo se representa. */
+    /* Núcleo de atributos. Va DESPUÉS del catálogo y ANTES de todo lo que pinta
+       variantes (products-menu, index.js y, por delegación, variant-pop): es quien
+       dice qué eje es cada cosa, cómo se llama y cómo se representa. */
     appendDeferredScript('/js/product-attributes.js', ver);
-    // DueÃ±o Ãºnico del panel de Productos (escritorio + mÃ³vil). Va DESPUÃ‰S de
-    // products.js (necesita el catÃ¡logo) y ANTES de index.js, que delega en Ã©l.
-    // Los `defer` se ejecutan en orden de documento, asÃ­ que el orden manda.
+    // Dueño único del panel de Productos (escritorio + móvil). Va DESPUÉS de
+    // products.js (necesita el catálogo) y ANTES de index.js, que delega en él.
+    // Los `defer` se ejecutan en orden de documento, así que el orden manda.
     appendDeferredScript('/js/products-menu.js', ver);
-    // Subir SIEMPRE esta revisiÃ³n al tocar js/index.js (se sirve como inmutable).
+    // Subir SIEMPRE esta revisión al tocar js/index.js (se sirve como inmutable).
     appendDeferredScript('/js/index.js', ver, '20260909-2');
   };
 

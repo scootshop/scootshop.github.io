@@ -43,8 +43,8 @@
     return ver ? String(ver).trim() : '1';
   }
 
-  // Auto-actualizaciÃ³n al restaurar desde bfcache: si la versiÃ³n publicada cambiÃ³
-  // respecto a la que tiene esta pÃ¡gina congelada, recargar para traer el cÃ³digo nuevo.
+  // Auto-actualización al restaurar desde bfcache: si la versión publicada cambió
+  // respecto a la que tiene esta página congelada, recargar para traer el código nuevo.
   window.addEventListener('pageshow', function (e) {
     if (!e || !e.persisted) return;
     fetch('/asset-version.json?t=' + Date.now(), { cache: 'no-store' })
@@ -72,7 +72,7 @@
     var href = mainImg && mainImg.getAttribute('src') ? mainImg.getAttribute('src').trim() : '';
 
     if (!href) {
-      // Fallback: og:image (same-origin only â€” avoids fetching from production on localhost)
+      // Fallback: og:image (same-origin only — avoids fetching from production on localhost)
       var ogImage = document.querySelector('meta[property="og:image"]');
       var ogHref = ogImage && ogImage.getAttribute('content') ? ogImage.getAttribute('content').trim() : '';
       if (ogHref) {
@@ -163,9 +163,9 @@
     });
   }
 
-  // Pinta cabecera y menÃº mÃ³vil desde la cachÃ© de sesiÃ³n lo antes posible (antes de
+  // Pinta cabecera y menú móvil desde la caché de sesión lo antes posible (antes de
   // que cargue el runtime) para que en visitas repetidas aparezcan al instante, sin
-  // el parpadeo de la barra vacÃ­a. El runtime los rehidrata despuÃ©s (menÃºs, carrito).
+  // el parpadeo de la barra vacía. El runtime los rehidrata después (menús, carrito).
   function primeCachedPartials(ver) {
     try {
       var v = ver || fallbackVersion();
@@ -206,10 +206,10 @@
 
     if (!document.querySelector('script[data-cart-runtime="true"]')) {
       var cartScript = document.createElement('script');
-      // cart-runtime.js se sirve como inmutable; este sufijo de revisiÃ³n fuerza
-      // la recarga tras un fix del runtime sin esperar a un bump global de versiÃ³n
-      // (global-assets.js es no-store, asÃ­ que el nuevo sufijo llega al instante).
-      // Subir esta revisiÃ³n SIEMPRE que se toque cart-runtime.js: el fichero se
+      // cart-runtime.js se sirve como inmutable; este sufijo de revisión fuerza
+      // la recarga tras un fix del runtime sin esperar a un bump global de versión
+      // (global-assets.js es no-store, así que el nuevo sufijo llega al instante).
+      // Subir esta revisión SIEMPRE que se toque cart-runtime.js: el fichero se
       // sirve como immutable y el ?v global no basta para refrescarlo.
       var cartRuntimeRev = '20260911-1';
       cartScript.src = '/js/cart-runtime.js?v=' + encodeURIComponent(ver) + '&r=' + cartRuntimeRev;
@@ -218,7 +218,7 @@
       document.head.appendChild(cartScript);
     }
 
-    /* NÃºcleo de atributos: quiÃ©n dice quÃ© eje es cada variante, cÃ³mo se llama y cÃ³mo
+    /* Núcleo de atributos: quién dice qué eje es cada variante, cómo se llama y cómo
        se representa. Va ANTES de todo lo que pinta variantes (la ficha y la burbuja),
        y `async=false` mantiene el orden. Ver js/product-attributes.js. */
     if (!document.querySelector('script[data-product-attributes="true"]')) {
@@ -233,8 +233,8 @@
       document.head.appendChild(attrsScript);
     }
 
-    // DueÃ±o Ãºnico del panel de Productos (escritorio + mÃ³vil). Va ANTES de
-    // global-assets-app.js, que delega en Ã©l. `async = false` mantiene el orden.
+    // Dueño único del panel de Productos (escritorio + móvil). Va ANTES de
+    // global-assets-app.js, que delega en él. `async = false` mantiene el orden.
     if (!document.querySelector('script[data-products-menu="true"]')) {
       var menuScript = document.createElement('script');
       menuScript.src = '/js/products-menu.js?v=' + encodeURIComponent(ver);
@@ -246,8 +246,8 @@
     if (!document.querySelector('script[data-global-assets-runtime="true"]')) {
       var script = document.createElement('script');
       // Mismo truco que cart-runtime.js justo arriba: global-assets-app.js se
-      // sirve como immutable, asÃ­ que el ?v global no basta para refrescarlo.
-      // Subir SIEMPRE esta revisiÃ³n al tocar global-assets-app.js.
+      // sirve como immutable, así que el ?v global no basta para refrescarlo.
+      // Subir SIEMPRE esta revisión al tocar global-assets-app.js.
       var globalAppRev = '20260908-1';
       script.src = '/js/global-assets-app.js?v=' + encodeURIComponent(ver) + '&r=' + globalAppRev;
       script.async = false;
@@ -286,7 +286,7 @@
     }
   }
 
-  // Reusar versiÃ³n ya obtenida por asset-sync.js si existe
+  // Reusar versión ya obtenida por asset-sync.js si existe
   if (window.ASSET_VER && window.ASSET_VER !== '1') {
     normalizeCriticalFontsForProductPage();
     primeProductLcpImage(window.ASSET_VER);
