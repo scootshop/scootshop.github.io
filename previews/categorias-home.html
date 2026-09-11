@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Encuentra tu vehículo — 5 maquetaciones</title>
+<style>
+  @font-face{font-family:'Russo One';src:url('../public_html/fonts/russo-one-latin.woff2') format('woff2');font-weight:400;font-display:swap}
+  @font-face{font-family:'Plus Jakarta Sans';src:url('../public_html/fonts/plus-jakarta-sans-latin.woff2') format('woff2');font-weight:200 800;font-display:swap}
+
+  :root{
+    --ui:'Plus Jakarta Sans',system-ui,sans-serif;
+    --sport:'Russo One',system-ui,sans-serif;
+    --rojo:#e11d2a;
+    --tinta:#0b0c0f;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--ui);color:var(--tinta);background:#eceef2}
+  code{background:#dfe3ea;border-radius:4px;padding:1px 5px;font-size:.92em}
+
+  .top{position:sticky;top:0;z-index:50;background:#0b0c0f;color:#fff;padding:14px 20px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+  .top h1{font-family:var(--sport);font-size:15px;margin:0;letter-spacing:.02em}
+  .ctrls{display:flex;gap:16px;align-items:center;flex-wrap:wrap;font-size:12.5px}
+  .grupo{display:flex;gap:7px;align-items:center}
+  .grupo span{color:#8a9099}
+  .ctrls button{font:inherit;border:1px solid #3b3f47;background:#15171c;color:#cfd3da;border-radius:999px;padding:5px 11px;cursor:pointer}
+  .ctrls button.on{background:#fff;color:#0b0c0f;border-color:#fff}
+
+  .intro{max-width:940px;margin:26px auto 6px;padding:0 20px;font-size:14.5px;line-height:1.6;color:#3b4048}
+  .intro strong{color:#0b0c0f}
+
+  .opt{margin:36px auto 0;padding:0 20px;max-width:1920px}
+  .opt-head{max-width:940px;margin:0 auto 12px}
+  .opt-head h2{font-family:var(--sport);font-size:20px;margin:0 0 4px}
+  .opt-head p{margin:0;font-size:14px;line-height:1.55;color:#4a5058}
+  .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px;align-items:center}
+  .tag{font-size:11.5px;background:#dfe3ea;color:#3b4048;border-radius:999px;padding:3px 9px}
+  .tag.bien{background:#dcfce7;color:#14532d}
+  .tag.ojo{background:#fee2e2;color:#7f1d1d}
+  .tag.medida{background:#0b0c0f;color:#fff;font-variant-numeric:tabular-nums}
+
+  .stage{margin:14px auto 0;background:#fff;box-shadow:0 10px 40px rgba(11,12,15,.13);overflow:hidden;width:100%}
+  .lienzo{width:min(1296px,94%);margin:0 auto;padding:34px 0 38px}
+
+  .cabecera{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:16px}
+  .cabecera h3{font-family:var(--ui);font-weight:800;font-size:26px;letter-spacing:-.02em;margin:0}
+  .cabecera a{font-size:13.5px;font-weight:700;color:#0b0c0f;text-decoration:none;border-bottom:2px solid var(--rojo);padding-bottom:2px}
+
+  /* ---------- Tarjeta base, común a todas las opciones ---------- */
+  .cat{
+    display:flex;
+    flex-direction:column;
+    border-radius:18px;
+    overflow:hidden;
+    background:#fff;
+    text-decoration:none;
+    box-shadow:0 1px 0 rgba(255,255,255,.92) inset, 0 16px 36px rgba(15,23,42,.08), 0 6px 16px rgba(15,23,42,.04);
+    transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .cat:hover{transform:translateY(-2px)}
+  .foto{display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff;min-height:0}
+  .foto img{display:block;width:100%;height:100%;object-fit:contain}
+  .cuerpo{display:flex;flex-direction:column;gap:3px;padding:2px 18px 14px}
+  .nombre{font-family:var(--sport);font-size:.96rem;line-height:1.15;text-transform:uppercase;letter-spacing:.01em;color:#0b0c0f}
+  .cuenta{font-size:.76rem;font-weight:600;color:rgba(17,24,39,.5);font-variant-numeric:tabular-nums}
+  .marcador .foto{background:#f3f5f8}
+  .marcador .foto::after{content:'foto pendiente';font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#9aa1ab}
+  .marcador .foto img{display:none}
+
+  /* A — como está hoy: 2 por fila, vertical */
+  .a .rejilla{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+  .a .foto{aspect-ratio:21/9}
+
+  /* B — horizontal: foto a un lado, texto al otro. La impar ocupa la fila entera */
+  .b .rejilla{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+  .b .cat{flex-direction:row;align-items:center;gap:6px}
+  .b .foto{flex:0 0 300px;aspect-ratio:16/10}
+  .b .cuerpo{padding:18px 22px}
+  .b .nombre{font-size:1.12rem}
+  .b .cuenta{font-size:.82rem}
+  .b .cat:last-child:nth-child(odd){grid-column:1 / -1}
+
+  /* C — tira que se llena sola */
+  .c .rejilla{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+  .c .foto{aspect-ratio:4/3}
+
+  /* D — destacado ancho + el resto en fila.
+     El resto va en una rejilla ANIDADA a propósito: si comparten rejilla con el
+     destacado, la columna que este ocupa ya no está vacía, no colapsa, y las
+     pequeñas dejan un hueco muerto a la derecha. */
+  .d .rejilla{display:grid;gap:16px}
+  .d .rejilla > .cat{flex-direction:row;align-items:center}
+  .d .rejilla > .cat .foto{flex:0 0 46%;aspect-ratio:21/9}
+  .d .rejilla > .cat .cuerpo{padding:22px 26px}
+  .d .rejilla > .cat .nombre{font-size:1.5rem}
+  .d .rejilla > .cat .cuenta{font-size:.9rem}
+  .d .resto{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px}
+  .d .resto .foto{aspect-ratio:4/3}
+
+  /* E — píldoras: lo más compacto */
+  .e .rejilla{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+  .e .cat{flex-direction:row;align-items:center;gap:4px;border-radius:14px}
+  .e .foto{flex:0 0 96px;height:96px;aspect-ratio:1}
+  .e .cuerpo{padding:10px 14px 10px 6px}
+  .e .nombre{font-size:.92rem}
+
+  .nota{max-width:940px;margin:14px auto 0;font-size:13px;line-height:1.6;color:#5c626b}
+  footer{margin:60px 0 40px;text-align:center;font-size:12.5px;color:#8a9099}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <h1>ENCUENTRA TU VEHÍCULO — 5 MAQUETACIONES</h1>
+  <div class="ctrls">
+    <span class="grupo"><span>Categorías:</span>
+      <button data-n="4">4 (hoy)</button>
+      <button data-n="5" class="on">5 · + Repuestos</button>
+      <button data-n="6">6 · + Patines</button>
+    </span>
+    <span class="grupo"><span>Ancho:</span>
+      <button data-w="0" class="on">Mi ventana</button>
+      <button data-w="1920">1920</button>
+      <button data-w="1440">1440</button>
+      <button data-w="1280">1280</button>
+    </span>
+  </div>
+</div>
+
+<p class="intro">
+  El catálogo ya declara <strong>«Repuestos»</strong> (<code>spare-parts</code>, hoy con
+  <code>showOnHome: false</code>) y <strong>«Patines eléctricos»</strong>, así que la sección tiene
+  que aguantar 4, 5 y 6. Cambia el número ahí arriba y mira qué le pasa a cada maquetación —
+  <strong>la A es la que está hoy en producción</strong>, puesta como referencia. Los recuentos son
+  los de verdad; las categorías que aún no tienen productos van con la foto pendiente.
+</p>
+
+<div id="opciones"></div>
+
+<footer>Vista previa local · previews/categorias-home.html · fuera de public_html, no se despliega</footer>
+
+<script>
+var IMG = '../public_html/';
+var CATEGORIAS = [
+  { nombre:'Patinetes',  cuenta:'24 modelos',   img:'patinetes/ecoxtrem/bison-gt-carbon-design/img/1-600.webp' },
+  { nombre:'Motos',      cuenta:'3 modelos',    img:'motos/ev12m-pro/img/1-600.webp' },
+  { nombre:'Bicicletas', cuenta:'2 modelos',    img:'bicicletas/g73/img/1-600.webp' },
+  { nombre:'Accesorios', cuenta:'22 productos', img:'accesorios/bolsa-almacenamiento/img/1-600.webp' },
+  { nombre:'Repuestos',  cuenta:'— productos',  img:'accesorios/manillar-wake/img/1-600.webp', ejemplo:true },
+  { nombre:'Patines',    cuenta:'— modelos',    marcador:true }
+];
+
+var OPCIONES = [
+  {
+    id:'a', titulo:'A · Como está hoy (referencia)',
+    desc:'Dos por fila, tarjeta vertical, foto en 21/9. Es exactamente lo que hay en producción ahora mismo.',
+    tags:['<span class="tag ojo">con 5 deja una huérfana</span>','<span class="tag ojo">el ancho se queda en blanco</span>'],
+    nota:'Con 4 cuadra. Con 5 la última se queda sola ocupando media fila y el hueco de al lado canta. Y con cualquier número, el producto se ve a 274 px dentro de una tarjeta de 640: los laterales son blanco muerto.'
+  },
+  {
+    id:'b', titulo:'B · Horizontal, dos por fila',
+    desc:'La foto a un lado y el nombre con el recuento al otro. Cuando el número es impar, la última ocupa la fila entera en vez de dejar hueco.',
+    tags:['<span class="tag bien">sin huecos con 4, 5 y 6</span>','<span class="tag bien">usa el ancho</span>','<span class="tag">la foto siempre a 300 px</span>'],
+    nota:'La foto va en una columna fija de 300 px, así que la que ocupa la fila entera NO crece a lo alto: todas las tarjetas miden lo mismo. Es la que menos cambia respecto a lo que ya tienes y la que mejor aprovecha el ancho que le diste.'
+  },
+  {
+    id:'c', titulo:'C · Tira que se llena sola',
+    desc:'Sin número fijo de columnas: caben las que quepan (<code>auto-fit</code>). Con 4 salen 4 en fila, con 5 salen 5, con 6 se parte en dos filas solo cuando ya no cabe.',
+    tags:['<span class="tag bien">no hay que tocar CSS al añadir una categoría</span>','<span class="tag bien">la sección más baja</span>','<span class="tag">la foto se hace pequeña</span>'],
+    nota:'Es lo más parecido a un índice: una fila y sigues bajando. A cambio la foto pierde tamaño — con 5 en fila cada una mide unos 240 px de ancho.'
+  },
+  {
+    id:'d', titulo:'D · Destacado + fila',
+    desc:'Patinetes de ancho completo arriba (es el 48 % del catálogo) y el resto repartido debajo, llenándose solo.',
+    tags:['<span class="tag bien">sin huecos con cualquier número</span>','<span class="tag bien">jerarquía: dice qué vendes</span>','<span class="tag">dos alturas distintas de tarjeta</span>'],
+    nota:'La asimetría es el dato: patinetes no es una categoría más, es casi la mitad de la tienda. Repuestos y accesorios caen abajo, que es su sitio — y de paso el desajuste del título «Encuentra tu vehículo» se nota menos.'
+  },
+  {
+    id:'e', titulo:'E · Píldoras',
+    desc:'Foto pequeña y texto al lado, en una rejilla que también se llena sola. Es un atajo de navegación, no un escaparate.',
+    tags:['<span class="tag bien">ocupa una cuarta parte</span>','<span class="tag bien">aguanta 8 categorías sin despeinarse</span>','<span class="tag ojo">la foto casi no vende</span>'],
+    nota:'Si algún día hay 7 u 8 categorías, esta es la única que sigue teniendo sentido. Hoy, con 4 fotos buenas de producto, quizá renuncies a demasiado.'
+  }
+];
+
+function tarjeta(c){
+  var clase = 'cat' + (c.marcador ? ' marcador' : '');
+  var img = c.marcador ? '' :
+    '<img src="' + IMG + c.img + '" alt="' + c.nombre + '" loading="lazy" decoding="async" />';
+  return '<a class="' + clase + '" href="#">' +
+      '<span class="foto">' + img + '</span>' +
+      '<span class="cuerpo">' +
+        '<span class="nombre">' + c.nombre + '</span>' +
+        '<span class="cuenta">' + c.cuenta + (c.ejemplo ? ' · foto de ejemplo' : '') + '</span>' +
+      '</span>' +
+    '</a>';
+}
+
+var cont = document.getElementById('opciones');
+OPCIONES.forEach(function(o){
+  var sec = document.createElement('section');
+  sec.className = 'opt ' + o.id;
+  sec.innerHTML =
+    '<div class="opt-head"><h2>' + o.titulo + '</h2><p>' + o.desc + '</p>' +
+      '<div class="tags">' + o.tags.join('') + '<span class="tag medida" data-medida>—</span></div></div>' +
+    '<div class="stage"><div class="lienzo">' +
+      '<div class="cabecera"><h3>Encuentra tu vehículo</h3><a href="#">Ver todo el catálogo</a></div>' +
+      '<div class="rejilla" data-rejilla></div>' +
+    '</div></div>' +
+    '<p class="nota">' + o.nota + '</p>';
+  cont.appendChild(sec);
+});
+
+var cuantas = 5;
+var anchoForzado = 0;
+
+function pintar(){
+  var lista = CATEGORIAS.slice(0, cuantas);
+  document.querySelectorAll('.opt').forEach(function(sec){
+    var html = sec.classList.contains('d')
+      ? tarjeta(lista[0]) + '<div class="resto">' + lista.slice(1).map(tarjeta).join('') + '</div>'
+      : lista.map(tarjeta).join('');
+    sec.querySelector('[data-rejilla]').innerHTML = html;
+    sec.querySelectorAll('.stage').forEach(function(st){
+      st.style.width = anchoForzado ? anchoForzado + 'px' : '100%';
+      st.style.maxWidth = '100%';
+    });
+  });
+  // Medir cuando las fotos ya han maquetado
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      document.querySelectorAll('.opt').forEach(function(sec){
+        var r = sec.querySelector('[data-rejilla]').getBoundingClientRect();
+        var una = sec.querySelector('.cat').getBoundingClientRect();
+        sec.querySelector('[data-medida]').textContent =
+          'sección ' + Math.round(r.height) + ' px · tarjeta ' + Math.round(una.width) + '×' + Math.round(una.height);
+      });
+    });
+  });
+}
+
+document.querySelectorAll('.ctrls [data-n]').forEach(function(b){
+  b.onclick = function(){
+    document.querySelectorAll('.ctrls [data-n]').forEach(function(o){ o.classList.remove('on'); });
+    b.classList.add('on');
+    cuantas = +b.dataset.n;
+    pintar();
+  };
+});
+document.querySelectorAll('.ctrls [data-w]').forEach(function(b){
+  b.onclick = function(){
+    document.querySelectorAll('.ctrls [data-w]').forEach(function(o){ o.classList.remove('on'); });
+    b.classList.add('on');
+    anchoForzado = +b.dataset.w;
+    pintar();
+  };
+});
+window.addEventListener('resize', pintar);
+window.addEventListener('load', pintar);
+pintar();
+</script>
+</body>
+</html>

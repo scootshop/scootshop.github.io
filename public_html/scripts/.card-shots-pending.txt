@@ -1,6 +1,8 @@
-accesorios/manillar-kocevlo/img/1-1000.webp
-accesorios/manillar-lunje/img/1-1000.webp
-accesorios/manillar-nanlio/img/1-1000.webp
-accesorios/manillar-uno/img/1-1000.webp
-accesorios/manillar-wake-downhill/img/1-1000.webp
-accesorios/manillar-wake/img/1-1000.webp
+accesorios/potencia-lunje/img/1-400.webp
+accesorios/potencia-lunje/img/1-600.webp
+accesorios/potencia-lunje/img/1-800.webp
+accesorios/potencia-lunje/img/1-1000.webp
+accesorios/potencia-lunje/img/16-400.webp
+accesorios/potencia-lunje/img/16-600.webp
+accesorios/potencia-lunje/img/16-800.webp
+accesorios/potencia-lunje/img/16-1000.webp
