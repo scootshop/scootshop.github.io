@@ -1,0 +1,96 @@
+<!-- /partials/filtros.html — el panel de filtros de las paginas de categoria.
+
+     Vivia dentro de index.html porque la portada era el catalogo. Desde que
+     cada categoria tiene su pagina (/patinetes, /accesorios, /repuestos) el
+     panel es de ellas y la portada no lo lleva: alli no hay nada que filtrar.
+
+     Lo copia scripts/build-categorias.py en las tres. NO se sirve como pagina
+     ni se enlaza desde ningun sitio.
+
+     Un <dialog> como los de FUNCIONAMIENTO: se pinta por encima de todo,
+     atrapa el foco, cierra con Escape y oscurece el fondo. Cerrado de serie,
+     asi que sin JS el boton no promete nada.
+     Los numeros de cada patinete (homologacion, motores, potencia, autonomia
+     y velocidad) los deja scripts/build-filtros.js en el catalogo; aqui solo
+     se leen. -->
+    <dialog class="filtros" id="filtrosPanel" aria-labelledby="filtros-tit">
+      <form class="filtros-caja" method="dialog">
+        <span class="filtros-asa" aria-hidden="true"></span>
+        <div class="filtros-barra" data-filtros-asa>
+          <p class="filtros-rot" id="filtros-tit"><b>Filtros</b><span data-filtros-resumen>Todo el catálogo</span></p>
+          <button type="button" class="filtros-x" data-filtros-cerrar aria-label="Cerrar">
+            <!-- La MISMA equis que el carrito y el menu movil: los tres cierran
+                 lo mismo y tienen que dibujarse igual. Era un SVG propio y se
+                 veia mas fina al lado de las otras dos. -->
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <div class="filtros-cuerpo">
+
+          <!-- La familia solo sale en accesorios y repuestos, y sus opciones las
+               escribe el JS con las que de verdad tienen productos. -->
+          <fieldset class="filtros-grupo" data-para="piezas" data-grupo-familia hidden>
+            <legend>Tipo</legend>
+            <div class="filtros-ops" role="radiogroup" data-familias></div>
+          </fieldset>
+
+          <fieldset class="filtros-grupo" data-para="patinetes">
+            <legend>Homologación</legend>
+            <div class="filtros-ops" role="radiogroup">
+              <label class="filtros-op"><input type="radio" name="dgt" value="" checked><span>Todos</span></label>
+              <label class="filtros-op"><input type="radio" name="dgt" value="si"><span>Homologados DGT</span></label>
+              <label class="filtros-op"><input type="radio" name="dgt" value="no"><span>Sin homologar</span></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="filtros-grupo" data-para="todo">
+            <legend>Precio</legend>
+            <div class="filtros-rango">
+              <label><span>Desde</span><input type="number" name="precioMin" min="0" step="10" inputmode="numeric" placeholder="0"> €</label>
+              <label><span>Hasta</span><input type="number" name="precioMax" min="0" step="10" inputmode="numeric" placeholder="sin tope"> €</label>
+            </div>
+          </fieldset>
+
+          <fieldset class="filtros-grupo" data-para="patinetes">
+            <legend>Motores</legend>
+            <div class="filtros-ops" role="radiogroup">
+              <label class="filtros-op"><input type="radio" name="motores" value="" checked><span>Cualquiera</span></label>
+              <label class="filtros-op"><input type="radio" name="motores" value="1"><span>Uno</span></label>
+              <label class="filtros-op"><input type="radio" name="motores" value="2"><span>Dos</span></label>
+            </div>
+          </fieldset>
+
+          <!-- FRENOS, no potencia. La potencia era una barra de 0 a 3000 W y casi
+               nadie compra un patinete por vatios; el tipo de freno si separa dos
+               compras distintas. El dato lo deriva scripts/build-filtros.js de la
+               fila «Frenos» de cada ficha. -->
+          <fieldset class="filtros-grupo" data-para="patinetes">
+            <legend>Frenos</legend>
+            <div class="filtros-ops" role="radiogroup">
+              <label class="filtros-op"><input type="radio" name="frenos" value="" checked><span>Cualquiera</span></label>
+              <label class="filtros-op"><input type="radio" name="frenos" value="hidraulicos"><span>Hidráulicos</span></label>
+              <label class="filtros-op"><input type="radio" name="frenos" value="mecanicos"><span>Mecánicos</span></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="filtros-grupo" data-para="patinetes">
+            <legend>Autonomía <i data-filtros-eco="km">desde 0 km</i></legend>
+            <input type="range" name="km" min="0" max="150" step="5" value="0" data-filtros-slider>
+            <div class="filtros-topes"><span>0 km</span><span>150 km</span></div>
+          </fieldset>
+
+          <fieldset class="filtros-grupo" data-para="patinetes">
+            <legend>Velocidad máxima <i data-filtros-eco="kmh">desde 0 km/h</i></legend>
+            <input type="range" name="kmh" min="0" max="90" step="5" value="0" data-filtros-slider>
+            <div class="filtros-topes"><span>0 km/h</span><span>90 km/h</span></div>
+          </fieldset>
+
+        </div>
+
+        <div class="filtros-pie">
+          <button type="button" class="filtros-limpiar" data-filtros-limpiar>Quitar filtros</button>
+          <button type="button" class="filtros-ver" data-filtros-ver>Ver <b data-filtros-cuenta>0</b> <span data-filtros-unidad>patinetes</span></button>
+        </div>
+      </form>
+    </dialog>
