@@ -30,6 +30,26 @@ def leer(rel):
     return io.open(os.path.join(RAIZ, rel), encoding='utf-8').read()
 
 
+def como_el_sitio(html):
+    """Deja el documento como los escribe el sitio: con BOM y con salto final.
+
+    Las 105 paginas del sitio llevan BOM de UTF-8 y acaban en salto de linea. Este
+    generador no los ponia, asi que las cuatro paginas que hornea NUNCA coincidian
+    byte a byte con lo que habia en disco y `--check` decia CATEGORIAS_KO para
+    siempre. El contenido era IDENTICO: la unica diferencia eran esos dos detalles.
+
+    Se arregla aqui y no regenerando las paginas a proposito. Quitarles el BOM las
+    dejaria como las UNICAS cuatro del sitio sin el, o sea alinear el artefacto con
+    un generador equivocado en vez de al reves. Y asi no cambia ni un fichero
+    servido.
+    """
+    if not html.startswith('﻿'):
+        html = '﻿' + html
+    if not html.endswith(NL):
+        html = html + NL
+    return html
+
+
 def entre(texto, desde, hasta, que):
     """El trozo que va de un marcador a otro, los dos incluidos."""
     i = texto.find(desde)
@@ -516,7 +536,7 @@ def main():
     desfasadas = []
     for cat in CATEGORIAS:
         destino = os.path.join(RAIZ, cat['carpeta'], 'index.html')
-        nuevo = componer(cat, piezas, ver, rev_carrito)
+        nuevo = como_el_sitio(componer(cat, piezas, ver, rev_carrito))
         viejo = io.open(destino, encoding='utf-8').read() if os.path.exists(destino) else None
         if viejo == nuevo:
             print('  = /%s/' % cat['carpeta'])
@@ -529,7 +549,7 @@ def main():
 
     # /preguntas: mismas piezas compartidas, sin catalogo.
     destino = os.path.join(RAIZ, 'preguntas', 'index.html')
-    nuevo = componer_preguntas(piezas, ver)
+    nuevo = como_el_sitio(componer_preguntas(piezas, ver))
     viejo = io.open(destino, encoding='utf-8').read() if os.path.exists(destino) else None
     if viejo == nuevo:
         print('  = /preguntas/')
