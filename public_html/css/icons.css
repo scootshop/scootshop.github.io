@@ -59,7 +59,6 @@
 .fa-circle-question::before{ content: "\f059"; }
 .fa-location-dot::before   { content: "\f3c5"; }
 .fa-user::before           { content: "\f007"; }
-.fa-scale-balanced::before { content: "\f24e"; }
 .fa-bars::before           { content: "\f0c9"; }
 .fa-xmark::before          { content: "\f00d"; }
 .fa-chevron-down::before   { content: "\f078"; }
@@ -71,17 +70,12 @@
 .fa-arrow-right::before    { content: "\f061"; }
 .fa-bolt::before           { content: "\f0e7"; }
 .fa-shield-halved::before  { content: "\f3ed"; }
-.fa-rotate-left::before    { content: "\f2ea"; }
 .fa-receipt::before        { content: "\f543"; }
 .fa-bag-shopping::before   { content: "\f290"; }
-.fa-bicycle::before        { content: "\f206"; }
 .fa-box-open::before       { content: "\f49e"; }
 .fa-box::before            { content: "\f466"; }
-.fa-comments::before       { content: "\f086"; }
 .fa-lightbulb::before      { content: "\f0eb"; }
-.fa-lock::before           { content: "\f023"; }
 .fa-mobile-screen-button::before { content: "\f3cd"; }
-.fa-motorcycle::before     { content: "\f21c"; }
 .fa-right-from-bracket::before { content: "\f2f5"; }
 .fa-tags::before           { content: "\f02c"; }
 .fa-truck::before          { content: "\f0d1"; }
