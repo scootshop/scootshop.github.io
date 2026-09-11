@@ -8,18 +8,8 @@ main{ padding-block:22px 32px; }
 
 .page-wrap{ padding-top:8px; }
 
-.breadcrumb{
-  display:flex;
-  gap:8px;
-  align-items:center;
-  flex-wrap:wrap;
-  margin:18px 0 10px;
-  font-weight:800;
-  color:var(--muted);
-}
-
-.breadcrumb a{ color:var(--muted); }
-.breadcrumb a:hover{ color:var(--ink); }
+/* La miga entera —como se lee Y como se coloca— vive en main.css, junto a la de
+   la pagina de categoria, porque son la misma pieza. Aqui no queda nada suyo. */
 
 .page-title{
   display:flex;
@@ -35,10 +25,24 @@ main{ padding-block:22px 32px; }
 .title-left h1{
   margin:0;
   font-family:var(--sport);
-  font-size:34px;
+  /* EL TITULAR DEL SITIO, el mismo que el de las paginas de categoria: Russo One
+     en su peso real (400) e inclinado. La familia solo tiene la cara 400 —pedirle
+     700 lo engorda el navegador, sin ganar avance, cerrando las contraformas—. La inclinacion es `skewX` y NO `font-style:italic` — Russo One no
+     tiene cursiva, asi que el navegador se la inventaria y cada uno de forma
+     distinta; con skew el angulo es el mismo en todos.
+     NO se le toca el `display`: es un elemento de un flex y con `inline-block`
+     dejaba de ceder ancho — medido en movil, se montaba sobre el logotipo de
+     marca en 3 de 4 fichas. */
+  font-weight:400;
+  /* El grosor se DIBUJA, no se pide: ver la regla del titular en main.css. */
+  -webkit-text-stroke:.04em currentColor;
+  /* La medida comun de los titulares de pagina (main.css). */
+  font-size:var(--titular);
   line-height:1.05;
-  letter-spacing:.6px;
+  letter-spacing:-.01em;
   text-transform:uppercase;
+  transform:skewX(-7deg);
+  transform-origin:left bottom;
 }
 
 .page-title .subtitle,
@@ -50,6 +54,29 @@ main{ padding-block:22px 32px; }
   font-size:.95rem;
 }
 
+/* LOGOTIPO DE MARCA dentro de la píldora del título. Las marcas que tienen
+   logotipo propio (Ecoxtrem, KuKirin, ROVORON, DUALTRON) lo enseñan aquí en
+   MONOCROMO: negro sobre el blanco de la píldora. Es la misma idea que el riel
+   de la portada, que también los iguala con un filtro (allí en silueta blanca,
+   porque la placa es oscura). Con sus colores de marca convivían mal entre sí
+   —el naranja de KuKirin y el azul de Ecoxtrem tiraban cada uno por su lado— y
+   competían con el rojo del sitio. Las marcas sin logotipo enseñan el nombre del
+   fabricante del producto, que es lo que el cliente reconoce. Antes ponía el
+   nombre de la SERIE, y "Serie K" o "Serie N" no le dicen nada a nadie.
+   El alto manda y el ancho se limita, como en el riel: los wordmarks van de
+   4:1 (Ecoxtrem) a 10,45:1 (DUALTRON) y sin tope el de Dualtron reventaría la
+   píldora. `object-fit:contain` evita que se deforme. */
+.badge-min-logo{
+  display:block;
+  height:20px;
+  width:auto;
+  max-width:130px;
+  object-fit:contain;
+  /* Los cuatro logotipos traen fondo transparente, así que esto ennegrece solo
+     el dibujo y deja pasar el blanco de la píldora. */
+  filter:brightness(0);
+}
+
 .badge-min{
   display:inline-flex;
   align-items:center;
@@ -58,7 +85,9 @@ main{ padding-block:22px 32px; }
   border-radius:999px;
   border:0;
   background:#fff;
-  color:var(--accent, #374151);
+  /* Negro del sitio, no el gris pizarra de antes: la marca en texto tiene que
+     leerse igual de rotunda que un logotipo en negro. */
+  color:var(--ink, #111315);
   box-shadow:
     0 -1px 3px rgba(15,23,42,.04),
     0 1px 0 rgba(255,255,255,.95) inset,
@@ -291,7 +320,10 @@ main{ padding-block:22px 32px; }
   gap:14px;
   flex-wrap:wrap;
   padding:22px 20px 18px;
-  border-bottom:1px solid rgba(15,23,42,.08);
+  /* Sin raya debajo del precio. Separaba el precio del selector de color, pero
+     el selector ya viene en su propio recuadro con fondo y filo propios: la raya
+     partia el panel en dos justo donde no hacia falta. */
+  border-bottom:0;
   background:#fff;
   position:relative;
 }
@@ -320,10 +352,11 @@ main{ padding-block:22px 32px; }
   pointer-events:none;
 }
 
-/* Agrupa precio actual + precio anterior + badge de descuento con separación
-   uniforme. Sin esta regla, .price-values es un <span> inline y los elementos
-   se apeñuzcan a la izquierda (más notorio cuando el badge DGT empuja a la
-   derecha con margin-left:auto). Regla general para paneles y tarjetas. */
+/* Agrupa precio actual y precio anterior con separación uniforme. Sin esta
+   regla, .price-values es un <span> inline y los elementos se apeñuzcan a la
+   izquierda (más notorio cuando la etiqueta DGT empuja a la derecha con
+   margin-left:auto). Regla general para paneles y tarjetas.
+   Aquí vivía también el porcentaje rojo, retirado del sitio en agosto 2026. */
 .price-values{
   display:flex;
   align-items:flex-end;
@@ -350,35 +383,16 @@ main{ padding-block:22px 32px; }
   align-self:flex-end;
 }
 
-.discount-badge{
-  display:inline-flex;
-  align-items:center;
-  gap:4px;
-  padding:4px 9px;
-  border-radius:6px;
-  background:#dc2626;
-  color:#fff;
-  font-size:12px;
-  font-weight:800;
-  letter-spacing:.04em;
-  line-height:1;
-  white-space:nowrap;
-  margin-top:2px;
-  align-self:flex-end;
-}
-
 /* ── Precio en ficha · alineación GENERAL ────────────────────────
    En las fichas (.panel), cuando .price-row NO trae el wrapper
-   .price-values (markup plano), alinea el precio tachado y el badge de
-   descuento por la BASE del precio actual, en vez de caer al fondo de
-   la fila (que el sello DGT, más alto, agranda). Garantiza por CSS la
-   MISMA posición del precio tachado y del % en TODAS las fichas, sin
-   depender de que el JS los envuelva en .price-values. */
+   .price-values (markup plano), alinea el precio tachado por la BASE del
+   precio actual en vez de dejarlo caer al fondo de la fila. Garantiza por
+   CSS la MISMA posición del tachado en TODAS las fichas, sin depender de
+   que el JS lo envuelva en .price-values. */
 .panel .price-row:not(:has(.price-values)){
   align-items:baseline;
 }
-.panel .price-row:not(:has(.price-values)) > .price-was,
-.panel .price-row:not(:has(.price-values)) > .discount-badge{
+.panel .price-row:not(:has(.price-values)) > .price-was{
   align-self:baseline;
 }
 
@@ -421,6 +435,11 @@ main{ padding-block:22px 32px; }
    aunque el resumen cambie. */
 .compat-box{
   margin:16px 0;
+  /* Separador entre la descripción y "Añade algo más": es el MISMO filete que ya
+     usa el resto del panel (1px rgba(15,23,42,.1)), no uno nuevo. Marca que aquí
+     acaba el producto y empieza otra cosa. */
+  padding-top:14px;
+  border-top:1px solid rgba(15,23,42,.1);
 }
 
 .compat-head{
@@ -434,7 +453,7 @@ main{ padding-block:22px 32px; }
 .compat-title{
   font-family:var(--sport);
   font-size:.82rem;
-  letter-spacing:.06em;
+  letter-spacing:.04em;
   text-transform:uppercase;
   line-height:1.55;
   color:var(--ink);
@@ -608,20 +627,25 @@ main{ padding-block:22px 32px; }
   margin-top:0;
 }
 
-/* La caja interna lleva el estilo botón AÑADIR/RESERVAR (fondo blanco, borde
-   transparente, misma sombra triple). El stock queda FUERA, como línea suelta. */
+/* HUECO GRIS Y PLANO. Diseño del usuario, probado por él en vivo y aplicado el
+   10 sep 2026. Antes era la receta del botón AÑADIR/RESERVAR: fondo blanco, radio 18
+   y la misma sombra triple. Ya no: el relleno gris delimita solo, y con fondo propio
+   MÁS caída el recuadro se leía como algo levantado encima del panel en vez de como
+   un hueco donde elegir. El gris es NEUTRO (#f9f9f9), no el azulado de las sombras
+   del sitio: sobre el panel blanco un gris frío tiraba a azul.
+   Tiene que ser OPACO: en las fichas de dos ejes el recuadro de abajo tapa con su
+   fondo lo que le cae encima (ver `.variant-axis + .variant-axis`).
+   VOLVER ATRÁS son cuatro cosas, no una: `background:#fff`, `border-radius:18px`,
+   devolver aquí la sombra
+     box-shadow: 0 0px 5px 2px rgb(232 222 222 / 18%),
+                 0 1px 0 rgba(255,255,255,.94) inset,
+                 0 14px 30px rgba(138,138,138,.08);
+   y poner a 0 las esquinas de abajo en la regla del bloque ÚNICO, más abajo. */
 .variant-axis-box{
   padding:14px 15px 15px;
   border:1px solid transparent;
-  border-radius:18px;
-  background:#fff;
-  /* Sombra en grises neutros (no en el azulado rgba(15,23,42)): ajustada en vivo por
-     el usuario el 2026-07-31, halo exterior aclarado a #e8dede (gris cálido) el
-     2026-08-06. Misma geometría que .btn-cart/.btn-reserve. */
-  box-shadow:
-    0 0px 5px 2px rgb(232 222 222 / 18%),
-    0 1px 0 rgba(255,255,255,.94) inset,
-    0 14px 30px rgba(138,138,138,.08);
+  border-radius:17px;
+  background:#f9f9f9;
 }
 
 /* ── Bloque de opciones ÚNICO: canto de abajo recto ───────────────────────────
@@ -636,8 +660,11 @@ main{ padding-block:22px 32px; }
    seguidas" — antes había que enumerar los casos por el NOMBRE de cada una.
    En un navegador sin :has() no pasa nada: se queda el recuadro redondeado de siempre. */
 .panel-inner:not(:has(.variant-axis + .variant-axis)) > .variant-axis > .variant-axis-box{
-  border-bottom-left-radius:0;
-  border-bottom-right-radius:0;
+  /* Con el hueco gris el canto recto ya no pinta nada: el recuadro no se apoya en
+     nada, flota dentro del panel, así que cierra por los cuatro lados. Antes iban
+     a 0 para que pareciera pegado a lo de abajo. */
+  border-bottom-left-radius:17px;
+  border-bottom-right-radius:17px;
 }
 
 /* ── VARIOS EJES: se leen como UNA sola tarjeta ───────────────────────────────
@@ -655,11 +682,41 @@ main{ padding-block:22px 32px; }
 .panel-inner:has(.variant-axis + .variant-axis) > .variant-axis:not(:last-of-type) > .variant-axis-box{
   border-bottom-left-radius:0;
   border-bottom-right-radius:0;
+  /* LA COSTURA RESPIRA COMO EL INTERIOR, no el doble. Dentro de una caja hay
+     15 px del borde al rótulo y 4 de los controles al borde; en la unión había
+     33 px entre los controles de arriba y el rótulo de abajo —más del doble—, y
+     eso partía en dos lo que tiene que leerse como UNA tarjeta. Con 6+7 la
+     separación cae a ~16, que es el mismo compás. */
+  padding-bottom:6px;
+  /* La sombra ENTERA, la misma que cualquier recuadro de opciones. Estuvo
+     recortada al brillo interior para no dibujar dos cantos en la costura; con la
+     costura quitada ya no hay nada que evitar, y sin caida este recuadro se
+     quedaba sin canto propio. */
+  /* Sin sombra: la caja es un hueco gris plano (ver .variant-axis-box). Aquí se
+     redeclaraba entera y habría devuelto la caída solo en las fichas de dos ejes. */
 }
 .variant-axis + .variant-axis > .variant-axis-box{
   border-top-left-radius:0;
   border-top-right-radius:0;
-  border-top-color:rgba(15,23,42,.07);
+  /* SIN linea de costura, de dos maneras.
+
+     La primera: aqui se pintaba un `border-top-color` para marcar la union. Fuera.
+
+     La segunda, que es la que costaba: el recuadro de ARRIBA tiene sombra de caida
+     (`0 14px 30px`), y esa sombra caia justo encima de este — se veia como una raya
+     gris en la junta aunque no hubiera ningun borde. No se quita la sombra, que es
+     la que le da canto: se TAPA. Con `position:relative` y `z-index:1` este
+     recuadro pinta despues, y su fondo blanco opaco cubre lo que le cae encima.
+     El resto de la sombra —el halo de los lados y de arriba— sigue viendose. */
+  position:relative;
+  z-index:1;
+  /* Y el halo de ESTE recuadro no derrama hacia arriba. `inset(0 ...)` corta justo
+     en su borde superior y deja 30 px de holgura por los otros tres lados, asi que
+     conserva su sombra por donde se ve y no pinta nada sobre el de encima. Sin
+     esto quedaba un velo del 2 % en la junta (rgb 250 sobre 255): poco, pero es
+     una raya. */
+  clip-path:inset(0 -30px -30px -30px);
+  padding-top:7px;
 }
 
 /* El renglón NO se parte nunca (nowrap). Antes envolvía, y con un nombre de color
@@ -821,26 +878,13 @@ main{ padding-block:22px 32px; }
    Aquí se queda solo lo que es propio de la ficha: la caja, la cabecera y el
    carril de más arriba. */
 
-/* El sello DGT (img.dgt-badge) mide 57px en main.css, MÁS ALTO que el precio
-   (.price-now = 38px, line-height:1), así que al mostrarse agranda la fila del precio;
-   en fichas que lo alternan (G2 PRO VMP/Normal) el precio "salta" al cambiar de versión.
-   Se quiere el sello a ~43px SIN que la fila crezca. Truco: la CAJA de layout se deja en
-   38px (= altura del precio .price-now, así la fila mide igual con o sin sello → sin salto
-   VMP/Normal), y el tamaño VISUAL se sube a ~43px con transform:scale (no ocupa layout, no
-   empuja la fila; el SVG escala nítido). Aplica a TODAS las fichas. Selector más específico
-   (.panel .price-row) que main.css (.panel .dgt-badge, incl. su media 640px) para ganar. */
-.panel .price-row .dgt-badge{
-  width:38px;
-  transform:scale(1.13);
-}
-
-/* En DESKTOP hay más aire: se agranda el sello subiendo SOLO el scale (no afecta al
-   layout, así la fila no cambia de alto ni de ancho). La caja sigue en 38px. */
-@media (min-width:981px){
-  .panel .price-row .dgt-badge{
-    transform:scale(1.263); /* 38px * 1.263 ≈ 48px visual */
-  }
-}
+/* AQUÍ HABÍA UN TRUCO Y YA NO HACE FALTA. El sello azul (img, 57px) era MÁS ALTO
+   que el precio (.price-now = 38px), así que al mostrarse agrandaba la fila y en
+   las fichas que lo alternan (DGT/NORMAL) el precio "saltaba" al cambiar de
+   versión; se arreglaba dejando la caja de layout en 38px y subiendo el tamaño
+   visual con transform:scale. La etiqueta de texto mide ~28px —menos que el
+   precio—, así que la fila ya no crece con ella y el truco sobraba entero.
+   Su tamaño vive en el bloque ETIQUETA DGT de css/main.css, con el de la tarjeta. */
 
 /* ══════════════════════════════════════════════════════════════════════════
    AVISO DE STOCK — píldora única de todas las fichas
@@ -886,20 +930,20 @@ main{ padding-block:22px 32px; }
     0 10px 22px rgba(15,23,42,.07);
 }
 
-/* El punto es lo que marca el estado de un vistazo; el cristal no cambia. */
-.stock-note::before{
-  content:'';
-  width:7px;
-  height:7px;
-  border-radius:50%;
-  flex:0 0 auto;
-  background:#9aa3ab;
-}
+/* LA CHAPA SOLO APARECE CUANDO HAY ALGO QUE DECIR.
 
-.stock-note--in::before{ background:#22c55e; }
+   «STOCK» era una pastilla anunciando lo normal: de 87 productos, casi todos
+   estan disponibles, asi que la chapa no informaba de nada y ocupaba el sitio
+   mas visible del panel, al lado del precio. Lo que SI es informacion es que
+   algo se haya agotado — y eso se sigue viendo, en rojo.
+
+   Se oculta por CSS y no quitandola del marcado a proposito: quien escribe esta
+   chapa es el sync de `global-assets-app.js` al cargar la ficha, asi que una
+   regla aqui gana pase lo que pase por alli. Aqui vivia tambien el punto de
+   color, que repetia en color lo que la palabra ya decia. */
+.stock-note--in{ display:none; }
 
 .stock-note--out{ color:#b91c1c; }
-.stock-note--out::before{ background:#ef4444; }
 
 /* ── Ajustes de SITIO. Solo posición: el diseño no se toca aquí. ────────── */
 
@@ -914,10 +958,10 @@ main{ padding-block:22px 32px; }
   transform:translateY(-3px);
 }
 
-/* En la fila del precio el sello DGT ya se empuja con margin-left:auto. Si la
-   píldora usara otro auto, el hueco libre se repartiría entre los dos y el sello
-   quedaría flotando en mitad de la fila; con margen fijo van pegados. */
-.panel .price-row:has(> .dgt-badge) > .stock-note{
+/* En la fila del precio la etiqueta DGT ya se empuja con margin-left:auto. Si la
+   píldora usara otro auto, el hueco libre se repartiría entre las dos y la etiqueta
+   quedaría flotando en mitad de la fila; con margen fijo van pegadas. */
+.panel .price-row:has(> .dgt-tag) > .stock-note{
   margin-left:12px;
 }
 
@@ -954,11 +998,15 @@ main{ padding-block:22px 32px; }
   white-space:nowrap;
 }
 
+/* Plano y de un solo color, como «Elegir opcion» del catalogo, el boton del
+   cajon y el de /checkout. Los cuatro botones negros del sitio, uno solo. */
 .btn-main{
-  border:1px solid #6b6c6c;
-  background:linear-gradient(180deg, #4a4a4a 0%, #171717 100%);
+  border:0;
+  background:#252525;
   color:#fff;
-  box-shadow:none;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.10) inset,
+    0 10px 24px rgba(15,23,42,.16);
 }
 
 .btn-main i{ display:none; }
@@ -975,8 +1023,8 @@ main{ padding-block:22px 32px; }
 
 .btn-main:hover{
   transform:translateY(-1px);
-  border-color:#8f8f8f;
-  background:linear-gradient(180deg, #565656 0%, #202020 100%);
+  border-color:transparent;
+  background:#3a3a3a;
   box-shadow:none;
 }
 
@@ -988,6 +1036,10 @@ main{ padding-block:22px 32px; }
   cursor:not-allowed;
   pointer-events:none;
   box-shadow:none;
+  /* SIN borde: el de `.btn-main` (1px #6b6c6c) está pensado para el botón negro y
+     sobre el gris de "Agotado" queda como un recuadro suelto que pide que lo pulses.
+     Un botón inactivo no debe dibujar contorno. */
+  border-color:transparent;
 }
 
 .btn-reserve{
@@ -1179,9 +1231,8 @@ main{ padding-block:22px 32px; }
     padding-top:12px;
   }
 
-  .panel-inner > .variant-axis:first-child{
-    padding-top:0;
-  }
+  /* Aquí se cancelaba a mano el `padding-top:14px` de las reglas borradas
+     arriba. Sin ellas no hay nada que cancelar. */
 
   .cta-col{
     grid-template-columns:1fr 1fr;
@@ -1744,29 +1795,19 @@ footer a:hover{ color:var(--ink); }
   }
 }
 
-/* ── Tablet & up: slightly larger color variant buttons ── */
-@media (min-width:600px){
-  .variant-axis{
-    margin-top:14px;
-    padding-top:14px;
-  }
-}
+/* Aquí vivían TRES reglas idénticas —a 600, 768 y 981 px— que daban a
+   `.variant-axis` el mismo `margin-top:14px; padding-top:14px`. Sus comentarios
+   hablaban de «botones de color más grandes», algo que hacía tiempo que no
+   hacían: lo único que quedaba de ellas era ese relleno.
 
-/* ── Large Tablet & up: moderate color variant buttons ── */
-@media (min-width:768px){
-  .variant-axis{
-    margin-top:14px;
-    padding-top:14px;
-  }
-}
+   Y ese relleno era el HUECO. Un eje suelto no lo nota —lo tapa el margen de
+   16 px de `.variant-axis`—, pero con dos ejes seguidos abría 14 px entre dos
+   recuadros que tienen que leerse como UNA tarjeta, y ninguna de las reglas de
+   unión lo cancelaba: apagaban márgenes, no rellenos. Por eso el hueco solo
+   salía por encima de 600 px y solo en las fichas de dos ejes.
 
-/* ── Desktop: comfortable color variant buttons ── */
-@media (min-width:981px){
-  .variant-axis{
-    margin-top:14px;
-    padding-top:14px;
-  }
-}
+   Borradas. La separación la define el `margin:16px 0` de `.variant-axis`, en
+   un solo sitio y para todos los anchos. */
 
 @media (max-width:480px){
   .thumbs{

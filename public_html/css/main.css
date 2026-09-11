@@ -12,12 +12,208 @@
   font-family:var(--ui);
 }
 
+/* ── EL TITULAR DEL SITIO ──
+   Russo One en su peso REAL (400), versalitas e inclinado -7 grados.
+
+   La familia tiene UNA sola cara (400 normal), asi que ni el peso ni la
+   inclinacion existen de verdad y los fabrica el navegador. Con la INCLINACION eso
+   no vale —cada navegador se inventa una— y por eso va con `skewX`, que da el
+   mismo angulo en todos. Con el GROSOR pasa igual y por eso tampoco se pide con
+   `font-weight`: se dibuja con `-webkit-text-stroke`, calibrado para dar lo que
+   daba la negrita del sistema donde si funcionaba.
+
+   `transform` y NO `display:inline-block`: varios de estos rotulos son elementos
+   de un flex, y con `inline-block` dejan de ceder ancho — medido en las fichas,
+   el titular se montaba sobre el logotipo de marca. Un transform inclina las
+   letras igual sin tocar como se reparte el espacio.
+
+   Si se añade un rotulo con `var(--sport)`, va en esta lista.
+
+   `:is()` y NO `:where()`: los dos agrupan igual, pero `:where()` vale cero de
+   especificidad y cualquier regla existente le gana — con el, los dos rotulos de
+   /cuenta se quedaban en el peso 700 que pide su propia hoja. */
+:is(
+  .order-summary__title,
+  .series h2,
+  .dosier-rail h2,
+  #legal h2,
+  .pagos h2,
+  .cat-card-name,
+  /* «Oferta de la semana». Iba en Jakarta 800 sin inclinar, que es la voz de los
+     rotulos de seccion sobre blanco; dentro de la placa oscura desentonaba con su
+     propio titular, que va justo debajo. La textura de desgaste NO le toca: esa
+     solo la llevan `.combo-titulo` y `.combo-ahora`. */
+  #home-featured-title,
+  .combo-titulo,
+  .combo-quiero-txt,
+  .combo-ahora,
+  .home-marca-nom,
+  .catalog-empty-state h2,
+  .compat-title,
+  .product-media-head h2,
+  .related-title,
+  .card .head h2,
+  .empty-state h2,
+  .acct-head h2,
+  .order-history-head h2,
+  /* El rotulo de cada tarjeta de /cuenta: «Mis datos», «Direcciones»,
+     «¿Necesitas ayuda?». Estaban en Russo One pero SIN el trazo ni la
+     inclinacion, asi que dentro de la misma pagina «Pedidos» salia inclinado y
+     «Direcciones» recto — dos voces para el mismo nivel de titulo. */
+  .acct-cardhead__title,
+  .section-heading strong,
+  /* Los titulos de los tres PANELES que se abren encima de la pagina: el cajon
+     del carrito, el de filtros y el menu movil. Iban en Plus Jakarta 800, o sea
+     con la misma voz que el texto que tienen debajo, asi que no leian como
+     titulo sino como una etiqueta mas grande. `.order-summary__title` —que es
+     este mismo pedido un paso despues, en /checkout— ya estaba aqui: tenerlos
+     separados hacia que dos pantallas seguidas titularan distinto.
+
+     OJO: `.filtros-rot b` y `.mm-head-title` son elementos EN LINEA, y
+     `transform` no se aplica a un elemento en linea no reemplazado. Sin el
+     `display:inline-block` que llevan en su propia hoja, la inclinacion no haria
+     nada y el trazo si — quedarian en Russo One rectas, que es justo la mezcla
+     que este bloque existe para evitar. */
+  .ss-cart-head h3,
+  .filtros-rot b,
+  .mm-head-title,
+  /* El nombre de cada categoria en el menu movil. */
+  .mm-cat-nom
+){
+  font-weight:400;
+  /* El grosor NO se pide con `font-weight`: la familia tiene una sola cara y el
+     700 se lo inventa el sistema —en escritorio engorda, en Chrome de Android
+     no—. Se dibuja, y asi es igual en todas partes. Calibrado contando pixeles
+     de tinta: la negrita daba +22,5%, este trazo +23,3%. */
+  -webkit-text-stroke:.04em currentColor;
+  text-transform:uppercase;
+  transform:skewX(-6deg);
+  transform-origin:left bottom;
+}
+
+/* ── MIGA DE PAN ──
+   La misma en la ficha (.breadcrumb) y en la pagina de categoria (.cat-miga).
+   Aqui va COMO SE LEE; donde se coloca y sobre que fondo, en la hoja de cada
+   una. Estaba escrita dos veces y habia derivado: 16 px y peso 800 en la ficha
+   contra 13,1 px y peso normal en la categoria. */
+/* El hueco alrededor de la miga: 26 px sobre ella (separa de la cabecera fija,
+   que pesa) y 10 debajo (la agrupa con el titular, que es a quien pertenece).
+   Ese reparto —mas arriba que abajo— es el que traia la ficha, y es el que se
+   globaliza: con 17/15, como estaba la categoria, la miga flotaba a medio camino
+   sin pertenecer a nada, y por eso parecia estar «mas arriba».
+
+   El 26 es UN numero, pero cada pagina llega a el por su lado: la ficha cuelga de
+   un `.page-wrap` que ya pone 8 px y solo necesita 18; la categoria no tiene ese
+   envoltorio y los pone todos. Se descuenta aqui y no a ojo en cada hoja. */
+:root{
+  --miga-arriba:26px;
+  --miga-abajo:10px;
+
+  /* El cuerpo del titular que encabeza una pagina: el de /patinetes y el de cada
+     ficha de producto. Un solo numero para los dos —2,6rem en pantalla ancha—
+     para que se reconozca el mismo sitio al pasar de uno a otro.
+     Crece con la ventana, pero no baja de 1,75rem: en movil los nombres largos
+     («ECOXTREM M41 TANK ULTIMATE 1000W») ya ocupan cuatro lineas. */
+  --titular:clamp(1.75rem, 1.2rem + 1.9vw, 2.6rem);
+}
+
+.breadcrumb{
+  margin:calc(var(--miga-arriba) - 8px) 0 var(--miga-abajo);
+}
+
+.cat-miga{
+  margin:var(--miga-arriba) 0 var(--miga-abajo);
+}
+
+.breadcrumb,
+.cat-miga .container{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  /* El diseño es el de la FICHA: 1rem y peso 800. La pagina de categoria lo
+     adopta, no al reves. */
+  font-size:1rem;
+  font-weight:800;
+  line-height:1.4;
+  color:var(--muted, #676b73);
+}
+
+.breadcrumb a,
+.cat-miga a{
+  color:var(--muted, #676b73);
+  text-decoration:none;
+  border-bottom:1px solid transparent;
+  transition:color .16s ease, border-color .16s ease;
+}
+
+/* EL MISMO SUBRAYADO QUE EL NOMBRE DE UN ACCESORIO en la caja «Añade algo mas»
+   (`.compat-name:hover`, tarjetas.css): `text-decoration:underline` a secas.
+
+   Aqui era un `border-bottom` de 1 px al 25 % de opacidad, y por eso no se
+   parecian: un borde se dibuja al fondo de la CAJA —mas lejos de las letras— y
+   aquel ademas iba palido, mientras que el subrayado del navegador va pegado al
+   texto, con su grosor automatico y en el color de la tinta. Dos rayas distintas
+   para la misma idea: «esto es un enlace y lo estas señalando».
+
+   El borde transparente de arriba SE QUEDA aunque ya no se pinte nunca: reserva
+   su pixel y evita que la miga se mueva al pasar el raton. */
+.breadcrumb a:hover,
+.cat-miga a:hover{
+  color:var(--ink, #0b0c0f);
+  text-decoration:underline;
+}
+
+/* El ultimo eslabon es la pagina en la que estas: no es un enlace, y se marca
+   en tinta plena porque es el que dice donde estas. */
+.breadcrumb [aria-current="page"],
+.cat-miga [aria-current="page"]{
+  color:var(--ink, #0b0c0f);
+}
+
+.breadcrumb-sep,
+.cat-miga-sep{ opacity:.5; }
+
+/* En movil la miga cabe en UNA linea, siempre. Con un nombre largo
+   —«ECOXTREM M41 TANK ULTIMATE 1000W»— rompia en dos y dejaba el separador
+   colgando solo al final de la primera; medido, 54 px de alto contra 23.
+   Lo que cede es el ultimo eslabon, que no es un enlace: solo dice donde estas,
+   y eso ya lo dice el titular que viene justo debajo. */
+@media (max-width:640px){
+  .breadcrumb,
+  .cat-miga .container{
+    flex-wrap:nowrap;
+  }
+
+  .breadcrumb > *,
+  .cat-miga .container > *{ flex:none; }
+
+  .breadcrumb [aria-current="page"],
+  .cat-miga [aria-current="page"]{
+    flex:0 1 auto;
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+}
+
 #siteHeader .nav{
   display:grid;
   grid-template-columns:auto 1fr auto;
   align-items:center;
   height:var(--header-h);
   gap:16px;
+}
+
+/* Los botones van SIEMPRE en la ultima columna. La barra es una rejilla de tres
+   —marca, menu y botones— y en movil el menu se esconde con `display:none`, con lo
+   que sale de la rejilla: los botones caian en la columna del medio y quedaban 32 px
+   de aire a la derecha contra los 16 de la izquierda. Anclandolos a la tercera, el
+   `1fr` de en medio se queda el sobrante y los botones se pegan al margen, alineados
+   con el logotipo y con las tarjetas. */
+#siteHeader .header-actions{
+  grid-column: 3;
 }
 
 #siteHeader .brand{
@@ -36,7 +232,15 @@
 }
 
 #siteHeader .brand img{
-  height: 72px;
+  /* La imagen es `img/logo/marca-barra.webp`, el logotipo SIN el aire del original.
+     `0-removebg-preview.webp` mide 400x400 pero su tinta son 360x158: el 60% del
+     alto es vacio, asi que con 72 px de imagen la marca visible eran 28,4 px y la
+     barra tenia que medir 88 para sostener aire.
+
+     Recortado, 29 px de imagen dan los MISMOS 28,4 px de marca que daban 72 px de
+     la imagen original: el logotipo se ve igual que siempre y la barra ya no tiene
+     que reservar sitio para el vacio. */
+  height: 29px;
   width:auto;
   display:block;
 }
@@ -74,15 +278,22 @@
 #siteHeader .pc-products-trigger{
   text-decoration:none;
   color:#0f172a;
-  font-weight:800;
-  letter-spacing:.0em;
-  padding:10px 12px;
+  /* 6 px y no 10: con la letra de «Cuenta» (15,2 px) la pildora medía 35,2 px de
+     alto y salía gruesa al lado de los rótulos. Ahora 27,2. El relleno LATERAL se
+     queda: lo que sobraba era aire arriba y abajo. */
+  padding:6px 12px;
   border-radius:999px;
   display:inline-flex;
   align-items:center;
   gap:8px;
-  text-transform:uppercase;
-  font-size:.86rem;
+  /* La MISMA letra que «Cuenta» (.header-account-label): las dos mitades de la
+     barra son la misma barra. Estos tres valores van juntos —si se toca uno hay
+     que tocar el otro rotulo— y por eso se nombra aqui de donde salen. */
+  font-size:1.09rem;
+  font-weight:800;
+  line-height:1;
+  letter-spacing:-.01em;
+  text-transform:none;
 }
 
 #siteHeader .pc-products-trigger{
@@ -135,14 +346,35 @@
   transform-origin:top left;
   animation:pcProductsMenuIn .18s cubic-bezier(.22, 1, .36, 1);
 
-  /* nav.menu impone versalitas, peso 800 y nowrap a todo lo que cuelga de ella,
-     y eso se hereda dentro del panel. Se neutraliza aquí para que manden las
-     reglas de .mm-* igual que en el móvil. */
+  /* nav.menu impone peso 800, su medida y nowrap a todo lo que cuelga de ella, y
+     eso se hereda dentro del panel. Se neutraliza aquí para que manden las
+     reglas de .mm-* igual que en el móvil.
+     (Las versalitas que este comentario citaba se fueron el 1 sep 2026, cuando la
+     barra pasó a escribirse como «Cuenta».) */
   font-size:1rem;
   font-weight:400;
   text-transform:none;
   letter-spacing:normal;
   white-space:normal;
+}
+
+/* LOS ICONOS DE REDES RESERVAN SU HUECO.
+
+   Instagram, Facebook y WhatsApp son glifos de una fuente de iconos, y hasta que esa
+   fuente llega el navegador les da el ancho de la letra de reserva. Como el menu va
+   centrado en la columna elastica de la cabecera, al cambiar su ancho se movia
+   entero: medido fotograma a fotograma en /accesorios/ con la red frenada, «Accesorios»
+   saltaba de x=789,05 a x=781,78 —7,27 px— a los 2291 ms, justo cuando terminaba de
+   bajar fa-brands-400.woff2 (2283 ms).
+
+   Con un ancho fijo la caja ya no depende del glifo, asi que da igual cuando llegue la
+   fuente —o si no llega—. Es lo mismo que hace la clase `fa-fw` de Font Awesome.
+   Los tres median 15,09 / 17,27 / 15,09 px; ahora los tres miden 1em y el dibujo va
+   centrado, asi que ademas quedan a la misma distancia unos de otros. */
+#siteHeader .menu i{
+  display:block;
+  width:1em;
+  text-align:center;
 }
 
 #siteHeader .pc-products-panel[hidden]{
@@ -236,7 +468,9 @@
 
 #siteHeader .header-account-label{
   display:inline-block;
-  font-size:.95rem;
+  /* La MISMA medida que los enlaces del menu: las dos mitades de la barra se leen
+     igual. Si se toca una, se toca la otra. */
+  font-size:1.09rem;
   font-weight:800;
   line-height:1;
   letter-spacing:-.01em;
@@ -395,7 +629,12 @@
   display:none;
 }
 
-@media (max-width:980px){
+/* 1100 y no 980: desde que la categoria se llama por su nombre («Patinetes
+   electricos») y la letra subio a 1,09rem, el menu mide 660 px en vez de 527 y
+   entre 980 y 1140 se montaba encima del logotipo. El numero sale de medirlo
+   —marca 220 + menu 660 + botones + los huecos de la rejilla—, no de una talla
+   estandar: si el menu vuelve a cambiar de ancho hay que volver a medir. */
+@media (max-width:1100px){
   #siteHeader nav.menu{ display:none; }
   #siteHeader .burger{ display:grid; }
   #siteHeader .header-cart-btn{ display:grid; }
@@ -408,6 +647,29 @@
    desplazamiento a 0 y salta al inicio, y fijar el body despega los
    position:sticky (la barra de categorías y series del home desaparece).
    El bloqueo se hace por eventos en cart-runtime.js, sin tocar el layout. */
+
+/* La barra de la pagina, APAGADA mientras el cajon esta abierto.
+
+   No se esconde ni se estrecha: eso cambiaria el ancho del area de contenido y
+   la pagina daria un salto de 15 px. Se le da el color del fondo, asi que la
+   franja sigue ocupando su sitio y deja de leerse como una raya. El scroll ya
+   esta bloqueado por eventos mientras el cajon esta abierto (ver cart-runtime),
+   de modo que tampoco se pierde una senal util.
+
+   BLANCO, no el gris del fondo. Con `#eef1f5` —el gris azulado de la pagina— la
+   franja seguia viendose, porque lo que tiene al lado es el panel del carrito, que
+   es blanco: al pegarse a el, cualquier tono se lee como un borde. En blanco el
+   panel parece llegar hasta el canto de la ventana. */
+html.ss-cart-abierto{
+  scrollbar-color: #fff #fff;
+}
+html.ss-cart-abierto::-webkit-scrollbar{ width:15px; }
+html.ss-cart-abierto::-webkit-scrollbar-track,
+html.ss-cart-abierto::-webkit-scrollbar-thumb,
+html.ss-cart-abierto::-webkit-scrollbar-button{
+  background:#fff;
+  border:0;
+}
 
 .ss-cart-backdrop{
   position:fixed;
@@ -483,9 +745,13 @@
 .ss-cart-head,
 .ss-cart-foot{
   padding:16px 20px;
-  border-bottom:1px solid rgba(17,19,21,.06);
   background:#fff;
 }
+
+/* La cabecera va SIN raya. Separaba «TU CARRITO» de la lista, pero la lista ya
+   viene sobre un gris distinto y con sus tarjetas blancas flotando: el corte se
+   ve solo. El pie si conserva la suya, porque ahi arriba y abajo son del mismo
+   blanco y sin raya el total se pegaria al ultimo producto. */
 
 .ss-cart-foot{
   padding-top:2px;
@@ -523,11 +789,18 @@
   );
 }
 
+/* OJO: la cabecera del cajon es un `<header>`, y `header{}` de esta misma hoja
+   —la cabecera FIJA del sitio— alcanza a cualquier `<header>` del documento. De
+   ahi salen el `position:fixed` (ya pisado con `relative`) y este `border-bottom`
+   de `rgba(0,0,0,.05)`, que no lo ponia ninguna regla del carrito y por eso no
+   aparecia buscando «ss-cart-head». Es la misma trampa que las cabeceras de las
+   paginas de categoria, y por eso alli no se usa `<header>`. */
 .ss-cart-head{
   display:flex;
   align-items:center;
   justify-content:space-between;
   position:relative;
+  border-bottom:0;
   background:#fff;
   padding-top:calc(16px + env(safe-area-inset-top, 0px));
   z-index:1;
@@ -535,8 +808,10 @@
 
 .ss-cart-head h3{
   margin:0;
-  font-size:1.05rem;
-  font-weight:800;
+  font-family:var(--sport);
+  /* Un punto mas que los 1,05 rem de antes: Russo One tiene una sola cara y su
+     grosor se dibuja con trazo, asi que a cuerpo pequeño la inclinacion aprieta. */
+  font-size:1.12rem;
   color:#111315;
   letter-spacing:.03em;
   text-transform:uppercase;
@@ -631,6 +906,16 @@
   line-height:1.55;
 }
 
+/* EL BOTON DEL CARRITO VACIO: pastilla CLARA, y sin hover.
+
+   Era negra (#0f172a) con letra blanca, o sea el mismo peso que «Finalizar
+   compra». Pero explorar el catalogo no es la accion decisiva de ninguna
+   pantalla: es una invitacion para quien no tiene nada que pagar. El negro se
+   queda para el boton que cobra.
+
+   Y NO cambia al pasar el raton, a proposito: aqui no hay nada que confirmar ni
+   ningun estado que anticipar — el subrayado del cursor ya dice que se puede
+   pulsar. La regla de hover se ha borrado entera, no puesta a lo mismo. */
 .ss-cart-empty-cta{
   min-height:42px;
   padding:0 18px;
@@ -638,16 +923,12 @@
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  background:#0f172a;
-  color:#fff;
+  background:rgba(15,23,42,.06);
+  color:#3a4250;
   font-weight:800;
   font-size:.78rem;
   letter-spacing:.04em;
   text-transform:uppercase;
-}
-
-.ss-cart-empty-cta:hover{
-  background:#0f172a;
 }
 
 .ss-cart-item{
@@ -656,12 +937,20 @@
   gap:12px;
   padding:12px;
   border:0;
-  border-radius:20px;
+  border-radius:22px;
   background:#fff;
-  /* Una sombra en vez de tres: cada capa de sombra es un desenfoque más que
-     pintar por tarjeta, y con 44px de blur se nota al desplazar la lista.
-     El resultado visual es prácticamente el mismo. */
-  box-shadow:0 8px 22px rgba(15,23,42,.08);
+  /* LA SOMBRA DE TARJETA DE LA CASA, la misma que el resumen de /checkout, el de
+     /pago y las fichas: filo interior blanco arriba —que es lo que le da el canto
+     de papel— mas dos capas de caida.
+
+     Aqui hubo una sola capa (`0 8px 22px`) para ahorrar desenfoques al desplazar
+     la lista; se vuelve a la de siempre porque la coherencia con las otras dos
+     pantallas pesa mas. Si alguna vez el cajon va a tirones en un movil lento,
+     este es el primer sitio donde mirar. */
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.9) inset,
+    0 18px 44px rgba(15,23,42,.08),
+    0 6px 18px rgba(15,23,42,.04);
 }
 
 /* La línea del carrito NO reacciona al ratón: ni se levanta, ni le crece la sombra, ni
@@ -696,12 +985,18 @@
   box-shadow:0 10px 24px rgba(15,23,42,.06);
 }
 
+/* EL HUECO DEL BOTON DE BORRAR LO RESERVAN LOS DOS QUE LE ESTORBAN, no la caja.
+
+   Estaba como `padding-right` aqui, y ese relleno lo heredaba tambien la fila de
+   abajo: el precio se quedaba 38 px cortos y no llegaba a la vertical del boton,
+   que es el borde derecho de verdad de la tarjeta. El boton esta ANCLADO a ese
+   borde (`right:0` contra esta caja), asi que el relleno solo tiene que apartar
+   al nombre y a la chapa de color, que son los que viven a su altura. */
 .ss-cart-meta{
   min-width:0;
   display:grid;
   gap:2px;
   position:relative;
-  padding-right:38px;
 }
 
 /* Una sola línea SIEMPRE, con puntos suspensivos si no cabe ("M41 TANK ARMOR…").
@@ -714,6 +1009,7 @@
   display:block;
   min-width:0;
   max-width:100%;
+  padding-right:42px;
   overflow:hidden;
   white-space:nowrap;
   text-overflow:ellipsis;
@@ -728,11 +1024,18 @@
 .ss-cart-color{
   margin-top:2px;
   width:fit-content;
+  max-width:calc(100% - 42px);
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
   padding:4px 9px;
   border-radius:999px;
   background:rgba(255,255,255,.82);
   border:0;
-  font-size:.64rem;
+  /* .72rem: el mismo cuerpo que la chapa de variante de /checkout y /pago
+     (`.order-summary__product-meta`). Es el mismo dato en tres pantallas
+     seguidas y estaba una talla por debajo solo aqui. */
+  font-size:.72rem;
   color:#667085;
   font-weight:800;
   letter-spacing:.06em;
@@ -740,110 +1043,200 @@
   box-shadow:0 8px 18px rgba(15,23,42,.06);
 }
 
+/* LA CHAPA DEL PACK EN LA LINEA DEL CAJON.
+
+   Ocupa el sitio de la chapa de variante, y es la MISMA que llevan /checkout y
+   /pago (`.order-summary__product-meta--pack`): son la misma pantalla tres veces
+   seguidas y tenian que decirlo igual. Roja y solida porque es la razon de que la
+   bolsa ponga «Gratis» y el manillar 32,99 — tiene que leerse a la primera.
+
+   Y sobre todo: es lo unico que dice que el PATINETE va en el pack. Su precio
+   dentro de la oferta es el de siempre, asi que no lleva tachado y sin chapa
+   parecia ajeno a ella siendo la pieza principal. */
+.ss-cart-color--pack{
+  background:var(--primary);
+  color:#fff;
+  box-shadow:none;
+  font-size:.7rem;
+  font-weight:900;
+  letter-spacing:.03em;
+}
+
+/* EL AVISO DE PACK ROTO. Solo aparece cuando el carrito tiene casi todo el pack y
+   le falta algo: es el momento en que quitar una pieza de 8 € encarece el carrito
+   28,99 €, y hasta ahora ocurria en silencio. Rojo suave y no de alarma: no es un
+   error del cliente, es una oferta que se le esta escapando. */
+.ss-cart-pack-roto{
+  margin-top:2px;
+  padding:13px 14px;
+  border-radius:18px;
+  border:1px solid rgba(209,28,28,.28);
+  background:rgba(209,28,28,.06);
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+}
+
+.ss-cart-pack-roto__tit{
+  margin:0;
+  font-size:.86rem;
+  font-weight:900;
+  letter-spacing:-.01em;
+  color:var(--primary);
+}
+
+.ss-cart-pack-roto__txt{
+  margin:0;
+  font-size:.82rem;
+  color:#5b6478;
+}
+
+.ss-cart-pack-roto__txt strong{ color:#111315; font-weight:900; }
+
+.ss-cart-pack-roto__btn{
+  align-self:flex-start;
+  padding:10px 16px;
+  border:0;
+  border-radius:999px;
+  background:var(--primary);
+  color:#fff;
+  font-family:inherit;
+  font-size:.74rem;
+  font-weight:900;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  cursor:pointer;
+}
+
 /* .ss-cart-price (el precio unitario suelto) se eliminó: repetía el total de la línea
    cuando había una unidad, que es el caso normal. */
 
+/* Sin raya de separacion con lo de arriba: la tarjeta ya es una caja blanca con
+   su propia sombra, y una raya dentro la partia en dos por la mitad.
+
+   Y la fila ENTERA sube (margen 8 -> 1), no solo el mando de cantidad: antes el
+   mando se subia con un margen negativo suyo y el precio se quedaba abajo, asi
+   que los dos dejaban de estar a la misma altura. Subiendo la fila, el mando
+   acaba donde ya estaba y el precio sube a encontrarlo. */
 .ss-cart-row{
-  margin-top:8px;
+  margin-top:1px;
   padding-top:8px;
-  border-top:1px solid rgba(15,23,42,.07);
+  border-top:0;
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:10px;
 }
 
+/* NI sombra NI filo. El filo obligaba a los botones a vivir 1 px por dentro del
+   contorno, y como el contorno es una pastilla (radio 999) el fondo del hover
+   —un rectangulo de 34x34— salia recortado en forma de D: el signo quedaba
+   centrado en su casilla pero descentrado dentro de la mancha azul. */
 .ss-cart-qty{
   display:inline-flex;
-  align-items:center;
+  align-items:stretch;
   gap:0;
   border:0;
   border-radius:999px;
   overflow:hidden;
   background:rgba(255,255,255,.96);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.95), 0 10px 22px rgba(15,23,42,.08);
+  box-shadow:none;
 }
 
+/* CENTRADO DEL SIGNO, medido en pixeles pintados y no a ojo.
+
+   `inline-flex` centra la CAJA DE LINEA, no la tinta: con `align-items:center` y
+   `line-height:1`, el `+` y el `-` quedaban 2,5 px POR DEBAJO del centro del boton
+   —los dos exactamente igual—, porque la linea base de la familia no cae en el
+   medio de su caja. Comprobado fotografiando el boton a 4x y midiendo el rectangulo
+   de tinta: el signo salia centrado en y=20 de una caja de 35.
+
+   El relleno de abajo sube el contenido esos 2,5 px sin tocar el tamaño del boton
+   (`box-sizing:border-box`) ni el del fondo del hover, que sigue llenando los
+   34x34. Un `transform` habria movido tambien esa mancha. */
 .ss-cart-qty button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
   width:34px;
   height:34px;
+  padding:0 0 5px;
   border:0;
   background:transparent;
   cursor:pointer;
-  font-size:1rem;
+  font-size:1.2rem;
+  font-weight:700;
   line-height:1;
-  color:#2563eb;
+  /* Tinta, no azul. El #2563eb era el acento de la bienvenida de la portada
+     (`--bienve-acc`) y aqui dentro no significaba nada: la paleta del carrito
+     es tinta #111315, filo #E6E9EF y rojo #d11c1c. */
+  color:var(--ink);
   transition:background .16s ease,color .16s ease;
 }
 
 .ss-cart-qty button:hover{
-  background:rgba(37,99,235,.08);
-  color:#1d4ed8;
+  background:rgba(15,23,42,.05);
+  color:#000;
 }
 
-.ss-cart-qty button + span,
-.ss-cart-qty span + button{
-  border-left:1px solid rgba(15,23,42,.10);
-}
-
+/* LOS DOS SEPARADORES CUELGAN DE LA CIFRA, uno a cada lado. Antes uno colgaba de
+   la cifra y el otro del boton de la derecha, y como la cifra medía lo que su
+   texto (24,8 px) y el boton 34, el de la izquierda salia mas corto que el de la
+   derecha. Ahora son la misma caja y miden lo mismo. */
 .ss-cart-qty span{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
   min-width:38px;
-  text-align:center;
+  border-left:1px solid rgba(15,23,42,.10);
+  border-right:1px solid rgba(15,23,42,.10);
   font-size:1rem;
   font-weight:900;
   color:#111315;
 }
 
+/* EL BOTON DE BORRAR UNA LINEA.
+
+   La misma forma que todo boton de icono del sitio —el de cuenta y el de
+   carrito de la cabecera, la hamburguesa, el aspa del cajon, las redes del
+   pie—: circulo, fondo blanco, filo de 1 px en `--line` y NADA de sombra. La
+   que tenia (`0 10px 24px`) lo levantaba del papel y lo hacia el elemento mas
+   llamativo de cada fila, cuando es el que menos hay que pulsar.
+
+   Y el hover es el lavado del 4 % que usan todos ellos, no un cambio de
+   elevacion: aqui no se mueve nada, solo se apoya. */
 .ss-cart-remove{
   position:absolute;
   top:0;
   right:0;
-  width:34px;
-  height:34px;
+  width:38px;
+  height:38px;
   border-radius:999px;
-  border:0;
-  background:rgba(255,255,255,.88);
-  color:transparent;
-  font-size:0;
-  line-height:1;
+  border:1px solid var(--line);
+  background:#fff;
+  color:#5b6478;
+  line-height:0;
   cursor:pointer;
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  transition:background .18s ease, transform .18s ease, box-shadow .18s ease, opacity .18s ease;
-  box-shadow:0 10px 24px rgba(15,23,42,.08);
-  opacity:1;
+  box-shadow:none;
+  transition:background-color .16s ease, border-color .16s ease, color .16s ease;
 }
 
-.ss-cart-remove::before,
-.ss-cart-remove::after{
-  content:'';
-  position:absolute;
-  width:12px;
-  height:1.75px;
-  border-radius:999px;
-  background:#5b6478;
-  transition:background .18s ease, transform .18s ease;
-}
-
-.ss-cart-remove::before{
-  transform:rotate(45deg);
-}
-
-.ss-cart-remove::after{
-  transform:rotate(-45deg);
+/* El icono manda su tamaño desde aqui y no desde el SVG: asi se cambia en un
+   sitio y el boton sigue midiendo lo mismo. */
+.ss-cart-remove svg{
+  width:18px;
+  height:18px;
+  display:block;
 }
 
 @media (hover:hover){
   .ss-cart-remove:hover{
-    background:rgba(255,255,255,.96);
-    box-shadow:0 8px 18px rgba(15,23,42,.12);
-    transform:translateY(-1px);
-  }
-
-  .ss-cart-remove:hover::before,
-  .ss-cart-remove:hover::after{
-    background:#111827;
+    background:rgba(15,23,42,.04);
+    border-color:rgba(17,24,39,.28);
+    color:#111315;
   }
 }
 
@@ -852,7 +1245,7 @@
   align-items:center;
   justify-content:flex-end;
   margin-left:auto;
-  font-size:1.06rem;
+  font-size:1.09rem;
   color:#111315;
   font-weight:900;
   line-height:1;
@@ -860,39 +1253,85 @@
   letter-spacing:-.02em;
 }
 
-.ss-cart-subtotal-row{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  font-weight:700;
-  color:#6b7280;
-  font-size:1.02rem;
-  background:transparent;
-  border:0;
-  border-top:1px solid rgba(17,19,21,.1);
-  border-bottom:1px solid rgba(17,19,21,.1);
-  padding:12px 0;
+/* El precio SUELTO tachado al lado del de pack, y el «Gratis» del regalo. Solo
+   aparecen con la oferta de la semana en el carrito; el resto del tiempo la celda
+   lleva una sola cifra y estas dos reglas no casan con nada. */
+.ss-cart-antes{
+  margin-left:7px;
+  font-size:.82em;
+  font-weight:600;
+  color:rgba(15,23,42,.42);
+  text-decoration-thickness:1px;
 }
 
-.ss-cart-subtotal-row strong{
-  color:#111315;
-  font-weight:900;
-  font-size:1.16rem;
+/* «Gratis», no «GRATIS»: solo la G. Es la misma palabra en las cuatro pantallas
+   —oferta de la portada, cajon, /checkout y /pago— y tiene que escribirse igual
+   en todas. En versalitas ademas pesaba mas que el precio del patinete. */
+.ss-cart-gratis{
+  color:#1a8f4a;
+  text-transform:none;
+  letter-spacing:0;
 }
 
+
+
+
+/* UNA SOLA DECISION. Aqui habia una rejilla de tres botones: pagar arriba a
+   todo lo ancho y, debajo, «Seguir comprando» y «Vaciar» a media caja cada uno.
+   El primero repetia lo que ya hacen el aspa y el velo; el segundo era una
+   accion destructiva con la misma voz que una neutra, pegada al boton de pagar.
+   Ahora abajo solo se paga: «Vaciar» esta en la cabecera y salir se explica en
+   una linea de texto. */
+/* DOS MITADES: el total a la izquierda, el boton a la derecha.
+
+   El boton ocupaba la fila entera (357 px) con una letra de 12,6, la misma que
+   «Elegir opcion» del catalogo — que vive en 170 px y la llena. A ese ancho la
+   misma tipografia se queda flotando y se lee mas debil, y esa era la queja.
+   Partida en dos, el boton vuelve al ancho donde esa letra pesa, y el importe
+   gana su sitio en vez de ir de apendice detras del verbo. */
 .ss-cart-actions{
   display:grid;
-  grid-template-columns:1fr 1fr;
-  grid-template-areas:
-    'checkout checkout'
-    'continue clear';
-  gap:10px;
+  /* `1fr auto` y NO dos mitades exactas: el boton mide lo que pide su texto mas
+     su relleno —unos 164 px— y el total se queda el resto. Con mitades rigidas,
+     en una pantalla de 320 px el boton bajaba a 163 y «Finalizar compra» (132 px)
+     se quedaba con 1 px NEGATIVO de holgura: se recortaba. Asi el ancho del boton
+     no depende de la ventana, que es justo lo que hace que la letra lo llene
+     siempre igual —que era el problema de partida—. */
+  grid-template-columns:1fr auto;
   align-items:center;
+  gap:12px;
+}
+.ss-cart-total{
+  display:flex;
+  flex-direction:column;
+  gap:1px;
+  min-width:0;
+}
+.ss-cart-total-rot{
+  font-size:.68rem;
+  font-weight:800;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:#6b7280;
+}
+.ss-cart-total-val{
+  /* El mismo cuerpo que tenia en su fila propia, cuando el importe era una
+     linea entera del pie. */
+  font-size:1.16rem;
+  font-weight:900;
+  color:#111315;
+  line-height:1.15;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
 }
 
-.ss-cart-continue,
-.ss-cart-clear,
+
 .ss-cart-checkout{
+  /* 56 y no los 46 de antes. Con el importe dentro, este boton dejo de ser un
+     enlace al final de una lista y paso a ser la unica decision del cajon: a
+     EL MISMO ALTO QUE «Elegir opcion» del catalogo: 46 px. Se probaron 56 (gordo)
+     y 50, y se vuelve aqui porque el patron ya existe en el sitio y no hay razon
+     para que el boton que cierra la compra mida distinto que el que la empieza. */
   min-height:46px;
   border-radius:999px;
   display:inline-flex;
@@ -900,6 +1339,9 @@
   justify-content:center;
   text-decoration:none;
   font-weight:800;
+  /* La MISMA letra que «Elegir opcion» del catalogo: 12,6 px y peso 800. Se probo
+     subirla a 15,2 y se descarto — lo que se buscaba era el grosor del boton, no
+     el cuerpo del texto. */
   font-size:.79rem;
   letter-spacing:.03em;
   text-transform:uppercase;
@@ -909,67 +1351,112 @@
 }
 
 @media (max-width:420px){
-  .ss-cart-clear,
   .ss-cart-checkout{
     font-size:.75rem;
     letter-spacing:.02em;
   }}
 
-.ss-cart-continue,
+/* ── LA CABECERA: EL NOMBRE, «VACIAR» Y EL ASPA ──────────────────────────
+   «Vaciar» es texto y no boton a proposito. Es la unica accion del cajon que
+   no se puede repetir —borra la compra entera— y estaba abajo con el mismo
+   cuerpo y la misma sombra que las demas. Aqui se ve, se alcanza y no compite:
+   pesa lo que tiene que pesar. Y ahora ademas se puede deshacer. */
+.ss-cart-head-acciones{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
 .ss-cart-clear{
+  min-height:0;
+  padding:4px 2px;
   border:0;
-  background:#fff;
-  color:#0f172a;
-  cursor:pointer;
-  box-shadow:
-    0 -1px 3px rgba(15,23,42,.045),
-    0 1px 0 rgba(255,255,255,.94) inset,
-    0 14px 30px rgba(15,23,42,.09);
-}
-
-.ss-cart-continue{
-  grid-area:continue;
-}
-
-.ss-cart-continue:hover,
-.ss-cart-clear:hover{
-  background:#f8fafc;
-  box-shadow:
-    0 -1px 4px rgba(15,23,42,.055),
-    0 1px 0 rgba(255,255,255,.97) inset,
-    0 18px 34px rgba(15,23,42,.11);
-  transform:translateY(-1px);
-}
-
-.ss-cart-clear{
-  grid-area:clear;
-}
-
-.ss-cart-checkout{
-  grid-area:checkout;
-  border:1px solid #6b6c6c;
-  background:linear-gradient(180deg, #373737 0%, #111111 100%);
-  color:#fff;
+  border-radius:6px;
+  background:none;
   box-shadow:none;
+  color:var(--muted);
+  font-family:inherit;
+  font-size:.78rem;
+  font-weight:800;
+  letter-spacing:.01em;
+  text-transform:none;
+  /* SIN subrayado en reposo. Era una raya permanente al lado del titulo, pidiendo
+     atencion para la unica accion del cajon que conviene no pulsar. Aparece al
+     acercar el raton, que es cuando hace falta saber que se puede pulsar. */
+  text-decoration:none;
+  cursor:pointer;
+  transition:color .16s ease;
+}
+
+@media (hover:hover){
+  .ss-cart-clear:hover{
+    color:var(--ink);
+    text-decoration:underline;
+    text-underline-offset:3px;
+  }
+}
+
+/* Sin raton no hay hover: en tactil el subrayado se ve al pulsar. */
+.ss-cart-clear:focus-visible,
+.ss-cart-clear:active{
+  color:var(--ink);
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+.ss-cart-clear:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+
+/* Sin lineas: el carrito vacio no tiene nada que vaciar. */
+.ss-cart-panel.is-empty .ss-cart-clear{ display:none; }
+
+/* PLANO Y DE UN SOLO COLOR, el mismo tratamiento que «Elegir opcion» del
+   catalogo. Llevaba un degradado de #373737 a #111 con un borde gris de 1 px:
+   dos botones negros distintos en el mismo sitio, y el degradado le daba un
+   relieve que no tiene ninguna otra pieza. Del catalogo se copia todo —color,
+   brillo interior y caida—, no solo el color, o volverian a parecerse a medias.
+   El de /checkout va detras: es esta misma decision un paso despues. */
+.ss-cart-checkout{
+  border:0;
+  background:#252525;
+  color:#fff;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.10) inset,
+    0 10px 24px rgba(15,23,42,.16);
+}
+
+/* El hover, el mismo aclarado del catalogo (#3a3a3a). Aqui repetia el degradado
+   y apagaba la sombra, asi que al pasar el raton el boton volvia al relieve. */
+/* La flecha: mismo hueco (9 px) y mismo avance (3 px) que «Elegir opcion». */
+.ss-cart-checkout{
+  gap:9px;
+}
+.ss-cart-checkout svg{
+  flex:0 0 auto;
+  transition:transform .18s ease;
+}
+@media (hover:hover){
+  .ss-cart-checkout:hover svg{ transform:translateX(3px); }
 }
 
 .ss-cart-checkout:hover{
-  background:linear-gradient(180deg, #373737 0%, #111111 100%);
+  background:#3a3a3a;
   color:#fff;
-  box-shadow:none;
   transform:none;
 }
 
 /* Product detail CTA parity with checkout/cart primary button */
 body[class*="product-"] .cta-col .btn-main{
-  border:1px solid #6b6c6c !important;
-  background:linear-gradient(180deg, #4a4a4a 0%, #171717 100%) !important;
-  box-shadow:none !important;
+  border:0 !important;
+  background:#252525 !important;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.10) inset,
+    0 10px 24px rgba(15,23,42,.16) !important;
   color:#fff !important;
 }
+/* OJO: este hover PISABA el boton plano con un degradado, y con `!important`.
+   Aplanar el reposo no basta: al pasar el raton el relieve volvia. */
 body[class*="product-"] .cta-col .btn-main:hover{
-  border-color:#8f8f8f !important;
-  background:linear-gradient(180deg, #565656 0%, #202020 100%) !important;
+  border-color:transparent !important;
+  background:#3a3a3a !important;
   box-shadow:none !important;
 }
 body[class*="product-"] .panel .cta-col{
@@ -1002,8 +1489,6 @@ body[class*="product-"] .panel .cta-col #reserveBtn{
       'reserve' !important;
   }}
 
-.ss-cart-continue:active,
-.ss-cart-clear:active,
 .ss-cart-checkout:active{
   transform:translateY(0);
 }
@@ -1033,31 +1518,34 @@ body[class*="product-"] .panel .cta-col #reserveBtn{
     height:60px;
   }
 
-  .ss-cart-meta{
+  /* En movil el boton es un punto mas pequeño, y el hueco que le reservan el
+     nombre y la chapa baja con el. La fila del precio no reserva nada: llega
+     hasta el borde, que es donde esta anclado el boton. */
+  .ss-cart-name{
     padding-right:40px;
+  }
+
+  .ss-cart-color{
+    max-width:calc(100% - 40px);
   }
 
   .ss-cart-row{
     gap:10px;
   }
 
+  /* `font-size` ya no pinta nada: el icono es un SVG y su medida la manda
+     `.ss-cart-remove svg`. */
   .ss-cart-remove{
-    width:32px;
-    height:32px;
-    font-size:18px;
+    width:36px;
+    height:36px;
   }}
 
 @media (max-width:390px){
   .ss-cart-actions{
-    grid-template-columns:1fr;
-    grid-template-areas:
-      'checkout'
-      'continue'
-      'clear';
+    grid-template-columns:1fr auto;
+    gap:10px;
   }
 
-  .ss-cart-continue,
-  .ss-cart-clear,
   .ss-cart-checkout{
     min-height:46px;
     font-size:.8rem;
@@ -1088,9 +1576,16 @@ body[class*="product-"] .panel .cta-col #reserveBtn{
   --surface:#ffffff;
   --primary:#d11c1c;
   --primary-soft:rgba(209,28,28,.10);
+  /* EL SUELO. Un solo gris para todo el sitio: el body, la mitad baja de la
+     portada, la barra de las categorias y /cuenta. Vive aqui y no en index.css
+     porque las fichas no cargan aquella hoja. */
+  --suelo:#f7f7f7;
 
   --sat: env(safe-area-inset-top, 0px);
-  --header-h: 88px;
+  /* El alto de la barra. Lo consumen el relleno del <body>, las barras pegajosas
+     que se cuelgan debajo, el `scroll-margin-top` de las anclas y el checkout:
+     cambiarlo aqui los mueve a todos. */
+  --header-h: 72px;
   --vh: 1vh;
 }
 
@@ -1112,6 +1607,16 @@ html{
      provocando una deriva acumulativa hacia abajo al entrar/salir de una ficha.
      Sin anchoring, scrollY se mantiene en el valor restaurado y cae en su sitio. */
   overflow-anchor:none;
+  /* Hueco de la barra de desplazamiento SIEMPRE reservado. Sin esto, una página
+     que cabe entera en la pantalla no saca barra, la ventana gana sus ~15px y la
+     cabecera fija —que se dimensiona contra el viewport— se ensancha: su contenido
+     centrado se corre 7,67px a la derecha respecto a cualquier página con scroll.
+     Medido a 1440px: /cuenta, /pedido y /pago daban contenedor en x=50 y borde
+     derecho en 1440, contra 42,33 y 1424,67 en home, catálogo y checkout.
+     Con la reserva, las páginas que ya tenían barra no cambian NADA (mismos
+     números al píxel) y las cortas se alinean con ellas. En móvil la barra es
+     superpuesta, así que el hueco es 0 y no toca nada. */
+  scrollbar-gutter:stable;
 }
 
 /* Transiciones suaves entre páginas (View Transitions cross-document). Mejora
@@ -1140,10 +1645,15 @@ html{
   ::view-transition-new(*){ animation: none !important; }}
 html, body, button, input, select, textarea{ color-scheme: only light !important; }
 
+/* EL SUELO DEL SITIO. Habia TRES grises distintos —#f3f4f6 en el body, #f0f2f5
+   en /cuenta y el blanco de las secciones de la portada— y se notaba al pasar de
+   una pagina a otra. Ahora es uno solo, el mismo que la mitad baja de la portada
+   (`--fondo-bajo` en css/index.css). Las tarjetas siguen blancas: es el contraste
+   contra ESTE gris lo que las hace objeto. */
 body{
   font-family:var(--ui);
-  background: #f3f4f6;
-  background-color:#f3f4f6;
+  background: var(--suelo);
+  background-color: var(--suelo);
   color:var(--ink);
   line-height:1.55;
   padding-top: calc(var(--header-h) + var(--sat));
@@ -1192,16 +1702,16 @@ button{ font-family:inherit; }
   --variant-border:1.5px solid rgba(15,23,42,.14);
   --variant-border-hover:rgba(15,23,42,.24);
   --variant-border-selected:rgba(15,23,42,.50);
-  --variant-ring-selected:0 0 0 4px rgba(17,24,39,.08);
   --variant-ring-focus:0 0 0 4px rgba(17,24,39,.12), 0 3px 12px rgba(15,23,42,.08);
   --variant-shadow-hover:0 4px 12px rgba(15,23,42,.08);
-  --variant-shadow-selected:0 6px 16px rgba(15,23,42,.12), inset 0 0 0 1px rgba(255,255,255,.22);
   --variant-dot:8px;                   /* punto blanco del círculo elegido */
   --variant-lift:translateY(-1px) scale(1.05);
   --variant-transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
   --variant-pill-padding:10px 15px;
   --variant-pill-transition:transform .16s ease, box-shadow .16s ease, background .16s ease, color .16s ease;
   --variant-disabled-opacity:.45;
+  --variant-disabled-ink:#64748b;      /* diagonal del agotado: gris MEDIO, lee sobre claro y sobre oscuro */
+  --variant-disabled-line:1.25px;      /* medio grosor de esa diagonal */
 }
 
 :root{
@@ -1288,6 +1798,38 @@ button{ font-family:inherit; }
   white-space:nowrap;
   line-height:1.1;
 }
+/* EL PRECIO DE UNA LINEA QUE ENTRA EN UN PACK.
+
+   Se enseña lo que cuesta dentro del pack y, debajo, tachado, lo que costaria
+   suelta — igual que en la oferta de la portada y en el cajon del carrito. El
+   tachado va DEBAJO y no al lado porque la columna del precio es estrecha y en
+   movil dos cifras seguidas no caben sin partirse.
+
+   Lo usan /checkout y /pago con las mismas clases: es la misma informacion en
+   dos pantallas seguidas y tenia que verse igual. */
+.order-summary__product-was{
+  display:block;
+  margin-top:2px;
+  font-size:.8rem;
+  font-weight:700;
+  color:var(--muted, #6b7280);
+  text-decoration-thickness:1px;
+  white-space:nowrap;
+}
+
+/* «Gratis», no «GRATIS». Hereda el tamaño del importe de linea (1,05rem y peso
+   900) y en mayusculas ocupaba mas que el precio del patinete, que es la cifra
+   que de verdad manda en el resumen. Un regalo se anuncia, no se grita.
+   1rem es una medida elegida a mano: queda justo por debajo del importe (1,05rem)
+   sin llegar a parecer un dato secundario. */
+.order-summary__product-free{
+  font-size:1rem;
+  font-weight:800;
+  color:#1a8f4a;
+  text-transform:none;
+  letter-spacing:0;
+}
+
 .order-summary__product-image{
   width:56px;
   height:56px;
@@ -1331,6 +1873,11 @@ button{ font-family:inherit; }
   font-size:1rem;
 }
 .order-summary__row:last-child{ border-bottom:0; }
+/* OJO: `display:flex` de arriba es una CLASE y gana a `[hidden]{display:none}`,
+   que es un atributo. La fila del pack nace `hidden` y se enseñaba igual, con su
+   marcador `—` puesto, en todos los pedidos sin pack. Vale para cualquier fila
+   del resumen que se esconda: envio, descuento, recargo. */
+.order-summary__row[hidden]{ display:none; }
 .order-summary__row-label{
   color:var(--muted);
   font-weight:800;
@@ -1544,8 +2091,12 @@ button{ font-family:inherit; }
 .order-summary--checkout .order-summary__product-meta,
 .order-summary--payment .order-summary__product-meta,
 .compat-box .order-summary__product-meta{
-  display:inline-flex;
-  align-items:center;
+  /* inline-BLOCK, no inline-flex: `text-overflow:ellipsis` NO se aplica sobre un
+     contenedor flex —su texto vive en una caja anónima—, así que la píldora se
+     recortaba a media letra y sin puntos ("Ref: ACC-BAR-NANLIO" partido en seco).
+     Como aquí dentro solo hay texto, el flex no aportaba nada. */
+  display:inline-block;
+  vertical-align:middle;
   width:auto;
   font-size:.72rem;
   font-weight:800;
@@ -1561,6 +2112,41 @@ button{ font-family:inherit; }
 .order-summary--payment .order-summary__product-meta--price{
   display:none;
 }
+
+/* OJO AL ORDEN: este bloque va DESPUES de la regla generica de
+   `.order-summary__product-meta` y no antes. Las dos tienen la misma
+   especificidad, asi que gana la ultima — puesto arriba, la chapa perdia
+   `overflow` y `max-width` y salia «PACK DE LA SEM…» recortada, con el color
+   salvado solo por el !important. */
+
+/* LA CHAPA DEL PACK.
+
+   Ocupa el sitio de «Ref: ACC-BAG», no una linea propia: en una linea de pack la
+   referencia no aporta nada —el cliente no compro un SKU, compro una oferta— y
+   apilar cuatro chapas hacia la tarjeta el doble de alta en movil.
+
+   Roja y solida, que es el acento de la casa. Las demas chapas son lavados grises
+   porque son datos; esta es la razon por la que la bolsa pone GRATIS y el manillar
+   32,99, y tiene que leerse a la primera.
+
+   El `!important` del color se queda: la regla generica pinta gris y ese si es un
+   empate que conviene ganar aunque alguien vuelva a mover bloques. */
+.order-summary__product-meta--pack,
+.order-summary--checkout .order-summary__product-meta--pack,
+.order-summary--payment .order-summary__product-meta--pack{
+  padding:4px 10px;
+  border-radius:999px;
+  background:var(--primary, #d11c1c);
+  color:#fff !important;
+  font-size:.7rem;
+  font-weight:900;
+  letter-spacing:.03em;
+  text-transform:uppercase;
+  white-space:nowrap;
+  max-width:none;
+  overflow:visible;
+}
+
 
 .order-summary--checkout .order-summary__product-meta--ref,
 .order-summary--checkout .order-summary__product-meta--price,
@@ -1765,8 +2351,8 @@ nav.menu{
   display:flex;
   gap:10px;
   font-weight:800;
-  text-transform:uppercase;
-  font-size:.86rem;
+  font-size:1.09rem;
+  letter-spacing:-.01em;
   align-items:center;
   flex-wrap:nowrap;
   white-space:nowrap;
@@ -1777,7 +2363,7 @@ nav.menu{
 nav.menu > a,
 nav.menu .menu-products-host > a,
 nav.menu button{
-  padding:7px 11px;
+  padding:6px 12px;
   border-radius:999px;
   background:transparent;
   border:0;
@@ -1863,76 +2449,10 @@ nav.menu > a[aria-current="page"]{
   opacity:.9;
 }
 
-/* Section header unificado */
-.section-header{
-  text-align:center;
-  margin-bottom:22px;
-}
-.section-header h2{
-  margin:0 0 8px;
-  font-family:var(--sport);
-  font-size:clamp(1.2rem, 1rem + 1vw, 1.65rem);
-  letter-spacing:.06em;
-  text-transform:uppercase;
-  color:#0b0c0f;
-}
-.section-header .section-subtitle{
-  margin:0 auto;
-  max-width:52ch;
-  color:#6b7280;
-  font-size:clamp(.92rem,.88rem + .2vw,1rem);
-  font-weight:700;
-  line-height:1.6;
-}
-
-.features{ padding:26px 0 10px; }
-
-.feature-grid{
-  list-style:none;
-  display:grid;
-  gap:16px;
-  grid-template-columns: repeat(4, minmax(0,1fr));
-}
-.feature-card{
-  background:linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(249,250,251,.96) 100%);
-  border:1px solid rgba(17,24,39,.08);
-  border-radius:20px;
-  padding:17px;
-  display:grid;
-  grid-template-columns:auto 1fr;
-  column-gap:14px;
-  row-gap:8px;
-  align-items:center;
-  box-shadow:0 10px 24px rgba(15,23,42,.05);
-  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-}
-.feature-card:hover{
-  transform:translateY(-2px);
-  box-shadow:0 16px 32px rgba(15,23,42,.08);
-  border-color:rgba(17,24,39,.14);
-}
-.feature-card h3{
-  font-size:1.02rem;
-  line-height:1.22;
-  letter-spacing:.01em;
-}
-.feature-card p{
-  grid-column:1/-1;
-  color:rgba(17,24,39,.72);
-  font-size:.93rem;
-  line-height:1.56;
-}
-.f-icon{
-  width:46px;
-  height:46px;
-  border-radius:999px;
-  display:grid;
-  place-items:center;
-  border:1px solid rgba(17,24,39,.08);
-  background:rgba(255,255,255,.96);
-  box-shadow:0 4px 12px rgba(15,23,42,.05);
-}
-.f-icon i{ font-size:20px; color:var(--primary); }
+/* Aqui vivian `.section-header` y las tarjetas `.feature-*`/`.f-icon`, de «Por
+   que SCOOT SHOP». Esa seccion se fusiono con «Como funciona la web» en un
+   dosier y sus cuatro razones son ahora la lista de hechos del rail. Ningun HTML
+   del sitio usa ya esas clases. */
 
 /* =========================
    6) PRODUCTS (cards existentes)
@@ -2124,30 +2644,85 @@ nav.menu > a[aria-current="page"]{
   font-weight:700;
   font-size:.9rem;
 }
-.card:not(.order-summary) .discount-badge{
-  display:inline-flex;
-  align-items:center;
-  padding:3px 8px;
-  border-radius:999px;
-  background:#dc2626;
-  color:#fff;
-  font-size:.72rem;
-  font-weight:800;
-  letter-spacing:.02em;
+/* ══════════════════════════════════════════════════════════════════════
+   ETIQUETA DGT
+   Una pestaña de TEXTO, no una imagen. El sello azul era un SVG trazado
+   de 236 KB que descargaban la portada y las 12 fichas homologadas; unas
+   letras no descargan nada.
+   Forma: fondo blanco, borde y letras en --ink. En la tarjeta va pegada
+   al canto derecho de la foto, y por eso ESE lado se queda sin borde y
+   con las esquinas rectas: es lo que la hace parecer un recuadro que sale
+   del canto y no una pegatina puesta encima.
+   Antes había DOS copias del sello por tarjeta —`--price` en la fila del
+   precio para escritorio y `--info` en la cabecera para movil— porque el
+   sitio cambiaba con el ancho. Ahora el sitio es el mismo, asi que hay una.
+   ══════════════════════════════════════════════════════════════════════ */
+.dgt-tag{
+  display:block;
+  /* Placa translucida sobre la foto, no un recuadro blanco con filo negro. El
+     tono es calido (#453e33) al 14 %: sobre el fondo claro de la foto se lee
+     como un gris con cuerpo, y deja respirar al logotipo en vez de encerrarlo. */
+  background:#453e3324;
+  /* No hay texto dentro, pero si el logo no cargara se pinta su `alt`: que
+     salga en la tinta del sitio y no en el negro por defecto del navegador. */
+  color:var(--ink,#111315);
+  /* El borde va TRANSPARENTE a proposito. No se quita: sigue ocupando sus 2 px
+     de caja, asi que la placa conserva su tamano y su holgura sin dibujar filo. */
+  border:2px solid #11131500;
+  border-radius:13px;
+  padding:6px 10px 5px;
+  /* line-height:0 para que el hueco de la linea no sume alto bajo el logo. */
+  line-height:0;
+}
+
+/* El LOGOTIPO de la DGT, en negro sobre la placa blanca. Es un WebP de 2,6 KB
+   (163x64, sin perdida) en vez del SVG trazado de 236 KB que habia antes; se
+   sirve al cuadruple del tamano en que se pinta para que no se vea blando en
+   pantallas densas. `width`/`height` van en el marcado y el ancho lo deduce la
+   proporcion, asi que no hay salto al cargar.
+   NUNCA lleva `?v=`: es una imagen. Ver project_images_never_versioned. */
+.dgt-tag-logo{
+  display:block;
+  height:16px;
+  width:auto;
+}
+
+/* En la tarjeta: pegada al borde derecho de la foto (.card-media ya es
+   position:relative). Sin borde derecho y con ese lado recto. */
+.card .dgt-tooltip--tab{
+  position:absolute;
+  top:14px;
+  right:0;
+  /* 4, POR ENCIMA de .card-color-preview (z-index:3), que es la capa del fundido
+     de la segunda foto al pasar el raton. Con el mismo 3 ganaba la capa —el JS la
+     anade a .card-media DESPUES de la etiqueta— y como lleva fondo blanco opaco,
+     el logo DESAPARECIA justo al pasar por encima del producto. */
+  z-index:4;
+  margin:0;
   line-height:1;
-  white-space:nowrap;
-  flex-shrink:0;
 }
-.card .dgt-badge{
-  margin-left:auto;
-  width:42px;
-  height:auto;
-  object-fit:contain;
-  flex:0 0 auto;
-  align-self:center;
+.card .dgt-tooltip--tab .dgt-tooltip-toggle{
+  margin:0;
+  line-height:1;
 }
-.card .dgt-tooltip--info{
-  display:none;
+/* EN LA TARJETA EL SELLO VA SIN PLACA: el logotipo solo, sobre la foto.
+
+   La placa translucida existia para despegarlo de una foto con fondo; sobre el
+   blanco de la tarjeta no despega de nada y lo que hace es encerrarlo. Lo que NO
+   se quita es el relleno: es el que mantiene el hueco donde se pulsa para abrir la
+   nube y la separacion del canto. Sin el, el objetivo se reduciria al dibujo y el
+   logo quedaria pegado al borde.
+
+   19 px de alto, los mismos que en la ficha: sin la placa alrededor, los 16 de
+   antes se leian pequenos. */
+.card .dgt-tooltip--tab .dgt-tag{
+  background:transparent;
+  border-right:0;
+  border-radius:13px 0 0 13px;
+  padding-right:10px;
+}
+.card .dgt-tooltip--tab .dgt-tag-logo{
+  height:24px;
 }
 
 .dgt-tooltip{
@@ -2171,9 +2746,90 @@ nav.menu > a[aria-current="page"]{
   margin-left:auto;
 }
 
-.dgt-tooltip-toggle .dgt-badge{
+.dgt-tooltip-toggle .dgt-tag{
   display:block;
 }
+
+/* OJO AL ORDEN: este bloque va DESPUES de `.dgt-tooltip`. Los dos valen lo mismo
+   en especificidad (una clase), asi que gana el ultimo — puesto antes, `.dgt-tooltip`
+   le devolvia `position:relative` y la pestaña se quedaba en mitad de la foto en vez
+   de pegarse al canto. */
+/* LA PESTAÑA EN LA FICHA. Es la MISMA que la de la tarjeta del catalogo —mismo
+   canto recto a la derecha, mismo lavado calido, mismo logotipo— pero a la escala
+   que le toca: la foto de la ficha mide el doble que la de la tarjeta, asi que el
+   sello crece con ella. Si se quedara en los 14 px de la tarjeta, sobre una foto
+   de 380 px se leeria como una pegatina olvidada.
+
+   `.gallery-main` es `position:relative` en tarjetas.css, que es lo que la
+   sostiene. Antes el sello vivia en la fila del precio, como una chapa suelta:
+   el mismo dato contado de dos maneras segun donde se mirase. */
+.dgt-tooltip--ficha{
+  position:absolute;
+  top:16px;
+  right:0;
+  z-index:3;
+  margin:0;
+  line-height:1;
+}
+
+/* El LOGOTIPO manda, la placa acompaña. Con 20 px de logo y 15 de relleno la
+   placa medía 39 px de alto para un dibujo de 20: mas de la mitad era fondo, y
+   sobre una foto de 592 px eso se lee como un rectangulo gris con algo dentro.
+   Con 24 de logo y 10 de relleno la placa baja a 38 y el logo ocupa el 63 % — se
+   ve el sello, no la pastilla. */
+.dgt-tooltip--ficha .dgt-tag{
+  /* SIN PLACA, igual que en la tarjeta del catalogo. Todo lo de abajo —el
+     radio, el reparto del aire a escala— describia como se dibujaba esa placa
+     y ya no dibuja nada; se conserva porque el relleno sigue siendo el hueco
+     donde se pulsa y lo que separa el logotipo del canto. */
+  background:transparent;
+  border-right:0;
+  border-radius:15px 0 0 15px;
+  /* EL AIRE ES EL DEL HOME, A ESCALA. La tarjeta del catalogo deja 12 px a cada
+     lado, 8 arriba y 7 abajo alrededor de un logotipo de 16. Aqui el logotipo mide
+     19, o sea 1,1875 veces, y el aire se multiplica por lo mismo: 14 / 14 / 9 / 8.
+     Descontando los 2 px del filo transparente, eso son estos rellenos, y el radio
+     sigue la misma proporcion (13 -> 15).
+
+     Asi la relacion logotipo/placa sale 0,53 — practicamente la de la tarjeta — y
+     las dos piezas se leen como el mismo objeto a dos tamaños, que es lo que se
+     pedia. Antes lo hice a ojo, recortando de aqui y de alla, y no cuadraba nunca
+     porque lo que sobraba no era relleno: era el hueco del logotipo deformado. */
+  padding:7px 10px 6px 12px;
+}
+
+/* EL LOGOTIPO NO ES UNA FOTO DE LA GALERIA.
+
+   `tarjetas.css` tiene `.gallery-main img{ width:100%; height:100%;
+   object-fit:contain; border-radius:16px }` — escrito para la foto del producto,
+   pero alcanza a CUALQUIER imagen dentro de la galeria, y el sello es una. Le
+   metia el dibujo en una caja que no es la suya: medido, salia de 47x23 (relacion
+   2,04) cuando el logotipo es 163x64 (2,55), asi que quedaba encajonado con aire
+   muerto a la derecha — eso era lo que se veia como «la etiqueta muy larga», y
+   por eso recortar el relleno no lo arreglaba.
+
+   Gana por especificidad (dos clases contra una clase y un tipo), asi que no
+   depende del orden de los ficheros. */
+.dgt-tooltip--ficha .dgt-tag-logo{
+  width:auto;
+  /* Mas grande que en la tarjeta del catalogo, a proposito: la foto de la ficha
+     mide el triple, y con la misma medida el sello se perdia en ella. */
+  height:30px;
+  max-width:none;
+  max-height:none;
+  object-fit:fill;
+  border-radius:0;
+}
+
+@media (max-width:760px){
+  /* En movil la foto de la ficha se acerca al tamano de la tarjeta, asi que el
+     sello es EXACTAMENTE el de la tarjeta: mismos rellenos, mismo radio, mismo
+     logotipo de 16 px. */
+  .dgt-tooltip--ficha{ top:12px; }
+  .dgt-tooltip--ficha .dgt-tag{ border-radius:13px 0 0 13px; padding:6px 12px 5px 10px; }
+  .dgt-tooltip--ficha .dgt-tag-logo{ height:22px; }
+}
+
 
 .dgt-tooltip-toggle:focus-visible{
   outline:2px solid rgba(225,6,0,.45);
@@ -2187,13 +2843,26 @@ nav.menu > a[aria-current="page"]{
   left:0;
   top:0;
   width:max-content;
+  /* OJO: este valor lo PISA `placeTooltip()` en js/index.js, que escribe
+     `style.maxWidth` en linea al colocarla. Cambiar el ancho se hace alli. */
   max-width:min(280px, calc(100vw - 20px));
   padding:11px 12px;
   border-radius:14px;
-  border:1px solid rgba(17,24,39,.12);
+  /* SIN BORDE. Lo que separa la burbuja del fondo es la sombra, y va por TODO el
+     contorno: el primer valor es un halo sin desplazar —mismo aire arriba, abajo y
+     a los lados— y el segundo es la caida de siempre, que es la que da la sensacion
+     de que flota. Con el borde de 1px la burbuja se leia como un recuadro dibujado;
+     sin el, como algo que esta por encima de la pagina. */
+  border:0;
   background:rgba(255,255,255,.98);
   color:rgba(17,24,39,.82);
-  box-shadow:0 18px 38px rgba(15,23,42,.16);
+  /* El gris es NEUTRO, no el azulado `rgba(15,23,42)` que usa el resto del sitio
+     para sus tarjetas: sobre las fotos de producto —casi todas grises— aquel tiraba
+     a azul y se notaba. Este es el mismo `rgba(138,138,138)` de los recuadros de la
+     ficha, y va flojo a proposito: lo justo para despegar la burbuja del fondo. */
+  box-shadow:
+    0 0 10px 2px rgba(138,138,138,.07),
+    0 10px 24px rgba(138,138,138,.11);
   font-size:.84rem;
   line-height:1.45;
   font-weight:700;
@@ -2213,8 +2882,12 @@ nav.menu > a[aria-current="page"]{
   width:14px;
   height:14px;
   background:rgba(255,255,255,.98);
-  border-top:1px solid rgba(17,24,39,.12);
-  border-left:1px solid rgba(17,24,39,.12);
+  border:0;
+  /* La punta tambien pierde sus dos bordes y lleva su propia sombrita, hacia
+     AFUERA. El desplazamiento va en el sistema del propio cuadrado, asi que la
+     rotacion se la lleva puesta: con 45deg apunta hacia arriba y con los 225deg
+     de `.is-above` apunta hacia abajo, sin escribir nada aparte. */
+  box-shadow:-2px -2px 6px rgba(138,138,138,.05);
   transform:translateX(-50%) rotate(45deg);
 }
 
@@ -2247,11 +2920,11 @@ nav.menu > a[aria-current="page"]{
     left:var(--dgt-arrow-left);
   }}
 
-.panel .dgt-badge{
+/* En la ficha no hay canto al que pegarse: la etiqueta es un recuadro
+   cerrado (los cuatro bordes, 6px en las cuatro esquinas) al final de la
+   fila del precio, que es donde vivia el sello. */
+.panel .dgt-tag{
   margin-left:auto;
-  width:57px;
-  height:auto;
-  object-fit:contain;
   flex:0 0 auto;
   align-self:center;
 }
@@ -2293,8 +2966,13 @@ nav.menu > a[aria-current="page"]{
 }
 
 .card:not(.order-summary) .btn-cart{
-  background:#fff;
-  color:#0f172a;
+  /* Gris oscuro, no blanco. Con el fondo cambia todo lo que estaba pensado para
+     claro: la tinta pasa a blanca, el icono del carrito tambien (es una mascara,
+     asi que basta con su background-color) y el brillo interior superior
+     —rgba(255,255,255,.94), que sobre blanco no se veia— baja a .10 o dibujaria
+     una raya blanca en el borde. */
+  background:#252525;
+  color:#fff;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -2307,9 +2985,8 @@ nav.menu > a[aria-current="page"]{
   letter-spacing:.03em;
   text-transform:uppercase;
   box-shadow:
-    0 -1px 3px rgba(15,23,42,.045),
-    0 1px 0 rgba(255,255,255,.94) inset,
-    0 14px 30px rgba(15,23,42,.09);
+    0 1px 0 rgba(255,255,255,.10) inset,
+    0 10px 24px rgba(15,23,42,.16);
 }
 
 .card:not(.order-summary) .btn-cart i{ display:none; }
@@ -2320,28 +2997,63 @@ nav.menu > a[aria-current="page"]{
   height:16px;
   flex:0 0 16px;
   display:inline-block;
-  background-color:#2b3138;
+  background-color:#fff;
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7.5 18C8.32843 18 9 18.6716 9 19.5C9 20.3284 8.32843 21 7.5 21C6.67157 21 6 20.3284 6 19.5C6 18.6716 6.67157 18 7.5 18Z'/%3E%3Cpath d='M16.5 18.0001C17.3284 18.0001 18 18.6716 18 19.5001C18 20.3285 17.3284 21.0001 16.5 21.0001C15.6716 21.0001 15 20.3285 15 19.5001C15 18.6716 15.6716 18.0001 16.5 18.0001Z'/%3E%3Cpath d='M2 3L2.26121 3.09184C3.5628 3.54945 4.2136 3.77826 4.58584 4.32298C4.95808 4.86771 4.95808 5.59126 4.95808 7.03836V9.76C4.95808 12.7016 5.02132 13.6723 5.88772 14.5862C6.75412 15.5 8.14857 15.5 10.9375 15.5H12M16.2404 15.5C17.8014 15.5 18.5819 15.5 19.1336 15.0504C19.6853 14.6008 19.8429 13.8364 20.158 12.3075L20.6578 9.88275C21.0049 8.14369 21.1784 7.27417 20.7345 6.69708C20.2906 6.12 18.7738 6.12 17.0888 6.12H11.0235M4.95808 6.12H7'/%3E%3C/svg%3E") center / contain no-repeat;
   mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7.5 18C8.32843 18 9 18.6716 9 19.5C9 20.3284 8.32843 21 7.5 21C6.67157 21 6 20.3284 6 19.5C6 18.6716 6.67157 18 7.5 18Z'/%3E%3Cpath d='M16.5 18.0001C17.3284 18.0001 18 18.6716 18 19.5001C18 20.3285 17.3284 21.0001 16.5 21.0001C15.6716 21.0001 15 20.3285 15 19.5001C15 18.6716 15.6716 18.0001 16.5 18.0001Z'/%3E%3Cpath d='M2 3L2.26121 3.09184C3.5628 3.54945 4.2136 3.77826 4.58584 4.32298C4.95808 4.86771 4.95808 5.59126 4.95808 7.03836V9.76C4.95808 12.7016 5.02132 13.6723 5.88772 14.5862C6.75412 15.5 8.14857 15.5 10.9375 15.5H12M16.2404 15.5C17.8014 15.5 18.5819 15.5 19.1336 15.0504C19.6853 14.6008 19.8429 13.8364 20.158 12.3075L20.6578 9.88275C21.0049 8.14369 21.1784 7.27417 20.7345 6.69708C20.2906 6.12 18.7738 6.12 17.0888 6.12H11.0235M4.95808 6.12H7'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* AGOTADO en la tarjeta: los mismos valores exactos que `.btn-main.is-disabled` de la
+   ficha (tarjetas.css) — gris #e5e7eb, texto #9ca3af, sin sombra, sin borde e inerte—,
+   con el icono de bolsa de `.btn-main::before` en vez del carrito. Lo que NO se copia es
+   la geometría del panel (54px, .86rem, letter-spacing .07em): aquí manda la de la
+   tarjeta, o el botón saldría más alto que los de las tarjetas vecinas.
+
+   `pointer-events:none` no es solo cosmética: deja que el clic llegue al <article> y
+   lleve a la ficha. */
+.card:not(.order-summary) .btn-cart--agotado{
+  background:#e5e7eb;
+  color:#9ca3af;
+  cursor:not-allowed;
+  pointer-events:none;
+  box-shadow:none;
+  border-color:transparent;
+}
+
+.card:not(.order-summary) .btn-cart--agotado::before{
+  background-color:currentColor;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z'/%3E%3Cline x1='3' y1='6' x2='21' y2='6'/%3E%3Cpath d='M16 10a4 4 0 01-8 0'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z'/%3E%3Cline x1='3' y1='6' x2='21' y2='6'/%3E%3Cpath d='M16 10a4 4 0 01-8 0'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* Tarjeta cuyo botón NO añade, sino que abre la burbuja para elegir: "Elegir opción"
+   con la flecha del "Continuar a pago" del checkout (.ck-btn), misma micro-interacción
+   —avanza 3px al pasar el ratón—. El carrito del ::before sobra: prometía un añadido
+   que ese clic no hace. La flecha va DESPUÉS del texto, por eso es un <svg> en el
+   marcado y no un pseudo-elemento (::before dibuja delante). */
+.card:not(.order-summary) .btn-cart--elegir::before{ display:none; }
+
+.card:not(.order-summary) .btn-cart--elegir svg{
+  flex:0 0 auto;
+  transition:transform .18s ease;
 }
 
 /* Solo en punteros reales. En táctil el :hover se queda pegado tras tocar
    —justo mientras se muestra "Añadido"— y encima anima una transición de
    box-shadow de tres capas en cada tarjeta del listado. */
 @media (hover:hover){
+  .card:not(.order-summary) .btn-cart--elegir:hover svg{ transform:translateX(3px); }
+
+  /* Al pasar por encima SOLO se aclara el gris. Antes cambiaba de color, se
+     elevaba un pixel y crecia la sombra: tres cosas a la vez para decir una. */
   .card:not(.order-summary) .btn-cart:hover{
-    transform:translateY(-1px);
-    color:#0b0c0f;
-    background:#f8fafc;
-    box-shadow:
-      0 -1px 4px rgba(15,23,42,.055),
-      0 1px 0 rgba(255,255,255,.97) inset,
-      0 18px 34px rgba(15,23,42,.11);
+    background:#3a3a3a;
   }
 }
 
+/* Añadido: verde CLARO. El #15803d de antes estaba elegido para el boton blanco;
+   sobre el gris oscuro se queda en 2,2:1 de contraste y no se lee. */
 .card:not(.order-summary) .btn-cart.is-added{
-  color:#15803d;
+  color:#4ade80;
 }
 
 /* =========================
@@ -2519,58 +3231,26 @@ footer{
    Solo overrides responsive extraídos del CSS original
    ========================================================= */
 
-/* Ajuste header en móvil */
-@media (max-width:768px){
-  :root{ --header-h: 72px; }
-}
+/* El ajuste de altura que habia aqui para movil (`--header-h: 72px`) se ha
+   quedado sin trabajo: desde que la barra de escritorio bajo a 72, el numero es
+   el mismo en los dos sitios y se declara una sola vez en :root. */
 
-/* En móvil ocultas nav desktop y muestras burger */
-@media (max-width:980px){
+/* 1) Primero se rinde «Cuenta»: se queda en icono y libera ~80 px para el menú.
+      Medido: con el rótulo puesto el menú necesita 1180 px para no pisar el
+      logotipo; sin él, 1100. */
+@media (max-width:1180px){
   #siteHeader .header-account-btn{
     width:44px;
     padding:0;
     gap:0;
   }
   #siteHeader .header-account-label{ display:none; }
-  nav.menu{ display:none; }
-  .burger{ display:grid; }
 }
 
-/* Features: 4 -> 2 columnas en tablets/móvil */
-@media (max-width:1024px){
-  .feature-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); }
-}
-
-/* Features: legibilidad en móvil */
-@media (max-width:768px){
-  .feature-grid{
-    gap:10px;
-    grid-template-columns: repeat(2, minmax(0,1fr));
-  }
-  .feature-card{
-    padding:12px;
-    grid-template-columns:36px 1fr;
-    column-gap:10px;
-    row-gap:4px;
-    align-items:start;
-  }
-  .feature-card h3{
-    font-size:.95rem;
-    line-height:1.22;
-  }
-  .feature-card p{
-    font-size:.84rem;
-    line-height:1.42;
-  }
-  .f-icon{
-    width:34px;
-    height:34px;
-  }
-  .f-icon i{ font-size:15px; }
-}
-
-@media (max-width:560px){
-  .feature-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); }}
+/* El corte del menú (1100 px) NO se declara aquí: vive junto al resto de la
+   cabecera, arriba, con `#siteHeader nav.menu`. Aquí había una copia con
+   `nav.menu` a secas que perdía por especificidad y no hacía nada — cambiarla
+   daba la falsa impresión de estar moviendo el corte. */
 
 @media (max-width:640px){
   .series{
@@ -2652,10 +3332,6 @@ footer{
     display:block !important;
     padding:0;
   }
-  .card.has-dgt .chip-name,
-  .card.has-dgt .card-body{
-    padding-right:52px;
-  }
 
   #p-ecoxtrem-m41-armored-dual .chip-name{
     font-size:.75rem;
@@ -2673,29 +3349,15 @@ footer{
   }
   .title{ display:none; }
 
-  .card .dgt-tooltip--price{
-    display:none !important;
-  }
-  .card .dgt-tooltip--info{
-    display:block;
-    position:absolute;
-    right:9px;
-    bottom:4px;
-    z-index:3;
-  }
-  .card .dgt-tooltip--info .dgt-tooltip-toggle{
-    padding:0;
-    background:none;
-    border:0;
-    display:block;
-  }
-  .card .dgt-tooltip--info .dgt-badge{
-    width:36px;
-    height:36px;
-    margin:0;
-    display:block;
-    filter:drop-shadow(0 1px 2px rgba(0,0,0,.1));
-  }
+  .card .dgt-tooltip--tab{ top:10px; }
+  .dgt-tag{ padding:5px 8px 4px; }
+  /* OJO A LA ESPECIFICIDAD. Esta regla se escribio como `.dgt-tag-logo` a secas, y
+     el dia que la version de escritorio paso a `.card .dgt-tooltip--tab .dgt-tag-logo`
+     —tres clases contra una— dejo de aplicarse SIN avisar: el sello salia a 24 px
+     sobre una tarjeta de 173, el 35 % de su ancho (en escritorio es el 19,6 %).
+     Por eso repite el mismo selector: para ganar por orden y no por peso. */
+  .dgt-tag-logo,
+  .card .dgt-tooltip--tab .dgt-tag-logo{ height:17px; }
 
   /* Bloque de precio inferior */
   .card-bottom{
@@ -2734,14 +3396,7 @@ footer{
   }
   .card:not(.order-summary) .price-now{ font-size:.96rem; font-weight:900; color:#111; }
   .card:not(.order-summary) .price-was{ font-size:.76rem; font-weight:700; opacity:.5; }
-  .card:not(.order-summary) .discount-badge{
-    font-size:.66rem;
-    padding:2px 7px;
-    margin-left:auto;
-    position:relative;
-    top:-1px;
-  }
-  .panel .dgt-badge{ width:57px; }}
+}
 
 @media (max-width:768px){
 
@@ -2823,8 +3478,7 @@ footer{
 }
 
 [data-home-catalog-root] .card:not(.order-summary) .card-brand,
-[data-home-catalog-root] .card:not(.order-summary) .title,
-[data-home-catalog-root] .card:not(.order-summary) .discount-badge{
+[data-home-catalog-root] .card:not(.order-summary) .title{
   display:none !important;
 }
 
@@ -2875,10 +3529,6 @@ footer{
   position:static;
 }
 
-[data-home-catalog-root] .card.has-dgt:not(.order-summary) .price-row{
-  padding-right:clamp(42px, 3vw, 50px);
-}
-
 [data-home-catalog-root] .card:not(.order-summary) .price-row::before,
 [data-home-catalog-root] .card:not(.order-summary) .price-row::after{
   display:none;
@@ -2905,30 +3555,6 @@ footer{
   align-self:auto;
 }
 
-[data-home-catalog-root] .card:not(.order-summary) .dgt-tooltip--price{
-  display:block !important;
-  position:absolute;
-  right:clamp(9px, 0.9vw, 12px);
-  top:clamp(-13px, -1vw, -9px);
-  margin:0;
-  transform:none;
-  z-index:2;
-}
-
-[data-home-catalog-root] .card:not(.order-summary) .dgt-tooltip--info{
-  display:none !important;
-}
-
-[data-home-catalog-root] .card:not(.order-summary) .dgt-tooltip--price .dgt-tooltip-toggle{
-  margin:0;
-}
-
-[data-home-catalog-root] .card:not(.order-summary) .dgt-tooltip--price .dgt-badge{
-  width:clamp(34px, 2.3vw, 39px);
-  height:clamp(34px, 2.3vw, 39px);
-  margin:0;
-}
-
 [data-home-catalog-root] .card:not(.order-summary) .btn-row{
   align-content:flex-start;
   align-items:flex-start;
@@ -2953,8 +3579,7 @@ footer{
 @media (max-width:480px){
   [data-home-catalog-root] .grid{ gap:10px; }
   [data-home-catalog-root] .card:not(.order-summary) .chip-name{ font-size:.82rem; }
-  [data-home-catalog-root] .card.has-dgt:not(.order-summary) .price-row{ padding-right:40px; }
-  [data-home-catalog-root] .card:not(.order-summary) .dgt-tooltip--price{ right:9px; top:-12px; }}
+}
 
 /* La PALETA DE COLOR de la tarjeta (.card-colors / .color-pop) ya no existe.
    Solo sabia de color, asi que un producto con modelo o medida no se podia anadir
@@ -3236,10 +3861,21 @@ footer{
   box-shadow:var(--variant-shadow-hover);
 }
 
+/* EL CÍRCULO ELEGIDO NO LLEVA SOMBRA. Lo marcan dos cosas y bastan: el borde, que
+   se oscurece, y el punto blanco del centro con su propio filo (la regla de ::after,
+   justo debajo). Tenía además un anillo exterior y una caída, y sobre el hueco gris
+   del recuadro se leían como suciedad alrededor del color en vez de como selección.
+   Retirado el 10 sep 2026 a petición del usuario; con él se fueron sus dos tokens,
+   que no los usaba nadie más. VOLVER ATRÁS = devolver aquí
+     box-shadow: 0 0 0 4px rgba(17,24,39,.08),
+                 0 6px 16px rgba(15,23,42,.12),
+                 inset 0 0 0 1px rgba(255,255,255,.22);
+   Se deja `none` explícito, y no se borra la línea, para que gane a la regla base
+   pase lo que pase con el orden del fichero. */
 .variant-option--swatch.is-active,
 .variant-option--swatch.is-active{
   border-color:var(--variant-border-selected);
-  box-shadow:var(--variant-ring-selected), var(--variant-shadow-selected);
+  box-shadow:none;
 }
 
 /* El punto blanco del centro marca el círculo elegido; en una píldora el elegido lo
@@ -3259,10 +3895,22 @@ footer{
   pointer-events:none;
 }
 
-/* No disponible: apagado y con una diagonal cruzada, que es lo que dice "no existe
-   en esta combinación" sin depender de lo tenue que sea el color. La diagonal va
-   oscura porque al bajar la opacidad sobre fondo blanco TODOS los círculos aclaran,
-   también el negro. El overflow:hidden del botón la recorta al círculo. */
+/* AGOTADO — REGLA GENERAL, vale para cualquier color presente o futuro:
+   apagado (`--variant-disabled-opacity`) + diagonal GRIS MEDIA plana. Van SIEMPRE las
+   dos señales juntas, nunca una sola: el apagado dice "esto no está disponible" de un
+   vistazo y la diagonal lo confirma. Fiarlo solo al apagado no vale —sobre fondo
+   blanco la opacidad no atenúa un color claro, y el azul marino apagado se ve lavanda,
+   o sea otro color—. El mismo bloque sirve para la ficha, la burbuja del home y las
+   combinaciones que `allows` deja fuera. El overflow:hidden del botón recorta la
+   diagonal al círculo.
+   El gris #64748b NO es un capricho: al apagar el botón se apaga también la diagonal,
+   así que solo un tono MEDIO separa por los dos lados —queda más claro que un color
+   oscuro apagado y más oscuro que uno claro—. Comprobado sobre seis tonos a la vez
+   (blanco #f8fafc, negro #111827, azul marino #0a1f66, gris medio #8c9099, amarillo y
+   granate) a 1x y a 3x: con #94a3b8 la diagonal se perdía sobre el gris apagado y con
+   un gris oscuro se perdía sobre el negro apagado.
+   Lo que NO se debe hacer: darle borde o filo a la diagonal. Se probó (núcleo blanco
+   con filo oscuro) y se lee como un diseño distinto al del resto de círculos. */
 .variant-option--swatch[disabled],
 .variant-option--swatch.is-disabled,
 .variant-option--swatch[disabled],
@@ -3282,10 +3930,10 @@ footer{
   inset:0;
   border-radius:inherit;
   background:linear-gradient(-45deg,
-    transparent calc(50% - 1px),
-    rgba(15,23,42,.6) calc(50% - 1px),
-    rgba(15,23,42,.6) calc(50% + 1px),
-    transparent calc(50% + 1px));
+    transparent calc(50% - var(--variant-disabled-line)),
+    var(--variant-disabled-ink) calc(50% - var(--variant-disabled-line)),
+    var(--variant-disabled-ink) calc(50% + var(--variant-disabled-line)),
+    transparent calc(50% + var(--variant-disabled-line)));
   pointer-events:none;
 }
 
